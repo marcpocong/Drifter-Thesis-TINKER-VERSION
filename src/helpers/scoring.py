@@ -218,14 +218,23 @@ def _snap_max(value: float, snap: float) -> float:
     return math.ceil(value / snap) * snap
 
 
+def _union_geometries(geometries):
+    if hasattr(geometries, "union_all"):
+        return geometries.union_all()
+    return geometries.unary_union
+
+
 def _write_template_raster(spec: ScoringGridSpec, out_path: Path, fill_value: int = 0):
     if rasterio is None or from_origin is None:
         raise ImportError("rasterio is required to write scoring-grid artifacts")
     out_path.parent.mkdir(parents=True, exist_ok=True)
     transform = from_origin(spec.min_x, spec.max_y, spec.resolution, spec.resolution)
     data = np.full((spec.height, spec.width), fill_value, dtype=np.uint8)
+    temp_path = out_path.with_name(f"{out_path.stem}__tmp{out_path.suffix}")
+    if temp_path.exists():
+        temp_path.unlink()
     with rasterio.open(
-        out_path,
+        temp_path,
         "w",
         driver="GTiff",
         height=spec.height,
@@ -237,6 +246,9 @@ def _write_template_raster(spec: ScoringGridSpec, out_path: Path, fill_value: in
         compress="lzw",
     ) as dst:
         dst.write(data, 1)
+    if out_path.exists():
+        out_path.unlink()
+    temp_path.replace(out_path)
 
 
 def _remove_existing_vector(path: Path):
@@ -262,8 +274,11 @@ def _write_grid_extent(spec: ScoringGridSpec, out_path: Path):
         crs=spec.crs,
     )
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = out_path.with_name(f"{out_path.stem}__tmp{out_path.suffix}")
+    _remove_existing_vector(temp_path)
+    gdf.to_file(temp_path, driver="GPKG")
     _remove_existing_vector(out_path)
-    gdf.to_file(out_path, driver="GPKG")
+    temp_path.replace(out_path)
 
 
 def _load_spec_from_metadata(path: Path) -> ScoringGridSpec:
@@ -312,12 +327,13 @@ def build_official_scoring_grid(force_refresh: bool = False) -> ScoringGridSpec:
 
     combined = gpd.GeoSeries(
         [
-            init_gdf.geometry.buffer(0).unary_union,
-            validation_gdf.geometry.buffer(0).unary_union,
-            source_gdf.geometry.unary_union,
+            _union_geometries(init_gdf.geometry.buffer(0)),
+            _union_geometries(validation_gdf.geometry.buffer(0)),
+            _union_geometries(source_gdf.geometry),
         ],
         crs=OFFICIAL_GRID_CRS,
-    ).unary_union
+    )
+    combined = _union_geometries(combined)
     buffered = combined.buffer(OFFICIAL_GRID_BUFFER_M)
     min_x, min_y, max_x, max_y = buffered.bounds
 
