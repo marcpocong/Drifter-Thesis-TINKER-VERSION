@@ -13,6 +13,7 @@ PyGNOME is not available (e.g., inside the `pipeline` container).
 import logging
 import yaml
 import pandas as pd
+import numpy as np
 from datetime import timedelta
 from pathlib import Path
 
@@ -67,6 +68,106 @@ class GnomeComparisonService:
         self.oils_cfg = self.config["oils"]
         self.sim_cfg = self.config["simulation"]
         self.gnome_cfg = self.config.get("gnome_comparison", {})
+
+    def run_transport_benchmark_scenario(
+        self,
+        start_lat: float,
+        start_lon: float,
+        start_time: str,
+        output_name: str = "pygnome_deterministic_control.nc",
+        random_seed: int = 20230303,
+    ) -> tuple[Path, dict]:
+        """
+        Run a deterministic transport-style PyGNOME scenario for Phase 3A benchmarking.
+
+        This intentionally skips weatherers so the exported mass field stays usable for
+        density-normalized raster pairing against the deterministic control products.
+        """
+        if not GNOME_AVAILABLE:
+            raise RuntimeError("PyGNOME benchmark scenario requires the gnome container.")
+
+        duration_hours = self.gnome_cfg.get(
+            "duration_hours", self.sim_cfg["duration_hours"]
+        )
+        time_step_minutes = self.gnome_cfg.get(
+            "time_step_minutes", self.sim_cfg["time_step_minutes"]
+        )
+        t_start = pd.to_datetime(start_time).to_pydatetime()
+        wind_speed_ms = float(self.gnome_cfg.get("benchmark_wind_speed_ms", 5.0))
+
+        model = Model(
+            start_time=t_start,
+            duration=timedelta(hours=duration_hours),
+            time_step=timedelta(minutes=time_step_minutes),
+        )
+
+        wind = Wind(
+            timeseries=[(t_start, (wind_speed_ms, 0.0))],
+            units="m/s",
+        )
+        model.environment += [wind]
+        model.movers += WindMover(wind)
+
+        first_oil_key = list(self.oils_cfg.keys())[0]
+        oil_cfg = self.oils_cfg[first_oil_key]
+        gnome_oil_type = oil_cfg.get("gnome_oil_type", oil_cfg["adios_id"])
+        oil = GnomeOil(gnome_oil_type)
+
+        benchmark_particles = min(
+            int(self.gnome_cfg.get("benchmark_num_particles", self.sim_cfg["num_particles"])),
+            5000,
+        )
+        num_clusters = min(
+            int(self.gnome_cfg.get("benchmark_num_clusters", 100)),
+            benchmark_particles,
+        )
+
+        from src.utils.io import resolve_polygon_seeding
+
+        cluster_lons, cluster_lats, _ = resolve_polygon_seeding(
+            num_clusters,
+            random_seed=random_seed,
+        )
+        cluster_counts = np.full(num_clusters, benchmark_particles // num_clusters, dtype=int)
+        cluster_counts[: benchmark_particles % num_clusters] += 1
+
+        for cl_lon, cl_lat, particle_count in zip(cluster_lons, cluster_lats, cluster_counts):
+            if particle_count <= 0:
+                continue
+            cluster_mass_tonnes = self.sim_cfg["initial_mass_tonnes"] * (particle_count / benchmark_particles)
+            model.spills += surface_point_line_spill(
+                num_elements=int(particle_count),
+                start_position=(float(cl_lon), float(cl_lat), 0.0),
+                release_time=t_start,
+                amount=float(cluster_mass_tonnes),
+                units="tonnes",
+                substance=oil,
+            )
+
+        nc_path = self.output_dir / output_name
+        if nc_path.exists():
+            nc_path.unlink()
+
+        nc_outputter = NetCDFOutput(
+            filename=str(nc_path),
+            which_data="most",
+            output_timestep=timedelta(hours=1),
+        )
+        model.outputters += nc_outputter
+        model.full_run()
+
+        metadata = {
+            "nc_path": str(nc_path),
+            "random_seed": int(random_seed),
+            "wind_speed_ms": wind_speed_ms,
+            "weathering_enabled": False,
+            "benchmark_particles": int(benchmark_particles),
+            "benchmark_clusters": int(num_clusters),
+            "oil_key": first_oil_key,
+            "oil_type": gnome_oil_type,
+            "release_start_utc": str(pd.to_datetime(start_time).strftime("%Y-%m-%dT%H:%M:%SZ")),
+        }
+        return nc_path, metadata
 
     # ------------------------------------------------------------------
     # Public API

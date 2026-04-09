@@ -170,29 +170,45 @@ def rasterize_observation_layer(gdf, grid: GridBuilder, out_path: Path | None = 
     return mask
 
 
-def extract_particles_at_hour(
+def normalize_time_index(values) -> pd.DatetimeIndex:
+    """Normalize datetime-like arrays to UTC-naive pandas timestamps."""
+    index = pd.DatetimeIndex(pd.to_datetime(values))
+    if index.tz is not None:
+        index = index.tz_convert("UTC").tz_localize(None)
+    return index
+
+
+def extract_particles_at_time(
     nc_path: Path,
-    target_hours: int,
+    target_time,
     model_type: str,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    allow_uniform_mass_fallback: bool = False,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, pd.Timestamp, dict]:
     """
-    Extract active particle lon/lat coordinates and mass at a specific target hour.
+    Extract particle lon/lat coordinates and mass nearest a target timestamp.
     """
+    target_ts = pd.Timestamp(target_time)
+    if target_ts.tzinfo is not None:
+        target_ts = target_ts.tz_convert("UTC").tz_localize(None)
+
     if model_type == "opendrift":
         with xr.open_dataset(nc_path) as ds:
-            times = pd.to_datetime(ds.time.values)
-            start_time = times[0]
-            target_time = start_time + pd.Timedelta(hours=target_hours)
-            diffs = np.abs(times - target_time)
-            t_idx = np.argmin(diffs)
+            times = normalize_time_index(ds.time.values)
+            t_idx = int(np.abs(times - target_ts).argmin())
+            actual_time = pd.Timestamp(times[t_idx])
 
-            lon = ds["lon"].values[:, t_idx]
-            lat = ds["lat"].values[:, t_idx]
-            status = ds["status"].values[:, t_idx]
-            mass = ds["mass_oil"].values[:, t_idx] if "mass_oil" in ds else np.ones_like(lon)
+            lon = np.asarray(ds["lon"].isel(time=t_idx).values).reshape(-1)
+            lat = np.asarray(ds["lat"].isel(time=t_idx).values).reshape(-1)
+            status = np.asarray(ds["status"].isel(time=t_idx).values).reshape(-1)
+            if "mass_oil" in ds:
+                mass = np.asarray(ds["mass_oil"].isel(time=t_idx).values).reshape(-1)
+                mass_strategy = "mass_oil"
+            else:
+                mass = np.ones_like(lon, dtype=np.float32)
+                mass_strategy = "uniform_unit_mass"
 
             valid = (status == 0) & ~np.isnan(lon) & ~np.isnan(lat)
-            return lon[valid], lat[valid], mass[valid]
+            return lon[valid], lat[valid], mass[valid], actual_time, {"mass_strategy": mass_strategy}
 
     if model_type == "pygnome":
         import netCDF4
@@ -204,20 +220,80 @@ def extract_particles_at_hour(
                 only_use_cftime_datetimes=False,
                 only_use_python_datetimes=True,
             )
-            times = pd.to_datetime(raw_times)
-            t_idx = np.argmin(np.abs(times - (times[0] + pd.Timedelta(hours=target_hours))))
+            times = normalize_time_index(raw_times)
+            t_idx = int(np.abs(times - target_ts).argmin())
+            actual_time = pd.Timestamp(times[t_idx])
 
-            particle_counts = nc.variables["particle_count"][:]
+            particle_counts = np.asarray(nc.variables["particle_count"][:], dtype=int)
             start_idx = int(np.sum(particle_counts[:t_idx]))
             end_idx = start_idx + int(particle_counts[t_idx])
 
-            lon = nc.variables["longitude"][start_idx:end_idx]
-            lat = nc.variables["latitude"][start_idx:end_idx]
-            status = nc.variables["status_codes"][start_idx:end_idx]
-            mass = nc.variables["mass"][start_idx:end_idx] if "mass" in nc.variables else np.ones_like(lon)
+            lon = np.asarray(nc.variables["longitude"][start_idx:end_idx], dtype=float)
+            lat = np.asarray(nc.variables["latitude"][start_idx:end_idx], dtype=float)
+            status = np.asarray(nc.variables["status_codes"][start_idx:end_idx], dtype=int)
+            valid = (status == 2) & ~np.isnan(lon) & ~np.isnan(lat)
 
-            valid = status == 2
-            return lon[valid], lat[valid], mass[valid]
+            if "mass" in nc.variables:
+                mass = np.asarray(nc.variables["mass"][start_idx:end_idx], dtype=float)
+                mass_strategy = "mass"
+                valid_mass = np.asarray(mass[valid], dtype=float)
+                if valid_mass.size > 0 and np.isfinite(valid_mass).all() and float(valid_mass.sum()) > 0.0:
+                    return lon[valid], lat[valid], valid_mass, actual_time, {"mass_strategy": mass_strategy}
+                if not allow_uniform_mass_fallback:
+                    raise ValueError(
+                        f"PyGNOME mass export is blank or non-positive at {actual_time.isoformat()} for {nc_path}."
+                    )
+                mass_strategy = "uniform_unit_mass_fallback"
+            else:
+                mass_strategy = "uniform_unit_mass_missing_mass_var"
+                if not allow_uniform_mass_fallback:
+                    raise ValueError(f"PyGNOME mass variable missing in {nc_path}.")
+
+            return (
+                lon[valid],
+                lat[valid],
+                np.ones(np.count_nonzero(valid), dtype=np.float32),
+                actual_time,
+                {"mass_strategy": mass_strategy},
+            )
+
+    raise ValueError(f"Unknown model_type: {model_type}")
+
+
+def extract_particles_at_hour(
+    nc_path: Path,
+    target_hours: int,
+    model_type: str,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Extract active particle lon/lat coordinates and mass at a specific target hour.
+    """
+    if model_type == "opendrift":
+        with xr.open_dataset(nc_path) as ds:
+            times = normalize_time_index(ds.time.values)
+            target_time = times[0] + pd.Timedelta(hours=target_hours)
+        lon, lat, mass, _, _ = extract_particles_at_time(nc_path, target_time, model_type)
+        return lon, lat, mass
+
+    if model_type == "pygnome":
+        import netCDF4
+
+        with netCDF4.Dataset(nc_path) as nc:
+            raw_times = netCDF4.num2date(
+                nc.variables["time"][:],
+                nc.variables["time"].units,
+                only_use_cftime_datetimes=False,
+                only_use_python_datetimes=True,
+            )
+            times = normalize_time_index(raw_times)
+            target_time = times[0] + pd.Timedelta(hours=target_hours)
+        lon, lat, mass, _, _ = extract_particles_at_time(
+            nc_path,
+            target_time,
+            model_type,
+            allow_uniform_mass_fallback=False,
+        )
+        return lon, lat, mass
 
     raise ValueError(f"Unknown model_type: {model_type}")
 

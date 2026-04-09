@@ -759,7 +759,10 @@ def resolve_spill_origin(
     return float(row["lat"]), float(row["lon"]), str(row["time"])
 
 
-def resolve_polygon_seeding(num_elements: int) -> tuple[list[float], list[float], str]:
+def resolve_polygon_seeding(
+    num_elements: int,
+    random_seed: int | None = None,
+) -> tuple[list[float], list[float], str]:
     """
     Uniformly scatters points inside the authoritative Layer 3 initialization polygon.
     Returns (lons, lats, time_str) for models to ingest during seeding.
@@ -777,7 +780,7 @@ def resolve_polygon_seeding(num_elements: int) -> tuple[list[float], list[float]
         raise ValueError(f"No valid geometry found in {seed_path}")
 
     if case.is_official:
-        lons, lats = _sample_points_from_polygons(valid_gdf, num_elements)
+        lons, lats = _sample_points_from_polygons(valid_gdf, num_elements, random_seed=random_seed)
     else:
         united = valid_gdf.geometry.buffer(0).unary_union
         temp_series = gpd.GeoSeries([united], crs=valid_gdf.crs)
@@ -850,7 +853,11 @@ def _resolve_layer_vector_path(layer, run_name: str, official_mode: bool) -> Pat
     return layer.geojson_path(run_name)
 
 
-def _sample_points_from_polygons(gdf, num_elements: int) -> tuple[list[float], list[float]]:
+def _sample_points_from_polygons(
+    gdf,
+    num_elements: int,
+    random_seed: int | None = None,
+) -> tuple[list[float], list[float]]:
     import geopandas as gpd
 
     work = gdf.dropna(subset=["geometry"]).copy()
@@ -861,14 +868,18 @@ def _sample_points_from_polygons(gdf, num_elements: int) -> tuple[list[float], l
     if not np.isfinite(weights).all() or weights.sum() <= 0:
         weights = np.ones(len(work), dtype=float)
     probabilities = weights / weights.sum()
-    rng = np.random.default_rng()
+    rng = np.random.default_rng(random_seed)
     counts = rng.multinomial(num_elements, probabilities)
 
     point_series_parts = []
     for geometry, count in zip(work.geometry, counts):
         if count <= 0:
             continue
-        samples = gpd.GeoSeries([geometry], crs=work.crs).sample_points(count).explode(index_parts=False)
+        samples = (
+            gpd.GeoSeries([geometry], crs=work.crs)
+            .sample_points(count, rng=rng)
+            .explode(index_parts=False)
+        )
         point_series_parts.append(samples.reset_index(drop=True))
 
     if not point_series_parts:

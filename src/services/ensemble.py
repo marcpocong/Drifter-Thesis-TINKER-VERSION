@@ -1,11 +1,15 @@
 """
 Ensemble forecasting module for uncertainty quantification.
-Executes Phase 2: 50-member Monte Carlo ensemble with perturbations.
+Executes Phase 2: Monte Carlo ensemble with perturbations.
 """
+
+from __future__ import annotations
 
 import json
 import logging
 import shutil
+import sys
+from contextlib import contextmanager
 from datetime import timedelta
 from pathlib import Path
 
@@ -18,11 +22,17 @@ from opendrift.readers import reader_constant, reader_netCDF_CF_generic
 
 from src.core.case_context import get_case_context
 from src.core.constants import BASE_OUTPUT_DIR, RUN_NAME
-from src.helpers.scoring import get_scoring_grid_spec
 from src.helpers.plotting import plot_probability_map
-from src.helpers.raster import GridBuilder, project_points_to_grid, rasterize_model_output, save_raster
+from src.helpers.raster import (
+    GridBuilder,
+    project_points_to_grid,
+    rasterize_particles,
+    save_raster,
+)
 from src.utils.io import (
     RecipeSelection,
+    find_current_vars,
+    find_wind_vars,
     get_deterministic_control_output_path,
     get_deterministic_control_score_raster_dir,
     get_deterministic_control_score_raster_path,
@@ -34,49 +44,457 @@ from src.utils.io import (
 
 logger = logging.getLogger(__name__)
 
+CURRENT_REQUIRED_VARS = ["x_sea_water_velocity", "y_sea_water_velocity"]
+WIND_REQUIRED_VARS = ["x_wind", "y_wind"]
+WAVE_VARIABLE_HINTS = [
+    "sea_surface_wave_significant_height",
+    "significant_wave_height",
+    "VHM0",
+    "VHMO",
+    "swh",
+    "Hs",
+]
+
+
+def normalize_model_timestamp(value) -> pd.Timestamp:
+    """Normalize datetimes to UTC-naive timestamps for OpenDrift compatibility."""
+    timestamp = pd.Timestamp(value)
+    if timestamp.tzinfo is None:
+        return timestamp
+    return timestamp.tz_convert("UTC").tz_localize(None)
+
+
+def normalize_time_index(values) -> pd.DatetimeIndex:
+    """Normalize arrays of datetimes to UTC-naive pandas indices."""
+    index = pd.DatetimeIndex(pd.to_datetime(values))
+    if index.tz is not None:
+        index = index.tz_convert("UTC").tz_localize(None)
+    return index
+
+
+def timestamp_to_utc_iso(value) -> str:
+    """Format a timestamp as canonical UTC Zulu time."""
+    return normalize_model_timestamp(value).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def timestamp_to_label(value) -> str:
+    """Format a timestamp for machine-readable filenames."""
+    return normalize_model_timestamp(value).strftime("%Y-%m-%dT%H-%M-%SZ")
+
+
+def detect_time_coordinate(ds: xr.Dataset) -> str | None:
+    """Return the canonical time coordinate/variable name when present."""
+    for name in ("time", "valid_time"):
+        if name in ds.coords or name in ds.variables:
+            return name
+    return None
+
+
+def infer_time_step_hours(times: pd.DatetimeIndex) -> float | None:
+    """Infer the dominant time-step spacing in hours for a forcing series."""
+    if len(times) < 2:
+        return None
+
+    diffs = np.diff(times.view("int64")) / 3_600_000_000_000.0
+    positive = diffs[diffs > 0]
+    if positive.size == 0:
+        return None
+    return float(np.median(positive))
+
+
+def grid_id_from_builder(grid: GridBuilder) -> str:
+    """Build a compact canonical grid identifier."""
+    return (
+        f"{grid.crs}:{grid.resolution}:{grid.width}x{grid.height}:"
+        f"{int(round(grid.min_x))}:{int(round(grid.min_y))}:"
+        f"{int(round(grid.max_x))}:{int(round(grid.max_y))}"
+    )
+
+
+@contextmanager
+def intercept_sys_exit():
+    """Turn OpenDrift's sys.exit aborts into catchable exceptions."""
+    original_exit = sys.exit
+
+    def _raise_runtime_error(message=None):
+        raise RuntimeError(message if message is not None else "sys.exit()")
+
+    sys.exit = _raise_runtime_error
+    try:
+        yield
+    finally:
+        sys.exit = original_exit
+
+
+def _relative_output_path(path: Path) -> str:
+    try:
+        return str(path.relative_to(BASE_OUTPUT_DIR))
+    except ValueError:
+        return str(path)
+
+
+def _stringify_exception_chain(exc: BaseException) -> list[str]:
+    messages: list[str] = []
+    seen: set[int] = set()
+    current: BaseException | None = exc
+    while current is not None and id(current) not in seen:
+        messages.append(f"{type(current).__name__}: {current}")
+        seen.add(id(current))
+        current = current.__cause__ or current.__context__
+    return messages
+
+
+def _root_cause_message(exc: BaseException) -> str:
+    chain = _stringify_exception_chain(exc)
+    return chain[-1] if chain else f"{type(exc).__name__}: {exc}"
+
+
+def _threshold_label(threshold: float) -> str:
+    return f"p{int(round(threshold * 100))}"
+
 
 class EnsembleForecastService:
     def __init__(self, currents_file, winds_file):
+        self.case = get_case_context()
         self.output_dir = BASE_OUTPUT_DIR / "ensemble"
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.forecast_dir = BASE_OUTPUT_DIR / "forecast"
         self.forecast_dir.mkdir(parents=True, exist_ok=True)
+        self.member_mask_dir = self.output_dir / "member_presence"
+        self.member_mask_dir.mkdir(parents=True, exist_ok=True)
+        self.loading_cache_dir = self.forecast_dir / "forcing_cache"
+        self.loading_cache_dir.mkdir(parents=True, exist_ok=True)
 
-        self.currents_file = currents_file
-        self.winds_file = winds_file
+        self.currents_file = Path(currents_file)
+        self.winds_file = Path(winds_file)
         self.alias_probability_cone = True
+        self.audit_json_path = self.forecast_dir / "forecast_loading_audit.json"
+        self.audit_csv_path = self.forecast_dir / "forecast_loading_audit.csv"
+        self.audit_records: list[dict] = []
 
         self.config_path = Path("config/ensemble.yaml")
         if not self.config_path.exists():
             raise FileNotFoundError(f"Ensemble configuration required at {self.config_path}")
 
         with open(self.config_path, "r") as f:
-            self.config = yaml.safe_load(f)
+            self.config = yaml.safe_load(f) or {}
 
-        self.ensemble_size = self.config["ensemble"]["ensemble_size"]
+        self.ensemble_size = int((self.config.get("ensemble") or {}).get("ensemble_size", 50))
+        official_products = self.config.get("official_products") or {}
+        self.snapshot_hours = [int(hour) for hour in official_products.get("snapshot_hours", [24, 48, 72])]
+        self.probability_thresholds = [float(value) for value in official_products.get("probability_thresholds", [0.5, 0.9])]
 
-    def _build_model(self) -> OceanDrift:
-        """Create a standard OceanDrift model with the configured readers."""
-        o = OceanDrift(loglevel=50)
+    def _init_run_audit(
+        self,
+        recipe_name: str,
+        run_kind: str,
+        requested_start_time,
+        duration_hours: int,
+        member_id: int | None = None,
+        perturbation: dict | None = None,
+    ) -> dict:
+        start_time = normalize_model_timestamp(requested_start_time)
+        end_time = start_time + timedelta(hours=duration_hours)
+        audit = {
+            "run_kind": run_kind,
+            "member_id": member_id,
+            "recipe": recipe_name,
+            "status": "initializing",
+            "requested_start_time_utc": timestamp_to_utc_iso(start_time),
+            "requested_end_time_utc": timestamp_to_utc_iso(end_time),
+            "requested_duration_hours": int(duration_hours),
+            "seed_element_count": 0,
+            "first_successful_model_timestep": "",
+            "last_successful_model_timestep": "",
+            "time_step_minutes": 60,
+            "output_path": "",
+            "root_cause": "",
+            "exception_chain": [],
+            "forcings": {},
+            "perturbation": perturbation or {},
+            "written_files": [],
+        }
+        self.audit_records.append(audit)
+        return audit
 
-        reader_curr = reader_netCDF_CF_generic.Reader(self.currents_file)
-        o.add_reader(reader_curr)
+    def _build_model(
+        self,
+        simulation_start: pd.Timestamp,
+        simulation_end: pd.Timestamp,
+        audit: dict,
+        wave_file: Path | None = None,
+    ) -> OceanDrift:
+        """Create an OceanDrift model with reader audits and prepared forcing paths."""
+        model = OceanDrift(loglevel=50)
 
-        reader_wind = reader_netCDF_CF_generic.Reader(self.winds_file)
-        o.add_reader(reader_wind)
+        current_entry = self._attach_reader_with_audit(
+            model=model,
+            file_path=self.currents_file,
+            reader_kind="current",
+            simulation_start=simulation_start,
+            simulation_end=simulation_end,
+        )
+        audit["forcings"]["current"] = current_entry
+
+        wind_entry = self._attach_reader_with_audit(
+            model=model,
+            file_path=self.winds_file,
+            reader_kind="wind",
+            simulation_start=simulation_start,
+            simulation_end=simulation_end,
+        )
+        audit["forcings"]["wind"] = wind_entry
+
+        if wave_file is None:
+            wave_file = Path(f"data/forcing/{RUN_NAME}/cmems_wave.nc")
+        audit["forcings"]["wave"] = self._attach_optional_wave_reader(
+            model=model,
+            file_path=wave_file,
+            simulation_start=simulation_start,
+            simulation_end=simulation_end,
+        )
+
+        model.set_config("general:use_auto_landmask", False)
+        model.add_reader(reader_constant.Reader({"land_binary_mask": 0}))
+        return model
+
+    def _prepare_forcing_entry(
+        self,
+        file_path: Path,
+        reader_kind: str,
+        simulation_start: pd.Timestamp,
+        simulation_end: pd.Timestamp,
+    ) -> dict:
+        entry = {
+            "kind": reader_kind,
+            "configured_path": str(file_path),
+            "used_path": str(file_path),
+            "exists": file_path.exists(),
+            "reader_attach_status": "not_attempted",
+            "required_variables": [],
+            "source_variables": [],
+            "mapped_variables": {},
+            "available_variables": [],
+            "time_coordinate": "",
+            "source_time_start_utc": "",
+            "source_time_end_utc": "",
+            "used_time_start_utc": "",
+            "used_time_end_utc": "",
+            "requested_start_time_utc": timestamp_to_utc_iso(simulation_start),
+            "requested_end_time_utc": timestamp_to_utc_iso(simulation_end),
+            "covers_requested_window": False,
+            "coverage_gap_hours": 0.0,
+            "inferred_time_step_hours": None,
+            "tail_extension_applied": False,
+            "tail_extension_reason": "",
+            "reader_label": "",
+            "reader_variables": [],
+            "notes": [],
+        }
+
+        if not entry["exists"]:
+            entry["reader_attach_status"] = "missing_file"
+            return entry
+
+        required_vars: list[str] = []
+        mapped_variables: dict[str, str] = {}
+        source_variables: list[str] = []
+
+        with xr.open_dataset(file_path) as ds:
+            entry["available_variables"] = sorted(list(ds.data_vars))
+            time_coordinate = detect_time_coordinate(ds)
+            if time_coordinate:
+                entry["time_coordinate"] = time_coordinate
+                times = normalize_time_index(ds[time_coordinate].values)
+                if len(times) > 0:
+                    entry["source_time_start_utc"] = timestamp_to_utc_iso(times.min())
+                    entry["source_time_end_utc"] = timestamp_to_utc_iso(times.max())
+                    entry["used_time_start_utc"] = entry["source_time_start_utc"]
+                    entry["used_time_end_utc"] = entry["source_time_end_utc"]
+                    entry["inferred_time_step_hours"] = infer_time_step_hours(times)
+                    entry["covers_requested_window"] = bool(times.min() <= simulation_start and times.max() >= simulation_end)
+                    if times.max() < simulation_end:
+                        gap_hours = (simulation_end - times.max()).total_seconds() / 3600.0
+                        entry["coverage_gap_hours"] = float(gap_hours)
+                        cadence_hours = entry["inferred_time_step_hours"]
+                        if cadence_hours is not None and gap_hours <= cadence_hours + 1e-9:
+                            used_path = self._extend_forcing_tail(
+                                source_path=file_path,
+                                target_end_time=simulation_end,
+                                time_coordinate=time_coordinate,
+                            )
+                            entry["used_path"] = str(used_path)
+                            entry["used_time_end_utc"] = timestamp_to_utc_iso(simulation_end)
+                            entry["covers_requested_window"] = True
+                            entry["tail_extension_applied"] = True
+                            entry["tail_extension_reason"] = (
+                                f"Extended final {reader_kind} slice with persistence because the "
+                                f"requested end was {gap_hours:.2f}h beyond the source end and the source cadence "
+                                f"was {cadence_hours:.2f}h."
+                            )
+                        else:
+                            entry["notes"].append(
+                                f"Requested end exceeded source coverage by {gap_hours:.2f}h."
+                            )
+                    elif times.min() > simulation_start:
+                        gap_hours = (times.min() - simulation_start).total_seconds() / 3600.0
+                        entry["coverage_gap_hours"] = float(gap_hours)
+                        entry["notes"].append(
+                            f"Requested start preceded source coverage by {gap_hours:.2f}h."
+                        )
+
+            if reader_kind == "current":
+                required_vars = CURRENT_REQUIRED_VARS
+                source_u, source_v = find_current_vars(ds)
+                source_variables = [source_u, source_v]
+            elif reader_kind == "wind":
+                required_vars = WIND_REQUIRED_VARS
+                source_u, source_v = find_wind_vars(ds)
+                source_variables = [source_u, source_v]
+            elif reader_kind == "wave":
+                source_variables = [name for name in WAVE_VARIABLE_HINTS if name in ds.data_vars]
+            else:
+                raise ValueError(f"Unsupported reader kind: {reader_kind}")
+
+        for required, source in zip(required_vars, source_variables):
+            if required != source:
+                mapped_variables[required] = source
+
+        entry["required_variables"] = required_vars
+        entry["source_variables"] = source_variables
+        entry["mapped_variables"] = mapped_variables
+        return entry
+
+    def _extend_forcing_tail(
+        self,
+        source_path: Path,
+        target_end_time: pd.Timestamp,
+        time_coordinate: str,
+    ) -> Path:
+        target_time = normalize_model_timestamp(target_end_time)
+        cache_name = f"{source_path.stem}__tailpersist__{timestamp_to_label(target_time)}.nc"
+        cache_path = self.loading_cache_dir / cache_name
+
+        if cache_path.exists():
+            with xr.open_dataset(cache_path) as cached:
+                cached_times = normalize_time_index(cached[time_coordinate].values)
+                if len(cached_times) > 0 and cached_times.max() >= target_time:
+                    return cache_path
+
+        with xr.open_dataset(source_path) as ds:
+            working = ds.load()
+
+        source_times = normalize_time_index(working[time_coordinate].values)
+        if len(source_times) == 0 or source_times.max() >= target_time:
+            return source_path
+
+        target_np = np.datetime64(target_time.to_datetime64())
+        final_slice = working.isel({time_coordinate: -1}).expand_dims({time_coordinate: [target_np]})
+        extended = xr.concat([working, final_slice], dim=time_coordinate)
+        extended.attrs = dict(working.attrs)
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        extended.to_netcdf(cache_path)
+        return cache_path
+
+    def _attach_reader_with_audit(
+        self,
+        model: OceanDrift,
+        file_path: Path,
+        reader_kind: str,
+        simulation_start: pd.Timestamp,
+        simulation_end: pd.Timestamp,
+    ) -> dict:
+        entry = self._prepare_forcing_entry(
+            file_path=file_path,
+            reader_kind=reader_kind,
+            simulation_start=simulation_start,
+            simulation_end=simulation_end,
+        )
+        if not entry["exists"]:
+            raise FileNotFoundError(f"Missing intended {reader_kind} file: {file_path}")
+        if not entry["covers_requested_window"]:
+            raise RuntimeError(
+                f"{reader_kind} forcing does not cover the requested simulation window "
+                f"({entry['requested_start_time_utc']} to {entry['requested_end_time_utc']})."
+            )
+
+        reader = reader_netCDF_CF_generic.Reader(entry["used_path"])
+        if entry["mapped_variables"] and hasattr(reader, "variable_mapping"):
+            reader.variable_mapping.update(entry["mapped_variables"])
+
+        available_vars = set(getattr(reader, "variables", []) or [])
+        available_vars.update((getattr(reader, "variable_mapping", {}) or {}).keys())
+        missing_required = [name for name in entry["required_variables"] if name not in available_vars]
+        if missing_required:
+            raise ValueError(
+                f"{reader_kind} reader does not expose required variables {missing_required} for {file_path.name}"
+            )
+
+        model.add_reader(reader)
+        entry["reader_attach_status"] = "loaded"
+        entry["reader_label"] = f"{reader.__class__.__name__}<{Path(entry['used_path']).name}>"
+        entry["reader_variables"] = sorted(list(available_vars))
+        return entry
+
+    def _attach_optional_wave_reader(
+        self,
+        model: OceanDrift,
+        file_path: Path | None,
+        simulation_start: pd.Timestamp,
+        simulation_end: pd.Timestamp,
+    ) -> dict:
+        if not file_path:
+            return {
+                "kind": "wave",
+                "configured_path": "",
+                "used_path": "",
+                "exists": False,
+                "reader_attach_status": "not_configured",
+                "required_variables": [],
+                "source_variables": [],
+                "mapped_variables": {},
+                "available_variables": [],
+                "time_coordinate": "",
+                "source_time_start_utc": "",
+                "source_time_end_utc": "",
+                "used_time_start_utc": "",
+                "used_time_end_utc": "",
+                "requested_start_time_utc": timestamp_to_utc_iso(simulation_start),
+                "requested_end_time_utc": timestamp_to_utc_iso(simulation_end),
+                "covers_requested_window": False,
+                "coverage_gap_hours": 0.0,
+                "inferred_time_step_hours": None,
+                "tail_extension_applied": False,
+                "tail_extension_reason": "",
+                "reader_label": "",
+                "reader_variables": [],
+                "notes": [],
+            }
+
+        entry = self._prepare_forcing_entry(
+            file_path=file_path,
+            reader_kind="wave",
+            simulation_start=simulation_start,
+            simulation_end=simulation_end,
+        )
+        if not entry["exists"]:
+            entry["reader_attach_status"] = "missing_file"
+            return entry
 
         try:
-            reader_wave = reader_netCDF_CF_generic.Reader(f"data/forcing/{RUN_NAME}/cmems_wave.nc")
-            o.add_reader(reader_wave)
-        except Exception:
-            pass
-
-        o.set_config("general:use_auto_landmask", False)
-        o.add_reader(reader_constant.Reader({"land_binary_mask": 0}))
-        return o
+            reader = reader_netCDF_CF_generic.Reader(entry["used_path"])
+            model.add_reader(reader)
+            entry["reader_attach_status"] = "loaded"
+            entry["reader_label"] = f"{reader.__class__.__name__}<{Path(entry['used_path']).name}>"
+            entry["reader_variables"] = sorted(list(getattr(reader, "variables", []) or []))
+            return entry
+        except Exception as exc:  # pragma: no cover - depends on optional wave forcing
+            entry["reader_attach_status"] = f"attach_failed: {exc}"
+            entry["notes"].append(str(exc))
+            return entry
 
     @staticmethod
-    def _seed_polygon_release(model: OceanDrift, start_time: str | pd.Timestamp, num_elements: int = 2000):
+    def _seed_polygon_release(model: OceanDrift, start_time, num_elements: int = 2000):
         """Seed particles across the configured initialization polygon."""
         from src.utils.io import resolve_polygon_seeding
 
@@ -85,108 +503,404 @@ class EnsembleForecastService:
             lon=lons,
             lat=lats,
             number=num_elements,
-            time=pd.to_datetime(start_time),
+            time=normalize_model_timestamp(start_time).to_pydatetime(),
         )
 
-    def run_deterministic_control(
+    def _record_output_timestep_coverage(self, output_file: Path, audit: dict):
+        if not output_file.exists():
+            return
+
+        with xr.open_dataset(output_file) as ds:
+            if "time" not in ds.coords:
+                return
+            times = normalize_time_index(ds["time"].values)
+            if len(times) == 0:
+                return
+            audit["first_successful_model_timestep"] = timestamp_to_utc_iso(times.min())
+            audit["last_successful_model_timestep"] = timestamp_to_utc_iso(times.max())
+
+    def _run_model(
         self,
-        recipe_name: str,
-        start_time: str,
-        duration_hours: int = 72,
+        model: OceanDrift,
+        output_file: Path,
+        duration_hours: int,
+        audit: dict,
     ) -> Path:
-        """Run a single deterministic spill forecast for official Phase 3B scoring."""
-        logger.info("Starting deterministic control forecast for recipe %s", recipe_name)
-        output_file = get_deterministic_control_output_path(recipe_name)
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+        audit["output_path"] = str(output_file)
+
         if output_file.exists():
             output_file.unlink()
 
-        model = self._build_model()
-        model.set_config("drift:horizontal_diffusivity", 0.0)
-        model.set_config("drift:wind_uncertainty", 0.0)
-        model.set_config("drift:current_uncertainty", 0.0)
-        self._seed_polygon_release(model, start_time, num_elements=2000)
-        model.run(
-            duration=timedelta(hours=duration_hours),
-            time_step=timedelta(minutes=60),
-            outfile=str(output_file),
-        )
-        rasterize_model_output(
-            grid=GridBuilder(),
-            nc_path=output_file,
-            model_type="opendrift",
-            out_dir=get_deterministic_control_score_raster_dir(recipe_name),
-            hours=[24, 48, 72],
-        )
-        logger.info("Deterministic control forecast saved to %s", output_file)
-        return output_file
-
-    def run_ensemble(self, start_lat: float, start_lon: float, start_time: str, duration_hours: int = 72):
-        """
-        Runs a 50-member ensemble to generate snapshot probability products.
-        Perturbs: Start Time, Wind Factor, and Diffusion.
-        """
-        logger.info("Starting Phase 2: Ensemble Forecast (%s members)...", self.ensemble_size)
-        logger.info("Spill Location: %s, %s", start_lat, start_lon)
-        logger.info("Nominal Start Time: %s", start_time)
-        logger.info("Currents: %s", self.currents_file)
-        logger.info("Winds: %s", self.winds_file)
-
-        ensemble_files = []
-        base_time = pd.to_datetime(start_time)
-        rng = np.random.default_rng()
-        p_cfg = self.config["perturbations"]
-
-        for i in range(self.ensemble_size):
-            member_id = i + 1
-
-            t_shift = p_cfg["time_shift_hours"]
-            time_offset_hours = rng.uniform(-t_shift, t_shift)
-            run_start_time = base_time + timedelta(hours=time_offset_hours)
-
-            diffusivity = rng.uniform(p_cfg["diffusivity_min"], p_cfg["diffusivity_max"])
-            wind_uncertainty = rng.uniform(
-                p_cfg["wind_uncertainty_min"],
-                p_cfg["wind_uncertainty_max"],
-            )
-
-            print(
-                f"   Member {member_id}/{self.ensemble_size}: "
-                f"T{time_offset_hours:+.1f}h | K={diffusivity:.3f} | W_unc={wind_uncertainty:.1f}"
-            )
-
-            try:
-                o = self._build_model()
-            except Exception as e:
-                logger.error("Error loading readers for member %s: %s", member_id, e)
-                continue
-
-            o.set_config("drift:horizontal_diffusivity", diffusivity)
-            o.set_config("drift:wind_uncertainty", wind_uncertainty)
-            o.set_config("drift:current_uncertainty", 0.1)
-            self._seed_polygon_release(o, run_start_time, num_elements=2000)
-
-            output_file = self.output_dir / f"member_{member_id:02d}.nc"
+        try:
+            with intercept_sys_exit():
+                model.run(
+                    duration=timedelta(hours=duration_hours),
+                    time_step=timedelta(minutes=int(audit["time_step_minutes"])),
+                    outfile=str(output_file),
+                )
+        except Exception as exc:
+            audit["status"] = "failed"
+            audit["root_cause"] = _root_cause_message(exc)
+            audit["exception_chain"] = _stringify_exception_chain(exc)
+            self._record_output_timestep_coverage(output_file, audit)
+            self._write_loading_audit_artifacts()
             if output_file.exists():
                 output_file.unlink()
+            raise RuntimeError(
+                f"{audit['run_kind']} failed: {audit['root_cause']}. "
+                f"See {self.audit_json_path} for forcing audit details."
+            ) from exc
 
-            o.run(
-                duration=timedelta(hours=duration_hours),
-                time_step=timedelta(minutes=60),
-                outfile=str(output_file),
+        audit["status"] = "completed"
+        self._record_output_timestep_coverage(output_file, audit)
+        self._write_loading_audit_artifacts()
+        return output_file
+
+    @staticmethod
+    def _load_opendrift_snapshot(
+        nc_path: Path,
+        target_time,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, pd.Timestamp]:
+        with xr.open_dataset(nc_path) as ds:
+            if "time" not in ds.coords:
+                raise ValueError(f"{nc_path} is missing a time coordinate.")
+            times = normalize_time_index(ds["time"].values)
+            target = normalize_model_timestamp(target_time)
+            time_index = int(np.abs(times - target).argmin())
+            actual_time = normalize_model_timestamp(times[time_index])
+
+            lon = np.asarray(ds["lon"].isel(time=time_index).values).reshape(-1)
+            lat = np.asarray(ds["lat"].isel(time=time_index).values).reshape(-1)
+            status = np.asarray(ds["status"].isel(time=time_index).values).reshape(-1)
+            if "mass_oil" in ds:
+                mass = np.asarray(ds["mass_oil"].isel(time=time_index).values).reshape(-1)
+            else:
+                mass = np.ones_like(lon, dtype=np.float32)
+
+        valid = ~np.isnan(lon) & ~np.isnan(lat) & (status == 0)
+        return lon[valid], lat[valid], mass[valid], actual_time
+
+    @staticmethod
+    def _build_date_composite_mask(
+        nc_path: Path,
+        target_date: str,
+        grid: GridBuilder,
+    ) -> np.ndarray:
+        date_value = pd.Timestamp(target_date).date()
+        composite = np.zeros((grid.height, grid.width), dtype=np.float32)
+
+        with xr.open_dataset(nc_path) as ds:
+            if "time" not in ds.coords:
+                raise ValueError(f"{nc_path} is missing a time coordinate.")
+            times = normalize_time_index(ds["time"].values)
+            matching_indices = [index for index, value in enumerate(times) if value.date() == date_value]
+            if not matching_indices:
+                return composite
+
+            for time_index in matching_indices:
+                lon = np.asarray(ds["lon"].isel(time=time_index).values).reshape(-1)
+                lat = np.asarray(ds["lat"].isel(time=time_index).values).reshape(-1)
+                status = np.asarray(ds["status"].isel(time=time_index).values).reshape(-1)
+                valid = ~np.isnan(lon) & ~np.isnan(lat) & (status == 0)
+                if not np.any(valid):
+                    continue
+                hits, _ = rasterize_particles(
+                    grid,
+                    lon[valid],
+                    lat[valid],
+                    np.ones(np.count_nonzero(valid), dtype=np.float32),
+                )
+                composite = np.maximum(composite, hits)
+
+        return composite.astype(np.float32)
+
+    def _write_probability_snapshot_artifacts(
+        self,
+        probability_data: np.ndarray,
+        target_time: pd.Timestamp,
+        grid: GridBuilder,
+    ) -> tuple[list[Path], list[dict]]:
+        label = timestamp_to_label(target_time)
+        written_files: list[Path] = []
+        records: list[dict] = []
+
+        prob_presence_path = self.output_dir / f"prob_presence_{label}.tif"
+        save_raster(grid, probability_data.astype(np.float32), prob_presence_path)
+        written_files.append(prob_presence_path)
+        records.append(
+            {
+                "product_type": "prob_presence",
+                "timestamp_utc": timestamp_to_utc_iso(target_time),
+                "relative_path": _relative_output_path(prob_presence_path),
+                "semantics": "Per-cell ensemble probability of member presence at the product timestamp.",
+            }
+        )
+
+        for threshold in self.probability_thresholds:
+            threshold_label = _threshold_label(threshold)
+            mask_data = (probability_data >= threshold).astype(np.float32)
+            mask_path = self.output_dir / f"mask_{threshold_label}_{label}.tif"
+            save_raster(grid, mask_data, mask_path)
+            written_files.append(mask_path)
+            records.append(
+                {
+                    "product_type": f"mask_{threshold_label}",
+                    "timestamp_utc": timestamp_to_utc_iso(target_time),
+                    "relative_path": _relative_output_path(mask_path),
+                    "semantics": f"Binary ensemble mask where probability of presence is at least {threshold:.2f}.",
+                }
             )
-            ensemble_files.append(output_file)
 
-        logger.info("Ensemble runs complete. Generating probability products...")
-        probability_outputs = self.generate_probability_products(ensemble_files, start_lat, start_lon)
-        manifest = self.write_output_manifest(ensemble_files, probability_outputs)
-        return manifest
+        return written_files, records
 
-    def generate_probability_products(self, file_list, start_lat, start_lon):
+    def _write_legacy_probability_products(
+        self,
+        probability_data: np.ndarray,
+        target_time: pd.Timestamp,
+        nominal_start_time: pd.Timestamp,
+        all_lons: list[float],
+        all_lats: list[float],
+        start_lat: float,
+        start_lon: float,
+        grid: GridBuilder,
+    ) -> list[Path]:
+        written_paths: list[Path] = []
+        hours_since_start = int(round((normalize_model_timestamp(target_time) - nominal_start_time).total_seconds() / 3600.0))
+        nc_out = self.output_dir / f"probability_{hours_since_start}h.nc"
+        dims = ["time", grid.y_name, grid.x_name]
+        coords = {
+            "time": [hours_since_start],
+            grid.y_name: grid.y_centers,
+            grid.x_name: grid.x_centers,
+        }
+        attrs = {
+            "description": f"Probability field at T+{hours_since_start}h",
+            "units": "decimal_fraction",
+            "crs": grid.crs,
+            "resolution": grid.resolution,
+            "grid_id": grid_id_from_builder(grid),
+            "timestamp_utc": timestamp_to_utc_iso(target_time),
+        }
+        xr.Dataset(
+            data_vars={"probability": (dims, probability_data[np.newaxis, :, :])},
+            coords=coords,
+            attrs=attrs,
+        ).to_netcdf(nc_out)
+        written_paths.append(nc_out)
+
+        tif_out = get_ensemble_probability_score_raster_path(hours_since_start)
+        save_raster(grid, probability_data.astype(np.float32), tif_out)
+        written_paths.append(tif_out)
+
+        img_out = self.output_dir / f"probability_{hours_since_start}h.png"
+        plot_probability_map(
+            output_file=str(img_out),
+            all_lons=np.asarray(all_lons),
+            all_lats=np.asarray(all_lats),
+            start_lon=start_lon,
+            start_lat=start_lat,
+            corners=grid.display_bounds_wgs84 or self.case.region,
+            title=f"Ensemble Forecast: T+{hours_since_start}h\nProbability Distribution (N={self.ensemble_size})",
+        )
+        written_paths.append(img_out)
+
+        if self.alias_probability_cone and hours_since_start == 72 and img_out.exists():
+            alias_path = self.output_dir / "probability_cone.png"
+            shutil.copyfile(img_out, alias_path)
+            written_paths.append(alias_path)
+
+        return written_paths
+
+    def _generate_deterministic_control_products(
+        self,
+        nc_path: Path,
+        recipe_name: str,
+        nominal_start_time,
+    ) -> tuple[list[Path], list[dict]]:
+        grid = GridBuilder()
+        written_files: list[Path] = []
+        product_records: list[dict] = []
+        output_dir = get_deterministic_control_score_raster_dir(recipe_name)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        start_time = normalize_model_timestamp(nominal_start_time)
+
+        for hour in self.snapshot_hours:
+            target_time = start_time + timedelta(hours=int(hour))
+            lon, lat, mass, actual_time = self._load_opendrift_snapshot(nc_path, target_time)
+            hits, probs = rasterize_particles(grid, lon, lat, mass)
+
+            label = timestamp_to_label(target_time)
+            footprint_path = self.forecast_dir / f"control_footprint_mask_{label}.tif"
+            density_path = self.forecast_dir / f"control_density_norm_{label}.tif"
+            save_raster(grid, hits, footprint_path)
+            save_raster(grid, probs, density_path)
+            written_files.extend([footprint_path, density_path])
+
+            legacy_hits_path = get_deterministic_control_score_raster_path(recipe_name, hour, raster_kind="hits")
+            legacy_probs_path = get_deterministic_control_score_raster_path(recipe_name, hour, raster_kind="p")
+            save_raster(grid, hits, legacy_hits_path)
+            save_raster(grid, probs, legacy_probs_path)
+            written_files.extend([legacy_hits_path, legacy_probs_path])
+
+            product_records.extend(
+                [
+                    {
+                        "product_type": "control_footprint_mask",
+                        "timestamp_utc": timestamp_to_utc_iso(target_time),
+                        "actual_snapshot_time_utc": timestamp_to_utc_iso(actual_time),
+                        "relative_path": _relative_output_path(footprint_path),
+                        "semantics": "Binary deterministic control footprint mask on the canonical scoring grid.",
+                    },
+                    {
+                        "product_type": "control_density_norm",
+                        "timestamp_utc": timestamp_to_utc_iso(target_time),
+                        "actual_snapshot_time_utc": timestamp_to_utc_iso(actual_time),
+                        "relative_path": _relative_output_path(density_path),
+                        "semantics": "Normalized deterministic control particle density on the canonical scoring grid.",
+                    },
+                    {
+                        "product_type": "legacy_hits_alias",
+                        "timestamp_utc": timestamp_to_utc_iso(target_time),
+                        "relative_path": _relative_output_path(legacy_hits_path),
+                        "semantics": "Backward-compatible alias for Phase 3B consumers.",
+                    },
+                    {
+                        "product_type": "legacy_density_alias",
+                        "timestamp_utc": timestamp_to_utc_iso(target_time),
+                        "relative_path": _relative_output_path(legacy_probs_path),
+                        "semantics": "Backward-compatible alias for Phase 3B consumers.",
+                    },
+                ]
+            )
+
+        return written_files, product_records
+
+    def _generate_official_ensemble_products(
+        self,
+        member_runs: list[dict],
+        nominal_start_time,
+        start_lat: float,
+        start_lon: float,
+    ) -> tuple[list[Path], list[dict]]:
+        grid = GridBuilder()
+        written_files: list[Path] = []
+        product_records: list[dict] = []
+        nominal_start = normalize_model_timestamp(nominal_start_time)
+
+        for hour in self.snapshot_hours:
+            target_time = nominal_start + timedelta(hours=int(hour))
+            member_masks: list[np.ndarray] = []
+            all_lons: list[float] = []
+            all_lats: list[float] = []
+
+            for member in member_runs:
+                lon, lat, _, actual_time = self._load_opendrift_snapshot(member["output_file"], target_time)
+                hits, _ = rasterize_particles(
+                    grid,
+                    lon,
+                    lat,
+                    np.ones(len(lon), dtype=np.float32),
+                )
+                member_masks.append(hits)
+                all_lons.extend(lon.tolist())
+                all_lats.extend(lat.tolist())
+
+                member_mask_path = self.member_mask_dir / (
+                    f"member_{member['member_id']:02d}_presence_{timestamp_to_label(target_time)}.tif"
+                )
+                save_raster(grid, hits, member_mask_path)
+                written_files.append(member_mask_path)
+                product_records.append(
+                    {
+                        "product_type": "member_presence_mask",
+                        "member_id": member["member_id"],
+                        "timestamp_utc": timestamp_to_utc_iso(target_time),
+                        "actual_snapshot_time_utc": timestamp_to_utc_iso(actual_time),
+                        "relative_path": _relative_output_path(member_mask_path),
+                        "semantics": "Binary per-member presence mask on the canonical scoring grid.",
+                    }
+                )
+
+            probability = np.mean(np.stack(member_masks, axis=0), axis=0).astype(np.float32)
+            probability_files, probability_records = self._write_probability_snapshot_artifacts(
+                probability_data=probability,
+                target_time=target_time,
+                grid=grid,
+            )
+            written_files.extend(probability_files)
+            product_records.extend(probability_records)
+
+            legacy_paths = self._write_legacy_probability_products(
+                probability_data=probability,
+                target_time=target_time,
+                nominal_start_time=nominal_start,
+                all_lons=all_lons,
+                all_lats=all_lats,
+                start_lat=start_lat,
+                start_lon=start_lon,
+                grid=grid,
+            )
+            written_files.extend(legacy_paths)
+
+        validation_date = ""
+        if self.case.validation_layer.event_time_utc:
+            validation_date = str(pd.Timestamp(self.case.validation_layer.event_time_utc).date())
+
+        if validation_date:
+            composite_masks: list[np.ndarray] = []
+            for member in member_runs:
+                composite = self._build_date_composite_mask(
+                    member["output_file"],
+                    target_date=validation_date,
+                    grid=grid,
+                )
+                composite_masks.append(composite)
+                member_composite_path = self.member_mask_dir / (
+                    f"member_{member['member_id']:02d}_presence_{validation_date}_datecomposite.tif"
+                )
+                save_raster(grid, composite, member_composite_path)
+                written_files.append(member_composite_path)
+                product_records.append(
+                    {
+                        "product_type": "member_presence_mask_datecomposite",
+                        "member_id": member["member_id"],
+                        "date_utc": validation_date,
+                        "relative_path": _relative_output_path(member_composite_path),
+                        "semantics": "Per-member binary presence union across all forecast timesteps on the target UTC date.",
+                    }
+                )
+
+            composite_probability = np.mean(np.stack(composite_masks, axis=0), axis=0).astype(np.float32)
+            composite_prob_path = self.output_dir / f"prob_presence_{validation_date}_datecomposite.tif"
+            composite_p50_path = self.output_dir / f"mask_p50_{validation_date}_datecomposite.tif"
+            save_raster(grid, composite_probability, composite_prob_path)
+            save_raster(grid, (composite_probability >= 0.5).astype(np.float32), composite_p50_path)
+            written_files.extend([composite_prob_path, composite_p50_path])
+            product_records.extend(
+                [
+                    {
+                        "product_type": "prob_presence_datecomposite",
+                        "date_utc": validation_date,
+                        "relative_path": _relative_output_path(composite_prob_path),
+                        "semantics": "Per-cell ensemble probability of any member presence across the target UTC date.",
+                    },
+                    {
+                        "product_type": "mask_p50_datecomposite",
+                        "date_utc": validation_date,
+                        "relative_path": _relative_output_path(composite_p50_path),
+                        "semantics": "Binary date-composite mask where probability of presence is at least 0.50.",
+                    },
+                ]
+            )
+
+        return written_files, product_records
+
+    def _generate_prototype_probability_products(self, file_list, start_lat, start_lon):
         """
         Generate gridded NetCDF probability fields and PNG snapshots for 24h, 48h, and 72h.
         """
-        snapshots = [24, 48, 72]
-        case = get_case_context()
+        snapshots = self.snapshot_hours
         grid = GridBuilder()
         written_files: list[Path] = []
 
@@ -210,17 +924,17 @@ class EnsembleForecastService:
             for file_path in file_list:
                 try:
                     with xr.open_dataset(file_path) as ds:
-                        target_time = pd.to_datetime(ds.time.values[0]) + timedelta(hours=hr)
-                        idx = np.abs(pd.to_datetime(ds.time.values) - target_time).argmin()
+                        times = normalize_time_index(ds.time.values)
+                        target_time = normalize_model_timestamp(times[0] + timedelta(hours=hr))
+                        idx = int(np.abs(times - target_time).argmin())
 
-                        lons = ds.lon.values[idx, :]
-                        lats = ds.lat.values[idx, :]
-
+                        lons = np.asarray(ds["lon"].isel(time=idx).values).reshape(-1)
+                        lats = np.asarray(ds["lat"].isel(time=idx).values).reshape(-1)
                         valid = ~np.isnan(lons) & ~np.isnan(lats)
                         all_lons.extend(lons[valid])
                         all_lats.extend(lats[valid])
-                except Exception as e:
-                    logger.warning("Could not process %s for %sh: %s", Path(file_path).name, hr, e)
+                except Exception as exc:
+                    logger.warning("Could not process %s for %sh: %s", Path(file_path).name, hr, exc)
 
             if not all_lons:
                 raise RuntimeError(
@@ -244,8 +958,7 @@ class EnsembleForecastService:
                 "units": "decimal_fraction",
                 "crs": grid.crs,
                 "resolution": grid.resolution,
-                "grid_metadata_path": str(grid.spec.metadata_path or ""),
-                "display_bounds_wgs84": json.dumps(grid.display_bounds_wgs84 or case.region),
+                "grid_id": grid_id_from_builder(grid),
             }
 
             ds_prob = xr.Dataset(
@@ -269,7 +982,7 @@ class EnsembleForecastService:
                 all_lats=np.array(all_lats),
                 start_lon=start_lon,
                 start_lat=start_lat,
-                corners=grid.display_bounds_wgs84 or case.region,
+                corners=grid.display_bounds_wgs84 or self.case.region,
                 title=f"Ensemble Forecast: T+{hr}h\nProbability Distribution (N={self.ensemble_size})",
             )
             written_files.append(img_out)
@@ -282,105 +995,356 @@ class EnsembleForecastService:
         logger.info("All Phase 2 probability products saved to %s", self.output_dir)
         return written_files
 
-    def write_output_manifest(self, ensemble_files, probability_outputs):
-        """Write a compact manifest listing the actual Phase 2 artifacts written."""
-        written_paths: list[Path] = []
-        for path in list(ensemble_files) + list(probability_outputs):
-            path_obj = Path(path)
-            if path_obj.exists():
-                written_paths.append(path_obj)
+    def _write_loading_audit_artifacts(self):
+        audit_payload = {"runs": self.audit_records}
+        with open(self.audit_json_path, "w") as f:
+            json.dump(audit_payload, f, indent=2)
 
-        manifest_records = [
-            {
-                "file_name": path.name,
-                "relative_path": str(path.relative_to(self.output_dir.parent)),
-                "category": self._classify_output(path),
+        rows: list[dict] = []
+        for audit in self.audit_records:
+            base_row = {
+                "run_kind": audit["run_kind"],
+                "member_id": audit["member_id"] if audit["member_id"] is not None else "",
+                "recipe": audit["recipe"],
+                "status": audit["status"],
+                "requested_start_time_utc": audit["requested_start_time_utc"],
+                "requested_end_time_utc": audit["requested_end_time_utc"],
+                "requested_duration_hours": audit["requested_duration_hours"],
+                "seed_element_count": audit["seed_element_count"],
+                "first_successful_model_timestep": audit["first_successful_model_timestep"],
+                "last_successful_model_timestep": audit["last_successful_model_timestep"],
+                "output_path": audit["output_path"],
+                "root_cause": audit["root_cause"],
+                "exception_chain": " | ".join(audit["exception_chain"]),
             }
-            for path in written_paths
-        ]
+            if not audit["forcings"]:
+                rows.append(base_row)
+                continue
 
+            for forcing_kind, forcing in audit["forcings"].items():
+                rows.append(
+                    {
+                        **base_row,
+                        "forcing_kind": forcing_kind,
+                        "configured_path": forcing.get("configured_path", ""),
+                        "used_path": forcing.get("used_path", ""),
+                        "exists": forcing.get("exists", False),
+                        "reader_attach_status": forcing.get("reader_attach_status", ""),
+                        "required_variables": ";".join(forcing.get("required_variables", [])),
+                        "source_variables": ";".join(forcing.get("source_variables", [])),
+                        "mapped_variables": json.dumps(forcing.get("mapped_variables", {}), sort_keys=True),
+                        "available_variables": ";".join(forcing.get("available_variables", [])),
+                        "reader_variables": ";".join(forcing.get("reader_variables", [])),
+                        "time_coordinate": forcing.get("time_coordinate", ""),
+                        "source_time_start_utc": forcing.get("source_time_start_utc", ""),
+                        "source_time_end_utc": forcing.get("source_time_end_utc", ""),
+                        "used_time_start_utc": forcing.get("used_time_start_utc", ""),
+                        "used_time_end_utc": forcing.get("used_time_end_utc", ""),
+                        "covers_requested_window": forcing.get("covers_requested_window", False),
+                        "coverage_gap_hours": forcing.get("coverage_gap_hours", 0.0),
+                        "inferred_time_step_hours": forcing.get("inferred_time_step_hours", ""),
+                        "tail_extension_applied": forcing.get("tail_extension_applied", False),
+                        "tail_extension_reason": forcing.get("tail_extension_reason", ""),
+                        "reader_label": forcing.get("reader_label", ""),
+                        "notes": " | ".join(forcing.get("notes", [])),
+                    }
+                )
+
+        pd.DataFrame(rows).to_csv(self.audit_csv_path, index=False)
+
+    def _build_ensemble_manifest_payload(
+        self,
+        recipe_name: str,
+        start_time,
+        member_runs: list[dict],
+        product_records: list[dict],
+    ) -> dict:
+        grid = GridBuilder()
+        return {
+            "workflow_mode": self.case.workflow_mode,
+            "case_id": self.case.case_id,
+            "grid": {
+                "grid_id": grid_id_from_builder(grid),
+                **grid.spec.to_metadata(),
+            },
+            "provenance": {
+                "recipe": recipe_name,
+                "nominal_start_time_utc": timestamp_to_utc_iso(start_time),
+                "loading_audit_json": str(self.audit_json_path),
+                "loading_audit_csv": str(self.audit_csv_path),
+                "initialization_mode": self.case.initialization_mode,
+                "initialization_polygon": str(self.case.initialization_layer.processed_vector_path(RUN_NAME))
+                if self.case.is_official
+                else str(self.case.initialization_layer.geojson_path(RUN_NAME)),
+            },
+            "member_runs": [
+                {
+                    "member_id": member["member_id"],
+                    "relative_path": _relative_output_path(member["output_file"]),
+                    "start_time_utc": member["start_time_utc"],
+                    "end_time_utc": member["end_time_utc"],
+                    "perturbation": member["perturbation"],
+                }
+                for member in member_runs
+            ],
+            "products": product_records,
+        }
+
+    def write_output_manifest(
+        self,
+        recipe_name: str,
+        member_runs: list[dict],
+        written_files: list[Path],
+        product_records: list[dict],
+        start_time,
+    ) -> dict:
+        """Write the Phase 2 ensemble manifest."""
         manifest_path = self.output_dir / "ensemble_manifest.json"
-        manifest_records.append(
-            {
-                "file_name": manifest_path.name,
-                "relative_path": str(manifest_path.relative_to(self.output_dir.parent)),
-                "category": "manifest",
+        if self.case.is_official:
+            payload = self._build_ensemble_manifest_payload(
+                recipe_name=recipe_name,
+                start_time=start_time,
+                member_runs=member_runs,
+                product_records=product_records,
+            )
+        else:
+            payload = {
+                "written_files": [
+                    {
+                        "file_name": path.name,
+                        "relative_path": _relative_output_path(path),
+                    }
+                    for path in written_files
+                    if path.exists()
+                ]
             }
-        )
+
         with open(manifest_path, "w") as f:
-            json.dump({"written_files": manifest_records}, f, indent=2)
+            json.dump(payload, f, indent=2)
 
         logger.info("Wrote ensemble manifest to %s", manifest_path)
         return {
             "manifest": str(manifest_path),
-            "written_files": [str(path) for path in written_paths] + [str(manifest_path)],
+            "written_files": [str(path) for path in written_files if path.exists()] + [str(manifest_path)],
         }
+
+    def run_deterministic_control(
+        self,
+        recipe_name: str,
+        start_time: str,
+        duration_hours: int = 72,
+    ) -> dict:
+        """Run a single deterministic spill forecast for official Phase 3B scoring."""
+        logger.info("Starting deterministic control forecast for recipe %s", recipe_name)
+        simulation_start = normalize_model_timestamp(start_time)
+        simulation_end = simulation_start + timedelta(hours=duration_hours)
+        audit = self._init_run_audit(
+            recipe_name=recipe_name,
+            run_kind="deterministic_control",
+            requested_start_time=simulation_start,
+            duration_hours=duration_hours,
+        )
+
+        model = self._build_model(
+            simulation_start=simulation_start,
+            simulation_end=simulation_end,
+            audit=audit,
+        )
+        model.set_config("drift:horizontal_diffusivity", 0.0)
+        model.set_config("drift:wind_uncertainty", 0.0)
+        model.set_config("drift:current_uncertainty", 0.0)
+        self._seed_polygon_release(model, simulation_start, num_elements=2000)
+        audit["seed_element_count"] = 2000
+
+        output_file = get_deterministic_control_output_path(recipe_name)
+        control_nc = self._run_model(
+            model=model,
+            output_file=output_file,
+            duration_hours=duration_hours,
+            audit=audit,
+        )
+        written_files, product_records = self._generate_deterministic_control_products(
+            nc_path=control_nc,
+            recipe_name=recipe_name,
+            nominal_start_time=simulation_start,
+        )
+        audit["written_files"] = [str(path) for path in written_files]
+        self._write_loading_audit_artifacts()
+        logger.info("Deterministic control forecast saved to %s", control_nc)
+        return {
+            "output_file": control_nc,
+            "written_files": [control_nc, *written_files],
+            "products": product_records,
+        }
+
+    def run_ensemble(
+        self,
+        recipe_name: str,
+        start_lat: float,
+        start_lon: float,
+        start_time: str,
+        duration_hours: int = 72,
+    ):
+        """
+        Runs the ensemble and writes official or prototype products.
+        """
+        logger.info("Starting Phase 2: Ensemble Forecast (%s members)...", self.ensemble_size)
+        logger.info("Spill Location: %s, %s", start_lat, start_lon)
+        logger.info("Nominal Start Time: %s", start_time)
+        logger.info("Currents: %s", self.currents_file)
+        logger.info("Winds: %s", self.winds_file)
+
+        ensemble_files: list[Path] = []
+        member_runs: list[dict] = []
+        base_time = normalize_model_timestamp(start_time)
+        rng = np.random.default_rng()
+        p_cfg = self.config["perturbations"]
+
+        for i in range(self.ensemble_size):
+            member_id = i + 1
+
+            t_shift = float(p_cfg["time_shift_hours"])
+            time_offset_hours = float(rng.uniform(-t_shift, t_shift))
+            run_start_time = base_time + timedelta(hours=time_offset_hours)
+            run_end_time = run_start_time + timedelta(hours=duration_hours)
+
+            diffusivity = float(rng.uniform(p_cfg["diffusivity_min"], p_cfg["diffusivity_max"]))
+            wind_uncertainty = float(
+                rng.uniform(
+                    p_cfg["wind_uncertainty_min"],
+                    p_cfg["wind_uncertainty_max"],
+                )
+            )
+
+            print(
+                f"   Member {member_id}/{self.ensemble_size}: "
+                f"T{time_offset_hours:+.1f}h | K={diffusivity:.3f} | W_unc={wind_uncertainty:.1f}"
+            )
+
+            audit = self._init_run_audit(
+                recipe_name=recipe_name,
+                run_kind="ensemble_member",
+                requested_start_time=run_start_time,
+                duration_hours=duration_hours,
+                member_id=member_id,
+                perturbation={
+                    "time_offset_hours": time_offset_hours,
+                    "horizontal_diffusivity": diffusivity,
+                    "wind_uncertainty": wind_uncertainty,
+                },
+            )
+
+            model = self._build_model(
+                simulation_start=run_start_time,
+                simulation_end=run_end_time,
+                audit=audit,
+            )
+            model.set_config("drift:horizontal_diffusivity", diffusivity)
+            model.set_config("drift:wind_uncertainty", wind_uncertainty)
+            model.set_config("drift:current_uncertainty", 0.1)
+            self._seed_polygon_release(model, run_start_time, num_elements=2000)
+            audit["seed_element_count"] = 2000
+
+            output_file = self.output_dir / f"member_{member_id:02d}.nc"
+            self._run_model(
+                model=model,
+                output_file=output_file,
+                duration_hours=duration_hours,
+                audit=audit,
+            )
+            ensemble_files.append(output_file)
+            member_runs.append(
+                {
+                    "member_id": member_id,
+                    "output_file": output_file,
+                    "start_time_utc": timestamp_to_utc_iso(run_start_time),
+                    "end_time_utc": timestamp_to_utc_iso(run_end_time),
+                    "perturbation": audit["perturbation"],
+                }
+            )
+
+        logger.info("Ensemble runs complete. Generating probability products...")
+        if self.case.is_official:
+            product_files, product_records = self._generate_official_ensemble_products(
+                member_runs=member_runs,
+                nominal_start_time=base_time,
+                start_lat=start_lat,
+                start_lon=start_lon,
+            )
+        else:
+            product_files = self._generate_prototype_probability_products(ensemble_files, start_lat, start_lon)
+            product_records = []
+
+        manifest = self.write_output_manifest(
+            recipe_name=recipe_name,
+            member_runs=member_runs,
+            written_files=[*ensemble_files, *product_files],
+            product_records=product_records,
+            start_time=base_time,
+        )
+        return manifest
 
     def write_official_forecast_manifest(
         self,
         selection: RecipeSelection,
-        deterministic_control: Path,
+        deterministic_control: dict,
         ensemble_manifest: dict,
         start_time: str,
     ) -> Path:
         """Write an official spill-forecast manifest for Phase 3B consumers."""
-        from src.core.case_context import get_case_context
-
-        case = get_case_context()
+        grid = GridBuilder()
         manifest_path = get_forecast_manifest_path()
         payload = {
-            "workflow_mode": case.workflow_mode,
-            "case_id": case.case_id,
-            "recipe_selection": {
-                "recipe": selection.recipe,
-                "source_kind": selection.source_kind,
-                "source_path": selection.source_path,
-                "status_flag": selection.status_flag,
-                "valid": selection.valid,
-                "provisional": selection.provisional,
-                "rerun_required": selection.rerun_required,
-                "note": selection.note,
+            "workflow_mode": self.case.workflow_mode,
+            "case_id": self.case.case_id,
+            "simulation_window_utc": {
+                "start": timestamp_to_utc_iso(start_time),
+                "end": timestamp_to_utc_iso(normalize_model_timestamp(start_time) + timedelta(hours=72)),
             },
-            "start_time": str(start_time),
+            "grid": {
+                "grid_id": grid_id_from_builder(grid),
+                **grid.spec.to_metadata(),
+            },
+            "provenance": {
+                "recipe_selection": {
+                    "recipe": selection.recipe,
+                    "source_kind": selection.source_kind,
+                    "source_path": selection.source_path,
+                    "status_flag": selection.status_flag,
+                    "valid": selection.valid,
+                    "provisional": selection.provisional,
+                    "rerun_required": selection.rerun_required,
+                    "note": selection.note,
+                },
+                "loading_audit_json": str(self.audit_json_path),
+                "loading_audit_csv": str(self.audit_csv_path),
+                "initialization_polygon": str(self.case.initialization_layer.processed_vector_path(RUN_NAME)),
+                "validation_polygon": str(self.case.validation_layer.processed_vector_path(RUN_NAME)),
+                "source_point": str(self.case.provenance_layer.processed_vector_path(RUN_NAME)),
+            },
             "artifacts": {
-                "deterministic_control_nc": str(deterministic_control),
+                "deterministic_control_nc": str(deterministic_control["output_file"]),
                 "deterministic_control_hits_72h_tif": str(
                     get_deterministic_control_score_raster_path(selection.recipe, 72, raster_kind="hits")
                 ),
+                "deterministic_control_density_72h_tif": str(
+                    get_deterministic_control_score_raster_path(selection.recipe, 72, raster_kind="p")
+                ),
                 "ensemble_manifest": ensemble_manifest.get("manifest"),
-                "ensemble_probability_72h_nc": str(self.output_dir / "probability_72h.nc"),
                 "ensemble_probability_72h_tif": str(get_ensemble_probability_score_raster_path(72)),
-            },
-            "status_flags": {
-                "valid": selection.valid,
-                "provisional": selection.provisional,
-                "rerun_required": selection.rerun_required,
+                "ensemble_p50_datecomposite_tif": str(
+                    self.output_dir / f"mask_p50_{pd.Timestamp(self.case.validation_layer.event_time_utc).date()}_datecomposite.tif"
+                ),
             },
             "written_files": [
-                str(deterministic_control),
-                *ensemble_manifest.get("written_files", []),
-            ],
+                str(path)
+                for path in deterministic_control["written_files"]
+            ] + list(ensemble_manifest.get("written_files", [])),
         }
         with open(manifest_path, "w") as f:
             json.dump(payload, f, indent=2)
         logger.info("Wrote official forecast manifest to %s", manifest_path)
         return manifest_path
-
-    @staticmethod
-    def _classify_output(path: Path) -> str:
-        if path.name == "probability_cone.png":
-            return "legacy_alias"
-        if path.name.startswith("member_") and path.suffix == ".nc":
-            return "member_trace"
-        if path.name.startswith("probability_") and path.suffix == ".tif":
-            return "probability_tif"
-        if path.name.startswith("probability_") and path.suffix == ".png":
-            return "probability_png"
-        if path.name.startswith("probability_") and path.suffix == ".nc":
-            return "probability_netcdf"
-        if path.name == "metadata.json":
-            return "metadata"
-        return "other"
 
 
 def run_ensemble(best_recipe, start_time=None, start_lat=None, start_lon=None):
@@ -403,6 +1367,7 @@ def run_ensemble(best_recipe, start_time=None, start_lat=None, start_lon=None):
     _start_time = start_time if start_time else d_time
 
     manifest = service.run_ensemble(
+        recipe_name=best_recipe,
         start_lat=_start_lat,
         start_lon=_start_lon,
         start_time=_start_time,
@@ -442,6 +1407,7 @@ def run_official_spill_forecast(
         start_time=_start_time,
     )
     ensemble_manifest = service.run_ensemble(
+        recipe_name=selection.recipe,
         start_lat=_start_lat,
         start_lon=_start_lon,
         start_time=_start_time,
@@ -457,6 +1423,8 @@ def run_official_spill_forecast(
         "output": str(service.output_dir),
         "manifest": ensemble_manifest["manifest"],
         "forecast_manifest": str(forecast_manifest),
-        "deterministic_control": str(deterministic_control),
-        "written_files": [str(deterministic_control)] + ensemble_manifest["written_files"] + [str(forecast_manifest)],
+        "deterministic_control": str(deterministic_control["output_file"]),
+        "written_files": [
+            str(path) for path in deterministic_control["written_files"]
+        ] + ensemble_manifest["written_files"] + [str(forecast_manifest)],
     }

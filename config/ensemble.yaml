@@ -3,6 +3,10 @@
 
 ensemble:
   ensemble_size: 50
+
+official_products:
+  snapshot_hours: [24, 48, 72]
+  probability_thresholds: [0.5, 0.9]
   
 # Perturbation Ranges (Monte Carlo)
 perturbations:

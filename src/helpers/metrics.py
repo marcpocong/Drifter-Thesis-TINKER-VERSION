@@ -12,9 +12,16 @@ def calculate_fss(forecast: np.ndarray, observed: np.ndarray, window: int = 5) -
     FSS = 1 - (MSE / MSE_ref)
     Measures spatial overlap with neighborhood tolerance.
     """
+    forecast_arr = np.asarray(forecast, dtype=float)
+    observed_arr = np.asarray(observed, dtype=float)
+    if forecast_arr.shape != observed_arr.shape:
+        raise ValueError("FSS requires forecast and observed grids with identical shapes.")
+    if window < 1:
+        raise ValueError("FSS window must be at least 1 cell.")
+
     # Neighborhood smoothing
-    f_smooth = uniform_filter(forecast, size=window)
-    o_smooth = uniform_filter(observed, size=window)
+    f_smooth = uniform_filter(forecast_arr, size=window)
+    o_smooth = uniform_filter(observed_arr, size=window)
     
     mse = np.mean((f_smooth - o_smooth)**2)
     mse_ref = np.mean(f_smooth**2) + np.mean(o_smooth**2)
@@ -22,21 +29,45 @@ def calculate_fss(forecast: np.ndarray, observed: np.ndarray, window: int = 5) -
     if mse_ref == 0:
         return 1.0 if mse == 0 else 0.0
         
-    return 1.0 - (mse / mse_ref)
+    return float(np.clip(1.0 - (mse / mse_ref), 0.0, 1.0))
 
-def calculate_kl_divergence(forecast: np.ndarray, observed: np.ndarray, epsilon: float = 1e-10) -> float:
+def calculate_kl_divergence(
+    forecast: np.ndarray,
+    observed: np.ndarray,
+    epsilon: float = 1e-10,
+    valid_mask: np.ndarray | None = None,
+) -> float:
     """
     Kullback-Leibler (KL) Divergence for probability distributions.
     Measures difference between forecast and observed spatial mass.
     """
-    # Normalize and handle zeros
-    f = np.clip(forecast.flatten(), epsilon, None)
-    o = np.clip(observed.flatten(), epsilon, None)
-    
+    forecast_arr = np.asarray(forecast, dtype=float)
+    observed_arr = np.asarray(observed, dtype=float)
+    if forecast_arr.shape != observed_arr.shape:
+        raise ValueError("KL divergence requires forecast and observed grids with identical shapes.")
+
+    valid = np.isfinite(forecast_arr) & np.isfinite(observed_arr)
+    if valid_mask is not None:
+        valid &= np.asarray(valid_mask, dtype=bool)
+
+    if not np.any(valid):
+        raise ValueError("KL divergence requires at least one valid cell after masking.")
+
+    f = np.clip(forecast_arr[valid], 0.0, None)
+    o = np.clip(observed_arr[valid], 0.0, None)
+
+    f_sum = float(f.sum())
+    o_sum = float(o.sum())
+    if f_sum <= 0.0 or o_sum <= 0.0:
+        raise ValueError("KL divergence requires positive forecast and observed mass over valid cells.")
+
+    # Normalize over the valid domain first, then apply epsilon and renormalize.
+    f = np.clip(f / f_sum, epsilon, None)
+    o = np.clip(o / o_sum, epsilon, None)
     f /= f.sum()
     o /= o.sum()
-    
-    return np.sum(o * np.log(o / f))
+
+    return float(np.sum(o * np.log(o / f)))
 
 def haversine(lat1, lon1, lat2, lon2):
     """
@@ -321,4 +352,3 @@ def extract_gnome_budget_from_nc(nc_path: str) -> pd.DataFrame:
             start_idx = end_idx
 
     return pd.DataFrame(records)
-
