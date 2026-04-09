@@ -51,6 +51,9 @@ SCORING_GRID_TEMPLATE_PATH = SCORING_GRID_DIR / "scoring_grid_template.tif"
 SCORING_GRID_EXTENT_PATH = SCORING_GRID_DIR / "grid_extent.gpkg"
 LAND_MASK_PATH = SCORING_GRID_DIR / "land_mask.tif"
 SEA_MASK_PATH = SCORING_GRID_DIR / "sea_mask.tif"
+SHORELINE_SEGMENTS_PATH = SCORING_GRID_DIR / "shoreline_segments.gpkg"
+SHORELINE_MASK_MANIFEST_JSON_PATH = SCORING_GRID_DIR / "shoreline_mask_manifest.json"
+SHORELINE_MASK_MANIFEST_CSV_PATH = SCORING_GRID_DIR / "shoreline_mask_manifest.csv"
 PRECHECK_REPORT_DIR = SCORING_GRID_DIR / "precheck_reports"
 
 
@@ -76,7 +79,11 @@ class ScoringGridSpec:
     extent_path: str | None = None
     land_mask_path: str | None = None
     sea_mask_path: str | None = None
+    shoreline_segments_path: str | None = None
+    shoreline_mask_manifest_json_path: str | None = None
+    shoreline_mask_manifest_csv_path: str | None = None
     shoreline_mask_status: str | None = None
+    shoreline_mask_signature: str | None = None
     source_paths: dict[str, str] | None = None
 
     @property
@@ -180,6 +187,9 @@ def get_scoring_grid_artifact_paths() -> dict[str, Path]:
         "extent_gpkg": SCORING_GRID_EXTENT_PATH,
         "land_mask_tif": LAND_MASK_PATH,
         "sea_mask_tif": SEA_MASK_PATH,
+        "shoreline_segments_gpkg": SHORELINE_SEGMENTS_PATH,
+        "shoreline_manifest_json": SHORELINE_MASK_MANIFEST_JSON_PATH,
+        "shoreline_manifest_csv": SHORELINE_MASK_MANIFEST_CSV_PATH,
     }
 
 
@@ -192,6 +202,64 @@ def _sanitize_report_stem(value: str) -> str:
 
 def _as_path_str(path: Path | None) -> str | None:
     return str(path) if path is not None else None
+
+
+def load_shoreline_mask_manifest(path: str | Path | None = None) -> dict[str, Any]:
+    manifest_path = Path(path) if path is not None else SHORELINE_MASK_MANIFEST_JSON_PATH
+    if not manifest_path.exists():
+        return {}
+    with open(manifest_path, "r", encoding="utf-8") as f:
+        return json.load(f) or {}
+
+
+def get_current_shoreline_mask_signature(path: str | Path | None = None) -> str:
+    manifest = load_shoreline_mask_manifest(path)
+    return str(manifest.get("shoreline_mask_signature") or "")
+
+
+def shoreline_mask_is_placeholder(path: str | Path | None = None) -> bool:
+    manifest = load_shoreline_mask_manifest(path)
+    if not manifest:
+        return True
+    status = str(manifest.get("shoreline_mask_status") or "")
+    return (
+        status.startswith("scaffold")
+        or int(manifest.get("land_cell_count", 0)) <= 0
+        or int(manifest.get("sea_cell_count", 0)) <= 0
+    )
+
+
+def load_binary_mask(path: str | Path) -> np.ndarray:
+    if rasterio is None:
+        raise ImportError("rasterio is required to load shoreline masks")
+    with rasterio.open(path) as src:
+        return src.read(1).astype(np.float32)
+
+
+def load_sea_mask_array(spec: ScoringGridSpec | None = None) -> np.ndarray | None:
+    active_spec = spec or get_scoring_grid_spec()
+    sea_mask_path = Path(active_spec.sea_mask_path) if active_spec.sea_mask_path else SEA_MASK_PATH
+    if not sea_mask_path.exists():
+        return None
+    return load_binary_mask(sea_mask_path)
+
+
+def apply_ocean_mask(
+    data: np.ndarray,
+    sea_mask: np.ndarray | None = None,
+    *,
+    fill_value: float = 0.0,
+) -> np.ndarray:
+    masked = np.asarray(data, dtype=np.float32).copy()
+    if sea_mask is None:
+        return masked
+    sea = np.asarray(sea_mask, dtype=np.float32)
+    if masked.shape != sea.shape:
+        raise ValueError(
+            f"Ocean-mask shape mismatch. Data shape {masked.shape} does not match sea-mask shape {sea.shape}."
+        )
+    masked[sea <= 0.5] = fill_value
+    return masked
 
 
 def _load_gdf(path: Path, label: str):
@@ -395,7 +463,11 @@ def build_official_scoring_grid(force_refresh: bool = False) -> ScoringGridSpec:
         extent_path=_as_path_str(artifact_paths["extent_gpkg"]),
         land_mask_path=_as_path_str(artifact_paths["land_mask_tif"]),
         sea_mask_path=_as_path_str(artifact_paths["sea_mask_tif"]),
-        shoreline_mask_status="scaffold_all_sea_pending_shoreline_integration",
+        shoreline_segments_path=_as_path_str(artifact_paths["shoreline_segments_gpkg"]),
+        shoreline_mask_manifest_json_path=_as_path_str(artifact_paths["shoreline_manifest_json"]),
+        shoreline_mask_manifest_csv_path=_as_path_str(artifact_paths["shoreline_manifest_csv"]),
+        shoreline_mask_status="pending_shoreline_mask_generation",
+        shoreline_mask_signature="",
         source_paths={
             "initialization_polygon": str(init_path),
             "validation_polygon": str(validation_path),
@@ -404,15 +476,42 @@ def build_official_scoring_grid(force_refresh: bool = False) -> ScoringGridSpec:
     )
 
     SCORING_GRID_DIR.mkdir(parents=True, exist_ok=True)
-    spec.save_metadata(artifact_paths["metadata_yaml"])
-    spec.save_metadata(artifact_paths["metadata_json"])
     _write_template_raster(spec, artifact_paths["template_tif"], fill_value=0)
     _write_grid_extent(spec, artifact_paths["extent_gpkg"])
+    from src.services.shoreline_mask import build_shoreline_mask_artifacts
 
-    # Scaffold masks for the later shoreline-aware patch.
-    _write_template_raster(spec, artifact_paths["land_mask_tif"], fill_value=0)
-    _write_template_raster(spec, artifact_paths["sea_mask_tif"], fill_value=1)
-    return spec
+    shoreline_manifest = build_shoreline_mask_artifacts(spec, force_refresh=force_refresh)
+    final_spec = ScoringGridSpec(
+        min_x=spec.min_x,
+        max_x=spec.max_x,
+        min_y=spec.min_y,
+        max_y=spec.max_y,
+        resolution=spec.resolution,
+        crs=spec.crs,
+        x_name=spec.x_name,
+        y_name=spec.y_name,
+        units=spec.units,
+        workflow_mode=spec.workflow_mode,
+        run_name=spec.run_name,
+        display_bounds_wgs84=spec.display_bounds_wgs84,
+        buffer_m=spec.buffer_m,
+        grid_snap_m=spec.grid_snap_m,
+        metadata_path=spec.metadata_path,
+        metadata_json_path=spec.metadata_json_path,
+        template_path=spec.template_path,
+        extent_path=spec.extent_path,
+        land_mask_path=spec.land_mask_path,
+        sea_mask_path=spec.sea_mask_path,
+        shoreline_segments_path=spec.shoreline_segments_path,
+        shoreline_mask_manifest_json_path=spec.shoreline_mask_manifest_json_path,
+        shoreline_mask_manifest_csv_path=spec.shoreline_mask_manifest_csv_path,
+        shoreline_mask_status=str(shoreline_manifest.get("shoreline_mask_status") or ""),
+        shoreline_mask_signature=str(shoreline_manifest.get("shoreline_mask_signature") or ""),
+        source_paths=spec.source_paths,
+    )
+    final_spec.save_metadata(artifact_paths["metadata_yaml"])
+    final_spec.save_metadata(artifact_paths["metadata_json"])
+    return final_spec
 
 
 def get_scoring_grid_spec(force_refresh: bool = False) -> ScoringGridSpec:

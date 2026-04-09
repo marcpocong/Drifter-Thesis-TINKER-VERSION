@@ -1,0 +1,38 @@
+{
+  "generated_at_utc": "2026-04-09T18:12:18.332828+00:00",
+  "shoreline_source": "GSHHG",
+  "source_version": "2.3.7",
+  "source_url": "https://ftp.soest.hawaii.edu/gshhg/gshhg-shp-2.3.7.zip",
+  "raw_archive_path": "data_processed/grids/raw/gshhg-shp-2.3.7.zip",
+  "raw_archive_sha256": "8dbbe7e071e77e9e75f2d639239099ebca8d5c16d6a07df8169729d49f15cf41",
+  "source_shapefile_path": "data_processed/grids/raw/gshhg_shp_i_l1/GSHHS_i_L1.shp",
+  "clipping_domain_used_wgs84": [
+    120.90964677179262,
+    122.0621541786303,
+    12.249384840763462,
+    13.783655303175253
+  ],
+  "clipping_domain_used_projected": [
+    274000.0,
+    398000.0,
+    1355000.0,
+    1524000.0
+  ],
+  "reprojection_crs": "EPSG:32651",
+  "rasterization_rule": "land polygons rasterized with all_touched=true; land=1, sea=inverse(land)",
+  "land_cell_count": 9575,
+  "sea_cell_count": 11381,
+  "segment_count": 1000,
+  "segment_length_m": 1000.0,
+  "shoreline_segments_path": "data_processed/grids/shoreline_segments.gpkg",
+  "land_mask_path": "data_processed/grids/land_mask.tif",
+  "sea_mask_path": "data_processed/grids/sea_mask.tif",
+  "shoreline_mask_status": "gshhg_2.3.7_resolution_i_level_1_all_touched",
+  "shoreline_mask_signature": "e80ea49ade09d47d48960a01672afa4a80591a9f1567aa15fdf1acf0cfc72774",
+  "known_limitations": [
+    "Coastal cells are excluded conservatively when any land polygon touches the 1 km cell.",
+    "The shoreline mask is clipped to the canonical scoring domain and does not extend beyond it."
+  ],
+  "wgs84_feature_count": 23,
+  "projected_feature_count": 22
+}

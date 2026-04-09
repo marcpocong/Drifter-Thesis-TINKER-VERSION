@@ -22,7 +22,11 @@ template_path: data_processed/grids/scoring_grid_template.tif
 extent_path: data_processed/grids/grid_extent.gpkg
 land_mask_path: data_processed/grids/land_mask.tif
 sea_mask_path: data_processed/grids/sea_mask.tif
-shoreline_mask_status: scaffold_all_sea_pending_shoreline_integration
+shoreline_segments_path: data_processed/grids/shoreline_segments.gpkg
+shoreline_mask_manifest_json_path: data_processed/grids/shoreline_mask_manifest.json
+shoreline_mask_manifest_csv_path: data_processed/grids/shoreline_mask_manifest.csv
+shoreline_mask_status: gshhg_2.3.7_resolution_i_level_1_all_touched
+shoreline_mask_signature: e80ea49ade09d47d48960a01672afa4a80591a9f1567aa15fdf1acf0cfc72774
 source_paths:
   initialization_polygon: data/arcgis/CASE_MINDORO_RETRO_2023/seed_polygon_mar3_processed.gpkg
   validation_polygon: data/arcgis/CASE_MINDORO_RETRO_2023/validation_polygon_mar6_processed.gpkg

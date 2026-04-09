@@ -6,7 +6,12 @@ import pandas as pd
 import xarray as xr
 from scipy.ndimage import uniform_filter
 
-def calculate_fss(forecast: np.ndarray, observed: np.ndarray, window: int = 5) -> float:
+def calculate_fss(
+    forecast: np.ndarray,
+    observed: np.ndarray,
+    window: int = 5,
+    valid_mask: np.ndarray | None = None,
+) -> float:
     """
     Fractions Skill Score (FSS) implementation for spatial probability fields.
     FSS = 1 - (MSE / MSE_ref)
@@ -19,13 +24,32 @@ def calculate_fss(forecast: np.ndarray, observed: np.ndarray, window: int = 5) -
     if window < 1:
         raise ValueError("FSS window must be at least 1 cell.")
 
-    # Neighborhood smoothing
-    f_smooth = uniform_filter(forecast_arr, size=window)
-    o_smooth = uniform_filter(observed_arr, size=window)
-    
-    mse = np.mean((f_smooth - o_smooth)**2)
-    mse_ref = np.mean(f_smooth**2) + np.mean(o_smooth**2)
-    
+    if valid_mask is not None:
+        valid = np.asarray(valid_mask, dtype=bool)
+        if valid.shape != forecast_arr.shape:
+            raise ValueError("FSS valid_mask must match the forecast/observed grid shape.")
+        if not np.any(valid):
+            raise ValueError("FSS valid_mask must contain at least one valid cell.")
+
+        valid_float = valid.astype(float)
+        f_weighted = np.where(valid, forecast_arr, 0.0)
+        o_weighted = np.where(valid, observed_arr, 0.0)
+        valid_mean = uniform_filter(valid_float, size=window, mode="constant", cval=0.0)
+        f_mean = uniform_filter(f_weighted, size=window, mode="constant", cval=0.0)
+        o_mean = uniform_filter(o_weighted, size=window, mode="constant", cval=0.0)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            f_smooth = np.where(valid_mean > 0, f_mean / valid_mean, 0.0)
+            o_smooth = np.where(valid_mean > 0, o_mean / valid_mean, 0.0)
+        eval_mask = valid
+        mse = np.mean((f_smooth[eval_mask] - o_smooth[eval_mask]) ** 2)
+        mse_ref = np.mean(f_smooth[eval_mask] ** 2) + np.mean(o_smooth[eval_mask] ** 2)
+    else:
+        # Neighborhood smoothing
+        f_smooth = uniform_filter(forecast_arr, size=window)
+        o_smooth = uniform_filter(observed_arr, size=window)
+        mse = np.mean((f_smooth - o_smooth) ** 2)
+        mse_ref = np.mean(f_smooth**2) + np.mean(o_smooth**2)
+
     if mse_ref == 0:
         return 1.0 if mse == 0 else 0.0
         

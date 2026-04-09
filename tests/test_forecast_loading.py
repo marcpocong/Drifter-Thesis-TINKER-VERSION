@@ -11,6 +11,7 @@ import xarray as xr
 from src.core.case_context import get_case_context
 from src.services.ensemble import EnsembleForecastService, normalize_model_timestamp
 from src.utils.io import (
+    detect_shoreline_mask_regeneration_need,
     get_ensemble_manifest_path,
     get_forecast_manifest_path,
     get_official_control_footprint_mask_path,
@@ -145,6 +146,24 @@ class ForecastLoadingTests(unittest.TestCase):
 
             self.assertEqual(composite.shape, (2, 2))
             self.assertGreaterEqual(int(composite.sum()), 2)
+
+    def test_shoreline_signature_mismatch_triggers_regeneration_guard(self):
+        mismatches = detect_shoreline_mask_regeneration_need(
+            manifest_payload={"grid": {"shoreline_mask_signature": "old-signature"}},
+            manifest_path="output/CASE_MINDORO_RETRO_2023/forecast/forecast_manifest.json",
+            current_signature="new-signature",
+            label="forecast_manifest_shoreline_refresh_required",
+        )
+        self.assertEqual(len(mismatches), 1)
+        self.assertEqual(mismatches[0]["label"], "forecast_manifest_shoreline_refresh_required")
+
+        no_mismatch = detect_shoreline_mask_regeneration_need(
+            manifest_payload={"grid": {"shoreline_mask_signature": "same-signature"}},
+            manifest_path="output/CASE_MINDORO_RETRO_2023/forecast/forecast_manifest.json",
+            current_signature="same-signature",
+            label="forecast_manifest_shoreline_refresh_required",
+        )
+        self.assertEqual(no_mismatch, [])
 
 
 if __name__ == "__main__":

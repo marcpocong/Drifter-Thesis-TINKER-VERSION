@@ -14,8 +14,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import shutil
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -26,7 +28,7 @@ import requests
 from src.core.case_context import get_case_context
 from src.helpers.metrics import calculate_fss
 from src.helpers.raster import GridBuilder, rasterize_observation_layer, save_raster
-from src.helpers.scoring import precheck_same_grid
+from src.helpers.scoring import apply_ocean_mask, load_sea_mask_array, precheck_same_grid
 from src.services.arcgis import (
     _infer_source_crs,
     _repair_degree_scaled_geometries,
@@ -36,6 +38,7 @@ from src.services.arcgis import (
 from src.services.ensemble import run_official_spill_forecast
 from src.services.scoring import OFFICIAL_PHASE3B_WINDOWS_KM, Phase3BScoringService
 from src.utils.io import (
+    find_missing_phase3b_forecast_outputs,
     get_case_output_dir,
     get_ensemble_manifest_path,
     get_forecast_manifest_path,
@@ -144,9 +147,44 @@ class InventoryRow:
 
 def _write_json(path: Path, payload: dict | list) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
+    temp_path = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    with open(temp_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2, default=str)
         f.write("\n")
+    _replace_file(temp_path, path)
+
+
+def _replace_file(temp_path: Path, destination: Path) -> None:
+    last_error: Exception | None = None
+    for attempt in range(5):
+        try:
+            if destination.exists():
+                destination.unlink()
+            os.replace(temp_path, destination)
+            return
+        except PermissionError as exc:
+            last_error = exc
+            time.sleep(0.5 * (attempt + 1))
+    if temp_path.exists():
+        temp_path.unlink(missing_ok=True)
+    if last_error is not None:
+        raise last_error
+    raise RuntimeError(f"Failed to replace {destination} from {temp_path}")
+
+
+def _write_text(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    with open(temp_path, "w", encoding="utf-8") as f:
+        f.write(text)
+    _replace_file(temp_path, path)
+
+
+def _write_csv(path: Path, df: pd.DataFrame) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    df.to_csv(temp_path, index=False)
+    _replace_file(temp_path, path)
 
 
 def _load_json(path: Path) -> dict:
@@ -267,6 +305,7 @@ class PublicObservationAppendixService:
             path.mkdir(parents=True, exist_ok=True)
 
         self.grid = GridBuilder()
+        self.sea_mask = load_sea_mask_array(self.grid.spec)
         self.phase3b_helper = Phase3BScoringService(output_dir=self.appendix_dir / "_scratch_phase3b_helper")
         self.validation_time = pd.Timestamp(self.case.validation_layer.event_time_utc or self.case.simulation_end_utc)
         self.validation_date = self.validation_time.strftime("%Y-%m-%d")
@@ -339,10 +378,11 @@ class PublicObservationAppendixService:
         forecast_manifest = get_forecast_manifest_path(self.case.run_name)
         ensemble_manifest = get_ensemble_manifest_path(self.case.run_name)
         main_datecomposite = get_official_mask_p50_datecomposite_path(self.case.run_name)
-        if forecast_manifest.exists() and ensemble_manifest.exists() and main_datecomposite.exists():
+        selection = resolve_recipe_selection()
+        missing_specs = find_missing_phase3b_forecast_outputs(selection.recipe, run_name=self.case.run_name)
+        if forecast_manifest.exists() and ensemble_manifest.exists() and main_datecomposite.exists() and not missing_specs:
             return
 
-        selection = resolve_recipe_selection()
         start_lat, start_lon, start_time = resolve_spill_origin()
         run_official_spill_forecast(
             selection=selection,
@@ -381,7 +421,7 @@ class PublicObservationAppendixService:
         item_id: str,
         service_url: str,
         layer_id: int,
-    ) -> tuple[Path, Path, Path, Path]:
+    ) -> tuple[Path, Path, Path, Path, Path]:
         raw_target_dir = self.raw_dir / source_key
         raw_target_dir.mkdir(parents=True, exist_ok=True)
 
@@ -420,8 +460,10 @@ class PublicObservationAppendixService:
         cleaned_to_write.to_file(processed_path, driver="GPKG")
 
         mask_path = self.accepted_masks_dir / f"{source_key}.tif"
-        rasterize_observation_layer(cleaned_gdf, self.grid, mask_path)
-        return item_meta_path, layer_meta_path, raw_geojson_path, processed_path
+        mask_data = rasterize_observation_layer(cleaned_gdf, self.grid)
+        mask_data = apply_ocean_mask(mask_data, sea_mask=self.sea_mask, fill_value=0.0)
+        save_raster(self.grid, mask_data.astype(np.float32), mask_path)
+        return item_meta_path, layer_meta_path, raw_geojson_path, processed_path, mask_path
 
     def _build_main_service_layer_rows(self, main_item: dict) -> list[InventoryRow]:
         service_url = str(main_item.get("url") or "")
@@ -718,15 +760,12 @@ class PublicObservationAppendixService:
 
             item_id = row.item_or_layer_id.split(":", 1)[0]
             layer_id = int(row.layer_id or 0)
-            item_meta_path, layer_meta_path, raw_geojson_path, processed_path = self._archive_and_ingest_external_polygon(
+            item_meta_path, layer_meta_path, raw_geojson_path, processed_path, mask_path = self._archive_and_ingest_external_polygon(
                 source_key=row.source_key,
                 item_id=item_id,
                 service_url=row.service_url,
                 layer_id=layer_id,
             )
-            mask_path = self.accepted_masks_dir / f"{row.source_key}.tif"
-            processed_gdf = gpd.read_file(processed_path)
-            rasterize_observation_layer(processed_gdf, self.grid, mask_path)
             updated_rows.append(
                 InventoryRow(
                     **{
@@ -746,7 +785,7 @@ class PublicObservationAppendixService:
         inventory_csv = self.appendix_dir / "public_obs_inventory.csv"
         inventory_json = self.appendix_dir / "public_obs_inventory.json"
         df = pd.DataFrame([row.to_dict() for row in rows])
-        df.to_csv(inventory_csv, index=False)
+        _write_csv(inventory_csv, df)
         _write_json(inventory_json, df.to_dict(orient="records"))
         return {"csv": inventory_csv, "json": inventory_json}
 
@@ -793,8 +832,10 @@ class PublicObservationAppendixService:
             member_masks.append(composite.astype(np.float32))
 
         probability = np.mean(np.stack(member_masks, axis=0), axis=0).astype(np.float32)
-        save_raster(self.grid, probability, out_probability_path)
-        save_raster(self.grid, (probability >= 0.5).astype(np.float32), out_threshold_path)
+        probability = apply_ocean_mask(probability, sea_mask=self.sea_mask, fill_value=0.0)
+        threshold_mask = apply_ocean_mask((probability >= 0.5).astype(np.float32), sea_mask=self.sea_mask, fill_value=0.0)
+        save_raster(self.grid, probability.astype(np.float32), out_probability_path)
+        save_raster(self.grid, threshold_mask.astype(np.float32), out_threshold_path)
 
     def _build_forecast_date_composites(self, accepted_rows: list[InventoryRow]) -> dict[str, dict[str, Path]]:
         distinct_dates = sorted({row.obs_date for row in accepted_rows if row.obs_date})
@@ -814,9 +855,22 @@ class PublicObservationAppendixService:
                         if prob_src.exists():
                             shutil.copyfile(prob_src, probability_path)
                             copied_probability = True
-                        break
+                            break
                 if not copied_probability:
                     self._build_date_composite_from_members(target_date, threshold_path, probability_path)
+                threshold_mask = apply_ocean_mask(
+                    self.phase3b_helper._read_mask(threshold_path),
+                    sea_mask=self.sea_mask,
+                    fill_value=0.0,
+                )
+                save_raster(self.grid, threshold_mask.astype(np.float32), threshold_path)
+                if probability_path.exists():
+                    probability_data = apply_ocean_mask(
+                        self.phase3b_helper._read_mask(probability_path),
+                        sea_mask=self.sea_mask,
+                        fill_value=0.0,
+                    )
+                    save_raster(self.grid, probability_data.astype(np.float32), probability_path)
             else:
                 self._build_date_composite_from_members(target_date, threshold_path, probability_path)
 
@@ -842,15 +896,26 @@ class PublicObservationAppendixService:
         if not precheck.passed:
             raise RuntimeError(f"Appendix pair {pair_id} failed same-grid precheck: {precheck.json_report_path}")
 
-        forecast_data = self.phase3b_helper._to_binary_mask(self.phase3b_helper._read_mask(forecast_path))
-        obs_data = self.phase3b_helper._to_binary_mask(self.phase3b_helper._read_mask(observation_path))
+        forecast_data = self.phase3b_helper._load_binary_score_mask(forecast_path)
+        obs_data = self.phase3b_helper._load_binary_score_mask(observation_path)
         diagnostics = self.phase3b_helper._compute_mask_diagnostics(forecast_data, obs_data)
 
         fss_rows: list[dict] = []
         summary_fss = {}
         for window_km in OFFICIAL_PHASE3B_WINDOWS_KM:
             window_cells = self.phase3b_helper._window_km_to_cells(int(window_km))
-            fss = float(np.clip(calculate_fss(forecast_data, obs_data, window=window_cells), 0.0, 1.0))
+            fss = float(
+                np.clip(
+                    calculate_fss(
+                        forecast_data,
+                        obs_data,
+                        window=window_cells,
+                        valid_mask=(self.sea_mask > 0.5) if self.sea_mask is not None else None,
+                    ),
+                    0.0,
+                    1.0,
+                )
+            )
             summary_fss[f"fss_{window_km}km"] = fss
             fss_rows.append(
                 {
@@ -933,10 +998,10 @@ class PublicObservationAppendixService:
         fss_path = self.appendix_dir / "appendix_perdate_fss_by_date_window.csv"
         diagnostics_path = self.appendix_dir / "appendix_perdate_diagnostics.csv"
         summary_path = self.appendix_dir / "appendix_perdate_summary.csv"
-        pd.DataFrame(pairing_rows).to_csv(pairing_path, index=False)
-        pd.DataFrame(fss_rows).to_csv(fss_path, index=False)
-        diagnostics_df.to_csv(diagnostics_path, index=False)
-        diagnostics_df.to_csv(summary_path, index=False)
+        _write_csv(pairing_path, pd.DataFrame(pairing_rows))
+        _write_csv(fss_path, pd.DataFrame(fss_rows))
+        _write_csv(diagnostics_path, diagnostics_df)
+        _write_csv(summary_path, diagnostics_df)
         return {
             "pairing_manifest": pairing_path,
             "fss_by_window": fss_path,
@@ -955,17 +1020,17 @@ class PublicObservationAppendixService:
         for row in accepted_rows:
             obs_union = np.maximum(
                 obs_union,
-                self.phase3b_helper._to_binary_mask(self.phase3b_helper._read_mask(Path(row.appendix_obs_mask))),
+                self.phase3b_helper._load_binary_score_mask(Path(row.appendix_obs_mask)),
             )
             model_union = np.maximum(
                 model_union,
-                self.phase3b_helper._to_binary_mask(
-                    self.phase3b_helper._read_mask(forecast_datecomposites[row.obs_date]["mask_p50"])
-                ),
+                self.phase3b_helper._load_binary_score_mask(forecast_datecomposites[row.obs_date]["mask_p50"]),
             )
 
         obs_union_path = self.appendix_dir / "appendix_eventcorridor_obs_union_2023-03-03_to_2023-03-06.tif"
         model_union_path = self.appendix_dir / "appendix_eventcorridor_model_union_2023-03-03_to_2023-03-06.tif"
+        obs_union = apply_ocean_mask(obs_union, sea_mask=self.sea_mask, fill_value=0.0)
+        model_union = apply_ocean_mask(model_union, sea_mask=self.sea_mask, fill_value=0.0)
         save_raster(self.grid, obs_union.astype(np.float32), obs_union_path)
         save_raster(self.grid, model_union.astype(np.float32), model_union_path)
 
@@ -986,9 +1051,9 @@ class PublicObservationAppendixService:
         diagnostics_path = self.appendix_dir / "appendix_eventcorridor_diagnostics.csv"
         summary_md = self.appendix_dir / "appendix_eventcorridor_summary.md"
 
-        pd.DataFrame([pairing_row]).to_csv(pairing_path, index=False)
-        pd.DataFrame(fss_rows).to_csv(fss_path, index=False)
-        pd.DataFrame([summary_row]).to_csv(diagnostics_path, index=False)
+        _write_csv(pairing_path, pd.DataFrame([pairing_row]))
+        _write_csv(fss_path, pd.DataFrame(fss_rows))
+        _write_csv(diagnostics_path, pd.DataFrame([summary_row]))
 
         summary_lines = [
             "# Appendix Event-Corridor Sensitivity",
@@ -1003,7 +1068,7 @@ class PublicObservationAppendixService:
                 f"{summary_row['fss_5km']:.4f}, {summary_row['fss_10km']:.4f}"
             ),
         ]
-        summary_md.write_text("\n".join(summary_lines) + "\n", encoding="utf-8")
+        _write_text(summary_md, "\n".join(summary_lines) + "\n")
         return {
             "obs_union": obs_union_path,
             "model_union": model_union_path,
@@ -1042,7 +1107,7 @@ class PublicObservationAppendixService:
                 }
             )
         out_path = self.appendix_dir / "appendix_beyond_horizon_candidates.csv"
-        pd.DataFrame(candidate_rows).sort_values(by=["obs_date", "source_name"]).to_csv(out_path, index=False)
+        _write_csv(out_path, pd.DataFrame(candidate_rows).sort_values(by=["obs_date", "source_name"]))
         return out_path
 
     @staticmethod
@@ -1070,14 +1135,14 @@ class PublicObservationAppendixService:
 
         for ax, target_date in zip(axes_array, dates):
             model = self.phase3b_helper._to_binary_mask(
-                self.phase3b_helper._read_mask(forecast_datecomposites[target_date]["mask_p50"])
+                self.phase3b_helper._apply_score_mask(self.phase3b_helper._read_mask(forecast_datecomposites[target_date]["mask_p50"]))
             )
             obs_union = np.zeros_like(model)
             for row in accepted_rows:
                 if row.obs_date == target_date:
                     obs_union = np.maximum(
                         obs_union,
-                        self.phase3b_helper._to_binary_mask(self.phase3b_helper._read_mask(Path(row.appendix_obs_mask))),
+                        self.phase3b_helper._load_binary_score_mask(Path(row.appendix_obs_mask)),
                     )
             self._render_overlay(ax, model, obs_union, f"{target_date} appendix public obs vs model")
 
@@ -1090,8 +1155,8 @@ class PublicObservationAppendixService:
 
     def _write_eventcorridor_overlay(self, out_path: Path, model_union_path: Path, obs_union_path: Path) -> None:
         fig, ax = plt.subplots(figsize=(8, 8))
-        model = self.phase3b_helper._to_binary_mask(self.phase3b_helper._read_mask(model_union_path))
-        obs = self.phase3b_helper._to_binary_mask(self.phase3b_helper._read_mask(obs_union_path))
+        model = self.phase3b_helper._load_binary_score_mask(model_union_path)
+        obs = self.phase3b_helper._load_binary_score_mask(obs_union_path)
         self._render_overlay(ax, model, obs, "Appendix event-corridor sensitivity")
         fig.tight_layout()
         fig.savefig(out_path, dpi=150, bbox_inches="tight")
@@ -1128,7 +1193,7 @@ class PublicObservationAppendixService:
             )
 
         notes_csv = self.appendix_dir / "appendix_public_vs_model_notes.csv"
-        pd.DataFrame(notes_rows).to_csv(notes_csv, index=False)
+        _write_csv(notes_csv, pd.DataFrame(notes_rows))
 
         qualitative_json = self.appendix_dir / "appendix_qualitative_public_timeline.json"
         qualitative_md = self.appendix_dir / "appendix_qualitative_public_timeline.md"
@@ -1145,7 +1210,7 @@ class PublicObservationAppendixService:
                 f"- `{row.obs_date or 'undated'}` | `{row.source_name}` | "
                 f"{row.provider} | {row.source_type} | {row.rejection_reason or row.notes}"
             )
-        qualitative_md.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        _write_text(qualitative_md, "\n".join(lines) + "\n")
 
         timeline_overlay = self.appendix_dir / "qa_appendix_public_timeline_overlay.png"
         eventcorridor_overlay = self.appendix_dir / "qa_appendix_eventcorridor_overlay.png"
@@ -1181,7 +1246,7 @@ class PublicObservationAppendixService:
             f"- Accepted quantitative within-horizon appendix dates: {', '.join(dates)}.",
             f"- Beyond-horizon candidates are listed separately in `{beyond_horizon_path.name}` and are not mixed into the 72 h score tables.",
         ]
-        wording_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        _write_text(wording_path, "\n".join(lines) + "\n")
         return wording_path
 
     def _write_recommendation(
@@ -1229,7 +1294,7 @@ class PublicObservationAppendixService:
         if not beyond_df.empty:
             next_date = beyond_df.sort_values(by=["obs_date"]).iloc[0]["obs_date"]
             lines.append(f"Closest beyond-horizon quantitative public date currently inventoried: `{next_date}`.")
-        recommendation_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        _write_text(recommendation_path, "\n".join(lines) + "\n")
         return recommendation_path
 
     def run(self) -> dict:

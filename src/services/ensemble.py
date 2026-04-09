@@ -19,7 +19,7 @@ import pandas as pd
 import xarray as xr
 import yaml
 from opendrift.models.oceandrift import OceanDrift
-from opendrift.readers import reader_constant, reader_netCDF_CF_generic
+from opendrift.readers import reader_global_landmask, reader_netCDF_CF_generic
 
 from src.core.case_context import get_case_context
 from src.core.constants import BASE_OUTPUT_DIR
@@ -30,6 +30,7 @@ from src.helpers.raster import (
     rasterize_particles,
     save_raster,
 )
+from src.helpers.scoring import apply_ocean_mask, load_sea_mask_array
 from src.utils.io import (
     RecipeSelection,
     find_current_vars,
@@ -252,6 +253,7 @@ class EnsembleForecastService:
         self.official_ensemble_size = int((self.official_config.get("ensemble") or {}).get("ensemble_size", self.ensemble_size))
         self.official_element_count = self._resolve_official_element_count() if self.case.is_official else None
         self.official_polygon_seed_random_seed = self._resolve_official_polygon_seed_random_seed() if self.case.is_official else None
+        self.canonical_sea_mask = load_sea_mask_array() if self.case.is_official else None
 
     def _load_case_config(self) -> dict:
         if not self.case.case_definition_path:
@@ -411,10 +413,41 @@ class EnsembleForecastService:
             required=require_wave_forcing,
         )
 
-        model.set_config("general:use_auto_landmask", False)
-        model.add_reader(reader_constant.Reader({"land_binary_mask": 0}))
+        if self.case.is_official:
+            try:
+                model.set_config("general:use_auto_landmask", False)
+                model.add_reader(reader_global_landmask.Reader())
+                audit["shoreline_landmask"] = {
+                    "reader": "reader_global_landmask.Reader",
+                    "source": "GSHHG-backed OpenDrift global landmask",
+                    "status": "loaded",
+                }
+            except Exception as exc:
+                audit["shoreline_landmask"] = {
+                    "reader": "reader_global_landmask.Reader",
+                    "source": "GSHHG-backed OpenDrift global landmask",
+                    "status": "failed",
+                    "exception_text": str(exc),
+                }
+                raise
+        else:
+            from opendrift.readers import reader_constant
+
+            model.set_config("general:use_auto_landmask", False)
+            model.add_reader(reader_constant.Reader({"land_binary_mask": 0}))
+            audit["shoreline_landmask"] = {
+                "reader": "reader_constant.Reader",
+                "source": "prototype constant all-sea mask",
+                "status": "loaded",
+            }
         model.set_config("drift:stokes_drift", stokes_drift_enabled)
         return model
+
+    def _apply_scoreable_ocean_mask(self, data: np.ndarray) -> np.ndarray:
+        working = np.asarray(data, dtype=np.float32)
+        if self.canonical_sea_mask is None:
+            return working.astype(np.float32)
+        return apply_ocean_mask(working, sea_mask=self.canonical_sea_mask, fill_value=0.0).astype(np.float32)
 
     def _resolve_wave_file(self) -> Path | None:
         if self.wave_file is not None:
@@ -863,6 +896,7 @@ class EnsembleForecastService:
         written_files: list[Path] = []
         records: list[dict] = []
 
+        probability_data = self._apply_scoreable_ocean_mask(probability_data)
         prob_presence_path = get_official_prob_presence_path(target_time, run_name=self.output_run_name)
         save_raster(grid, probability_data.astype(np.float32), prob_presence_path)
         written_files.append(prob_presence_path)
@@ -877,7 +911,7 @@ class EnsembleForecastService:
 
         for threshold in self.probability_thresholds:
             threshold_label = _threshold_label(threshold)
-            mask_data = (probability_data >= threshold).astype(np.float32)
+            mask_data = self._apply_scoreable_ocean_mask((probability_data >= threshold).astype(np.float32))
             mask_path = get_official_mask_threshold_path(
                 threshold_label,
                 target_time,
@@ -936,13 +970,14 @@ class EnsembleForecastService:
         written_paths.append(tif_out)
 
         img_out = self.output_dir / f"probability_{hours_since_start}h.png"
+        plot_corners = grid.display_bounds_wgs84 or [grid.min_lon, grid.max_lon, grid.min_lat, grid.max_lat]
         plot_probability_map(
             output_file=str(img_out),
             all_lons=np.asarray(all_lons),
             all_lats=np.asarray(all_lats),
             start_lon=start_lon,
             start_lat=start_lat,
-            corners=grid.display_bounds_wgs84 or self.case.region,
+            corners=plot_corners,
             title=f"Ensemble Forecast: T+{hours_since_start}h\nProbability Distribution (N={self.ensemble_size})",
         )
         written_paths.append(img_out)
@@ -969,6 +1004,8 @@ class EnsembleForecastService:
             target_time = start_time + timedelta(hours=int(hour))
             lon, lat, mass, actual_time = self._load_opendrift_snapshot(nc_path, target_time)
             hits, probs = rasterize_particles(grid, lon, lat, mass)
+            hits = self._apply_scoreable_ocean_mask(hits)
+            probs = self._apply_scoreable_ocean_mask(probs)
 
             footprint_path = get_official_control_footprint_mask_path(
                 target_time,
@@ -1030,6 +1067,8 @@ class EnsembleForecastService:
                     lat,
                     mass if len(mass) else np.ones(len(lon), dtype=np.float32),
                 )
+                hits = self._apply_scoreable_ocean_mask(hits)
+                density = self._apply_scoreable_ocean_mask(density)
                 member_masks.append(hits)
                 member_density_rasters.append(density)
                 all_lons.extend(lon.tolist())
@@ -1056,6 +1095,7 @@ class EnsembleForecastService:
             density_total = float(density_mean.sum())
             if density_total > 0:
                 density_mean = (density_mean / density_total).astype(np.float32)
+            density_mean = self._apply_scoreable_ocean_mask(density_mean)
             probability_files, probability_records = self._write_probability_snapshot_artifacts(
                 probability_data=probability,
                 target_time=target_time,
@@ -1088,6 +1128,7 @@ class EnsembleForecastService:
                     target_date=validation_date,
                     grid=grid,
                 )
+                composite = self._apply_scoreable_ocean_mask(composite)
                 composite_masks.append(composite)
                 member_composite_path = self.member_mask_dir / (
                     f"member_presence_mask_{member['member_id']:02d}_{validation_date}_datecomposite.tif"
@@ -1105,10 +1146,15 @@ class EnsembleForecastService:
                 )
 
             composite_probability = np.mean(np.stack(composite_masks, axis=0), axis=0).astype(np.float32)
+            composite_probability = self._apply_scoreable_ocean_mask(composite_probability)
             composite_prob_path = self.output_dir / f"prob_presence_{validation_date}_datecomposite.tif"
             composite_p50_path = get_official_mask_p50_datecomposite_path(run_name=self.output_run_name)
             save_raster(grid, composite_probability, composite_prob_path)
-            save_raster(grid, (composite_probability >= 0.5).astype(np.float32), composite_p50_path)
+            save_raster(
+                grid,
+                self._apply_scoreable_ocean_mask((composite_probability >= 0.5).astype(np.float32)),
+                composite_p50_path,
+            )
             written_files.extend([composite_prob_path, composite_p50_path])
             product_records.extend(
                 [
@@ -1209,13 +1255,14 @@ class EnsembleForecastService:
             written_files.append(tif_out)
 
             img_out = self.output_dir / f"probability_{hr}h.png"
+            plot_corners = grid.display_bounds_wgs84 or [grid.min_lon, grid.max_lon, grid.min_lat, grid.max_lat]
             plot_probability_map(
                 output_file=str(img_out),
                 all_lons=np.array(all_lons),
                 all_lats=np.array(all_lats),
                 start_lon=start_lon,
                 start_lat=start_lat,
-                corners=grid.display_bounds_wgs84 or self.case.region,
+                corners=plot_corners,
                 title=f"Ensemble Forecast: T+{hr}h\nProbability Distribution (N={self.ensemble_size})",
             )
             written_files.append(img_out)

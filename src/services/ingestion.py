@@ -107,6 +107,23 @@ class DataIngestionService(BaseService):
         if self.case_context.is_official:
             self.bbox = list(self.case_context.region)
             self.bbox_source = "official_case_region_fallback_before_scoring_grid"
+            try:
+                from src.helpers.scoring import get_scoring_grid_artifact_paths, get_scoring_grid_spec
+
+                metadata_path = get_scoring_grid_artifact_paths()["metadata_yaml"]
+                if metadata_path.exists():
+                    spec = get_scoring_grid_spec()
+                    display_bounds = spec.display_bounds_wgs84 or list(self.case_context.region)
+                    self.bbox = derive_bbox_from_display_bounds(
+                        display_bounds_wgs84=display_bounds,
+                        halo_degrees=self.official_forcing_halo_degrees,
+                    )
+                    self.bbox_source = (
+                        f"canonical_scoring_grid_display_bounds_plus_{self.official_forcing_halo_degrees:.2f}deg_halo"
+                    )
+            except Exception:
+                self.bbox = list(self.case_context.region)
+                self.bbox_source = "official_case_region_fallback_before_scoring_grid"
         else:
             # Pad bounding box heavily to prevent edge-clipping during interpolation for low-res models like NCEP
             pad = 3.0

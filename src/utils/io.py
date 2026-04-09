@@ -490,12 +490,27 @@ def get_prepared_input_specs(
         add_spec(
             "land_mask",
             scoring_grid_paths["land_mask_tif"],
-            "Generated land-mask scaffold aligned to the official scoring grid",
+            "Generated GSHHG-based land mask aligned to the official scoring grid",
         )
         add_spec(
             "sea_mask",
             scoring_grid_paths["sea_mask_tif"],
-            "Generated sea-mask scaffold aligned to the official scoring grid",
+            "Generated GSHHG-based sea mask aligned to the official scoring grid",
+        )
+        add_spec(
+            "shoreline_segments",
+            scoring_grid_paths["shoreline_segments_gpkg"],
+            "Generated shoreline segments derived from the GSHHG coastline on the official scoring grid",
+        )
+        add_spec(
+            "shoreline_mask_manifest_json",
+            scoring_grid_paths["shoreline_manifest_json"],
+            "Generated machine-readable shoreline-mask manifest (JSON)",
+        )
+        add_spec(
+            "shoreline_mask_manifest_csv",
+            scoring_grid_paths["shoreline_manifest_csv"],
+            "Generated machine-readable shoreline-mask manifest (CSV)",
         )
 
     if require_drifter:
@@ -581,6 +596,39 @@ def find_missing_prepared_inputs(
         if not Path(spec["path"]).exists():
             missing.append(spec)
     return missing
+
+
+def _manifest_shoreline_signature(manifest_payload: dict) -> str:
+    grid = manifest_payload.get("grid") or {}
+    return str(
+        grid.get("shoreline_mask_signature")
+        or manifest_payload.get("shoreline_mask_signature")
+        or ""
+    )
+
+
+def detect_shoreline_mask_regeneration_need(
+    *,
+    manifest_payload: dict,
+    manifest_path: str | Path,
+    current_signature: str,
+    label: str,
+) -> list[dict[str, str]]:
+    if not current_signature:
+        return []
+    recorded_signature = _manifest_shoreline_signature(manifest_payload)
+    if recorded_signature == current_signature:
+        return []
+    return [
+        {
+            "label": label,
+            "path": str(manifest_path),
+            "source": (
+                "Current shoreline-mask signature does not match the signature recorded in this manifest. "
+                "Rerun the official forecast path to regenerate shoreline-compatible outputs."
+            ),
+        }
+    ]
 
 
 def get_case_output_dir(run_name: str | None = None) -> Path:
@@ -780,6 +828,31 @@ def find_missing_phase3b_forecast_outputs(
                     "path": str(ensemble_manifest),
                     "source": "Official ensemble forecast manifest",
                 }
+            )
+        from src.helpers.scoring import get_current_shoreline_mask_signature
+
+        current_signature = get_current_shoreline_mask_signature()
+        if forecast_manifest.exists():
+            with open(forecast_manifest, "r", encoding="utf-8") as f:
+                forecast_payload = json.load(f) or {}
+            missing.extend(
+                detect_shoreline_mask_regeneration_need(
+                    manifest_payload=forecast_payload,
+                    manifest_path=forecast_manifest,
+                    current_signature=current_signature,
+                    label="forecast_manifest_shoreline_refresh_required",
+                )
+            )
+        if ensemble_manifest.exists():
+            with open(ensemble_manifest, "r", encoding="utf-8") as f:
+                ensemble_payload = json.load(f) or {}
+            missing.extend(
+                detect_shoreline_mask_regeneration_need(
+                    manifest_payload=ensemble_payload,
+                    manifest_path=ensemble_manifest,
+                    current_signature=current_signature,
+                    label="ensemble_manifest_shoreline_refresh_required",
+                )
             )
 
     for spec in get_phase3b_forecast_candidates(recipe_name, active_run_name):

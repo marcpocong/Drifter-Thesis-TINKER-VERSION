@@ -18,7 +18,7 @@ import pandas as pd
 from src.core.case_context import get_case_context
 from src.helpers.metrics import calculate_fss
 from src.helpers.raster import GridBuilder
-from src.helpers.scoring import precheck_same_grid
+from src.helpers.scoring import apply_ocean_mask, load_sea_mask_array, precheck_same_grid
 from src.utils.io import (
     get_ensemble_manifest_path,
     get_forecast_manifest_path,
@@ -269,6 +269,7 @@ class Phase3BScoringService:
         self.output_dir = Path(output_dir) if output_dir else default_output_dir
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.grid = GridBuilder()
+        self.sea_mask = load_sea_mask_array(self.grid.spec) if self.case.is_official else None
         self.windows_km = list(OFFICIAL_PHASE3B_WINDOWS_KM)
 
     def run(self) -> Phase3BArtifacts:
@@ -582,8 +583,8 @@ class Phase3BScoringService:
             updated_row["precheck_json"] = str(precheck.json_report_path)
             updated_pairings.append(updated_row)
 
-            forecast_mask = self._to_binary_mask(self._read_mask(forecast_path))
-            obs_mask = self._to_binary_mask(self._read_mask(observation_path))
+            forecast_mask = self._load_binary_score_mask(forecast_path)
+            obs_mask = self._load_binary_score_mask(observation_path)
             diagnostics = self._compute_mask_diagnostics(forecast_mask, obs_mask)
             diagnostics_rows.append(
                 {
@@ -594,7 +595,18 @@ class Phase3BScoringService:
 
             for window_km in self.windows_km:
                 window_cells = self._window_km_to_cells(window_km)
-                fss = float(np.clip(calculate_fss(forecast_mask, obs_mask, window=window_cells), 0.0, 1.0))
+                fss = float(
+                    np.clip(
+                        calculate_fss(
+                            forecast_mask,
+                            obs_mask,
+                            window=window_cells,
+                            valid_mask=(self.sea_mask > 0.5) if self.sea_mask is not None else None,
+                        ),
+                        0.0,
+                        1.0,
+                    )
+                )
                 fss_rows.append(
                     {
                         "pair_id": updated_row["pair_id"],
@@ -651,6 +663,7 @@ class Phase3BScoringService:
                     "iou",
                     "dice",
                     "nearest_distance_to_obs_m",
+                    "ocean_cell_count",
                 ]
             ],
             on="pair_id",
@@ -717,8 +730,8 @@ class Phase3BScoringService:
             primary = primary_rows.iloc[0]
             out_path = self.output_dir / "qa_phase3b_obsmask_vs_p50.png"
             try:
-                forecast_mask = self._to_binary_mask(self._read_mask(Path(primary["forecast_path"])))
-                obs_mask = self._to_binary_mask(self._read_mask(Path(primary["observation_path"])))
+                forecast_mask = self._load_binary_score_mask(Path(primary["forecast_path"]))
+                obs_mask = self._load_binary_score_mask(Path(primary["observation_path"]))
                 self._write_mask_overlay_png(forecast_mask, obs_mask, out_path)
                 written.append(out_path)
             except Exception:
@@ -771,6 +784,15 @@ class Phase3BScoringService:
 
         with rasterio.open(path) as src:
             return src.read(1).astype(np.float32)
+
+    def _apply_score_mask(self, data: np.ndarray) -> np.ndarray:
+        masked = np.nan_to_num(np.asarray(data, dtype=np.float32), nan=0.0, posinf=0.0, neginf=0.0)
+        if self.sea_mask is not None:
+            masked = apply_ocean_mask(masked, sea_mask=self.sea_mask, fill_value=0.0)
+        return masked.astype(np.float32)
+
+    def _load_binary_score_mask(self, path: Path) -> np.ndarray:
+        return self._to_binary_mask(self._apply_score_mask(self._read_mask(path)))
 
     @staticmethod
     def _to_binary_mask(data: np.ndarray) -> np.ndarray:
@@ -832,6 +854,7 @@ class Phase3BScoringService:
             "iou": iou,
             "dice": dice,
             "nearest_distance_to_obs_m": nearest_distance_to_obs_m,
+            "ocean_cell_count": int(np.count_nonzero(self.sea_mask > 0.5)) if self.sea_mask is not None else int(forecast_mask.size),
         }
 
     def _build_prototype_obs_registry(self, run_name: str) -> pd.DataFrame:

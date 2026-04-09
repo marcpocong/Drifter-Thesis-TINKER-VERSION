@@ -36,7 +36,8 @@ try:
 except ImportError:  # pragma: no cover - optional fallback
     validation_make_valid = None
 
-from src.helpers.raster import GridBuilder, rasterize_observation_layer
+from src.helpers.raster import GridBuilder, rasterize_observation_layer, save_mask_raster
+from src.helpers.scoring import apply_ocean_mask, load_sea_mask_array
 
 logger = logging.getLogger(__name__)
 
@@ -501,6 +502,10 @@ def rasterize_prepared_layer(prepared_layer: ArcGISPreparedLayer, grid: GridBuil
 
     gdf = gpd.read_file(prepared_layer.processed_vector_path)
     mask_data = rasterize_observation_layer(gdf, grid, prepared_layer.raster_path)
+    sea_mask = load_sea_mask_array(grid.spec)
+    if sea_mask is not None:
+        mask_data = apply_ocean_mask(mask_data, sea_mask=sea_mask, fill_value=0.0)
+        save_mask_raster(grid, mask_data.astype(np.float32), prepared_layer.raster_path)
     raster_centroid, raster_nonzero_cells = compute_raster_centroid(mask_data, grid)
     return replace(
         prepared_layer,
