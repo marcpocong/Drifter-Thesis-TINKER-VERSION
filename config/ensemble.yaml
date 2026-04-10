@@ -27,6 +27,30 @@ official_forecast:
 official_products:
   snapshot_hours: [24, 48, 72]
   probability_thresholds: [0.5, 0.9]
+
+official_retention:
+  selected_mode: R1
+  selected_phase: official_rerun_r1
+  selected_from: output/CASE_MINDORO_RETRO_2023/transport_retention_fix/transport_retention_run_manifest.json
+  selection_reason: >
+    Transport-retention sensitivity showed R1 preserved raw activity,
+    probability presence, and p50 signal through the strict March 6
+    validation horizon while R0/R2 died around March 5. R3 also survived
+    but is diagnostic-only and not a thesis-final candidate.
+  medium_tier_blocked_until_selected_rerun: true
+  scenarios:
+    R1:
+      coastline_action: previous
+      coastline_approximation_precision: 0.001
+      time_step_minutes: 60
+      diagnostic_only: false
+      thesis_final_candidate: true
+    R3:
+      coastline_action: none
+      coastline_approximation_precision: 0.001
+      time_step_minutes: 60
+      diagnostic_only: true
+      thesis_final_candidate: false
   
 # Perturbation Ranges (Monte Carlo)
 perturbations:

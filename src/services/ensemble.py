@@ -200,6 +200,8 @@ class EnsembleForecastService:
         simulation_end_utc: str | None = None,
         snapshot_hours: list[int] | None = None,
         date_composite_dates: list[str] | None = None,
+        transport_overrides: dict | None = None,
+        seed_overrides: dict | None = None,
     ):
         self.case = get_case_context()
         self.case_config = self._load_case_config()
@@ -219,6 +221,8 @@ class EnsembleForecastService:
         self.simulation_start_override = simulation_start_utc
         self.simulation_end_override = simulation_end_utc
         self.date_composite_dates_override = list(date_composite_dates or [])
+        self.transport_overrides = dict(transport_overrides or {})
+        self.seed_overrides = dict(seed_overrides or {})
 
         self.currents_file = Path(currents_file)
         self.winds_file = Path(winds_file)
@@ -360,7 +364,7 @@ class EnsembleForecastService:
             "seed_element_count": 0,
             "first_successful_model_timestep": "",
             "last_successful_model_timestep": "",
-            "time_step_minutes": 60,
+            "time_step_minutes": int(self.transport_overrides.get("time_step_minutes", 60)),
             "output_path": "",
             "root_cause": "",
             "exception_text": "",
@@ -450,7 +454,40 @@ class EnsembleForecastService:
                 "status": "loaded",
             }
         model.set_config("drift:stokes_drift", stokes_drift_enabled)
+        self._apply_transport_overrides(model, audit)
         return model
+
+    def _apply_transport_overrides(self, model: OceanDrift, audit: dict) -> None:
+        """Apply optional official sensitivity controls without affecting prototype defaults."""
+        if not self.transport_overrides:
+            audit["transport_retention_config"] = {
+                "coastline_action": model.get_config("general:coastline_action"),
+                "coastline_approximation_precision": model.get_config("general:coastline_approximation_precision"),
+                "time_step_minutes": int(audit.get("time_step_minutes", 60)),
+                "override_applied": False,
+            }
+            return
+
+        applied: dict[str, object] = {"override_applied": True}
+        coastline_action = self.transport_overrides.get("coastline_action")
+        if coastline_action:
+            model.set_config("general:coastline_action", str(coastline_action))
+        coastline_precision = self.transport_overrides.get("coastline_approximation_precision")
+        if coastline_precision is not None:
+            model.set_config("general:coastline_approximation_precision", float(coastline_precision))
+        time_step_minutes = self.transport_overrides.get("time_step_minutes")
+        if time_step_minutes is not None:
+            model.set_config("general:time_step_minutes", float(time_step_minutes))
+            audit["time_step_minutes"] = int(time_step_minutes)
+
+        applied.update(
+            {
+                "coastline_action": model.get_config("general:coastline_action"),
+                "coastline_approximation_precision": model.get_config("general:coastline_approximation_precision"),
+                "time_step_minutes": int(audit.get("time_step_minutes", 60)),
+            }
+        )
+        audit["transport_retention_config"] = applied
 
     def _apply_scoreable_ocean_mask(self, data: np.ndarray) -> np.ndarray:
         working = np.asarray(data, dtype=np.float32)
@@ -784,6 +821,72 @@ class EnsembleForecastService:
             number=num_elements,
             time=normalize_model_timestamp(start_time).to_pydatetime(),
         )
+
+    def _seed_official_release(
+        self,
+        model: OceanDrift,
+        start_time,
+        num_elements: int,
+        random_seed: int | None = None,
+        audit: dict | None = None,
+    ) -> dict:
+        """Seed official particles using either the configured polygon or an explicit sensitivity override."""
+        from src.utils.io import resolve_provenance_source_point
+
+        mode = str(self.seed_overrides.get("initialization_mode") or self.case.initialization_mode)
+        seed_record = {
+            "initialization_mode": mode,
+            "source_geometry_path": str(self.case.initialization_layer.processed_vector_path(self.case.run_name)),
+            "source_point_path": str(self.case.provenance_layer.processed_vector_path(self.case.run_name)),
+            "release_geometry": "processed_march3_initialization_polygon",
+            "point_release_surrogate": "not_applicable",
+            "random_seed": random_seed if random_seed is not None else "",
+        }
+
+        if mode in {"source_point_initialized_same_start", "source_history_reconstruction"}:
+            point = resolve_provenance_source_point()
+            if point is None:
+                raise RuntimeError("Source-point initialization requires a processed provenance source point.")
+            lat, lon = point
+            release_start = normalize_model_timestamp(self.seed_overrides.get("release_start_utc") or start_time)
+            release_end = normalize_model_timestamp(self.seed_overrides.get("release_end_utc") or release_start)
+            if release_end < release_start:
+                raise ValueError(
+                    "source_history_reconstruction requires release_end_utc >= release_start_utc "
+                    f"(got {release_start} to {release_end})."
+                )
+            seed_time = release_start.to_pydatetime()
+            if release_end > release_start:
+                seed_time = [release_start.to_pydatetime(), release_end.to_pydatetime()]
+            model.seed_elements(
+                lon=float(lon),
+                lat=float(lat),
+                number=int(num_elements),
+                time=seed_time,
+            )
+            seed_record.update(
+                {
+                    "source_geometry_path": str(self.case.provenance_layer.processed_vector_path(self.case.run_name)),
+                    "release_geometry": "provenance_source_point_exact",
+                    "point_release_surrogate": "exact_point_release",
+                    "source_lat": float(lat),
+                    "source_lon": float(lon),
+                    "release_start_utc": timestamp_to_utc_iso(release_start),
+                    "release_end_utc": timestamp_to_utc_iso(release_end),
+                    "release_duration_hours": float((release_end - release_start).total_seconds() / 3600.0),
+                }
+            )
+        else:
+            self._seed_polygon_release(
+                model,
+                start_time,
+                num_elements=num_elements,
+                random_seed=random_seed,
+            )
+
+        if audit is not None:
+            audit["seed_initialization"] = seed_record
+        return seed_record
 
     def _record_output_timestep_coverage(self, output_file: Path, audit: dict):
         if not output_file.exists():
@@ -1412,6 +1515,14 @@ class EnsembleForecastService:
                 "wind_factor_min": float(ensemble_cfg.get("wind_factor_min", 0.8)),
                 "wind_factor_max": float(ensemble_cfg.get("wind_factor_max", 1.2)),
                 "start_time_offset_hours": [int(v) for v in ensemble_cfg.get("start_time_offset_hours", [-3, -2, -1, 0, 1, 2, 3])],
+                "start_time_offsets_disabled_by_seed_override": bool(
+                    self.seed_overrides.get("disable_start_time_offsets", False)
+                ),
+                "effective_start_time_offset_hours": (
+                    [0]
+                    if self.seed_overrides.get("disable_start_time_offsets", False)
+                    else [int(v) for v in ensemble_cfg.get("start_time_offset_hours", [-3, -2, -1, 0, 1, 2, 3])]
+                ),
                 "horizontal_diffusivity_m2s_min": float(ensemble_cfg.get("horizontal_diffusivity_m2s_min", 1.0)),
                 "horizontal_diffusivity_m2s_max": float(ensemble_cfg.get("horizontal_diffusivity_m2s_max", 10.0)),
             },
@@ -1531,11 +1642,12 @@ class EnsembleForecastService:
         model.set_config("drift:horizontal_diffusivity", horizontal_diffusivity)
         model.set_config("drift:wind_uncertainty", 0.0)
         model.set_config("drift:current_uncertainty", 0.0)
-        self._seed_polygon_release(
+        seed_record = self._seed_official_release(
             model,
             simulation_start,
             num_elements=seed_element_count,
             random_seed=seed_random_seed,
+            audit=audit,
         )
         audit["seed_element_count"] = seed_element_count
 
@@ -1566,6 +1678,7 @@ class EnsembleForecastService:
                 "end_time_utc": timestamp_to_utc_iso(simulation_end),
                 "random_seed": seed_random_seed,
                 "provisional_transport_model": self.provisional_transport_model,
+                "seed_initialization": seed_record,
             },
             "products": product_records,
         }
@@ -1597,6 +1710,8 @@ class EnsembleForecastService:
             wind_factor_min = float(ensemble_cfg.get("wind_factor_min", 0.8))
             wind_factor_max = float(ensemble_cfg.get("wind_factor_max", 1.2))
             offset_choices = [int(value) for value in ensemble_cfg.get("start_time_offset_hours", [-3, -2, -1, 0, 1, 2, 3])]
+            if self.seed_overrides.get("disable_start_time_offsets", False):
+                offset_choices = [0]
             diffusivity_min = float(ensemble_cfg.get("horizontal_diffusivity_m2s_min", 1.0))
             diffusivity_max = float(ensemble_cfg.get("horizontal_diffusivity_m2s_max", 10.0))
             base_seed = int(self.official_polygon_seed_random_seed)
@@ -1642,11 +1757,12 @@ class EnsembleForecastService:
                 model.set_config("drift:horizontal_diffusivity", diffusivity)
                 model.set_config("drift:wind_uncertainty", 0.0)
                 model.set_config("drift:current_uncertainty", 0.0)
-                self._seed_polygon_release(
+                seed_record = self._seed_official_release(
                     model,
                     run_start_time,
                     num_elements=int(self.official_element_count),
                     random_seed=member_seed,
+                    audit=audit,
                 )
                 audit["seed_element_count"] = int(self.official_element_count)
 
@@ -1666,6 +1782,7 @@ class EnsembleForecastService:
                         "end_time_utc": timestamp_to_utc_iso(run_end_time),
                         "element_count": int(self.official_element_count),
                         "perturbation": audit["perturbation"],
+                        "seed_initialization": seed_record,
                     }
                 )
         else:
@@ -1817,6 +1934,7 @@ class EnsembleForecastService:
             },
             "historical_baseline_provenance": self.historical_baseline_provenance,
             "sensitivity_context": self.sensitivity_context,
+            "seed_overrides": self.seed_overrides,
             "source_geometry": {
                 "initialization_polygon": str(self.case.initialization_layer.processed_vector_path(self.case.run_name)),
                 "validation_polygon": str(self.case.validation_layer.processed_vector_path(self.case.run_name)),
@@ -1899,6 +2017,8 @@ def run_official_spill_forecast(
     simulation_end_utc: str | None = None,
     snapshot_hours: list[int] | None = None,
     date_composite_dates: list[str] | None = None,
+    transport_overrides: dict | None = None,
+    seed_overrides: dict | None = None,
 ):
     """Run the official deterministic control plus ensemble path for Phase 3B."""
     try:
@@ -1921,6 +2041,8 @@ def run_official_spill_forecast(
         simulation_end_utc=simulation_end_utc,
         snapshot_hours=snapshot_hours,
         date_composite_dates=date_composite_dates,
+        transport_overrides=transport_overrides,
+        seed_overrides=seed_overrides,
     )
 
     d_lat, d_lon, d_time = resolve_spill_origin()

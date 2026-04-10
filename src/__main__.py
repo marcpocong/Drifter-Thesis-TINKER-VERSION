@@ -13,6 +13,10 @@ Container routing via the PIPELINE_PHASE environment variable:
   PIPELINE_PHASE=phase3b_extended_public -> Official extended-horizon public-observation Phase 3B guardrail
   PIPELINE_PHASE=phase3b_extended_public_scored -> Appendix-only short extended public-observation scoring
   PIPELINE_PHASE=horizon_survival_audit -> Read-only short-extended horizon survival diagnosis
+  PIPELINE_PHASE=transport_retention_fix -> Official transport-retention sensitivity diagnostics
+  PIPELINE_PHASE=official_rerun_r1 -> Promote selected R1 retention mode and rescore strict/short tracks
+  PIPELINE_PHASE=init_mode_sensitivity_r1 -> Compare B polygon vs A1 source-point initialization under R1
+  PIPELINE_PHASE=source_history_reconstruction_r1 -> Test A2 source-history release duration under R1
   PIPELINE_PHASE=public_obs_appendix -> Official appendix-only public observation expansion
   PIPELINE_PHASE=3               -> Phase 3 (oil weathering & PyGNOME comparison)
   PIPELINE_PHASE=benchmark       -> Phase 3A cross-model benchmark
@@ -712,6 +716,140 @@ def run_horizon_survival_audit_phase():
     print(f"Report: {results['report_md']}")
 
 
+def run_transport_retention_fix_phase():
+    from src.core.case_context import get_case_context
+    from src.services.transport_retention_fix import run_transport_retention_fix
+
+    case = get_case_context()
+    if not case.is_official:
+        print("transport_retention_fix is only supported for official spill-case workflows.")
+        sys.exit(1)
+
+    print("Starting transport-retention sensitivity diagnostics...")
+    print_workflow_context()
+
+    results = run_transport_retention_fix()
+    table = results["scenario_table"]
+    print("\nTransport-retention sensitivity complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print(f"Best scenario: {results['best_scenario']}")
+    print(f"Coastline interaction confirmed: {results['coastline_interaction_confirmed']}")
+    print(f"Medium tier should remain blocked: {results['medium_tier_should_remain_blocked']}")
+    print(f"Recommended next step: {results['recommended_next_step']}")
+    print("\nScenario comparison:")
+    columns = [
+        "scenario_id",
+        "coastline_action",
+        "last_raw_active_time_utc",
+        "last_nonzero_prob_presence_utc",
+        "last_nonzero_mask_p50_utc",
+        "strict_march6_fss_1km",
+        "strict_march6_fss_3km",
+        "strict_march6_fss_5km",
+        "strict_march6_fss_10km",
+        "eventcorridor_fss_1km",
+        "eventcorridor_fss_3km",
+        "eventcorridor_fss_5km",
+        "eventcorridor_fss_10km",
+    ]
+    print(table[columns].to_string(index=False))
+    print(f"Report: {results['report_md']}")
+
+
+def run_official_rerun_r1_phase():
+    from src.core.case_context import get_case_context
+    from src.services.official_rerun_r1 import run_official_rerun_r1
+
+    case = get_case_context()
+    if not case.is_official:
+        print("official_rerun_r1 is only supported for official spill-case workflows.")
+        sys.exit(1)
+
+    print("Starting selected R1 official rerun/rescore pack...")
+    print_workflow_context()
+
+    results = run_official_rerun_r1()
+    strict = results["strict_march6"]
+    event = results["eventcorridor"]
+    print("\nOfficial R1 rerun/rescore complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print(f"Selected scenario: {results['selected_scenario']}")
+    print(f"Retained from transport_retention_fix: {results['retained_from_transport_retention_fix']}")
+    print(
+        "Strict March 6 FSS 1/3/5/10 km: "
+        f"{strict['fss_1km']}, {strict['fss_3km']}, {strict['fss_5km']}, {strict['fss_10km']}"
+    )
+    print(f"March 6 p50 nonzero cells: {strict['forecast_nonzero_cells']}")
+    print(f"March 6 max probability: {strict['max_probability']}")
+    print(f"Last active time: {strict['last_raw_active_time_utc']}")
+    print(
+        "Short extended event-corridor FSS 1/3/5/10 km: "
+        f"{event['fss_1km']}, {event['fss_3km']}, {event['fss_5km']}, {event['fss_10km']}"
+    )
+    print(f"Recommended next branch: {results['recommended_next_branch']}")
+    print(f"Before/after table: {results['before_after_csv']}")
+    print(f"Report: {results['report_md']}")
+
+
+def run_init_mode_sensitivity_r1_phase():
+    from src.core.case_context import get_case_context
+    from src.services.init_mode_sensitivity_r1 import run_init_mode_sensitivity_r1
+
+    case = get_case_context()
+    if not case.is_official:
+        print("init_mode_sensitivity_r1 is only supported for official spill-case workflows.")
+        sys.exit(1)
+
+    print("Starting R1 initialization-mode sensitivity...")
+    print_workflow_context()
+
+    results = run_init_mode_sensitivity_r1()
+    summary = results["summary"]
+    strict = summary[summary["pair_role"] == "strict_march6"]
+    event = summary[summary["pair_role"] == "eventcorridor_march4_6"]
+    print("\nInitialization-mode sensitivity complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print("Selected transport-retention scenario: R1")
+    print("\nStrict March 6 FSS:")
+    print(strict[["branch_id", "initialization_mode", "forecast_nonzero_cells", "fss_1km", "fss_3km", "fss_5km", "fss_10km", "last_raw_active_time_utc"]].to_string(index=False))
+    print("\nMarch 4-6 event-corridor FSS:")
+    print(event[["branch_id", "initialization_mode", "forecast_nonzero_cells", "fss_1km", "fss_3km", "fss_5km", "fss_10km", "last_raw_active_time_utc"]].to_string(index=False))
+    print(f"\nRecommended initialization strategy: {results['recommendation']['recommended_initialization_strategy']}")
+    print(f"A2 worth attempting next: {results['recommendation']['a2_source_history_reconstruction_worth_attempting']}")
+    print(f"Report: {results['report_md']}")
+
+
+def run_source_history_reconstruction_r1_phase():
+    from src.core.case_context import get_case_context
+    from src.services.source_history_reconstruction_r1 import run_source_history_reconstruction_r1
+
+    case = get_case_context()
+    if not case.is_official:
+        print("source_history_reconstruction_r1 is only supported for official spill-case workflows.")
+        sys.exit(1)
+
+    print("Starting R1 source-history reconstruction sensitivity...")
+    print_workflow_context()
+
+    results = run_source_history_reconstruction_r1()
+    summary = results["summary"]
+    strict = summary[summary["pair_role"] == "strict_march6"]
+    event = summary[summary["pair_role"] == "eventcorridor_march4_6"]
+    checkpoint = summary[summary["pair_role"] == "march3_reconstruction_checkpoint"]
+    print("\nSource-history reconstruction sensitivity complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print(f"Best A2 scenario: {results['recommendation']['best_a2_scenario']}")
+    print("\nStrict March 6 FSS:")
+    print(strict[["scenario_id", "release_duration_hours", "forecast_nonzero_cells", "fss_1km", "fss_3km", "fss_5km", "fss_10km", "last_raw_active_time_utc"]].to_string(index=False))
+    print("\nMarch 4-6 event-corridor FSS:")
+    print(event[["scenario_id", "release_duration_hours", "forecast_nonzero_cells", "fss_1km", "fss_3km", "fss_5km", "fss_10km", "last_raw_active_time_utc"]].to_string(index=False))
+    print("\nMarch 3 checkpoint FSS:")
+    print(checkpoint[["scenario_id", "release_duration_hours", "forecast_nonzero_cells", "fss_1km", "fss_3km", "fss_5km", "fss_10km"]].to_string(index=False))
+    print(f"\nRecommendation: {results['recommendation']['recommendation']}")
+    print(f"Convergence should be next: {results['recommendation']['convergence_should_be_next']}")
+    print(f"Report: {results['report_md']}")
+
+
 def main():
     import subprocess
 
@@ -758,6 +896,14 @@ def main():
         run_phase3b_extended_public_scored_phase()
     elif phase == "horizon_survival_audit":
         run_horizon_survival_audit_phase()
+    elif phase == "transport_retention_fix":
+        run_transport_retention_fix_phase()
+    elif phase == "official_rerun_r1":
+        run_official_rerun_r1_phase()
+    elif phase == "init_mode_sensitivity_r1":
+        run_init_mode_sensitivity_r1_phase()
+    elif phase == "source_history_reconstruction_r1":
+        run_source_history_reconstruction_r1_phase()
     elif phase == "public_obs_appendix":
         run_public_obs_appendix_phase()
     elif phase == "3":
