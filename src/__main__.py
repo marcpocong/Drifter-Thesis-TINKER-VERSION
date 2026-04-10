@@ -17,6 +17,9 @@ Container routing via the PIPELINE_PHASE environment variable:
   PIPELINE_PHASE=official_rerun_r1 -> Promote selected R1 retention mode and rescore strict/short tracks
   PIPELINE_PHASE=init_mode_sensitivity_r1 -> Compare B polygon vs A1 source-point initialization under R1
   PIPELINE_PHASE=source_history_reconstruction_r1 -> Test A2 source-history release duration under R1
+  PIPELINE_PHASE=pygnome_public_comparison -> Compare OpenDrift/PyGNOME against public observation masks
+  PIPELINE_PHASE=ensemble_threshold_sensitivity -> Calibrate ensemble footprint thresholds without rerunning
+  PIPELINE_PHASE=recipe_sensitivity_r1_multibranch -> Test R1 OpenDrift recipe/branch matrix vs PyGNOME
   PIPELINE_PHASE=public_obs_appendix -> Official appendix-only public observation expansion
   PIPELINE_PHASE=3               -> Phase 3 (oil weathering & PyGNOME comparison)
   PIPELINE_PHASE=benchmark       -> Phase 3A cross-model benchmark
@@ -850,6 +853,217 @@ def run_source_history_reconstruction_r1_phase():
     print(f"Report: {results['report_md']}")
 
 
+def run_pygnome_public_comparison_phase():
+    from src.core.case_context import get_case_context
+    from src.services.pygnome_public_comparison import run_pygnome_public_comparison
+
+    case = get_case_context()
+    if not case.is_official:
+        print("pygnome_public_comparison is only supported for official spill-case workflows.")
+        sys.exit(1)
+
+    print("Starting PyGNOME/OpenDrift public-observation comparison...")
+    print_workflow_context()
+
+    results = run_pygnome_public_comparison()
+    ranking = results["ranking"]
+    summary = results["summary"]
+    strict = summary[summary["pair_role"] == "strict_march6"].copy()
+    event = summary[summary["pair_role"] == "eventcorridor_march4_6"].copy()
+
+    print("\nPyGNOME/OpenDrift public-observation comparison complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print("\nStrict March 6 ranking inputs:")
+    print(
+        strict[
+            [
+                "track_id",
+                "model_name",
+                "forecast_nonzero_cells",
+                "obs_nonzero_cells",
+                "nearest_distance_to_obs_m",
+                "iou",
+                "dice",
+                "fss_1km",
+                "fss_3km",
+                "fss_5km",
+                "fss_10km",
+            ]
+        ].to_string(index=False)
+    )
+    print("\nMarch 4-6 event-corridor ranking inputs:")
+    print(
+        event[
+            [
+                "track_id",
+                "model_name",
+                "forecast_nonzero_cells",
+                "obs_nonzero_cells",
+                "nearest_distance_to_obs_m",
+                "iou",
+                "dice",
+                "fss_1km",
+                "fss_3km",
+                "fss_5km",
+                "fss_10km",
+            ]
+        ].to_string(index=False)
+    )
+    print("\nModel ranking table:")
+    print(ranking.to_string(index=False))
+    print(f"\nRecommendation: {results['recommendation']['recommendation']}")
+    print(f"Report memo: {results['memo']}")
+
+
+def run_ensemble_threshold_sensitivity_phase():
+    from src.core.case_context import get_case_context
+    from src.services.ensemble_threshold_sensitivity import run_ensemble_threshold_sensitivity
+
+    case = get_case_context()
+    if not case.is_official:
+        print("ensemble_threshold_sensitivity is only supported for official spill-case workflows.")
+        sys.exit(1)
+
+    print("Starting ensemble threshold sensitivity...")
+    print_workflow_context()
+
+    results = run_ensemble_threshold_sensitivity()
+    ranking = results["calibration_ranking"]
+    summary = results["summary"]
+    selected_label = results["selected_threshold_label"]
+    holdout = summary[
+        (summary["pair_role"] == "strict_march6")
+        & (summary["threshold_label"].astype(str) == selected_label)
+    ]
+    event = summary[summary["pair_role"] == "eventcorridor_march4_6"].copy()
+    event["mean_fss"] = event.apply(
+        lambda row: sum(float(row[f"fss_{window}km"]) for window in (1, 3, 5, 10)) / 4.0,
+        axis=1,
+    )
+
+    print("\nEnsemble threshold sensitivity complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print("\nThreshold ranking by March 4-5 calibration mean FSS:")
+    print(ranking.to_string(index=False))
+    print(f"\nSelected threshold: {selected_label} ({results['selected_threshold']:.2f})")
+    print("\nHoldout strict March 6 for selected threshold:")
+    print(
+        holdout[
+            [
+                "threshold_label",
+                "forecast_nonzero_cells",
+                "obs_nonzero_cells",
+                "nearest_distance_to_obs_m",
+                "iou",
+                "dice",
+                "fss_1km",
+                "fss_3km",
+                "fss_5km",
+                "fss_10km",
+            ]
+        ].to_string(index=False)
+    )
+    print("\nMarch 4-6 event-corridor FSS by threshold:")
+    print(
+        event[
+            [
+                "threshold_label",
+                "forecast_nonzero_cells",
+                "obs_nonzero_cells",
+                "iou",
+                "dice",
+                "fss_1km",
+                "fss_3km",
+                "fss_5km",
+                "fss_10km",
+                "mean_fss",
+            ]
+        ].sort_values("threshold_label").to_string(index=False)
+    )
+    print(f"\nBeats current p50: {results['recommendation']['eventcorridor_mean_fss_delta_vs_p50'] > 0}")
+    print(f"Beats OpenDrift deterministic event corridor: {results['recommendation']['selected_beats_opendrift_deterministic_eventcorridor']}")
+    print(f"Beats PyGNOME event corridor: {results['recommendation']['selected_beats_pygnome_eventcorridor']}")
+    print(f"Recommendation: {results['recommendation']['recommendation']}")
+    print(f"Next branch: {results['recommendation']['recommended_next_branch']}")
+    print(f"Report: {results['report_md']}")
+
+
+def run_recipe_sensitivity_r1_multibranch_phase():
+    from src.core.case_context import get_case_context
+    from src.services.recipe_sensitivity_r1_multibranch import run_recipe_sensitivity_r1_multibranch
+
+    case = get_case_context()
+    if not case.is_official:
+        print("recipe_sensitivity_r1_multibranch is only supported for official spill-case workflows.")
+        sys.exit(1)
+
+    print("Starting R1 multibranch forcing-recipe sensitivity...")
+    print_workflow_context()
+
+    results = run_recipe_sensitivity_r1_multibranch()
+    ranking = results["ranking"]
+    summary = results["summary"].copy()
+    summary["mean_fss"] = summary.apply(
+        lambda row: sum(float(row[f"fss_{window}km"]) for window in (1, 3, 5, 10)) / 4.0,
+        axis=1,
+    )
+    strict = summary[summary["pair_role"] == "strict_march6"].sort_values("mean_fss", ascending=False)
+    event = summary[summary["pair_role"] == "eventcorridor_march4_6"].sort_values("mean_fss", ascending=False)
+
+    print("\nR1 multibranch forcing-recipe sensitivity complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print("\nBest strict March 6 rows:")
+    print(
+        strict[
+            [
+                "track_id",
+                "model_family",
+                "recipe_id",
+                "branch_id",
+                "product_kind",
+                "forecast_nonzero_cells",
+                "obs_nonzero_cells",
+                "nearest_distance_to_obs_m",
+                "iou",
+                "dice",
+                "fss_1km",
+                "fss_3km",
+                "fss_5km",
+                "fss_10km",
+                "mean_fss",
+            ]
+        ].head(10).to_string(index=False)
+    )
+    print("\nBest March 4-6 event-corridor rows:")
+    print(
+        event[
+            [
+                "track_id",
+                "model_family",
+                "recipe_id",
+                "branch_id",
+                "product_kind",
+                "forecast_nonzero_cells",
+                "obs_nonzero_cells",
+                "nearest_distance_to_obs_m",
+                "iou",
+                "dice",
+                "fss_1km",
+                "fss_3km",
+                "fss_5km",
+                "fss_10km",
+                "mean_fss",
+            ]
+        ].head(10).to_string(index=False)
+    )
+    print("\nRanking table:")
+    print(ranking.to_string(index=False))
+    print(f"\nAny OpenDrift branch beats PyGNOME: {results['recommendation']['any_opendrift_branch_beats_pygnome']}")
+    print(f"Recommendation: {results['recommendation']['recommendation']}")
+    print(f"Next branch: {results['recommendation']['recommended_next_branch']}")
+    print(f"Report: {results['report_md']}")
+
+
 def main():
     import subprocess
 
@@ -904,6 +1118,12 @@ def main():
         run_init_mode_sensitivity_r1_phase()
     elif phase == "source_history_reconstruction_r1":
         run_source_history_reconstruction_r1_phase()
+    elif phase == "pygnome_public_comparison":
+        run_pygnome_public_comparison_phase()
+    elif phase == "ensemble_threshold_sensitivity":
+        run_ensemble_threshold_sensitivity_phase()
+    elif phase == "recipe_sensitivity_r1_multibranch":
+        run_recipe_sensitivity_r1_multibranch_phase()
     elif phase == "public_obs_appendix":
         run_public_obs_appendix_phase()
     elif phase == "3":

@@ -1,205 +1,218 @@
 <#
 .SYNOPSIS
-    Main entry point wrapper for the Drifter-Validated Oil Spill Forecasting system.
+    One-command launcher for the oil-spill forecasting workflows.
+
+.DESCRIPTION
+    Run from the repository root with:
+
+        .\start.ps1
+
+    The recommended menu option runs the current Mindoro workflow from the
+    beginning: prep, Phase 1/2 forecast generation, Phase 3B scoring, public
+    observation tracks, diagnostics, PyGNOME comparison, and latest recipe
+    sensitivity outputs.
 #>
 
 $Host.UI.RawUI.WindowTitle = "Drifter-Validated Oil Spill Forecasting"
-
-# Force UTF-8 encoding for console output and standard streams to fix emoji/log artifacts
 $OutputEncoding = [Console]::OutputEncoding = [Console]::InputEncoding = [System.Text.Encoding]::UTF8
 
-function Show-Menu {
-    Clear-Host
-    Write-Host "============================================================" -ForegroundColor Cyan
-    Write-Host "   Drifter-Validated Oil Spill Forecasting" -ForegroundColor White
-    Write-Host "============================================================" -ForegroundColor Cyan
+function Write-Section {
+    param([string]$Text)
     Write-Host ""
-    Write-Host "  1. " -ForegroundColor Yellow -NoNewline; Write-Host "Help"
-    Write-Host "  2. " -ForegroundColor Yellow -NoNewline; Write-Host "Run Full End-to-End Pipeline (Phases 1-5 validation)"
-    Write-Host "  3. " -ForegroundColor Yellow -NoNewline; Write-Host "Exit"
-    Write-Host ""
-    $choice = Read-Host "Select an option (1-3)"
-
-    switch ($choice) {
-        '1' { Show-Help }
-        '2' { Run-E2E }
-        '3' { Exit-Script }
-        default {
-            Write-Host "Invalid option. Please choose 1, 2, or 3." -ForegroundColor Red
-            Start-Sleep -Seconds 2
-            Show-Menu
-        }
-    }
+    Write-Host "============================================================" -ForegroundColor Cyan
+    Write-Host "   $Text" -ForegroundColor White
+    Write-Host "============================================================" -ForegroundColor Cyan
 }
 
-function Show-Help {
-    Clear-Host
-    Write-Host "============================================================" -ForegroundColor Cyan
-    Write-Host "   HELP" -ForegroundColor White
-    Write-Host "============================================================" -ForegroundColor Cyan
-    Write-Host ""
-    Write-Host "  OUTPUT FOLDER STRUCTURE" -ForegroundColor Yellow
-    Write-Host "  ------------------------" -ForegroundColor DarkGray
-    Write-Host "   output\[CASE]\validation\  " -ForegroundColor Blue -NoNewline; Write-Host "Phase 1 & 5 : " -ForegroundColor Magenta -NoNewline; Write-Host "Drifter maps, NCS scores, Phase 3B FSS metrics"
-    Write-Host "   output\[CASE]\ensemble\    " -ForegroundColor Blue -NoNewline; Write-Host "Phase 2     : " -ForegroundColor Magenta -NoNewline; Write-Host "Ensemble member traces, probability_24h/48h/72h PNG+NC, and ensemble_manifest.json"
-    Write-Host "   output\[CASE]\benchmark\   " -ForegroundColor Blue -NoNewline; Write-Host "Phase 3A    : " -ForegroundColor Magenta -NoNewline; Write-Host "OpenDrift vs PyGNOME Tracking benchmark"
-    Write-Host "   output\[CASE]\weathering\  " -ForegroundColor Blue -NoNewline; Write-Host "Phase 4     : " -ForegroundColor Magenta -NoNewline; Write-Host "Oil weathering mass budgets and shoreline impact limits"
-    Write-Host "   data\prepared\[CASE]\      " -ForegroundColor Blue -NoNewline; Write-Host "Prep        : " -ForegroundColor Magenta -NoNewline; Write-Host "Prepared forcing, processed ArcGIS layers, masks, and prepared_input_manifest.csv"
-    Write-Host ""
-    Write-Host "  WORKFLOW MODES" -ForegroundColor Yellow
-    Write-Host "  --------------" -ForegroundColor DarkGray
-    Write-Host "   prototype_2016      " -ForegroundColor Blue -NoNewline; Write-Host "Historical drifter-calibration workflow with case-local Phase 1 ranking"
-    Write-Host "   mindoro_retro_2023  " -ForegroundColor Blue -NoNewline; Write-Host "Official spill-case workflow using prep + deterministic control + ensemble + Phase 3B"
-    Write-Host ""
-    Write-Host "  Override the mode for this launcher with:" -ForegroundColor Yellow
-    Write-Host "   `$env:WORKFLOW_MODE = 'mindoro_retro_2023'" -ForegroundColor Green
-    Write-Host "   `$env:BASELINE_SELECTION_PATH = 'config/phase1_baseline_selection.yaml'" -ForegroundColor Green
-    Write-Host "   `$env:BASELINE_RECIPE_OVERRIDE = 'cmems_era5'" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "============================================================" -ForegroundColor Cyan
-    Write-Host ""
-    Pause
-    Show-Menu
-}
-
-function Run-E2E {
-    Clear-Host
-    Write-Host "============================================================" -ForegroundColor Cyan
-    Write-Host "   STARTING END-TO-END PIPELINE ORCHESTRATOR" -ForegroundColor White
-    Write-Host "============================================================" -ForegroundColor Cyan
-    Write-Host ""
-
-    # Ensure required empty directories exist before mounting/running
-    foreach ($dir in @("data", "output", "logs")) {
+function Ensure-Directories {
+    foreach ($dir in @("data", "data_processed", "output", "logs")) {
         if (!(Test-Path $dir)) {
             New-Item -ItemType Directory -Force -Path $dir | Out-Null
         }
     }
-    
-    $logFile = "logs\run_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
-    Start-Transcript -Path $logFile -Append | Out-Null
+}
 
-    $startTime = Get-Date
-    $exitCode = 0
-    $workflowMode = if ($env:WORKFLOW_MODE) { $env:WORKFLOW_MODE } else { "prototype_2016" }
-
-    Write-Host ">>> Starting E2E Pipeline Test..." -ForegroundColor Cyan
-    Write-Host ">>> Workflow mode: $workflowMode" -ForegroundColor Cyan
-
-    Write-Host "`n[1/6] Ensuring Docker containers are running..." -ForegroundColor Yellow
-    docker-compose up -d
-
-    Write-Host "`n[2/6] Running pipeline-only preparation stage..." -ForegroundColor Yellow
-    docker-compose exec -e WORKFLOW_MODE="$workflowMode" -e PIPELINE_PHASE="prep" pipeline python -m src *>&1 | Out-Host
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "[ERROR] Prep stage failed!" -ForegroundColor Red
-        $exitCode = $LASTEXITCODE
-    }
-
-    # 3. RUN PHASE 1 & 2 / MINIMAL OFFICIAL TRACK
-    if ($workflowMode -eq "mindoro_retro_2023") {
-        Write-Host "`n[3/6] Running minimal official spill-case track: deterministic control + ensemble + Phase 3B..." -ForegroundColor Yellow
-        Write-Host "       Benchmark and weathering are optional and will be skipped in this official path." -ForegroundColor DarkGray
-    } else {
-        Write-Host "`n[3/6] Running historical Phase 1 transport validation and Phase 2 ensemble..." -ForegroundColor Yellow
-    }
-    if ($exitCode -eq 0) {
-        if ($workflowMode -eq "mindoro_retro_2023") {
-            docker-compose exec -e WORKFLOW_MODE="$workflowMode" -e PIPELINE_PHASE="official_phase3b" pipeline python -m src *>&1 | Out-Host
-        } else {
-            docker-compose exec -e WORKFLOW_MODE="$workflowMode" -e PIPELINE_PHASE="1_2" pipeline python -m src *>&1 | Out-Host
-        }
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "[ERROR] Forecast pipeline failed!" -ForegroundColor Red
-            $exitCode = $LASTEXITCODE
-        }
-    }
-
-    # 4. RUN PHASE 3A
-    if ($exitCode -eq 0 -and $workflowMode -ne "mindoro_retro_2023") {
-        Write-Host "`n[4/6] Running Phase 3A: Cross-Model Benchmark..." -ForegroundColor Yellow
-        docker-compose exec -e WORKFLOW_MODE="$workflowMode" -e PIPELINE_PHASE="benchmark" gnome python -m src *>&1 | Out-Host
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "[ERROR] Phase 3A failed!" -ForegroundColor Red
-            $exitCode = $LASTEXITCODE
-        }
-    }
-
-    # 5. RUN PHASE 3
-    if ($exitCode -eq 0 -and $workflowMode -ne "mindoro_retro_2023") {
-        # Note: Runs in the 'gnome' container
-        Write-Host "`n[5/6] Running Phase 3: Fate, Weathering & PyGNOME Comparisons..." -ForegroundColor Yellow
-        docker-compose exec -e WORKFLOW_MODE="$workflowMode" -e PIPELINE_PHASE="3" gnome python -m src *>&1 | Out-Host
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "[ERROR] Phase 3 failed!" -ForegroundColor Red
-            $exitCode = $LASTEXITCODE
-        }
-    }
-
-    # 6. RUN PHASE 3B
-    if ($exitCode -eq 0 -and $workflowMode -ne "mindoro_retro_2023") {
-        Write-Host "`n[6/6] Running Phase 3B: Observational FSS Validation..." -ForegroundColor Yellow
-        docker-compose exec -e WORKFLOW_MODE="$workflowMode" -e PIPELINE_PHASE="3b" pipeline python -m src *>&1 | Out-Host
-        if ($LASTEXITCODE -ne 0) { 
-            Write-Host "[ERROR] Phase 3B failed!" -ForegroundColor Red
-            $exitCode = $LASTEXITCODE 
-        }
-    }
-
-    $endTime = Get-Date
-
-    if ($exitCode -ne 0) {
-        Write-Host ""
-        Write-Host "[ERROR] Master E2E Pipeline failed. Check the logs near the error." -ForegroundColor Red
-        Stop-Transcript | Out-Null
-        Write-Host "Log saved to: $logFile" -ForegroundColor DarkGray
-        Pause
-        Show-Menu
-        return
-    }
-
-    Write-Host "`n======================================================" -ForegroundColor Cyan
-    if ($workflowMode -eq "mindoro_retro_2023") {
-        Write-Host "[SUCCESS] OFFICIAL MINIMAL PHASE 3B PATH COMPLETED SUCCESSFULLY!" -ForegroundColor Green
-    } else {
-        Write-Host "[SUCCESS] ALL E2E PHASES EXECUTED SUCCESSFULLY!" -ForegroundColor Green
-    }
-    Write-Host "======================================================" -ForegroundColor Cyan
-    Write-Host "Please check the 'output/' directory to verify:"
-    Write-Host " - data/prepared/[CASE]/  : Prepared forcing/ArcGIS manifest and input inventory" -ForegroundColor Gray
-    Write-Host " - output/[CASE]/validation/ : NCS scores, deterministic maps, and Phase 3B FSS metrics"
-    Write-Host " - output/[CASE]/ensemble/   : member_*.nc, probability_24h/48h/72h .png + .nc, ensemble_manifest.json"
-    if ($workflowMode -eq "mindoro_retro_2023") {
-        Write-Host " - output/[CASE]/forecast/   : deterministic_control_*.nc and forecast_manifest.json"
-        Write-Host " - output/[CASE]/validation/ : phase3b_run_manifest.json, FSS CSVs, and summary"
-        Write-Host " - output/[CASE]/weathering/ : Optional, not required for official Phase 3B" -ForegroundColor Gray
-        Write-Host " - output/[CASE]/benchmark/  : Optional, not required for official Phase 3B" -ForegroundColor Gray
-    } else {
-        Write-Host " - output/[CASE]/weathering/ : Mass-balances limits and Shoreline impact CSVs"
-        Write-Host " - output/[CASE]/benchmark/  : Benchmark tracking png and stats" -ForegroundColor Gray
-    }
+function Invoke-DockerPhase {
+    param(
+        [Parameter(Mandatory = $true)][string]$Phase,
+        [Parameter(Mandatory = $true)][string]$Description,
+        [string]$WorkflowMode = "mindoro_retro_2023",
+        [string]$Service = "pipeline"
+    )
 
     Write-Host ""
-    Write-Host "[SUCCESS] E2E Pipeline Completed!" -ForegroundColor Green
-    Write-Host "Started : $($startTime.ToString('HH:mm:ss.ff'))" -ForegroundColor Cyan
-    Write-Host "Finished: $($endTime.ToString('HH:mm:ss.ff'))" -ForegroundColor Cyan
+    Write-Host ">>> $Description" -ForegroundColor Yellow
+    Write-Host "    WORKFLOW_MODE=$WorkflowMode PIPELINE_PHASE=$Phase SERVICE=$Service" -ForegroundColor DarkGray
 
-    $duration = $endTime - $startTime
-    Write-Host ("Total Runtime: {0:D2}h {1:D2}m {2:D2}s" -f $duration.Hours, $duration.Minutes, $duration.Seconds) -ForegroundColor Yellow
-    Write-Host "Log saved to: $logFile" -ForegroundColor DarkGray
+    docker-compose exec -T `
+        -e WORKFLOW_MODE="$WorkflowMode" `
+        -e PIPELINE_PHASE="$Phase" `
+        $Service python -m src *>&1 | Out-Host
 
-    Stop-Transcript | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Phase '$Phase' failed in service '$Service' with exit code $LASTEXITCODE."
+    }
+}
+
+function Invoke-PhaseList {
+    param(
+        [Parameter(Mandatory = $true)][array]$Steps,
+        [string]$WorkflowMode = "mindoro_retro_2023"
+    )
+
+    Ensure-Directories
+    $logFile = "logs\run_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
+    Start-Transcript -Path $logFile -Append | Out-Null
+    $startTime = Get-Date
+
+    try {
+        Write-Host "Starting Docker containers..." -ForegroundColor Yellow
+        docker-compose up -d
+        if ($LASTEXITCODE -ne 0) {
+            throw "docker-compose up failed with exit code $LASTEXITCODE."
+        }
+
+        $index = 0
+        foreach ($step in $Steps) {
+            $index += 1
+            Write-Host ""
+            Write-Host "[$index/$($Steps.Count)]" -ForegroundColor Cyan -NoNewline
+            Invoke-DockerPhase `
+                -Phase $step.Phase `
+                -Description $step.Description `
+                -WorkflowMode $WorkflowMode `
+                -Service $step.Service
+        }
+
+        $endTime = Get-Date
+        $duration = $endTime - $startTime
+        Write-Host ""
+        Write-Host "[SUCCESS] Workflow completed." -ForegroundColor Green
+        Write-Host ("Runtime: {0:D2}h {1:D2}m {2:D2}s" -f $duration.Hours, $duration.Minutes, $duration.Seconds) -ForegroundColor Yellow
+        Write-Host "Log saved to: $logFile" -ForegroundColor DarkGray
+    }
+    catch {
+        Write-Host ""
+        Write-Host "[ERROR] $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host "Log saved to: $logFile" -ForegroundColor DarkGray
+    }
+    finally {
+        Stop-Transcript | Out-Null
+    }
 
     Write-Host ""
     Pause
-    Show-Menu
 }
 
-function Exit-Script {
+function Get-MindoroFullSteps {
+    return @(
+        @{ Phase = "prep"; Service = "pipeline"; Description = "Prep inputs: forcing, ArcGIS layers, canonical grid, shoreline masks" },
+        @{ Phase = "1_2"; Service = "pipeline"; Description = "Phase 1/2 official baseline recipe, deterministic control, and ensemble forecast" },
+        @{ Phase = "3b"; Service = "pipeline"; Description = "Strict March 6 Phase 3B stress-test scoring" },
+        @{ Phase = "public_obs_appendix"; Service = "pipeline"; Description = "Public observation appendix inventory and accepted masks" },
+        @{ Phase = "phase3b_multidate_public"; Service = "pipeline"; Description = "Main multi-date public-observation validation" },
+        @{ Phase = "phase3b_extended_public"; Service = "pipeline"; Description = "Extended public-observation guardrail/inventory" },
+        @{ Phase = "phase3b_extended_public_scored"; Service = "pipeline"; Description = "Short extended March 7-9 appendix scoring" },
+        @{ Phase = "horizon_survival_audit"; Service = "pipeline"; Description = "Horizon survival audit" },
+        @{ Phase = "transport_retention_fix"; Service = "pipeline"; Description = "Transport-retention sensitivity and R1 selection evidence" },
+        @{ Phase = "official_rerun_r1"; Service = "pipeline"; Description = "Official R1 rerun/rescore pack" },
+        @{ Phase = "init_mode_sensitivity_r1"; Service = "pipeline"; Description = "Initialization sensitivity: B polygon vs A1 source point" },
+        @{ Phase = "source_history_reconstruction_r1"; Service = "pipeline"; Description = "A2 source-history reconstruction sensitivity" },
+        @{ Phase = "pygnome_public_comparison"; Service = "gnome"; Description = "PyGNOME/OpenDrift public-observation comparison" },
+        @{ Phase = "ensemble_threshold_sensitivity"; Service = "pipeline"; Description = "Ensemble threshold calibration/sensitivity" },
+        @{ Phase = "recipe_sensitivity_r1_multibranch"; Service = "pipeline"; Description = "R1 recipe/branch matrix vs fixed PyGNOME comparator" }
+    )
+}
+
+function Get-MindoroCoreSteps {
+    return @(
+        @{ Phase = "prep"; Service = "pipeline"; Description = "Prep inputs" },
+        @{ Phase = "1_2"; Service = "pipeline"; Description = "Phase 1/2 official baseline forecast generation" },
+        @{ Phase = "3b"; Service = "pipeline"; Description = "Strict March 6 Phase 3B scoring" },
+        @{ Phase = "phase3b_multidate_public"; Service = "pipeline"; Description = "Main multi-date public-observation validation" }
+    )
+}
+
+function Get-PrototypeSteps {
+    return @(
+        @{ Phase = "prep"; Service = "pipeline"; Description = "Prep prototype inputs" },
+        @{ Phase = "1_2"; Service = "pipeline"; Description = "Prototype Phase 1 transport validation and Phase 2 ensemble" },
+        @{ Phase = "benchmark"; Service = "gnome"; Description = "Prototype/legacy Phase 3A benchmark" },
+        @{ Phase = "3"; Service = "gnome"; Description = "Prototype/legacy Phase 3 weathering and PyGNOME comparison" },
+        @{ Phase = "3b"; Service = "pipeline"; Description = "Prototype/legacy Phase 3B scoring" }
+    )
+}
+
+function Show-Help {
+    Clear-Host
+    Write-Section "HELP"
     Write-Host ""
-    Write-Host "Goodbye." -ForegroundColor DarkGray
-    exit 0
+    Write-Host "Recommended command:" -ForegroundColor Yellow
+    Write-Host "  .\start.ps1" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Recommended menu option:" -ForegroundColor Yellow
+    Write-Host "  2. Run Mindoro FULL workflow from Phase 1" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "What option 2 runs:" -ForegroundColor Yellow
+    Write-Host "  prep -> 1_2 -> 3b -> public_obs_appendix -> phase3b_multidate_public"
+    Write-Host "  -> phase3b_extended_public -> phase3b_extended_public_scored"
+    Write-Host "  -> horizon_survival_audit -> transport_retention_fix -> official_rerun_r1"
+    Write-Host "  -> init_mode_sensitivity_r1 -> source_history_reconstruction_r1"
+    Write-Host "  -> pygnome_public_comparison -> ensemble_threshold_sensitivity"
+    Write-Host "  -> recipe_sensitivity_r1_multibranch"
+    Write-Host ""
+    Write-Host "Outputs are written under:" -ForegroundColor Yellow
+    Write-Host "  output\CASE_MINDORO_RETRO_2023\" -ForegroundColor Blue
+    Write-Host ""
+    Write-Host "Notes:" -ForegroundColor Yellow
+    Write-Host "  - PyGNOME comparison runs in the 'gnome' container."
+    Write-Host "  - The strict March 6 target remains unchanged."
+    Write-Host "  - The legacy prototype_2016 workflow is still available from the menu."
+    Write-Host ""
+    Pause
 }
 
-# Start the script loop
+function Show-Menu {
+    while ($true) {
+        Clear-Host
+        Write-Section "DRIFTER-VALIDATED OIL SPILL FORECASTING"
+        Write-Host ""
+        Write-Host "  1. " -ForegroundColor Yellow -NoNewline; Write-Host "Help"
+        Write-Host "  2. " -ForegroundColor Yellow -NoNewline; Write-Host "Run Mindoro FULL workflow from Phase 1 (recommended)"
+        Write-Host "  3. " -ForegroundColor Yellow -NoNewline; Write-Host "Run Mindoro CORE workflow only"
+        Write-Host "  4. " -ForegroundColor Yellow -NoNewline; Write-Host "Run legacy prototype_2016 workflow"
+        Write-Host "  5. " -ForegroundColor Yellow -NoNewline; Write-Host "Exit"
+        Write-Host ""
+        $choice = Read-Host "Select an option (1-5, Enter = 2)"
+        if ([string]::IsNullOrWhiteSpace($choice)) {
+            $choice = "2"
+        }
+
+        switch ($choice) {
+            "1" { Show-Help }
+            "2" {
+                Write-Section "MINDORO FULL WORKFLOW"
+                Invoke-PhaseList -WorkflowMode "mindoro_retro_2023" -Steps (Get-MindoroFullSteps)
+            }
+            "3" {
+                Write-Section "MINDORO CORE WORKFLOW"
+                Invoke-PhaseList -WorkflowMode "mindoro_retro_2023" -Steps (Get-MindoroCoreSteps)
+            }
+            "4" {
+                Write-Section "LEGACY PROTOTYPE WORKFLOW"
+                Invoke-PhaseList -WorkflowMode "prototype_2016" -Steps (Get-PrototypeSteps)
+            }
+            "5" {
+                Write-Host ""
+                Write-Host "Goodbye." -ForegroundColor DarkGray
+                exit 0
+            }
+            default {
+                Write-Host "Invalid option. Please choose 1, 2, 3, 4, or 5." -ForegroundColor Red
+                Start-Sleep -Seconds 2
+            }
+        }
+    }
+}
+
 Show-Menu
