@@ -17,7 +17,11 @@ services:
       - ./output:/app/output
       - ./config:/app/config
       - ./src:/app/src
+      - ./ui:/app/ui
       - ./tests:/app/tests
+
+    ports:
+      - "8501:8501"
     
     # Load environment variables from .env file
     env_file:
@@ -25,6 +29,7 @@ services:
 
     # Environment variables (overrides .env)
     environment:
+      - PATH=/app/.venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
       - PYTHONUNBUFFERED=1
       - PYTHONDONTWRITEBYTECODE=1
       - PIPELINE_ROLE=pipeline

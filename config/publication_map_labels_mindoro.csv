@@ -1,0 +1,4 @@
+label_id,label_text,lon,lat,label_group,enabled_yes_no,notes
+mindoro_island,Mindoro Island,121.15,12.96,major_landmass,yes,Regional landmass label for locator and close-up context
+tablas_strait,Tablas Strait,121.88,12.78,major_waterbody,yes,Unambiguous eastern waterbody for Mindoro comparison boards
+south_east_mindoro_coast,Southeast Mindoro coast,121.55,12.69,coast_context,yes,Main shoreline-impact coast label for Phase 4 figures

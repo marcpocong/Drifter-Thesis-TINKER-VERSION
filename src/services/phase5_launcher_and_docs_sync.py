@@ -28,9 +28,11 @@ DOC_PATHS = [
     Path("docs") / "PHASE_STATUS.md",
     Path("docs") / "ARCHITECTURE.md",
     Path("docs") / "OUTPUT_CATALOG.md",
+    Path("docs") / "FIGURE_GALLERY.md",
     Path("docs") / "QUICKSTART.md",
     Path("docs") / "COMMAND_MATRIX.md",
     Path("docs") / "LAUNCHER_USER_GUIDE.md",
+    Path("docs") / "UI_GUIDE.md",
 ]
 
 OPTIONAL_MANIFEST_PATHS = [
@@ -194,6 +196,7 @@ class Phase5LauncherAndDocsSyncService:
             ("pandas", "pandas"),
             ("xarray", "xarray"),
             ("PyYAML", "PyYAML"),
+            ("streamlit", "streamlit"),
             ("opendrift", "opendrift"),
             ("geopandas", "geopandas"),
             ("rasterio", "rasterio"),
@@ -281,10 +284,19 @@ class Phase5LauncherAndDocsSyncService:
         tracked_paths.extend(
             (
                 (self.repo_root / "start.ps1", "launcher"),
+                (self.repo_root / "docker-compose.yml", "container_runtime"),
+                (self.repo_root / "docker" / "pipeline" / "pyproject.toml", "container_runtime"),
                 (self.repo_root / ".gitignore", "repo_hygiene"),
                 (self.launcher_matrix_path, "launcher_catalog"),
             )
         )
+        for path in DOC_PATHS:
+            tracked_paths.append((self.repo_root / path, "documentation"))
+        ui_root = self.repo_root / "ui"
+        if ui_root.exists():
+            for path in sorted(ui_root.rglob("*")):
+                if path.is_file():
+                    tracked_paths.append((path, "ui"))
 
         rows: list[dict[str, Any]] = []
         seen: set[str] = set()
@@ -326,6 +338,12 @@ class Phase5LauncherAndDocsSyncService:
             return "phase4", "mindoro_phase4", "Mindoro Phase 4"
         if "final_validation_package" in rel_lower:
             return "phase5", "final_validation_package", "Final validation package"
+        if "trajectory_gallery_panel" in rel_lower:
+            return "phase5", "trajectory_gallery_panel", "Trajectory gallery panel pack"
+        if "figure_package_publication" in rel_lower:
+            return "phase5", "figure_package_publication", "Publication-grade figure package"
+        if "trajectory_gallery" in rel_lower:
+            return "phase5", "trajectory_gallery", "Trajectory gallery"
         if "final_reproducibility_package" in rel_lower:
             return "phase5", "phase5_sync", "Phase 5 reproducibility package"
         if "phase3c_external_case_run" in rel_lower:
@@ -431,6 +449,22 @@ class Phase5LauncherAndDocsSyncService:
             "reportability_scope": "non_scientific_reproducibility_and_documentation_layer",
             "summary": "Launcher, docs, and reproducibility packaging are synchronized around the current repo state without rerunning expensive science.",
             "evidence_path": _relative_to_repo(self.repo_root, self.output_dir / "phase5_final_verdict.md"),
+        }
+
+    def _phase5_ui_row(self) -> dict[str, Any]:
+        return {
+            "phase_id": "phase5",
+            "track_id": "phase5_read_only_dashboard",
+            "track_label": "Phase 5 read-only local dashboard",
+            "readiness_status": "implemented_reportable_non_scientific_read_only_ui",
+            "scientifically_reportable": False,
+            "scientifically_frozen": False,
+            "inherited_provisional": True,
+            "main_blocker": "Interactive run controls remain intentionally deferred; the first UI version is read-only by design.",
+            "reportable_now": True,
+            "reportability_scope": "read_only_local_dashboard_for_existing_outputs",
+            "summary": "The local dashboard is now available as a read-only Phase 5 exploration layer built on the current packaging outputs and publication-grade figures.",
+            "evidence_path": "docs/UI_GUIDE.md",
         }
 
     def _build_phase_status_registry(self) -> list[dict[str, Any]]:
@@ -600,6 +634,7 @@ class Phase5LauncherAndDocsSyncService:
                 "evidence_path": _relative_to_repo(self.repo_root, self.repo_root / PHASE4_MANIFEST_JSON),
             },
             self._phase5_row(),
+            self._phase5_ui_row(),
         ]
         return rows
 
@@ -670,6 +705,44 @@ class Phase5LauncherAndDocsSyncService:
                 _relative_to_repo(self.repo_root, self.repo_root / PHASE4_MANIFEST_JSON),
             )
 
+        trajectory_gallery_dir = self.repo_root / "output" / "trajectory_gallery"
+        if trajectory_gallery_dir.exists():
+            for output_path in sorted(trajectory_gallery_dir.glob("*")):
+                add_row(
+                    "phase5",
+                    "trajectory_gallery",
+                    "trajectory_gallery",
+                    output_path.name,
+                    output_path,
+                    "Read-only trajectory gallery artifact built from existing outputs for panel inspection.",
+                )
+        trajectory_gallery_panel_dir = self.repo_root / "output" / "trajectory_gallery_panel"
+        if trajectory_gallery_panel_dir.exists():
+            for output_path in sorted(trajectory_gallery_panel_dir.rglob("*")):
+                if output_path.is_dir():
+                    continue
+                add_row(
+                    "phase5",
+                    "trajectory_gallery_panel",
+                    "trajectory_gallery_panel",
+                    output_path.name,
+                    output_path,
+                    "Read-only polished panel gallery artifact built from existing outputs for non-technical review.",
+                )
+        figure_package_publication_dir = self.repo_root / "output" / "figure_package_publication"
+        if figure_package_publication_dir.exists():
+            for output_path in sorted(figure_package_publication_dir.rglob("*")):
+                if output_path.is_dir():
+                    continue
+                add_row(
+                    "phase5",
+                    "figure_package_publication",
+                    "figure_package_publication",
+                    output_path.name,
+                    output_path,
+                    "Read-only publication-grade figure package artifact built from existing outputs for canonical defense and paper presentation.",
+                )
+
         for artifact_type, path in sorted(phase5_artifacts.items()):
             if artifact_type == "final_output_catalog":
                 continue
@@ -712,6 +785,10 @@ class Phase5LauncherAndDocsSyncService:
                 "- Existing scientific Mindoro and DWH outputs were reused and not recomputed here.",
                 "- The existing `output/final_validation_package/` bundle was reused rather than rebuilt from scratch.",
                 "- Mindoro Phase 4 now participates in the reproducibility/package layer via the current `phase4_run_manifest.json` and verdict bundle.",
+                "- The static `output/trajectory_gallery/` bundle now participates in the reproducibility/package layer as a read-only technical figure set.",
+                "- The static `output/trajectory_gallery_panel/` bundle now participates in the reproducibility/package layer as the polished panel-ready figure pack.",
+                "- The static `output/figure_package_publication/` bundle now participates in the reproducibility/package layer as the canonical publication-grade presentation package.",
+                "- The new `ui/` layer now participates as a read-only local dashboard over the existing packaged outputs and figures rather than as a rerun control surface.",
                 "",
                 "## Key Artifacts",
                 "",
@@ -719,6 +796,10 @@ class Phase5LauncherAndDocsSyncService:
                 f"- Reproducibility manifest: `{_relative_to_repo(self.repo_root, phase5_artifacts['final_reproducibility_manifest'])}`",
                 f"- Packaging sync memo: `{_relative_to_repo(self.repo_root, phase5_artifacts['phase5_packaging_sync_memo'])}`",
                 f"- Launcher guide: `{_relative_to_repo(self.repo_root, phase5_artifacts['launcher_user_guide'])}`",
+                "- UI guide: `docs/UI_GUIDE.md`",
+                "- Trajectory gallery manifest: `output/trajectory_gallery/trajectory_gallery_manifest.json`",
+                "- Panel gallery manifest: `output/trajectory_gallery_panel/panel_figure_manifest.json`",
+                "- Publication figure manifest: `output/figure_package_publication/publication_figure_manifest.json`",
             ]
         )
         return "\n".join(lines)
@@ -740,12 +821,17 @@ class Phase5LauncherAndDocsSyncService:
             f"- Existing Phase 1 audit: `{_relative_to_repo(self.repo_root, self.repo_root / PHASE1_AUDIT_JSON)}`",
             f"- Existing Phase 2 audit: `{_relative_to_repo(self.repo_root, self.repo_root / PHASE2_AUDIT_JSON)}`",
             f"- Existing Mindoro Phase 4 manifest: `{_relative_to_repo(self.repo_root, self.repo_root / PHASE4_MANIFEST_JSON)}`",
+            "- Existing trajectory gallery outputs under `output/trajectory_gallery/` when present.",
+            "- Existing polished panel gallery outputs under `output/trajectory_gallery_panel/` when present.",
+            "- Existing publication-grade figure package outputs under `output/figure_package_publication/` when present.",
+            "- Existing read-only dashboard source files under `ui/` and guidance in `docs/UI_GUIDE.md` when present.",
             "",
             "## Guardrails",
             "",
             "- No scientific score tables were recomputed here.",
             "- No finished Mindoro or DWH scientific outputs were overwritten.",
             "- The launcher/menu is now organized around current track categories instead of the older monolithic Mindoro full-chain story.",
+            "- The first dashboard version is intentionally read-only and does not add scientific run buttons.",
         ]
         if missing_optional:
             lines.extend(
@@ -783,6 +869,7 @@ class Phase5LauncherAndDocsSyncService:
             f"- Phase 2 scientifically frozen: {overall_verdict['phase2_scientifically_frozen']}",
             f"- Mindoro Phase 4 scientifically reportable now: {overall_verdict['phase4_scientifically_reportable_now']}",
             f"- Mindoro Phase 4 inherited provisional: {overall_verdict['phase4_inherited_provisional']}",
+            "- Read-only local dashboard: implemented as a Phase 5 exploration layer over existing outputs, with no scientific run controls.",
             f"- Biggest remaining project-science blocker: {overall_verdict['biggest_remaining_project_scientific_blocker']}",
             "",
             "## Optional Future Work",
@@ -802,6 +889,11 @@ class Phase5LauncherAndDocsSyncService:
                 _coerce_text(item.get("entry_id")),
             ),
         )
+        safe_entries = [
+            entry
+            for entry in entries
+            if bool(entry.get("safe_default"))
+        ]
         lines = [
             "# Launcher User Guide",
             "",
@@ -811,11 +903,18 @@ class Phase5LauncherAndDocsSyncService:
             "",
             "- `./start.ps1 -List -NoPause` shows the current menu catalog without starting Docker work.",
             "- `./start.ps1 -Help -NoPause` prints guidance and safe entry IDs.",
-            "- `./start.ps1 -Entry phase5_sync -NoPause` refreshes the read-only Phase 5 reproducibility package.",
+        ]
+        for entry in safe_entries:
+            lines.append(
+                f"- `./start.ps1 -Entry {_coerce_text(entry.get('entry_id'))} -NoPause` runs the safe read-only entry "
+                f"`{_coerce_text(entry.get('label'))}`."
+            )
+        lines.extend(
+            [
             "",
             "## Entry Catalog",
             "",
-        ]
+        ])
         for category in self.launcher_matrix.get("categories", []):
             category_id = _coerce_text(category.get("category_id"))
             lines.append(f"### {_coerce_text(category.get('label'))}")

@@ -1,5 +1,5 @@
 {
-  "catalog_version": "phase5_launcher_matrix_v1",
+  "catalog_version": "phase5_launcher_matrix_v2",
   "entrypoint": "start.ps1",
   "categories": [
     {
@@ -267,6 +267,63 @@
       ]
     },
     {
+      "entry_id": "trajectory_gallery",
+      "menu_order": 85,
+      "category_id": "read_only_packaging_help_utilities",
+      "workflow_mode": "mindoro_retro_2023",
+      "label": "Trajectory gallery build",
+      "description": "Read-only static gallery of trajectories, overlays, comparison maps, and Mindoro Phase 4 shoreline/oil-type figures.",
+      "service_profile": "pipeline_only",
+      "rerun_cost": "cheap_read_only",
+      "safe_default": true,
+      "notes": "Builds output/trajectory_gallery from existing outputs only and does not rerun expensive scientific branches.",
+      "steps": [
+        {
+          "phase": "trajectory_gallery_build",
+          "service": "pipeline",
+          "description": "Read-only static trajectory gallery build"
+        }
+      ]
+    },
+    {
+      "entry_id": "trajectory_gallery_panel",
+      "menu_order": 86,
+      "category_id": "read_only_packaging_help_utilities",
+      "workflow_mode": "mindoro_retro_2023",
+      "label": "Trajectory gallery panel polish",
+      "description": "Read-only polished panel-ready figure pack with captions, locator insets, and comparison boards built from existing outputs only.",
+      "service_profile": "pipeline_only",
+      "rerun_cost": "cheap_read_only",
+      "safe_default": true,
+      "notes": "Builds output/trajectory_gallery_panel without rerunning expensive scientific branches.",
+      "steps": [
+        {
+          "phase": "trajectory_gallery_panel_polish",
+          "service": "pipeline",
+          "description": "Read-only polished trajectory gallery board build"
+        }
+      ]
+    },
+    {
+      "entry_id": "figure_package_publication",
+      "menu_order": 87,
+      "category_id": "read_only_packaging_help_utilities",
+      "workflow_mode": "mindoro_retro_2023",
+      "label": "Publication-grade figure package",
+      "description": "Read-only canonical presentation package with publication-grade single figures, comparison boards, captions, and talking points built from existing outputs only.",
+      "service_profile": "pipeline_only",
+      "rerun_cost": "cheap_read_only",
+      "safe_default": true,
+      "notes": "Builds output/figure_package_publication without rerunning expensive scientific branches.",
+      "steps": [
+        {
+          "phase": "figure_package_publication",
+          "service": "pipeline",
+          "description": "Read-only publication-grade figure package build"
+        }
+      ]
+    },
+    {
       "entry_id": "prototype_legacy_bundle",
       "menu_order": 90,
       "category_id": "legacy_prototype_tracks",
@@ -308,14 +365,14 @@
   ],
   "optional_future_work": [
     {
-      "work_id": "trajectory_gallery",
-      "label": "Trajectory gallery",
-      "status": "not_implemented"
+      "work_id": "ui_run_controls",
+      "label": "Interactive UI run controls",
+      "status": "deferred"
     },
     {
-      "work_id": "read_only_browser_ui",
-      "label": "Read-only browser UI",
-      "status": "not_implemented"
+      "work_id": "ui_deeper_search_filters",
+      "label": "Deeper artifact search and filtering inside the UI",
+      "status": "deferred"
     },
     {
       "work_id": "dwh_phase4_appendix_pilot",

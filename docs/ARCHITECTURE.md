@@ -74,6 +74,7 @@ Phase 4 is now a real workflow, not a placeholder shell:
 - separate output bundle under `output/phase4/CASE_MINDORO_RETRO_2023/`
 
 Phase 4 is reportable now for Mindoro, but it still inherits upstream provisional status from the unfinished Phase 1/2 freeze story.
+The repo's existing PyGNOME branches remain Phase 3-style transport comparators, so a separate read-only `phase4_crossmodel_comparability_audit` is now the guardrail that decides whether any OpenDrift-versus-PyGNOME Phase 4 comparison is scientifically defensible. In the current repo state, that audit is deferred rather than promoted to a result because matched PyGNOME fate-and-shoreline outputs do not yet exist.
 
 ## Phase 5 Boundary
 
@@ -83,6 +84,7 @@ Phase 5 is the project synchronization layer:
 - docs synchronization
 - reproducibility/package indexes
 - honest cross-phase status registry
+- read-only local dashboard over the packaged outputs and figure layers
 
 It is intentionally non-scientific in scope. It reuses existing scientific artifacts rather than recomputing them.
 
@@ -103,7 +105,7 @@ The launcher source of truth is `config/launcher_matrix.json`. It defines:
 - current menu options match the actual repo state
 - prototype mode remains available without being misrepresented
 - read-only utilities are visible and easy to run
-- non-existent UI or gallery features are not advertised as if they already exist
+- non-existent UI features are not advertised as if they already exist, while the implemented raw gallery, panel gallery, and publication-grade figure package are exposed honestly as separate safe utilities
 
 ## Packaging Architecture
 
@@ -111,5 +113,9 @@ The repo now has two different packaging layers:
 
 - `output/final_validation_package/`: frozen thesis validation package built from completed scientific outputs
 - `output/final_reproducibility_package/`: Phase 5 synchronization layer that indexes software versions, cases, configs, manifests, outputs, logs, and honest phase status
+- `output/trajectory_gallery/`: read-only technical gallery built from existing trajectories, rasters, overlays, and Phase 4 artifacts
+- `output/trajectory_gallery_panel/`: read-only polished panel-ready board pack built from the raw gallery and the same stored source artifacts
+- `output/figure_package_publication/`: read-only canonical publication-grade package built from stored rasters, tracks, manifests, and Phase 4 tables for defense and paper use
+- `ui/`: read-only local dashboard that consumes those packages and archives without becoming a scientific rerun surface
 
-Phase 5 reuses the final validation package rather than replacing it. The validation package remains the thesis summary bundle; the reproducibility package is the reproducibility/indexing layer around the current repo state.
+Phase 5 reuses the final validation package rather than replacing it. The validation package remains the thesis summary bundle; the reproducibility package is the reproducibility/indexing layer around the current repo state; the raw trajectory gallery is the technical figure archive; the polished panel gallery is the intermediate non-technical review layer; the publication figure package is the canonical presentation layer for defense slides and paper-ready single figures; and the UI is the read-only local explorer over that same packaged state.

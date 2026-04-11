@@ -1,0 +1,4 @@
+label_id,label_text,lon,lat,label_group,enabled_yes_no,notes
+gulf_of_mexico,Gulf of Mexico,-88.45,27.85,major_waterbody,yes,Regional waterbody label for DWH locator context
+louisiana_coast,Louisiana coast,-90.25,29.25,coast_context,yes,Unambiguous coast label for DWH comparison boards
+mississippi_delta,Mississippi Delta,-89.2,29.1,landmark,yes,Major landmark in the DWH study region

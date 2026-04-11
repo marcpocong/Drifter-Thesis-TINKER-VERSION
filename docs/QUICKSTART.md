@@ -33,9 +33,45 @@ docker-compose exec -T -e PIPELINE_PHASE=phase5_launcher_and_docs_sync pipeline 
 docker-compose exec -T -e PIPELINE_PHASE=phase1_finalization_audit pipeline python -m src
 docker-compose exec -T -e PIPELINE_PHASE=phase2_finalization_audit pipeline python -m src
 docker-compose exec -T -e PIPELINE_PHASE=final_validation_package pipeline python -m src
+docker-compose exec -T -e PIPELINE_PHASE=trajectory_gallery_build pipeline python -m src
+docker-compose exec -T -e PIPELINE_PHASE=trajectory_gallery_panel_polish pipeline python -m src
+docker-compose exec -T -e PIPELINE_PHASE=figure_package_publication pipeline python -m src
 ```
 
-## 5. Run Mindoro Phase 4 Only When Needed
+## 5. Build The Figure Galleries
+
+```powershell
+.\start.ps1 -Entry trajectory_gallery -NoPause
+.\start.ps1 -Entry trajectory_gallery_panel -NoPause
+.\start.ps1 -Entry figure_package_publication -NoPause
+```
+
+These write to `output/trajectory_gallery/`, `output/trajectory_gallery_panel/`, and `output/figure_package_publication/` from existing outputs only and are safe for technical refreshes, non-technical board refreshes, and canonical defense/paper figure refreshes.
+
+## 6. Launch The Read-Only Local Dashboard
+
+```bash
+docker-compose exec pipeline streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
+```
+
+Then open `http://localhost:8501`.
+
+Use panel-friendly mode first if you want:
+
+- publication-grade recommended defense figures
+- simple validation summaries
+- Mindoro Phase 4 figures
+- the explicit Phase 4 cross-model deferred-status page
+
+Switch to advanced mode only when you need:
+
+- panel and raw archive figures
+- manifests and logs
+- lower-level artifact inspection
+
+The dashboard is read-only in this first version and does not expose scientific rerun controls.
+
+## 7. Run Mindoro Phase 4 Only When Needed
 
 ```bash
 docker-compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=phase4_oiltype_and_shoreline pipeline python -m src
@@ -43,7 +79,7 @@ docker-compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=pha
 
 This writes to `output/phase4/CASE_MINDORO_RETRO_2023/` and does not overwrite stored Phase 3 validation outputs.
 
-## 6. Use Scientific Reruns Intentionally
+## 8. Use Scientific Reruns Intentionally
 
 Examples:
 
@@ -54,9 +90,10 @@ Examples:
 
 These are intentional rerun paths. Do not use them casually for status inspection.
 
-## 7. Current Caution Notes
+## 9. Current Caution Notes
 
 - Phase 1 is architecture-audited, but the final multi-year production rerun is still needed.
 - Phase 2 is scientifically usable, but not scientifically frozen.
 - Phase 4 is reportable now for Mindoro, but inherited-provisional from the upstream Phase 1/2 status.
+- Phase 4 cross-model comparison is still deferred; the UI surfaces that status directly and does not fake Phase 4 PyGNOME comparison pages.
 - Prototype mode remains for debugging/regression only.

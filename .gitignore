@@ -50,6 +50,27 @@ output/final_reproducibility_package/*
 !output/final_reproducibility_package/*.csv
 !output/final_reproducibility_package/*.json
 !output/final_reproducibility_package/*.md
+!output/trajectory_gallery/
+output/trajectory_gallery/*
+!output/trajectory_gallery/*.csv
+!output/trajectory_gallery/*.json
+!output/trajectory_gallery/*.md
+!output/trajectory_gallery/*.png
+!output/trajectory_gallery_panel/
+output/trajectory_gallery_panel/*
+!output/trajectory_gallery_panel/*.csv
+!output/trajectory_gallery_panel/*.json
+!output/trajectory_gallery_panel/*.md
+!output/trajectory_gallery_panel/*.png
+!output/trajectory_gallery_panel/_support/
+output/trajectory_gallery_panel/_support/*
+!output/trajectory_gallery_panel/_support/*.png
+!output/figure_package_publication/
+output/figure_package_publication/*
+!output/figure_package_publication/*.csv
+!output/figure_package_publication/*.json
+!output/figure_package_publication/*.md
+!output/figure_package_publication/*.png
 
 # Python testing
 .pytest_cache/

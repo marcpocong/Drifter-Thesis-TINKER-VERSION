@@ -17,9 +17,22 @@ It no longer hides everything behind one stale "Mindoro full workflow" story.
 .\start.ps1 -List -NoPause
 .\start.ps1 -Help -NoPause
 .\start.ps1 -Entry phase5_sync -NoPause
+.\start.ps1 -Entry trajectory_gallery -NoPause
+.\start.ps1 -Entry trajectory_gallery_panel -NoPause
+.\start.ps1 -Entry figure_package_publication -NoPause
 ```
 
 These commands are the safest starting point because they do not trigger full scientific reruns by default.
+
+## Read-Only Dashboard
+
+The local dashboard is implemented, but it is intentionally kept outside the launcher entry catalog in this first version. Launch it directly:
+
+```bash
+docker-compose exec pipeline streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
+```
+
+This keeps the launcher honest: it remains a matrix-driven workflow launcher, while the UI remains a separate read-only exploration surface over the packaged outputs.
 
 ## Main Parameters
 
@@ -36,6 +49,9 @@ Read-only utilities:
 - `phase2_audit`
 - `final_validation_package`
 - `phase5_sync`
+- `trajectory_gallery`
+- `trajectory_gallery_panel`
+- `figure_package_publication`
 
 Intentional scientific reruns:
 
@@ -60,8 +76,8 @@ Legacy/debug:
 
 ## Not Implemented Yet
 
-- trajectory gallery
-- read-only browser UI
+- interactive UI run controls
+- deeper artifact filtering inside the UI
 - DWH Phase 4 appendix pilot
 
-These items are recorded in the launcher matrix as optional future work and are not advertised as ready-made launcher features.
+The raw technical trajectory gallery, the polished panel-ready gallery, the publication-grade figure package, and the read-only local dashboard are all implemented. The remaining items above are still recorded as future work.

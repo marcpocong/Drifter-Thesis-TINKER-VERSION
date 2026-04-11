@@ -31,7 +31,9 @@ Container routing via the PIPELINE_PHASE environment variable:
   PIPELINE_PHASE=phase1_finalization_audit -> Read-only Chapter 3 Phase 1 architecture audit and verdict
   PIPELINE_PHASE=phase2_finalization_audit -> Read-only Chapter 3 Phase 2 semantics/manifests audit and verdict
   PIPELINE_PHASE=phase4_oiltype_and_shoreline -> Mindoro Phase 4 oil-type fate and shoreline-impact workflow
+  PIPELINE_PHASE=phase4_crossmodel_comparability_audit -> Read-only Phase 4 OpenDrift-vs-PyGNOME comparability audit
   PIPELINE_PHASE=phase5_launcher_and_docs_sync -> Read-only launcher/docs/reproducibility package sync
+  PIPELINE_PHASE=trajectory_gallery_build -> Read-only static trajectory/overlay/shoreline figure gallery
   PIPELINE_PHASE=3               -> Phase 3 (oil weathering & PyGNOME comparison)
   PIPELINE_PHASE=benchmark       -> Phase 3A cross-model benchmark
 
@@ -1470,6 +1472,33 @@ def run_phase4_oiltype_and_shoreline_phase():
     print(f"Biggest remaining blocker: {verdict['biggest_remaining_phase4_blocker']}")
 
 
+def run_phase4_crossmodel_comparability_audit_phase():
+    from src.services.phase4_crossmodel_comparability_audit import run_phase4_crossmodel_comparability_audit
+
+    print("Starting Phase 4 OpenDrift-vs-PyGNOME comparability audit...")
+    print("This phase is read-only and will only inspect existing Phase 4, Mindoro PyGNOME, and DWH PyGNOME artifacts.")
+
+    results = run_phase4_crossmodel_comparability_audit()
+    verdict = results["overall_verdict"]
+
+    print("\nPhase 4 cross-model comparability audit complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print(f"Comparability matrix CSV: {results['matrix_csv']}")
+    print(f"Comparability matrix JSON: {results['matrix_json']}")
+    print(f"Report: {results['report_md']}")
+    print(f"Verdict: {results['verdict_md']}")
+    print(
+        "Quantities directly comparable now: "
+        f"{', '.join(verdict['quantities_directly_comparable_now']) if verdict['quantities_directly_comparable_now'] else 'none'}"
+    )
+    print(
+        "Quantities comparable with small adapter: "
+        f"{', '.join(verdict['quantities_comparable_with_small_adapter']) if verdict['quantities_comparable_with_small_adapter'] else 'none'}"
+    )
+    print(f"Pilot comparison figures produced: {verdict['pilot_comparison_produced']}")
+    print(f"Biggest blocker: {verdict['biggest_blocker']}")
+
+
 def run_phase5_launcher_and_docs_sync_phase():
     from src.services.phase5_launcher_and_docs_sync import run_phase5_launcher_and_docs_sync
 
@@ -1506,6 +1535,89 @@ def run_phase5_launcher_and_docs_sync_phase():
     )
 
 
+def run_trajectory_gallery_build_phase():
+    from src.services.trajectory_gallery_build import run_trajectory_gallery_build
+
+    print("Starting trajectory gallery build...")
+    print("This phase is read-only and builds panel-facing figures from existing outputs, manifests, rasters, and NetCDFs only.")
+
+    results = run_trajectory_gallery_build()
+
+    print("\nTrajectory gallery build complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print(f"Manifest: {results['manifest_path']}")
+    print(f"Figure index CSV: {results['index_csv']}")
+    print(f"Figures index: {results['figures_index_md']}")
+    print(f"Figure count: {results['figure_count']}")
+    print(f"Cases with visuals: {', '.join(results['cases_with_visuals'])}")
+    print(f"Models with visuals: {', '.join(results['models_with_visuals'])}")
+    if results["scenario_ids_with_visuals"]:
+        print(f"Scenarios with visuals: {', '.join(results['scenario_ids_with_visuals'])}")
+    print("Figure groups generated:")
+    for group_code, count in results["figure_group_counts"].items():
+        print(f"  - {group_code}: {count}")
+    if results["missing_optional_artifacts"]:
+        print("Missing optional artifacts recorded:")
+        for item in results["missing_optional_artifacts"]:
+            print(f"  - {item['relative_path']}: {item['notes']}")
+
+
+def run_trajectory_gallery_panel_polish_phase():
+    from src.services.trajectory_gallery_panel_polish import run_trajectory_gallery_panel_polish
+
+    print("Starting trajectory gallery panel polish...")
+    print("This phase is read-only and builds polished panel-facing boards from existing figures, manifests, rasters, and NetCDFs only.")
+
+    results = run_trajectory_gallery_panel_polish()
+
+    print("\nTrajectory gallery panel polish complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print(f"Registry: {results['registry_csv']}")
+    print(f"Manifest: {results['manifest_json']}")
+    print(f"Captions: {results['captions_md']}")
+    print(f"Talking points: {results['talking_points_md']}")
+    print(f"Figure count: {results['figure_count']}")
+    print(f"Board families generated: {', '.join(results['board_families_generated'])}")
+    print(f"Side-by-side comparison boards produced: {results['side_by_side_comparison_boards_produced']}")
+    print(f"Plain-language captions produced: {results['plain_language_captions_produced']}")
+    if results["recommended_main_defense_figures"]:
+        print("Recommended main-defense figures:")
+        for figure_id in results["recommended_main_defense_figures"]:
+            print(f"  - {figure_id}")
+    if results["missing_optional_artifacts"]:
+        print("Missing optional artifacts recorded:")
+        for item in results["missing_optional_artifacts"]:
+            print(f"  - {item['relative_path']}: {item['notes']}")
+
+
+def run_figure_package_publication_phase():
+    from src.services.figure_package_publication import run_figure_package_publication
+
+    print("Starting publication-grade figure package build...")
+    print("This phase is read-only and redraws publication-grade figures from existing outputs, manifests, rasters, and NetCDFs only.")
+
+    results = run_figure_package_publication()
+
+    print("\nPublication-grade figure package complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print(f"Registry: {results['registry_csv']}")
+    print(f"Manifest: {results['manifest_json']}")
+    print(f"Captions: {results['captions_md']}")
+    print(f"Talking points: {results['talking_points_md']}")
+    print(f"Figure count: {results['figure_count']}")
+    print(f"Figure families generated: {', '.join(results['figure_families_generated'])}")
+    print(f"Side-by-side comparison boards produced: {results['side_by_side_comparison_boards_produced']}")
+    print(f"Single-image paper figures produced: {results['single_image_paper_figures_produced']}")
+    if results["recommended_main_defense_figures"]:
+        print("Recommended main-defense figures:")
+        for figure_id in results["recommended_main_defense_figures"]:
+            print(f"  - {figure_id}")
+    if results["missing_optional_artifacts"]:
+        print("Missing optional artifacts recorded:")
+        for item in results["missing_optional_artifacts"]:
+            print(f"  - {item['relative_path']}: {item['notes']}")
+
+
 def main():
     import subprocess
 
@@ -1525,8 +1637,20 @@ def main():
     if phase == "phase4_oiltype_and_shoreline":
         run_phase4_oiltype_and_shoreline_phase()
         return
+    if phase == "phase4_crossmodel_comparability_audit":
+        run_phase4_crossmodel_comparability_audit_phase()
+        return
     if phase == "phase5_launcher_and_docs_sync":
         run_phase5_launcher_and_docs_sync_phase()
+        return
+    if phase == "trajectory_gallery_build":
+        run_trajectory_gallery_build_phase()
+        return
+    if phase == "trajectory_gallery_panel_polish":
+        run_trajectory_gallery_panel_polish_phase()
+        return
+    if phase == "figure_package_publication":
+        run_figure_package_publication_phase()
         return
 
     case = get_case_context()
@@ -1604,8 +1728,16 @@ def main():
         run_phase2_finalization_audit_phase()
     elif phase == "phase4_oiltype_and_shoreline":
         run_phase4_oiltype_and_shoreline_phase()
+    elif phase == "phase4_crossmodel_comparability_audit":
+        run_phase4_crossmodel_comparability_audit_phase()
     elif phase == "phase5_launcher_and_docs_sync":
         run_phase5_launcher_and_docs_sync_phase()
+    elif phase == "trajectory_gallery_build":
+        run_trajectory_gallery_build_phase()
+    elif phase == "trajectory_gallery_panel_polish":
+        run_trajectory_gallery_panel_polish_phase()
+    elif phase == "figure_package_publication":
+        run_figure_package_publication_phase()
     elif phase == "3":
         run_phase3()
     elif phase == "3b":

@@ -6,7 +6,13 @@ Use the PowerShell launcher from the repository root. The launcher is now organi
 
 - `./start.ps1 -List -NoPause` shows the current menu catalog without starting Docker work.
 - `./start.ps1 -Help -NoPause` prints guidance and safe entry IDs.
-- `./start.ps1 -Entry phase5_sync -NoPause` refreshes the read-only Phase 5 reproducibility package.
+- `./start.ps1 -Entry phase1_audit -NoPause` runs the safe read-only entry `Phase 1 finalization audit`.
+- `./start.ps1 -Entry phase2_audit -NoPause` runs the safe read-only entry `Phase 2 finalization audit`.
+- `./start.ps1 -Entry final_validation_package -NoPause` runs the safe read-only entry `Final validation package refresh`.
+- `./start.ps1 -Entry phase5_sync -NoPause` runs the safe read-only entry `Phase 5 launcher/docs/package sync`.
+- `./start.ps1 -Entry trajectory_gallery -NoPause` runs the safe read-only entry `Trajectory gallery build`.
+- `./start.ps1 -Entry trajectory_gallery_panel -NoPause` runs the safe read-only entry `Trajectory gallery panel polish`.
+- `./start.ps1 -Entry figure_package_publication -NoPause` runs the safe read-only entry `Publication-grade figure package`.
 
 ## Entry Catalog
 
@@ -48,6 +54,15 @@ Safe utilities that summarize or audit the current repo state without rerunning 
 - `phase5_sync`: Phase 5 launcher/docs/package sync. Workflow mode = `mindoro_retro_2023`. Cost = `cheap_read_only`. Safe read-only default = `true`. Phases = phase5_launcher_and_docs_sync.
   Note: Builds final_reproducibility_package without overwriting scientific outputs.
   Run with: `./start.ps1 -Entry phase5_sync -NoPause`
+- `trajectory_gallery`: Trajectory gallery build. Workflow mode = `mindoro_retro_2023`. Cost = `cheap_read_only`. Safe read-only default = `true`. Phases = trajectory_gallery_build.
+  Note: Builds output/trajectory_gallery from existing outputs only and does not rerun expensive scientific branches.
+  Run with: `./start.ps1 -Entry trajectory_gallery -NoPause`
+- `trajectory_gallery_panel`: Trajectory gallery panel polish. Workflow mode = `mindoro_retro_2023`. Cost = `cheap_read_only`. Safe read-only default = `true`. Phases = trajectory_gallery_panel_polish.
+  Note: Builds output/trajectory_gallery_panel without rerunning expensive scientific branches.
+  Run with: `./start.ps1 -Entry trajectory_gallery_panel -NoPause`
+- `figure_package_publication`: Publication-grade figure package. Workflow mode = `mindoro_retro_2023`. Cost = `cheap_read_only`. Safe read-only default = `true`. Phases = figure_package_publication.
+  Note: Builds output/figure_package_publication without rerunning expensive scientific branches.
+  Run with: `./start.ps1 -Entry figure_package_publication -NoPause`
 
 ### Legacy prototype tracks
 
@@ -65,12 +80,12 @@ Backward-compatible prototype workflows preserved for debugging and regression.
 
 ## Optional Future Work
 
-- `trajectory_gallery`: Trajectory gallery [not_implemented]
-- `read_only_browser_ui`: Read-only browser UI [not_implemented]
+- `ui_run_controls`: Interactive UI run controls [deferred]
+- `ui_deeper_search_filters`: Deeper artifact search and filtering inside the UI [deferred]
 - `dwh_phase4_appendix_pilot`: DWH Phase 4 appendix pilot [deferred]
 
 ## Matrix Source
 
 - Catalog file: `config/launcher_matrix.json`
 - Entrypoint script: `start.ps1`
-- Catalog version: `phase5_launcher_matrix_v1`
+- Catalog version: `phase5_launcher_matrix_v2`

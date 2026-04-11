@@ -1,0 +1,60 @@
+title_format: "{figure_title}"
+subtitle_format: "{case_label} | {date_label} | {phase_label}"
+palette:
+  background_land: "#e6dfd1"
+  background_sea: "#f7fbfd"
+  shoreline: "#8b8178"
+  observed_mask: "#2f3a46"
+  deterministic_opendrift: "#165ba8"
+  ensemble_p50: "#1f7a4d"
+  ensemble_p90: "#72b6ff"
+  pygnome: "#9b4dca"
+  source_point: "#b42318"
+  initialization_polygon: "#d97706"
+  validation_polygon: "#0f172a"
+  centroid_path: "#111827"
+  corridor_hull: "#c2410c"
+  ensemble_member_path: "#94a3b8"
+  oil_lighter: "#f28c28"
+  oil_base: "#8c564b"
+  oil_heavier: "#4b0082"
+legend_labels:
+  observed_mask: "Observed spill extent"
+  deterministic_opendrift: "OpenDrift deterministic forecast"
+  ensemble_p50: "OpenDrift ensemble p50 footprint"
+  ensemble_p90: "OpenDrift ensemble p90 footprint"
+  pygnome: "PyGNOME comparator"
+  source_point: "Source point"
+  initialization_polygon: "Initialization polygon"
+  validation_polygon: "Validation target polygon"
+  centroid_path: "Centroid path"
+  corridor_hull: "Corridor / hull"
+  ensemble_member_path: "Sampled ensemble trajectories"
+  oil_lighter: "Light oil scenario"
+  oil_base: "Fixed base medium-heavy proxy"
+  oil_heavier: "Heavier oil scenario"
+typography:
+  title_size: 19
+  subtitle_size: 10
+  panel_title_size: 11
+  legend_title_size: 9
+  body_size: 9
+  note_size: 8
+layout:
+  board_size_inches: [16, 9]
+  single_size_inches: [13, 8]
+  dpi: 220
+  figure_facecolor: "#ffffff"
+  axes_facecolor: "#f7fbfd"
+  grid_color: "#cbd5e1"
+  legend_facecolor: "#ffffff"
+  legend_edgecolor: "#94a3b8"
+crop_rules:
+  zoom_padding_fraction: 0.18
+  close_padding_fraction: 0.08
+  minimum_padding_m: 4000
+  minimum_crop_span_m: 12000
+locator_rules:
+  mindoro_scale_km: 25
+  dwh_scale_km: 100
+  locator_padding_fraction: 0.55

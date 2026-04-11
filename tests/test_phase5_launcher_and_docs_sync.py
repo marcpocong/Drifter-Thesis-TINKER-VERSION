@@ -116,6 +116,60 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
                             ],
                         },
                         {
+                            "entry_id": "trajectory_gallery",
+                            "menu_order": 25,
+                            "category_id": "read_only_packaging_help_utilities",
+                            "workflow_mode": "mindoro_retro_2023",
+                            "label": "Trajectory gallery build",
+                            "description": "Read-only gallery.",
+                            "rerun_cost": "cheap_read_only",
+                            "safe_default": True,
+                            "notes": "Panel-facing static figures only.",
+                            "steps": [
+                                {
+                                    "phase": "trajectory_gallery_build",
+                                    "service": "pipeline",
+                                    "description": "Gallery",
+                                }
+                            ],
+                        },
+                        {
+                            "entry_id": "trajectory_gallery_panel",
+                            "menu_order": 26,
+                            "category_id": "read_only_packaging_help_utilities",
+                            "workflow_mode": "mindoro_retro_2023",
+                            "label": "Trajectory gallery panel polish",
+                            "description": "Read-only polished panel gallery.",
+                            "rerun_cost": "cheap_read_only",
+                            "safe_default": True,
+                            "notes": "Panel-ready figure pack only.",
+                            "steps": [
+                                {
+                                    "phase": "trajectory_gallery_panel_polish",
+                                    "service": "pipeline",
+                                    "description": "Panel gallery",
+                                }
+                            ],
+                        },
+                        {
+                            "entry_id": "figure_package_publication",
+                            "menu_order": 27,
+                            "category_id": "read_only_packaging_help_utilities",
+                            "workflow_mode": "mindoro_retro_2023",
+                            "label": "Publication-grade figure package",
+                            "description": "Read-only publication figure package.",
+                            "rerun_cost": "cheap_read_only",
+                            "safe_default": True,
+                            "notes": "Canonical defense and paper presentation figures only.",
+                            "steps": [
+                                {
+                                    "phase": "figure_package_publication",
+                                    "service": "pipeline",
+                                    "description": "Publication figures",
+                                }
+                            ],
+                        },
+                        {
                             "entry_id": "prototype_legacy_bundle",
                             "menu_order": 30,
                             "category_id": "legacy_prototype_tracks",
@@ -131,8 +185,8 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
                         },
                     ],
                     "optional_future_work": [
-                        {"work_id": "trajectory_gallery", "label": "Trajectory gallery", "status": "not_implemented"},
-                        {"work_id": "read_only_browser_ui", "label": "Read-only browser UI", "status": "not_implemented"},
+                        {"work_id": "ui_run_controls", "label": "Interactive UI run controls", "status": "deferred"},
+                        {"work_id": "ui_deeper_search_filters", "label": "Deeper artifact search and filtering inside the UI", "status": "deferred"},
                         {"work_id": "dwh_phase4_appendix_pilot", "label": "DWH Phase 4 appendix pilot", "status": "deferred"},
                     ],
                 },
@@ -174,7 +228,9 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
                 "docs/PHASE_STATUS.md",
                 "docs/ARCHITECTURE.md",
                 "docs/OUTPUT_CATALOG.md",
+                "docs/FIGURE_GALLERY.md",
                 "docs/QUICKSTART.md",
+                "docs/UI_GUIDE.md",
                 "docs/COMMAND_MATRIX.md",
                 "docs/LAUNCHER_USER_GUIDE.md",
                 "start.ps1",
@@ -191,6 +247,9 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
             (root / "output" / "phase1_finalization_audit").mkdir(parents=True, exist_ok=True)
             (root / "output" / "phase2_finalization_audit").mkdir(parents=True, exist_ok=True)
             (root / "output" / "phase4" / "CASE_MINDORO_RETRO_2023").mkdir(parents=True, exist_ok=True)
+            (root / "output" / "trajectory_gallery").mkdir(parents=True, exist_ok=True)
+            (root / "output" / "trajectory_gallery_panel").mkdir(parents=True, exist_ok=True)
+            (root / "output" / "figure_package_publication").mkdir(parents=True, exist_ok=True)
 
             (root / "output" / "CASE_MINDORO_RETRO_2023" / "phase3b" / "phase3b_summary.csv").write_text(
                 "metric,value\nfss_1km,0.0\n",
@@ -293,6 +352,32 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
                     },
                 },
             )
+            (root / "output" / "trajectory_gallery" / "trajectory_gallery_manifest.json").write_text(
+                "{}\n",
+                encoding="utf-8",
+            )
+            (root / "output" / "trajectory_gallery" / "trajectory_gallery_index.csv").write_text(
+                "figure_id,relative_path\nsample,output/trajectory_gallery/sample.png\n",
+                encoding="utf-8",
+            )
+            (root / "output" / "trajectory_gallery_panel" / "panel_figure_manifest.json").write_text(
+                "{}\n",
+                encoding="utf-8",
+            )
+            (root / "output" / "trajectory_gallery_panel" / "panel_figure_registry.csv").write_text(
+                "figure_id,relative_path\nsample_panel,output/trajectory_gallery_panel/sample_panel.png\n",
+                encoding="utf-8",
+            )
+            (root / "output" / "figure_package_publication" / "publication_figure_manifest.json").write_text(
+                "{}\n",
+                encoding="utf-8",
+            )
+            (root / "output" / "figure_package_publication" / "publication_figure_registry.csv").write_text(
+                "figure_id,relative_path\nsample_publication,output/figure_package_publication/sample_publication.png\n",
+                encoding="utf-8",
+            )
+            (root / "ui").mkdir(parents=True, exist_ok=True)
+            (root / "ui" / "app.py").write_text("print('ui')\n", encoding="utf-8")
 
             (root / "logs" / "run_phase5_sync.log").write_text("phase5 log\n", encoding="utf-8")
 
@@ -320,9 +405,13 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
 
             self.assertEqual(results["launcher_entrypoint"], "./start.ps1 -List -NoPause")
             self.assertIn("phase5_sync", results["safe_read_only_entry_ids"])
+            self.assertIn("trajectory_gallery", results["safe_read_only_entry_ids"])
+            self.assertIn("trajectory_gallery_panel", results["safe_read_only_entry_ids"])
+            self.assertIn("figure_package_publication", results["safe_read_only_entry_ids"])
 
             phase_status_df = pd.read_csv(results["final_phase_status_registry_csv"])
             self.assertTrue(((phase_status_df["phase_id"] == "phase5") & (phase_status_df["track_id"] == "phase5_sync")).any())
+            self.assertTrue(((phase_status_df["phase_id"] == "phase5") & (phase_status_df["track_id"] == "phase5_read_only_dashboard")).any())
             self.assertTrue(((phase_status_df["phase_id"] == "phase4") & (phase_status_df["track_id"] == "mindoro_phase4")).any())
 
             manifest_index_df = pd.read_csv(results["final_manifest_index_csv"])
@@ -333,8 +422,20 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
             output_catalog_df = pd.read_csv(results["final_output_catalog_csv"])
             self.assertTrue(
                 (
-                    (output_catalog_df["phase_id"] == "phase4")
-                    & (output_catalog_df["artifact_type"] == "phase4_oil_budget_summary")
+                    (output_catalog_df["track_id"] == "trajectory_gallery")
+                    & (output_catalog_df["artifact_type"] == "trajectory_gallery_manifest.json")
+                ).any()
+            )
+            self.assertTrue(
+                (
+                    (output_catalog_df["track_id"] == "trajectory_gallery_panel")
+                    & (output_catalog_df["artifact_type"] == "panel_figure_manifest.json")
+                ).any()
+            )
+            self.assertTrue(
+                (
+                    (output_catalog_df["track_id"] == "figure_package_publication")
+                    & (output_catalog_df["artifact_type"] == "publication_figure_manifest.json")
                 ).any()
             )
 
@@ -350,6 +451,12 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
             launcher_guide_text = Path(results["launcher_user_guide_md"]).read_text(encoding="utf-8")
             self.assertIn("phase5_sync", launcher_guide_text)
             self.assertIn("trajectory_gallery", launcher_guide_text)
+            self.assertIn("trajectory_gallery_panel", launcher_guide_text)
+            self.assertIn("figure_package_publication", launcher_guide_text)
+
+            config_snapshot_df = pd.read_csv(results["final_config_snapshot_index_csv"])
+            self.assertTrue((config_snapshot_df["relative_path"] == "docs/UI_GUIDE.md").any())
+            self.assertTrue((config_snapshot_df["relative_path"] == "ui/app.py").any())
 
 
 if __name__ == "__main__":

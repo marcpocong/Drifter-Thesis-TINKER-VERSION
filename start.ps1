@@ -13,6 +13,9 @@
         .\start.ps1 -List -NoPause
         .\start.ps1 -Help -NoPause
         .\start.ps1 -Entry phase5_sync -NoPause
+        .\start.ps1 -Entry trajectory_gallery -NoPause
+        .\start.ps1 -Entry trajectory_gallery_panel -NoPause
+        .\start.ps1 -Entry figure_package_publication -NoPause
 #>
 
 param(
@@ -190,7 +193,7 @@ function Show-LauncherList {
     Write-Host ""
     Write-Host "Entrypoint: .\start.ps1" -ForegroundColor Green
     Write-Host "Catalog: $($matrix.catalog_version)" -ForegroundColor Yellow
-    Write-Host "Safe first command: .\start.ps1 -Entry phase5_sync -NoPause" -ForegroundColor Yellow
+    Write-Host "Safe first commands: .\start.ps1 -Entry phase5_sync -NoPause ; .\start.ps1 -Entry trajectory_gallery -NoPause ; .\start.ps1 -Entry trajectory_gallery_panel -NoPause ; .\start.ps1 -Entry figure_package_publication -NoPause" -ForegroundColor Yellow
     Write-Host ""
 
     foreach ($category in Get-LauncherCategories) {

@@ -17,10 +17,11 @@ Phase 5 is reportable now as the launcher/docs/reproducibility synchronization l
 - Phase 2 scientifically frozen: False
 - Mindoro Phase 4 scientifically reportable now: True
 - Mindoro Phase 4 inherited provisional: True
+- Read-only local dashboard: implemented as a Phase 5 exploration layer over existing outputs, with no scientific run controls.
 - Biggest remaining project-science blocker: The repo still lacks the accepted/rejected drogued 72 h segment registry generated from a true 2016-2022 regional drifter pool, so the frozen baseline cannot yet be defended as the final Chapter 3 Phase 1 study.
 
 ## Optional Future Work
 
-- `trajectory_gallery`: Trajectory gallery [not_implemented]
-- `read_only_browser_ui`: Read-only browser UI [not_implemented]
+- `ui_run_controls`: Interactive UI run controls [deferred]
+- `ui_deeper_search_filters`: Deeper artifact search and filtering inside the UI [deferred]
 - `dwh_phase4_appendix_pilot`: DWH Phase 4 appendix pilot [deferred]

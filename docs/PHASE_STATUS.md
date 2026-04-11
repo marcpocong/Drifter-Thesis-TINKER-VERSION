@@ -7,7 +7,12 @@
 - Mindoro Phase 3: scientifically informative and reportable; strict March 6 remains the hard sparse stress test.
 - DWH Phase 3C: external rich-data transfer validation success.
 - Phase 4: scientifically reportable now for Mindoro, inherited-provisional.
+- Phase 4 cross-model comparison: deferred; current PyGNOME branches remain comparator-only for transport/spatial work rather than matched Phase 4 fate-and-shoreline outputs.
 - Phase 5: launcher/docs/package synchronization layer.
+- Trajectory gallery: read-only technical figure set built from existing outputs only.
+- Trajectory gallery panel pack: read-only polished board layer for non-technical review, built from existing outputs only.
+- Publication figure package: canonical publication-grade defense/paper figure layer built from existing outputs only, with honest Phase 3 cross-model boards and a Phase 4 deferred-comparison note figure.
+- Read-only local dashboard: implemented Phase 5 exploration layer over the publication package, panel/raw figure archives, reproducibility indexes, and the Phase 4 cross-model audit.
 
 ## Phase 1
 
@@ -114,6 +119,29 @@ What remains provisional:
 - `fixed_base_medium_heavy_proxy` remains flagged for mass-balance follow-up
 - DWH Phase 4 remains deferred
 
+## Phase 4 Cross-Model Comparability Audit
+
+- Plain-language status: deferred; no scientifically defensible Phase 4 OpenDrift-versus-PyGNOME comparison is available from the current stored outputs.
+- Scientifically reportable: `false`
+- Reportable now: `true` for the audit verdict itself, `false` for a Phase 4 cross-model result
+- Scientifically frozen: `false`
+- Inherited provisional: `true`
+- Biggest blocker: the repo still lacks a matched Mindoro PyGNOME Phase 4 output family with the same scenario registry, weathering compartments, and shoreline-segment semantics used by OpenDrift Phase 4.
+
+What is already in place:
+
+- `output/phase4/CASE_MINDORO_RETRO_2023/` contains real OpenDrift Phase 4 oil-budget, shoreline-arrival, and shoreline-segment outputs
+- Mindoro and DWH PyGNOME Phase 3 comparator tracks already exist as spatial transport comparators
+- helper code exists for parsing PyGNOME mass budgets and plotting OpenOil-versus-PyGNOME overlays
+- explicit read-only audit outputs now live under `output/phase4_crossmodel_comparability_audit/`
+
+Why comparison is still deferred:
+
+- Mindoro PyGNOME benchmark metadata explicitly records `weathering_enabled=false`
+- current stored PyGNOME NetCDF diagnostics collapse to 100% surface and 0% evaporated/dispersed/beached, which is not a defensible Phase 4 fate comparator
+- no stored PyGNOME shoreline-arrival or shoreline-segment output family exists
+- DWH PyGNOME remains a Phase 3 comparator branch and does not substitute for a matched Mindoro Phase 4 run
+
 ## Phase 5
 
 - Plain-language status: launcher/docs/package synchronization layer.
@@ -128,9 +156,121 @@ What is already in place:
 - matrix-driven launcher via `config/launcher_matrix.json` and `start.ps1`
 - `output/final_reproducibility_package/` with software, case, config, manifest, log, output, and phase-status indexes
 - synchronized documentation for launcher safety, command matrix, and current phase boundaries
+- `output/trajectory_gallery/` with a static technical figure manifest, index, and trajectory/overlay/Phase 4 figures built from existing artifacts only
+- `output/trajectory_gallery_panel/` with polished comparison boards, captions, talking points, and panel recommendations built from the existing gallery and stored outputs only
+- `output/figure_package_publication/` with canonical publication-grade single figures, side-by-side boards, captions, and defense talking points built from existing outputs only
+- `ui/` read-only dashboard pages that consume the publication package first, then expose panel/raw/archive artifacts only when advanced mode is enabled
 
 Optional future work still deferred:
 
-- trajectory gallery
-- read-only browser UI
+- interactive UI run controls
+- deeper artifact filtering inside the UI
 - DWH Phase 4 appendix pilot
+
+## Read-Only Dashboard
+
+- Plain-language status: implemented read-only local exploration layer for the current packaged outputs.
+- Scientifically reportable: `false`
+- Reportable now: `true`
+- Scientifically frozen: `false`
+- Inherited provisional: `true`
+- Scope: non-scientific dashboard over publication figures, panel/raw archives, final reproducibility indexes, and the Phase 4 cross-model audit.
+
+What is already in place:
+
+- panel-friendly mode that defaults to publication-grade figures and recommended defense boards
+- advanced mode that exposes panel/raw figures, manifests, logs, and lower-level artifact inspection
+- dedicated pages for Mindoro validation, DWH transfer validation, cross-model comparison, Phase 4 interpretation, and Phase 4 cross-model deferred status
+- an explicit read-only Phase 4 cross-model status page that states the comparison is deferred and links to blocker/next-step artifacts
+
+What remains deferred:
+
+- scientific rerun controls from the UI
+- deeper in-app artifact search/filtering beyond the current page-level controls
+
+## Trajectory Gallery
+
+- Plain-language status: implemented read-only technical figure layer for panel inspection.
+- Scientifically reportable: `false`
+- Reportable now: `true`
+- Scientifically frozen: `false`
+- Inherited provisional: `true`
+- Scope: static trajectories, overlays, comparison maps, and Mindoro Phase 4 shoreline/oil-type figures built from existing outputs without rerunning science.
+
+Panel-ready now:
+
+- Mindoro deterministic path figure
+- Mindoro sampled ensemble member trajectory summary
+- Mindoro centroid/corridor/hull view
+- Mindoro forecast-vs-observation overlays
+- Mindoro OpenDrift vs PyGNOME comparison maps
+- DWH deterministic path figure
+- DWH ensemble p50/p90 overlays
+- DWH OpenDrift vs PyGNOME comparison maps
+- Mindoro Phase 4 oil-budget figures
+- Mindoro Phase 4 shoreline-arrival and shoreline-segment figures
+
+Still optional future work:
+
+- deeper interactive filtering/search around the gallery inside the UI
+- interactive trajectory filtering/search
+
+## Trajectory Gallery Panel Pack
+
+- Plain-language status: implemented read-only polished board layer for panel presentation.
+- Scientifically reportable: `false`
+- Reportable now: `true`
+- Scientifically frozen: `false`
+- Inherited provisional: `true`
+- Scope: panel-ready trajectory, comparison, and Phase 4 boards with captions and talking points built from the raw gallery and stored outputs only.
+
+Recommended main-presentation boards:
+
+- Mindoro strict March 6 forecast-vs-observation board
+- Mindoro OpenDrift vs PyGNOME comparison board
+- Mindoro trajectory board
+- Mindoro Phase 4 oil-budget board
+- Mindoro Phase 4 shoreline-arrival / shoreline-impact board
+- DWH deterministic forecast-vs-observation board
+- DWH deterministic vs ensemble board
+- DWH OpenDrift vs PyGNOME comparison board
+
+Still optional future work:
+
+- alternate print-layout variants for every board
+- deeper interactive board filtering/search inside the UI
+
+## Publication Figure Package
+
+- Plain-language status: implemented canonical publication-grade presentation layer.
+- Scientifically reportable: `false`
+- Reportable now: `true`
+- Scientifically frozen: `false`
+- Inherited provisional: `true`
+- Scope: publication-grade single figures, side-by-side boards, captions, talking points, and a Phase 4 deferred-comparison note figure built from existing outputs without rerunning science.
+
+Recommended main-presentation figures:
+
+- Mindoro strict March 6 zoomed overlay and forced close-up
+- Mindoro strict March 6 publication board
+- Mindoro OpenDrift vs PyGNOME publication board
+- Mindoro trajectory publication board
+- Mindoro Phase 4 oil-budget publication board
+- Mindoro Phase 4 shoreline-impact publication board
+- Mindoro Phase 4 deferred-comparison note figure when the panel asks why no Phase 4 PyGNOME board is shown
+- DWH deterministic forecast-vs-observation board
+- DWH deterministic versus ensemble publication board
+- DWH OpenDrift versus PyGNOME publication board
+
+What this package adds beyond the panel gallery:
+
+- paper-ready single-image figures
+- forced locator, zoom, and close-up variants where the observed target is tiny
+- explicit publication registry, captions, and talking points
+- a canonical presentation layer while keeping the raw and panel galleries as archives
+
+What remains provisional:
+
+- Mindoro publication figures still inherit the unfinished Phase 1/2 frozen-baseline story
+- legacy recipe-family drift remains upstream and is documented rather than fully removed
+- DWH publication figures remain transfer-validation/support visuals, not a replacement for the Mindoro thesis case

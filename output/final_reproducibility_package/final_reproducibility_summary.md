@@ -6,7 +6,7 @@ This package synchronizes launcher/menu behavior, documentation, and reproducibi
 
 - PowerShell entrypoint: `./start.ps1 -List -NoPause`
 - Source-of-truth launcher matrix: `config/launcher_matrix.json`
-- Safe read-only launcher IDs: `phase1_audit`, `phase2_audit`, `final_validation_package`, `phase5_sync`
+- Safe read-only launcher IDs: `phase1_audit`, `phase2_audit`, `final_validation_package`, `phase5_sync`, `trajectory_gallery`, `trajectory_gallery_panel`, `figure_package_publication`
 
 ## Phase Status Highlights
 
@@ -20,12 +20,17 @@ This package synchronizes launcher/menu behavior, documentation, and reproducibi
 - `phase3c` / `C3`: DWH PyGNOME remains reportable as a comparator, not as truth. fss_1km=0.3197, fss_3km=0.3495, fss_5km=0.3689, fss_10km=0.4068
 - `phase4` / `mindoro_phase4`: Mindoro Phase 4 is scientifically reportable now, but inherited-provisional from upstream Phase 1/2 state.
 - `phase5` / `phase5_sync`: Launcher, docs, and reproducibility packaging are synchronized around the current repo state without rerunning expensive science.
+- `phase5` / `phase5_read_only_dashboard`: The local dashboard is now available as a read-only Phase 5 exploration layer built on the current packaging outputs and publication-grade figures.
 
 ## Packaging Sync Scope
 
 - Existing scientific Mindoro and DWH outputs were reused and not recomputed here.
 - The existing `output/final_validation_package/` bundle was reused rather than rebuilt from scratch.
 - Mindoro Phase 4 now participates in the reproducibility/package layer via the current `phase4_run_manifest.json` and verdict bundle.
+- The static `output/trajectory_gallery/` bundle now participates in the reproducibility/package layer as a read-only technical figure set.
+- The static `output/trajectory_gallery_panel/` bundle now participates in the reproducibility/package layer as the polished panel-ready figure pack.
+- The static `output/figure_package_publication/` bundle now participates in the reproducibility/package layer as the canonical publication-grade presentation package.
+- The new `ui/` layer now participates as a read-only local dashboard over the existing packaged outputs and figures rather than as a rerun control surface.
 
 ## Key Artifacts
 
@@ -33,3 +38,7 @@ This package synchronizes launcher/menu behavior, documentation, and reproducibi
 - Reproducibility manifest: `output/final_reproducibility_package/final_reproducibility_manifest.json`
 - Packaging sync memo: `output/final_reproducibility_package/phase5_packaging_sync_memo.md`
 - Launcher guide: `output/final_reproducibility_package/launcher_user_guide.md`
+- UI guide: `docs/UI_GUIDE.md`
+- Trajectory gallery manifest: `output/trajectory_gallery/trajectory_gallery_manifest.json`
+- Panel gallery manifest: `output/trajectory_gallery_panel/panel_figure_manifest.json`
+- Publication figure manifest: `output/figure_package_publication/publication_figure_manifest.json`

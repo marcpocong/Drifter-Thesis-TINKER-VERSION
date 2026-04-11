@@ -4,10 +4,11 @@ python_package,numpy,1.26.4,importlib.metadata,
 python_package,pandas,2.3.3,importlib.metadata,
 python_package,xarray,2024.11.0,importlib.metadata,
 python_package,PyYAML,6.0.3,importlib.metadata,
+python_package,streamlit,1.56.0,importlib.metadata,
 python_package,opendrift,1.14.9,importlib.metadata,
 python_package,geopandas,1.1.3,importlib.metadata,
 python_package,rasterio,1.4.4,importlib.metadata,
 python_package,shapely,2.1.2,importlib.metadata,
 python_package,pyproj,3.7.1,importlib.metadata,
 python_package,fiona,,importlib.metadata,
-launcher_catalog,launcher_matrix_catalog_version,phase5_launcher_matrix_v1,config/launcher_matrix.json,Source-of-truth launcher/menu matrix used by start.ps1 and Phase 5 sync.
+launcher_catalog,launcher_matrix_catalog_version,phase5_launcher_matrix_v2,config/launcher_matrix.json,Source-of-truth launcher/menu matrix used by start.ps1 and Phase 5 sync.

@@ -1,0 +1,45 @@
+panel_variant_default: slide
+title_format: "{board_title}"
+subtitle_format: "{case_label} | {date_label} | {phase_label}"
+palette:
+  background_land: "#d6d3d1"
+  observed_mask: "#4b5563"
+  deterministic_opendrift: "#2563eb"
+  ensemble_p50: "#0f766e"
+  ensemble_p90: "#60a5fa"
+  pygnome: "#9333ea"
+  source_point: "#dc2626"
+  initialization_polygon: "#f59e0b"
+  validation_polygon: "#111827"
+  centroid_path: "#0f172a"
+  corridor_hull: "#f97316"
+  ensemble_member_path: "#94a3b8"
+  oil_lighter: "#ff8c00"
+  oil_base: "#8c564b"
+  oil_heavier: "#4b0082"
+legend_labels:
+  observed_mask: "Accepted observed mask"
+  deterministic_opendrift: "OpenDrift deterministic"
+  ensemble_p50: "OpenDrift ensemble p50"
+  ensemble_p90: "OpenDrift ensemble p90"
+  pygnome: "PyGNOME deterministic comparator"
+  source_point: "Source point (provenance only)"
+  initialization_polygon: "Initialization polygon"
+  validation_polygon: "Validation polygon"
+  centroid_path: "Centroid path"
+  corridor_hull: "Sampled corridor / hull"
+  ensemble_member_path: "Sampled ensemble member paths"
+typography:
+  title_size: 19
+  subtitle_size: 10
+  panel_title_size: 11
+  caption_size: 10
+  note_size: 9
+layout:
+  slide_size_inches: [16, 9]
+  dpi: 180
+  figure_facecolor: "#f8fafc"
+  axes_facecolor: "#ffffff"
+  grid_color: "#cbd5e1"
+  legend_facecolor: "#ffffff"
+  legend_edgecolor: "#94a3b8"
