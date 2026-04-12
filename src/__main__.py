@@ -13,8 +13,8 @@ Container routing via the PIPELINE_PHASE environment variable:
   PIPELINE_PHASE=phase3b_extended_public -> Official extended-horizon public-observation Phase 3B guardrail
   PIPELINE_PHASE=phase3b_extended_public_scored -> Appendix-only short extended public-observation scoring
   PIPELINE_PHASE=phase3b_extended_public_scored_march23 -> Appendix-only March 23 extended public branch stress test
-  PIPELINE_PHASE=phase3b_extended_public_scored_march13_14_reinit -> Appendix-only March 13 -> March 14 NOAA reinit stress test
-  PIPELINE_PHASE=phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison -> Appendix-only March 13 -> March 14 NOAA reinit cross-model comparator
+  PIPELINE_PHASE=phase3b_extended_public_scored_march13_14_reinit -> Mindoro Phase 3B primary public-validation row (March 13 -> March 14 NOAA reinit with explicit shared-imagery caveat)
+  PIPELINE_PHASE=phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison -> Mindoro Phase 3A comparator-only March 13 -> March 14 cross-model lane
   PIPELINE_PHASE=horizon_survival_audit -> Read-only short-extended horizon survival diagnosis
   PIPELINE_PHASE=transport_retention_fix -> Official transport-retention sensitivity diagnostics
   PIPELINE_PHASE=official_rerun_r1 -> Promote selected R1 retention mode and rescore strict/short tracks
@@ -874,11 +874,11 @@ def run_phase3b_extended_public_scored_march13_14_reinit_phase():
         print("phase3b_extended_public_scored_march13_14_reinit is only supported for official spill-case workflows.")
         sys.exit(1)
 
-    print("Starting appendix-only March 13 -> March 14 NOAA reinit stress test...")
+    print("Starting Mindoro Phase 3B March 13 -> March 14 primary public-validation rerun...")
     print_workflow_context()
 
     results = run_phase3b_extended_public_scored_march13_14_reinit()
-    print("\nMarch 13 -> March 14 NOAA reinit stress test complete.")
+    print("\nMindoro Phase 3B March 13 -> March 14 primary public-validation rerun complete.")
     print(f"Outputs saved to: {results['output_dir']}")
     print(f"Start source key: {results['start_source_key']}")
     print(f"Target source key: {results['target_source_key']}")
@@ -903,11 +903,11 @@ def run_phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison_phas
         )
         sys.exit(1)
 
-    print("Starting appendix-only March 13 -> March 14 NOAA reinit cross-model comparator...")
+    print("Starting Mindoro Phase 3A March 13 -> March 14 comparator-only cross-model bundle...")
     print_workflow_context()
 
     results = run_phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison()
-    print("\nMarch 13 -> March 14 NOAA reinit cross-model comparator complete.")
+    print("\nMindoro Phase 3A March 13 -> March 14 comparator-only cross-model bundle complete.")
     print(f"Outputs saved to: {results['output_dir']}")
     print(f"Start source key: {results['start_source_key']}")
     print(f"Target source key: {results['target_source_key']}")

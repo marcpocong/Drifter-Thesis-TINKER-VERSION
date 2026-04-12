@@ -44,30 +44,30 @@ These captions are written for defense-panel use and are aligned with the public
 
 ## G. DWH deterministic publication package
 
-- `case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__daily_deterministic_board`: This board is ready for panel use because it shows the daily DWH comparisons with the same readable grammar across all three dates.
+- `case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__daily_deterministic_board`: This board is ready for panel use because it shows the separate DWH external transfer-validation story on observed daily truth masks with the same readable grammar across all three dates.
 - `case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__single_overlay__2010_05_21__zoom__paper__forecast_vs_observation`: This daily figure shows the first DWH date-composite comparison with both the forecast and observed footprint clearly visible.
 - `case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__single_overlay__2010_05_22__zoom__paper__forecast_vs_observation`: This daily figure shows the second DWH date-composite comparison with the same publication grammar.
 - `case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__single_overlay__2010_05_23__zoom__paper__forecast_vs_observation`: This daily figure shows the third DWH date-composite comparison with the same publication grammar.
 
 ## H. DWH deterministic vs ensemble publication package
 
-- `case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__deterministic_vs_ensemble_board`: This board is ready for panel use because it makes the deterministic-versus-ensemble footprint differences easy to see.
-- `case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__single_model__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_p50`: This figure shows the DWH ensemble p50 event corridor against the observed corridor.
-- `case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__single_model__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_p90`: This figure shows the wider p90 event corridor against the observed corridor.
-- `case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__single_model__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_deterministic`: This figure shows the deterministic DWH event corridor against the observed corridor in a paper-friendly format.
+- `case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__deterministic_vs_ensemble_board`: This board is ready for panel use because it compares deterministic, p50, and p90 against the observed DWH truth corridor on the same readiness-gated forcing stack.
+- `case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__single_model__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_p50`: This figure shows the DWH ensemble p50 event corridor against the observed DWH truth corridor on the same readiness-gated forcing stack.
+- `case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__single_model__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_p90`: This figure shows the wider DWH ensemble p90 event corridor against the observed DWH truth corridor on the same readiness-gated forcing stack.
+- `case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__single_model__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_deterministic`: This figure shows the readiness-gated HYCOM GOFS 3.1 currents + ERA5 winds + CMEMS wave/Stokes deterministic event corridor against the observed DWH truth corridor.
 
 ## I. DWH OpenDrift vs PyGNOME publication package
 
-- `case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__opendrift_vs_pygnome__comparison_board__2010_05_21_to_2010_05_23__board__slide__opendrift_vs_pygnome_board`: This board is ready for panel use because it makes the OpenDrift-versus-PyGNOME comparison explicit in the richer DWH case.
-- `case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__pygnome__single_model__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_pygnome`: This figure shows the PyGNOME comparator corridor against the observed corridor with the same visual grammar.
-- `case_dwh_retro_2010_72h__phase3c_external_case_run__observation__single_observation__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_observation`: This figure isolates the DWH observed event corridor so the panel can see the target footprint before looking at the model layers.
+- `case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__opendrift_vs_pygnome__comparison_board__2010_05_21_to_2010_05_23__board__slide__opendrift_vs_pygnome_board`: This board is ready for panel use because it keeps observed DWH masks as truth and makes the OpenDrift-versus-PyGNOME comparator framing explicit in the separate external case.
+- `case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__pygnome__single_model__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_pygnome`: This figure shows the PyGNOME comparator corridor against the observed DWH truth corridor while keeping PyGNOME in a comparator-only role.
+- `case_dwh_retro_2010_72h__phase3c_external_case_run__observation__single_observation__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_observation`: This figure isolates the observed DWH event corridor that serves as truth for the separate external transfer-validation case before any model comparison is shown.
 
 ## J. DWH trajectory publication package
 
-- `case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__pygnome__single_trajectory__2010_05_20_to_2010_05_23__zoom__paper__pygnome_trajectory`: This figure gives the panel a like-for-like PyGNOME trajectory picture using the same framing as the OpenDrift transport figures.
-- `case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__single_trajectory__2010_05_20_to_2010_05_23__zoom__paper__ensemble_sampled_trajectory`: This figure shows how the DWH ensemble spreads around the main transport pathway while staying readable.
-- `case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__single_trajectory__2010_05_20_to_2010_05_23__zoom__paper__deterministic_trajectory`: This figure gives the panel an intuitive picture of the DWH deterministic transport path.
-- `case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift_vs_pygnome__trajectory_board__2010_05_20_to_2010_05_23__board__slide__trajectory_board`: This board gives the panel a clean transport-path view of the DWH case before or after the footprint-comparison boards.
+- `case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__pygnome__single_trajectory__2010_05_20_to_2010_05_23__zoom__paper__pygnome_trajectory`: This figure gives the panel a like-for-like PyGNOME trajectory picture while keeping PyGNOME as comparator-only against the observed DWH truth masks.
+- `case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__single_trajectory__2010_05_20_to_2010_05_23__zoom__paper__ensemble_sampled_trajectory`: This figure shows how the DWH ensemble spreads around the main transport pathway while staying readable on the same readiness-gated forcing stack.
+- `case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__single_trajectory__2010_05_20_to_2010_05_23__zoom__paper__deterministic_trajectory`: This figure gives the panel an intuitive picture of the deterministic transport path behind the separate DWH external transfer-validation case.
+- `case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift_vs_pygnome__trajectory_board__2010_05_20_to_2010_05_23__board__slide__trajectory_board`: This board is appendix/support material for the separate DWH external transfer-validation case and explains transport path before score-based truth comparisons.
 
 ## K. Prototype 2016 OpenDrift vs PyGNOME support package
 

@@ -19,11 +19,17 @@ ensure_repo_root_on_path(__file__)
 
 import streamlit as st
 
+from src.core.artifact_status import get_artifact_status
 from ui.data_access import figure_subset
-from ui.pages.common import filter_family, render_figure_cards, render_page_intro, render_status_callout, render_table
+from ui.pages.common import render_figure_cards, render_page_intro, render_status_callout, render_table
 
 
 def render(state: dict, ui_state: dict) -> None:
+    deterministic_status = get_artifact_status("dwh_deterministic_transfer")
+    ensemble_status = get_artifact_status("dwh_ensemble_transfer")
+    comparator_status = get_artifact_status("dwh_crossmodel_comparator")
+    trajectory_status = get_artifact_status("dwh_trajectory_context")
+
     render_page_intro(
         "DWH Transfer Validation",
         "This page highlights the external rich-data transfer-validation success story, including deterministic overlays, deterministic-versus-ensemble figures, comparator boards, and DWH trajectory views.",
@@ -36,11 +42,25 @@ def render(state: dict, ui_state: dict) -> None:
         "info",
     )
 
-    family_codes = ["G", "H", "I", "J"]
-    figures = figure_subset(
+    deterministic_figures = figure_subset(
         ui_state["visual_layer"],
         case_id="CASE_DWH_RETRO_2010_72H",
-        family_codes=family_codes if ui_state["visual_layer"] == "publication" else None,
+        status_keys=[deterministic_status.key],
+    )
+    ensemble_figures = figure_subset(
+        ui_state["visual_layer"],
+        case_id="CASE_DWH_RETRO_2010_72H",
+        status_keys=[ensemble_status.key],
+    )
+    comparator_figures = figure_subset(
+        ui_state["visual_layer"],
+        case_id="CASE_DWH_RETRO_2010_72H",
+        status_keys=[comparator_status.key],
+    )
+    trajectory_figures = figure_subset(
+        ui_state["visual_layer"],
+        case_id="CASE_DWH_RETRO_2010_72H",
+        status_keys=[trajectory_status.key],
     )
 
     tabs = st.tabs(
@@ -55,16 +75,16 @@ def render(state: dict, ui_state: dict) -> None:
 
     with tabs[0]:
         render_figure_cards(
-            filter_family(figures, "G"),
-            title="DWH deterministic figures",
-            caption="Per-date overlays plus the event-corridor board are the most useful first-stop visuals for the DWH case.",
+            deterministic_figures,
+            title=deterministic_status.panel_label,
+            caption="Per-date overlays, event-corridor views, or stored deterministic path context are the most useful first-stop visuals for the DWH case.",
             limit=None if ui_state["advanced"] else 4,
         )
 
     with tabs[1]:
         render_figure_cards(
-            filter_family(figures, "H"),
-            title="DWH deterministic versus ensemble figures",
+            ensemble_figures,
+            title=ensemble_status.panel_label,
             caption="These figures explain how deterministic, p50, and p90 differ without asking the panel to parse raw threshold tables.",
             limit=None if ui_state["advanced"] else 4,
         )
@@ -72,20 +92,20 @@ def render(state: dict, ui_state: dict) -> None:
     with tabs[2]:
         render_status_callout(
             "Comparator framing",
-            "PyGNOME remains a comparator here, not truth. The value of this page is the explicit side-by-side interpretation of model behavior.",
+            comparator_status.panel_text,
             "info",
         )
         render_figure_cards(
-            filter_family(figures, "I"),
-            title="DWH OpenDrift versus PyGNOME figures",
+            comparator_figures,
+            title=comparator_status.panel_label,
             caption="Panel-friendly mode emphasizes the direct comparison board first.",
             limit=None if ui_state["advanced"] else 4,
         )
 
     with tabs[3]:
         render_figure_cards(
-            filter_family(figures, "J"),
-            title="DWH trajectory figures",
+            trajectory_figures,
+            title=trajectory_status.panel_label,
             caption="Trajectory views focus on deterministic paths, sampled ensemble spread, and the PyGNOME comparator path where available.",
             limit=None if ui_state["advanced"] else 4,
         )

@@ -80,7 +80,6 @@ class Phase2FinalizationAuditService:
         self.ensemble_source_path = self.repo_root / "src" / "services" / "ensemble.py"
         self.settings_path = self.repo_root / "config" / "settings.yaml"
         self.weathering_path = self.repo_root / "src" / "services" / "weathering.py"
-        self.phase1_baseline_path = self.repo_root / "config" / "phase1_baseline_selection.yaml"
         self.recipes_path = self.repo_root / "config" / "recipes.yaml"
         self.source_history_path = self.repo_root / "src" / "services" / "source_history_reconstruction_r1.py"
         self.extended_public_path = self.repo_root / "src" / "services" / "phase3b_extended_public_scored.py"
@@ -88,6 +87,7 @@ class Phase2FinalizationAuditService:
         self.forecast_manifest = _read_json(self.forecast_manifest_path)
         self.ensemble_manifest = _read_json(self.ensemble_manifest_path)
         self.loading_audit = _read_json(self.loading_audit_json_path)
+        self.phase1_baseline_path = self._baseline_selection_source_path()
         self.selected_recipe = str(
             ((self.forecast_manifest.get("recipe_selection") or {}).get("recipe"))
             or ((self.forecast_manifest.get("baseline_provenance") or {}).get("recipe"))
@@ -117,6 +117,23 @@ class Phase2FinalizationAuditService:
         if not path.exists():
             return ""
         return path.read_text(encoding="utf-8", errors="ignore")
+
+    def _relative_to_repo(self, path: Path) -> str:
+        try:
+            return str(path.relative_to(self.repo_root))
+        except ValueError:
+            return str(path)
+
+    def _baseline_selection_source_path(self) -> Path:
+        source_path = str(
+            ((self.forecast_manifest.get("recipe_selection") or {}).get("source_path"))
+            or ((self.forecast_manifest.get("baseline_provenance") or {}).get("source_path"))
+            or "config/phase1_baseline_selection.yaml"
+        )
+        path = Path(source_path)
+        if not path.is_absolute():
+            path = self.repo_root / path
+        return path
 
     def _scan_lines(self, paths: list[Path], needles: list[str]) -> list[dict[str, Any]]:
         hits: list[dict[str, Any]] = []
@@ -599,7 +616,7 @@ class Phase2FinalizationAuditService:
                     "so the Phase 2 frozen-baseline story remains upstream-provisional."
                 ),
                 evidence_paths=[
-                    str(self.phase1_baseline_path.relative_to(self.repo_root)),
+                    self._relative_to_repo(self.phase1_baseline_path),
                     str(self.recipes_path.relative_to(self.repo_root)),
                     str(self.ensemble_source_path.relative_to(self.repo_root)),
                     str(self.phase_status_path.relative_to(self.repo_root)),

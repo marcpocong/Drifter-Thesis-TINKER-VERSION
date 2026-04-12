@@ -2,9 +2,6 @@
 
 ## Start Here
 
-- `case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__opendrift_vs_pygnome__comparison_board__2010_05_21_to_2010_05_23__board__slide__opendrift_vs_pygnome_board`: This board is ready for panel use because it makes the OpenDrift-versus-PyGNOME comparison explicit in the richer DWH case.
-- `case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__deterministic_vs_ensemble_board`: This board is ready for panel use because it makes the deterministic-versus-ensemble footprint differences easy to see.
-- `case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__daily_deterministic_board`: This board is ready for panel use because it shows the daily DWH comparisons with the same readable grammar across all three dates.
 - `case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift__single_model_overlay__2023_03_14__single__paper__march14_crossmodel_r1_overlay`: This figure shows the top-ranked OpenDrift model in the promoted March 14 cross-model bundle.
 - `case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift_vs_pygnome__comparison_board__2023_03_14__board__slide__mindoro_crossmodel_board`: This board answers the cross-model question on the promoted March 14 target without treating PyGNOME as truth.
 - `case_mindoro_retro_2023__phase3b_reinit_primary__opendrift__comparison_board__2023_03_13_to_2023_03_14__board__slide__mindoro_primary_validation_board`: This is now the main Mindoro presentation board because it centers the promoted March 13 -> March 14 validation pair and the best OpenDrift result.
@@ -13,6 +10,9 @@
 - `case_mindoro_retro_2023__phase4__openoil__comparison_board__2023_03_03_to_2023_03_06__all_scenarios__board__slide__shoreline_impact_board`: This board is ready for panel use because it makes the shoreline-impact story legible without asking the reader to parse raw CSVs.
 - `case_mindoro_retro_2023__phase4__openoil__single_summary__2023_03_03_to_2023_03_06__single__paper__oil_budget_summary`: This summary figure is the fastest way to show how oil type changes the final weathering and shoreline burden story.
 - `case_mindoro_retro_2023__phase4__openoil__single_summary__2023_03_03_to_2023_03_06__single__paper__shoreline_arrival`: This figure gives the panel a clear timing summary of when each oil scenario first reaches shoreline segments.
+- `case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__daily_deterministic_board`: This board is ready for panel use because it shows the separate DWH external transfer-validation story on observed daily truth masks with the same readable grammar across all three dates.
+- `case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__deterministic_vs_ensemble_board`: This board is ready for panel use because it compares deterministic, p50, and p90 against the observed DWH truth corridor on the same readiness-gated forcing stack.
+- `case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__opendrift_vs_pygnome__comparison_board__2010_05_21_to_2010_05_23__board__slide__opendrift_vs_pygnome_board`: This board is ready for panel use because it keeps observed DWH masks as truth and makes the OpenDrift-versus-PyGNOME comparator framing explicit in the separate external case.
 
 ## Paper-Ready Singles
 

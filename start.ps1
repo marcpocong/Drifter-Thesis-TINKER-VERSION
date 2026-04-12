@@ -243,6 +243,7 @@ function Show-Help {
     Write-Host "  - Phase 1 is architecture-audited, but the full 2016-2022 production rerun is still needed." -ForegroundColor White
     Write-Host "  - Phase 2 is scientifically usable, but not scientifically frozen." -ForegroundColor White
     Write-Host "  - Phase 4 is scientifically reportable now for Mindoro, but inherited-provisional from the upstream Phase 1/2 state." -ForegroundColor White
+    Write-Host "  - DWH Phase 3C stays a separate external transfer-validation story with readiness-gated HYCOM GOFS 3.1 + ERA5 + CMEMS wave/Stokes forcing; observed masks remain truth and PyGNOME remains comparator-only." -ForegroundColor White
     Write-Host "  - Prototype mode remains available for debugging and regression only." -ForegroundColor White
     Write-Host ""
     Write-Host "Not implemented yet:" -ForegroundColor Yellow

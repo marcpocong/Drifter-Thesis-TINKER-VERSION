@@ -8,12 +8,13 @@ from src.core.constants import REGION
 logger = logging.getLogger(__name__)
 
 class DrifterTracker:
-    def __init__(self, region=REGION):
-        self.region = region
+    def __init__(self, domain_bounds=REGION):
+        self.domain_bounds = domain_bounds
+        self.region = domain_bounds
 
     def find_drifters(self, start_date: str, end_date: str = None) -> pd.DataFrame:
         """
-        Check if there are any drifters in the region within the specified date range.
+        Check if there are any drifters in the active domain within the specified date range.
         
         Args:
             start_date (str): Start date in 'YYYY-MM-DD' format.
@@ -32,7 +33,7 @@ class DrifterTracker:
         start_str = start_dt.strftime("%Y-%m-%dT00:00:00Z")
         end_str = end_dt.strftime("%Y-%m-%dT23:59:59Z")
         
-        logger.info(f"Searching for drifters in region {self.region} from {start_date} to {end_date or start_date}...")
+        logger.info(f"Searching for drifters in domain {self.domain_bounds} from {start_date} to {end_date or start_date}...")
 
         try:
             e = ERDDAP(
@@ -44,10 +45,10 @@ class DrifterTracker:
             e.constraints = {
                 "time>=": start_str,
                 "time<=": end_str,
-                "latitude>=": self.region[2],
-                "latitude<=": self.region[3],
-                "longitude>=": self.region[0],
-                "longitude<=": self.region[1],
+                "latitude>=": self.domain_bounds[2],
+                "latitude<=": self.domain_bounds[3],
+                "longitude>=": self.domain_bounds[0],
+                "longitude<=": self.domain_bounds[1],
             }
             e.variables = ["time", "latitude", "longitude", "ID"]
             
@@ -113,11 +114,11 @@ class DrifterTracker:
         Finds and plots drifters for the given date range.
         If end_date is None, tracks for a single day.
         """
-        # 1. Find drifters in the date range in the region
+        # 1. Find drifters in the date range within the active display domain.
         df_found = self.find_drifters(start_date, end_date)
         
         if df_found.empty:
-            logger.info("No drifters found for this period in the region.")
+            logger.info("No drifters found for this period in the active domain.")
             return
         
         unique_ids = df_found['ID'].unique()
@@ -139,7 +140,7 @@ class DrifterTracker:
         from src.helpers.plotting import plot_drifter_track
         plot_drifter_track(
             output_path=output_path,
-            region=self.region,
+            domain_bounds=self.domain_bounds,
             unique_ids=unique_ids,
             df_found=df_found,
             get_trajectory_func=self.get_trajectory,

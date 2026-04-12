@@ -42,7 +42,7 @@ except ImportError:  # pragma: no cover - runtime guarded
 
 RERUN_BY_HYPOTHESIS = {
     "seed_geometry_bias_or_rescue_path_error": "initialization repair rerun",
-    "prototype_region_contamination_in_forcing_subset_or_runtime_domain": "forcing-domain rerun",
+    "broad_case_domain_contamination_in_forcing_subset_or_runtime_domain": "forcing-domain rerun",
     "coastal_masking_or_missing_shoreline_interaction": "shoreline-mask rerun",
     "wave_or_stokes_attach_mismatch": "forcing-domain rerun",
     "forcing_timing_or_halo_extent_issue": "forcing-domain rerun",
@@ -190,9 +190,9 @@ def rank_displacement_hypotheses(metrics: dict) -> list[dict]:
     domain_score = 0.10
     domain_support = []
     domain_counter = []
-    if metrics["forcing_bounds_match_legacy_region_plus_pad"]:
+    if metrics["forcing_bounds_match_broad_case_domain_plus_pad"]:
         domain_score += 0.30
-        domain_support.append("Current forcing files match the legacy case region plus the historical 3 degree pad.")
+        domain_support.append("Current forcing files match the broad Mindoro spill-case domain plus the historical 3 degree pad.")
     if metrics["forcing_bounds_cover_canonical_halo"]:
         domain_score -= 0.05
         domain_counter.append("The legacy forcing subsets still fully cover the canonical scoring domain plus the 0.5 degree halo.")
@@ -201,12 +201,12 @@ def rank_displacement_hypotheses(metrics: dict) -> list[dict]:
         domain_counter.append("Runtime products already use the canonical scoring grid.")
     rows.append(
         {
-            "hypothesis_id": "prototype_region_contamination_in_forcing_subset_or_runtime_domain",
-            "label": "prototype-region contamination in forcing subset/runtime domain",
+            "hypothesis_id": "broad_case_domain_contamination_in_forcing_subset_or_runtime_domain",
+            "label": "broad-case-domain contamination in forcing subset/runtime domain",
             "likelihood_score": domain_score,
             "supporting_evidence": " | ".join(domain_support),
             "contradicting_evidence": " | ".join(domain_counter),
-            "recommended_rerun": RERUN_BY_HYPOTHESIS["prototype_region_contamination_in_forcing_subset_or_runtime_domain"],
+            "recommended_rerun": RERUN_BY_HYPOTHESIS["broad_case_domain_contamination_in_forcing_subset_or_runtime_domain"],
         }
     )
 
@@ -406,7 +406,12 @@ def run_displacement_audit() -> dict:
     current_bounds = _forcing_bounds(paths["current_forcing"])
     wind_bounds = _forcing_bounds(paths["wind_forcing"])
     wave_bounds = _forcing_bounds(paths["wave_forcing"])
-    legacy_region_plus_pad = [float(case.region[0] - 3.0), float(case.region[1] + 3.0), float(case.region[2] - 3.0), float(case.region[3] + 3.0)]
+    broad_case_domain_plus_pad = [
+        float(case.mindoro_case_domain[0] - 3.0),
+        float(case.mindoro_case_domain[1] + 3.0),
+        float(case.mindoro_case_domain[2] - 3.0),
+        float(case.mindoro_case_domain[3] + 3.0),
+    ]
     halo_bounds = derive_bbox_from_display_bounds(scoring_grid.get("display_bounds_wgs84", list(case.region)), float(scoring_grid.get("forcing_bbox_halo_degrees", 0.5)))
     covers = lambda bounds, target: bounds[0] <= target[0] and bounds[1] >= target[1] and bounds[2] <= target[2] and bounds[3] >= target[3]
 
@@ -432,7 +437,7 @@ def run_displacement_audit() -> dict:
         "current_tail_extension_max_gap_hours": float(max(gap_values) if gap_values else 0.0),
         "recipe_best_mean_fss": float(best_recipe["mean_fss"]),
         "recipe_best_centroid_gain_m": float(baseline_recipe["centroid_distance_m"] - best_recipe["centroid_distance_m"]),
-        "forcing_bounds_match_legacy_region_plus_pad": all(np.allclose(item["bounds_wgs84"], legacy_region_plus_pad) for item in (current_bounds, wind_bounds, wave_bounds)),
+        "forcing_bounds_match_broad_case_domain_plus_pad": all(np.allclose(item["bounds_wgs84"], broad_case_domain_plus_pad) for item in (current_bounds, wind_bounds, wave_bounds)),
         "forcing_bounds_cover_canonical_halo": all(covers(item["bounds_wgs84"], halo_bounds) for item in (current_bounds, wind_bounds, wave_bounds)),
         "runtime_grid_is_canonical": bool((forecast_manifest.get("grid") or {}).get("grid_id") == (ensemble_manifest.get("grid") or {}).get("grid_id") == (phase3b_forensics.get("primary_pairing") or {}).get("grid_id")),
         "march3_rescue_applied": "rescued scaled-to-near-zero coordinates" in str(init_report["notes"]),
@@ -481,12 +486,12 @@ def run_displacement_audit() -> dict:
             "last_control_distance_to_obs_m": float(control_track.iloc[-1]["dist_to_obs_centroid_m"]),
         },
         "forcing_bounds_check": {
-            "legacy_region_plus_3deg_pad": legacy_region_plus_pad,
+            "broad_mindoro_case_domain_plus_3deg_pad": broad_case_domain_plus_pad,
             "canonical_scoring_domain_plus_0_5deg_halo": halo_bounds,
             "currents": current_bounds,
             "winds": wind_bounds,
             "waves": wave_bounds,
-            "forcing_bounds_match_legacy_region_plus_pad": metrics["forcing_bounds_match_legacy_region_plus_pad"],
+            "forcing_bounds_match_broad_case_domain_plus_pad": metrics["forcing_bounds_match_broad_case_domain_plus_pad"],
             "forcing_bounds_cover_canonical_halo": metrics["forcing_bounds_cover_canonical_halo"],
         },
         "runtime_logic_check": {
@@ -548,8 +553,8 @@ def run_displacement_audit() -> dict:
             "",
             "## Conclusion",
             "",
-            "The remaining displacement is most consistent with the current all-sea coastal treatment. The current on-disk forcing subsets also still reflect the old broad region, but recipe changes did not materially improve overlap and wave attachment is clean.",
-            "Future official prep runs should use the canonical scoring-grid display bounds plus the 0.5 degree halo instead of the legacy broad region field.",
+            "The remaining displacement is most consistent with the current all-sea coastal treatment. The current on-disk forcing subsets also still reflect the broad Mindoro spill-case domain, but recipe changes did not materially improve overlap and wave attachment is clean.",
+            "Future official prep runs should use the canonical scoring-grid display bounds plus the 0.5 degree halo instead of the broad Mindoro spill-case domain field.",
         ]
     )
     report_md.write_text("\n".join(lines) + "\n", encoding="utf-8")

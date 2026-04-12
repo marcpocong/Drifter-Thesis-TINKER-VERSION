@@ -10,7 +10,7 @@
     {
       "category_id": "sensitivity_appendix_tracks",
       "label": "Sensitivity / appendix tracks",
-      "description": "Supporting branches that are informative but not the main reportable path."
+      "description": "Supporting branches and backward-compatible aliases that are informative but not the main reportable path."
     },
     {
       "category_id": "read_only_packaging_help_utilities",
@@ -30,11 +30,11 @@
       "category_id": "scientific_reportable_tracks",
       "workflow_mode": "mindoro_retro_2023",
       "label": "Mindoro reportable core bundle",
-      "description": "Prep, official Phase 1/2, strict Phase 3B, broader public support, and Mindoro Phase 4.",
+      "description": "Prep, official Phase 1/2, promoted Phase 3B primary public validation, March 6 legacy honesty row, broader public support, and Mindoro Phase 4.",
       "service_profile": "pipeline_only",
       "rerun_cost": "expensive",
       "safe_default": false,
-      "notes": "Use only when an intentional scientific rerun of the main Mindoro reportable path is desired.",
+      "notes": "Use only when an intentional scientific rerun of the main Mindoro reportable path, including the promoted B1 row, is desired.",
       "steps": [
         {
           "phase": "prep",
@@ -47,19 +47,53 @@
           "description": "Official deterministic control and 50-member ensemble forecast"
         },
         {
+          "phase": "phase3b_extended_public",
+          "service": "pipeline",
+          "description": "Extended-horizon guardrail inventory and NOAA source ingestion for the promoted B1 row"
+        },
+        {
+          "phase": "phase3b_extended_public_scored_march13_14_reinit",
+          "service": "pipeline",
+          "description": "March 13 -> March 14 primary public-validation row"
+        },
+        {
           "phase": "3b",
           "service": "pipeline",
-          "description": "Strict March 6 public-observation stress test"
+          "description": "Legacy March 6 honesty/reference row"
         },
         {
           "phase": "phase3b_multidate_public",
           "service": "pipeline",
-          "description": "Broader public-observation support track"
+          "description": "Legacy broader public-support reference track"
         },
         {
           "phase": "phase4_oiltype_and_shoreline",
           "service": "pipeline",
           "description": "Mindoro Phase 4 oil-type fate and shoreline-impact workflow"
+        }
+      ]
+    },
+    {
+      "entry_id": "mindoro_phase3b_primary_public_validation",
+      "menu_order": 18,
+      "category_id": "scientific_reportable_tracks",
+      "workflow_mode": "mindoro_retro_2023",
+      "label": "Mindoro Phase 3B primary public validation",
+      "description": "Promoted March 13 -> March 14 NOAA public-validation row with explicit shared-imagery caveat while preserving the frozen March 3 -> March 6 case definition and March 6 legacy outputs.",
+      "service_profile": "pipeline_only",
+      "rerun_cost": "expensive",
+      "safe_default": false,
+      "notes": "Canonical B1 builder. This does not delete or relabel the March 6 legacy honesty row.",
+      "steps": [
+        {
+          "phase": "phase3b_extended_public",
+          "service": "pipeline",
+          "description": "Extended-horizon guardrail inventory and NOAA source ingestion"
+        },
+        {
+          "phase": "phase3b_extended_public_scored_march13_14_reinit",
+          "service": "pipeline",
+          "description": "March 13 -> March 14 primary public-validation row"
         }
       ]
     },
@@ -107,11 +141,11 @@
       "category_id": "scientific_reportable_tracks",
       "workflow_mode": "dwh_retro_2010",
       "label": "DWH Phase 3C reportable bundle",
-      "description": "External-case setup, scientific forcing readiness, deterministic transfer validation, ensemble comparison, and PyGNOME comparator.",
+      "description": "External-case setup, readiness-gated scientific forcing selection, deterministic transfer validation, ensemble comparison, and comparator-only PyGNOME work on the DWH truth masks.",
       "service_profile": "mixed_pipeline_and_gnome",
       "rerun_cost": "expensive",
       "safe_default": false,
-      "notes": "This is the full DWH scientific rerun path and should only be used intentionally.",
+      "notes": "Separate external transfer-validation story only. Mindoro remains the main Philippine thesis case; DWH observed masks remain truth; PyGNOME remains comparator-only; current frozen stack is HYCOM GOFS 3.1 + ERA5 + CMEMS wave/Stokes.",
       "steps": [
         {
           "phase": "phase3c_external_case_setup",
@@ -121,22 +155,22 @@
         {
           "phase": "dwh_phase3c_scientific_forcing_ready",
           "service": "pipeline",
-          "description": "Scientific forcing readiness check"
+          "description": "Readiness-gated scientific forcing check and stack freeze"
         },
         {
           "phase": "phase3c_external_case_run",
           "service": "pipeline",
-          "description": "Deterministic external transfer validation"
+          "description": "Deterministic external transfer validation against observed DWH truth masks"
         },
         {
           "phase": "phase3c_external_case_ensemble_comparison",
           "service": "pipeline",
-          "description": "Deterministic-vs-ensemble comparison"
+          "description": "Deterministic-vs-ensemble comparison against observed DWH truth masks"
         },
         {
           "phase": "phase3c_dwh_pygnome_comparator",
           "service": "gnome",
-          "description": "PyGNOME comparator against the DWH truth masks"
+          "description": "Comparator-only PyGNOME comparison against observed DWH truth masks"
         }
       ]
     },
@@ -146,11 +180,11 @@
       "category_id": "sensitivity_appendix_tracks",
       "workflow_mode": "mindoro_retro_2023",
       "label": "Mindoro appendix / sensitivity bundle",
-      "description": "Public appendix, extended public scoring, retention, initialization, source-history, PyGNOME comparison, threshold, and recipe sensitivity branches.",
+      "description": "Public appendix, extended public scoring, March 23 stress test, retention, initialization, source-history, comparator, threshold, and recipe sensitivity branches.",
       "service_profile": "mixed_pipeline_and_gnome",
       "rerun_cost": "expensive",
       "safe_default": false,
-      "notes": "These tracks are informative and reportable as support material, but they are not the main-text scientific core.",
+      "notes": "These tracks are informative and reportable as support material, but the promoted B1 row now has its own scientific launcher entry.",
       "steps": [
         {
           "phase": "public_obs_appendix",
@@ -175,12 +209,12 @@
         {
           "phase": "phase3b_extended_public_scored_march13_14_reinit",
           "service": "pipeline",
-          "description": "March 13 -> March 14 NOAA reinit branch stress test"
+          "description": "Rebuild/reuse the promoted March 13 -> March 14 B1 source bundle for downstream support tracks"
         },
         {
           "phase": "phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison",
           "service": "gnome",
-          "description": "March 13 -> March 14 NOAA reinit cross-model comparator"
+          "description": "March 13 -> March 14 comparator-only cross-model lane"
         },
         {
           "phase": "horizon_survival_audit",
@@ -272,12 +306,12 @@
       "menu_order": 47,
       "category_id": "sensitivity_appendix_tracks",
       "workflow_mode": "mindoro_retro_2023",
-      "label": "Mindoro March 13-14 NOAA reinit stress test",
-      "description": "Appendix-only March 13 NOAA polygon reinitialization scored against the March 14 NOAA polygon over the R0 and R1_previous branches.",
+      "label": "Legacy alias: Mindoro March 13-14 primary validation bundle",
+      "description": "Backward-compatible alias for the promoted March 13 -> March 14 B1 public-validation row plus the comparator-only March 14 cross-model lane.",
       "service_profile": "mixed_pipeline_and_gnome",
       "rerun_cost": "expensive",
       "safe_default": false,
-      "notes": "Appendix-only. This does not replace the frozen strict March 6 official result or the final validation package.",
+      "notes": "Compatibility alias retained for older scripts. B1 is primary, B2 is legacy honesty-only, and PyGNOME remains comparator-only.",
       "steps": [
         {
           "phase": "phase3b_extended_public",
@@ -287,12 +321,12 @@
         {
           "phase": "phase3b_extended_public_scored_march13_14_reinit",
           "service": "pipeline",
-          "description": "March 13 -> March 14 NOAA polygon reinit branch comparison"
+          "description": "March 13 -> March 14 primary public-validation row"
         },
         {
           "phase": "phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison",
           "service": "gnome",
-          "description": "March 13 -> March 14 NOAA reinit cross-model comparator"
+          "description": "March 13 -> March 14 comparator-only cross-model lane"
         }
       ]
     },

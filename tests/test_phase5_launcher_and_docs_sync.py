@@ -445,6 +445,23 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
             self.assertTrue((phase_status_df["track_id"] == "B1").any())
             self.assertTrue((phase_status_df["track_id"] == "B2").any())
             self.assertTrue((phase_status_df["track_id"] == "B3").any())
+            phase_status_by_track = phase_status_df.set_index("track_id")
+            self.assertEqual(
+                phase_status_by_track.loc["B1", "track_label"],
+                "Mindoro March 13 -> March 14 NOAA reinit primary validation",
+            )
+            self.assertEqual(
+                phase_status_by_track.loc["C1", "track_label"],
+                "DWH deterministic external transfer validation",
+            )
+
+            case_registry_df = pd.read_csv(results["final_case_registry_csv"])
+            prototype_2021 = case_registry_df[case_registry_df["case_id"] == "prototype_2021"].iloc[0]
+            prototype_2016 = case_registry_df[case_registry_df["case_id"] == "prototype_2016"].iloc[0]
+            self.assertIn("accepted-segment debug support", prototype_2021["mode_label"])
+            self.assertIn("not final Phase 1 evidence", prototype_2021["notes"])
+            self.assertIn("legacy debug support", prototype_2016["mode_label"].lower())
+            self.assertIn("not final Phase 1 evidence", prototype_2016["notes"])
 
             manifest_index_df = pd.read_csv(results["final_manifest_index_csv"])
             optional_row = manifest_index_df[manifest_index_df["track_id"] == "dwh_phase4_appendix_pilot"].iloc[0]

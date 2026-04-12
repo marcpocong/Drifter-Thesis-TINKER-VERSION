@@ -1,6 +1,6 @@
 {
   "phase": "phase5_launcher_and_docs_sync",
-  "generated_at_utc": "2026-04-12T05:55:54.401642+00:00",
+  "generated_at_utc": "2026-04-12T12:05:29.325679+00:00",
   "repo_root": "/app",
   "output_dir": "output/final_reproducibility_package",
   "launcher_catalog": {
@@ -24,6 +24,15 @@
     "package_case_registry_path": "output/final_validation_package/final_validation_case_registry.csv",
     "scientific_scores_recomputed": false
   },
+  "mindoro_primary_validation_promotion": {
+    "base_case_definition_path": "config/case_mindoro_retro_2023.yaml",
+    "case_freeze_amendment_path": "config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml",
+    "primary_launcher_entry_id": "mindoro_phase3b_primary_public_validation",
+    "launcher_alias_entry_id": "mindoro_march13_14_noaa_reinit_stress_test",
+    "base_case_window": "2023-03-03_to_2023-03-06",
+    "promoted_primary_window": "2023-03-13_to_2023-03-14",
+    "legacy_row_retained": "B2"
+  },
   "docs_updated": [
     "README.md",
     "docs/PHASE_STATUS.md",
@@ -33,6 +42,7 @@
     "docs/QUICKSTART.md",
     "docs/COMMAND_MATRIX.md",
     "docs/LAUNCHER_USER_GUIDE.md",
+    "docs/MINDORO_PRIMARY_VALIDATION_MIGRATION.md",
     "docs/UI_GUIDE.md"
   ],
   "artifacts": {
@@ -89,7 +99,7 @@
       "main_blocker": "Comparator-only track with a shared-imagery caveat; upstream Mindoro transport baseline is still not frozen.",
       "reportable_now": true,
       "reportability_scope": "comparative_benchmark_discussion",
-      "summary": "Mindoro March 13 -> March 14 cross-model comparison remains scientifically informative as a comparator benchmark. fss_1km=0.0000, fss_3km=0.0441, fss_5km=0.1371, fss_10km=0.2490",
+      "summary": "Comparator-only lane on the promoted March 14 target. fss_1km=0.0000, fss_3km=0.0441, fss_5km=0.1371, fss_10km=0.2490",
       "evidence_path": "output/final_validation_package/final_validation_manifest.json"
     },
     {
@@ -103,7 +113,7 @@
       "main_blocker": "The frozen recipe still comes from three legacy prototype dates, not from a completed 2016-2022 regional drifter-segment study.",
       "reportable_now": true,
       "reportability_scope": "main_text_primary_validation",
-      "summary": "Mindoro March 13 -> March 14 is the promoted primary validation, reported with the explicit March 12 imagery caveat. fss_1km=0.0000, fss_3km=0.0441, fss_5km=0.1371, fss_10km=0.2490",
+      "summary": "Promoted primary validation; inherited-provisional; not frozen. fss_1km=0.0000, fss_3km=0.0441, fss_5km=0.1371, fss_10km=0.2490",
       "evidence_path": "output/final_validation_package/final_validation_manifest.json"
     },
     {
@@ -117,7 +127,7 @@
       "main_blocker": "The frozen recipe still comes from three legacy prototype dates, not from a completed 2016-2022 regional drifter-segment study.",
       "reportable_now": true,
       "reportability_scope": "legacy_sparse_reference",
-      "summary": "Mindoro March 6 remains a legacy sparse reference and should not be silently discarded. fss_1km=0.0000, fss_3km=0.0000, fss_5km=0.0000, fss_10km=0.0000",
+      "summary": "Legacy honesty reference; not the promoted primary row. fss_1km=0.0000, fss_3km=0.0000, fss_5km=0.0000, fss_10km=0.0000",
       "evidence_path": "output/final_validation_package/final_validation_manifest.json"
     },
     {
@@ -131,7 +141,7 @@
       "main_blocker": "The frozen recipe still comes from three legacy prototype dates, not from a completed 2016-2022 regional drifter-segment study.",
       "reportable_now": true,
       "reportability_scope": "legacy_broader_support_reference",
-      "summary": "Mindoro March 3-6 broader-support remains scientifically informative legacy context, not a replacement for B1. fss_1km=0.1722, fss_3km=0.2004, fss_5km=0.2166, fss_10km=0.2438",
+      "summary": "Legacy broader-support context; not a primary row. fss_1km=0.1722, fss_3km=0.2004, fss_5km=0.2166, fss_10km=0.2438",
       "evidence_path": "output/final_validation_package/final_validation_manifest.json"
     },
     {
@@ -145,7 +155,7 @@
       "main_blocker": "The frozen recipe still comes from three legacy prototype dates, not from a completed 2016-2022 regional drifter-segment study.",
       "reportable_now": true,
       "reportability_scope": "external_rich_data_transfer_validation",
-      "summary": "DWH deterministic transfer validation is a reportable external-case success. fss_1km=0.5033, fss_3km=0.5523, fss_5km=0.5700, fss_10km=0.6018",
+      "summary": "Main DWH transfer-validation track. fss_1km=0.5033, fss_3km=0.5523, fss_5km=0.5700, fss_10km=0.6018",
       "evidence_path": "output/final_validation_package/final_validation_manifest.json"
     },
     {
@@ -159,7 +169,7 @@
       "main_blocker": "The frozen recipe still comes from three legacy prototype dates, not from a completed 2016-2022 regional drifter-segment study.",
       "reportable_now": true,
       "reportability_scope": "external_rich_data_transfer_validation",
-      "summary": "DWH ensemble p50 is reportable and leads the overall mean FSS comparison under the current case definition. fss_1km=0.4997, fss_3km=0.5299, fss_5km=0.5467, fss_10km=0.5790",
+      "summary": "DWH ensemble comparison on the same truth masks. fss_1km=0.4997, fss_3km=0.5299, fss_5km=0.5467, fss_10km=0.5790",
       "evidence_path": "output/final_validation_package/final_validation_manifest.json"
     },
     {
@@ -173,13 +183,13 @@
       "main_blocker": "Comparator-only track; PyGNOME is not truth and remains below OpenDrift on the current DWH case.",
       "reportable_now": true,
       "reportability_scope": "cross_model_comparator",
-      "summary": "DWH PyGNOME remains reportable as a comparator, not as truth. fss_1km=0.3197, fss_3km=0.3495, fss_5km=0.3689, fss_10km=0.4068",
+      "summary": "DWH cross-model comparator; PyGNOME not truth. fss_1km=0.3197, fss_3km=0.3495, fss_5km=0.3689, fss_10km=0.4068",
       "evidence_path": "output/final_validation_package/final_validation_manifest.json"
     },
     {
       "phase_id": "phase4",
       "track_id": "mindoro_phase4",
-      "track_label": "Mindoro Phase 4 oil-type and shoreline workflow",
+      "track_label": "Mindoro Phase 4 oil-budget interpretation",
       "readiness_status": "scientifically_reportable_inherited_provisional",
       "scientifically_reportable": true,
       "scientifically_frozen": false,
@@ -187,7 +197,7 @@
       "main_blocker": "The frozen recipe still comes from three legacy prototype dates, not from a completed 2016-2022 regional drifter-segment study.",
       "reportable_now": true,
       "reportability_scope": "mindoro_oil_type_and_shoreline_interpretation",
-      "summary": "Mindoro Phase 4 is scientifically reportable now, but inherited-provisional from upstream Phase 1/2 state.",
+      "summary": "Phase 4 OpenDrift/OpenOil-only interpretation; inherited-provisional.",
       "evidence_path": "output/phase4/CASE_MINDORO_RETRO_2023/phase4_run_manifest.json"
     },
     {
@@ -220,7 +230,7 @@
     }
   ],
   "manifest_index_summary": {
-    "row_count": 116,
+    "row_count": 118,
     "missing_optional_artifacts": [
       "output/phase4/CASE_DWH_RETRO_2010_72H/phase4_run_manifest.json"
     ]

@@ -56,15 +56,18 @@ Read-only utilities:
 Intentional scientific reruns:
 
 - `phase1_production_rerun`
+- `mindoro_phase3b_primary_public_validation`
 - `mindoro_reportable_core`
 - `mindoro_phase4_only`
 - `dwh_reportable_bundle`
 
 `phase1_production_rerun` is intentionally expensive and stages `output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml` only. It does not auto-overwrite `config/phase1_baseline_selection.yaml`.
+`mindoro_phase3b_primary_public_validation` is the canonical March 13 -> March 14 Phase 3B public-validation entry. It preserves the original March 3 -> March 6 case YAML and relies on the separate amendment file `config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml`.
 
 Appendix and sensitivity:
 
 - `mindoro_appendix_sensitivity_bundle`
+- `mindoro_march13_14_noaa_reinit_stress_test` remains available only as a backward-compatible alias for the promoted B1 bundle plus the comparator lane.
 
 Legacy/debug:
 
@@ -88,6 +91,9 @@ docker-compose exec -T -e WORKFLOW_MODE=prototype_2021 -e PIPELINE_PHASE=prototy
 - Phase 1 now has a dedicated `phase1_production_rerun` entry that stages the 2016-2022 regional rerun outputs and a candidate baseline artifact without auto-overwriting `config/phase1_baseline_selection.yaml`.
 - Phase 2 is scientifically usable, but not scientifically frozen.
 - Phase 4 is scientifically reportable now for Mindoro, but inherited-provisional from the upstream Phase 1/2 state.
+- The frozen Mindoro base case remains `config/case_mindoro_retro_2023.yaml`; promoting March 13 -> March 14 does not silently rewrite March 3 -> March 6 provenance.
+- March 6 remains a legacy honesty-only row and should never be called the primary Mindoro validation row.
+- March 13 -> March 14 must keep the shared-imagery caveat explicit, and PyGNOME remains comparator-only in that promoted lane.
 - `prototype_2021` is the preferred accepted-segment debug lane, but it is still not the final Phase 1 study.
 - `prototype_2016` remains backward-compatible and keeps the preserved `+/- 3 h` ensemble jitter by padding its prep window.
 - `Phase 3A` is the deterministic OpenDrift-vs-PyGNOME transport benchmark, `Phase 3B` is observation-based scoring, and `Phase 4` is Oil-Type Fate and Shoreline Impact Analysis. Do not describe the prototype/debug lanes as if they prove Phase 4.

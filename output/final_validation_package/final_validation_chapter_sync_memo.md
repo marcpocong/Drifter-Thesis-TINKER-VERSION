@@ -17,5 +17,6 @@ Packaging guidance:
 - Keep Mindoro as the main Philippine case.
 - Keep DWH as the rich-data external transfer-validation branch.
 - Present Phase 3A as comparator-only benchmarking, not as a truth-source replacement.
+- Preserve `config/case_mindoro_retro_2023.yaml` as the frozen March 3 -> March 6 case definition and carry the Phase 3B promotion through the amendment file instead.
 - Present March 13 -> March 14 as the canonical Mindoro validation with the shared-imagery caveat stated explicitly.
 - Keep March 6 and March 3-6 visible as legacy/reference material rather than deleting or hiding them.

@@ -31,7 +31,13 @@ class TrajectoryGalleryBuildTests(unittest.TestCase):
     def test_gallery_service_writes_manifest_and_handles_missing_optional_artifacts(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
-            source_png = root / "output" / "CASE_MINDORO_RETRO_2023" / "phase3b" / "qa_phase3b_obsmask_vs_p50.png"
+            source_png = (
+                root
+                / "output"
+                / "CASE_MINDORO_RETRO_2023"
+                / "phase3b_extended_public_scored_march13_14_reinit"
+                / "qa_march13_seed_vs_march14_target.png"
+            )
             source_png.parent.mkdir(parents=True, exist_ok=True)
             source_png.write_bytes(b"not_a_real_png_but_copyable")
 
@@ -49,7 +55,10 @@ class TrajectoryGalleryBuildTests(unittest.TestCase):
 
             index_df = pd.read_csv(index_csv_path)
             self.assertTrue((index_df["case_id"] == "CASE_MINDORO_RETRO_2023").any())
-            self.assertTrue(index_df["filename"].str.contains("obsmask_vs_p50").any())
+            self.assertTrue(index_df["filename"].str.contains("seed_vs_target").any())
+            self.assertIn("status_key", index_df.columns)
+            self.assertIn("status_provenance", index_df.columns)
+            self.assertTrue((index_df["status_key"] == "mindoro_primary_validation").any())
 
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
             self.assertTrue(manifest["gallery_built_from_existing_outputs_only"])

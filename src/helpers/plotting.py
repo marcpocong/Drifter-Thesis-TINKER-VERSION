@@ -10,7 +10,7 @@ from datetime import datetime
 
 def plot_drifter_track(
     output_path: str,
-    region: list,
+    domain_bounds: list,
     unique_ids: list,
     df_found: pd.DataFrame,
     get_trajectory_func,
@@ -35,9 +35,9 @@ def plot_drifter_track(
     gl.top_labels = False
     gl.right_labels = False
 
-    # Set extent with some padding
+    # Set extent with some padding around the active display domain.
     pad = 2
-    ax.set_extent([region[0]-pad, region[1]+pad, region[2]-pad, region[3]+pad])
+    ax.set_extent([domain_bounds[0]-pad, domain_bounds[1]+pad, domain_bounds[2]-pad, domain_bounds[3]+pad])
 
     # For each drifter, get full trajectory and plot
     for drifter_id in unique_ids:
@@ -166,7 +166,7 @@ def plot_trajectory_map(output_file: str,
     if corners:
         ax.set_extent(corners, crs=ccrs.PlateCarree())
         
-        # --- Inset Map logic: If data is small relative to region, zoom in ---
+        # --- Inset Map logic: if data is small relative to the display domain, zoom in ---
         if data_extent:
             map_span_lon = corners[1] - corners[0]
             data_span_lon = data_extent[1] - data_extent[0]

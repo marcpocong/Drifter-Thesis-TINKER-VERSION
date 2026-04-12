@@ -20,6 +20,9 @@ from pyproj import Transformer
 from rasterio.plot import show
 from shapely.geometry import MultiPoint
 
+from src.core.artifact_status import artifact_status_columns
+from src.services.mindoro_primary_validation_metadata import MINDORO_SHARED_IMAGERY_CAVEAT
+
 matplotlib.use("Agg")
 
 PHASE = "trajectory_gallery_build"
@@ -65,6 +68,15 @@ class FigureRecord:
     provisional_context: str
     source_paths: str
     notes: str
+    status_key: str
+    status_label: str
+    status_role: str
+    status_reportability: str
+    status_official_status: str
+    status_frozen_status: str
+    status_provenance: str
+    status_panel_text: str
+    status_dashboard_summary: str
 
     def as_row(self) -> dict[str, Any]:
         return {
@@ -86,6 +98,15 @@ class FigureRecord:
             "provisional_context": self.provisional_context,
             "source_paths": self.source_paths,
             "notes": self.notes,
+            "status_key": self.status_key,
+            "status_label": self.status_label,
+            "status_role": self.status_role,
+            "status_reportability": self.status_reportability,
+            "status_official_status": self.status_official_status,
+            "status_frozen_status": self.status_frozen_status,
+            "status_provenance": self.status_provenance,
+            "status_panel_text": self.status_panel_text,
+            "status_dashboard_summary": self.status_dashboard_summary,
         }
 
 
@@ -230,6 +251,16 @@ class TrajectoryGalleryBuildService:
         scenario_id: str = "",
     ) -> FigureRecord:
         group = FIGURE_GROUPS[figure_group_code]
+        status = artifact_status_columns(
+            {
+                "case_id": case_id,
+                "phase_or_track": phase_or_track,
+                "run_type": run_type,
+                "figure_slug": figure_slug,
+                "relative_path": relative_path,
+                "notes": notes,
+            }
+        )
         record = FigureRecord(
             figure_id=Path(relative_path).stem,
             figure_group_code=figure_group_code,
@@ -249,6 +280,15 @@ class TrajectoryGalleryBuildService:
             provisional_context=self._provisional_context(case_id, phase_or_track),
             source_paths=";".join(source_paths),
             notes=notes,
+            status_key=status["status_key"],
+            status_label=status["status_label"],
+            status_role=status["status_role"],
+            status_reportability=status["status_reportability"],
+            status_official_status=status["status_official_status"],
+            status_frozen_status=status["status_frozen_status"],
+            status_provenance=status["status_provenance"],
+            status_panel_text=status["status_panel_text"],
+            status_dashboard_summary=status["status_dashboard_summary"],
         )
         self.figure_records.append(record)
         self.generated_group_codes.add(figure_group_code)
@@ -768,7 +808,7 @@ class TrajectoryGalleryBuildService:
                 "run_type": "forecast_vs_observation_overlay",
                 "date_token": "2023-03-13_to_2023-03-14",
                 "figure_slug": "seed_vs_target",
-                "notes": "Promoted March 13 seed-versus-March 14 target figure reused as a panel-ready gallery figure.",
+                "notes": f"Promoted March 13 seed-versus-March 14 target figure reused as a panel-ready gallery figure. {MINDORO_SHARED_IMAGERY_CAVEAT}",
             },
             {
                 "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/qa_march14_reinit_R1_previous_overlay.png",
@@ -779,7 +819,7 @@ class TrajectoryGalleryBuildService:
                 "run_type": "forecast_vs_observation_overlay",
                 "date_token": "2023-03-14",
                 "figure_slug": "r1_previous_overlay",
-                "notes": "Promoted March 14 R1 previous reinit overlay reused from the completed reinit QA bundle.",
+                "notes": f"Promoted March 14 R1 previous reinit overlay reused from the completed reinit QA bundle. {MINDORO_SHARED_IMAGERY_CAVEAT}",
             },
             {
                 "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/qa/qa_march14_crossmodel_R1_previous_reinit_p50_overlay.png",
@@ -790,7 +830,7 @@ class TrajectoryGalleryBuildService:
                 "run_type": "comparison_overlay",
                 "date_token": "2023-03-14",
                 "figure_slug": "r1_previous_crossmodel_overlay",
-                "notes": "Promoted March 14 R1 previous reinit cross-model overlay reused from the stored comparator outputs.",
+                "notes": f"Promoted March 14 R1 previous reinit cross-model overlay reused from the stored comparator outputs. PyGNOME remains comparator-only where shown, and {MINDORO_SHARED_IMAGERY_CAVEAT}",
             },
             {
                 "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/qa/qa_march14_crossmodel_pygnome_reinit_deterministic_overlay.png",
@@ -801,7 +841,7 @@ class TrajectoryGalleryBuildService:
                 "run_type": "comparison_overlay",
                 "date_token": "2023-03-14",
                 "figure_slug": "pygnome_crossmodel_overlay",
-                "notes": "Promoted March 14 PyGNOME comparator overlay reused from the stored comparator bundle.",
+                "notes": f"Promoted March 14 PyGNOME comparator overlay reused from the stored comparator bundle. PyGNOME remains comparator-only, and {MINDORO_SHARED_IMAGERY_CAVEAT}",
             },
             {
                 "source_relative_path": "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_ensemble_comparison/qa_phase3c_ensemble_overlays.png",
@@ -984,7 +1024,7 @@ class TrajectoryGalleryBuildService:
         _write_csv(
             index_csv_path,
             figure_rows,
-            columns=["figure_id", "figure_group_code", "figure_group_id", "figure_group_label", "case_id", "phase_or_track", "model_name", "run_type", "date_token", "scenario_id", "figure_slug", "relative_path", "filename", "generation_mode", "ready_for_panel_presentation", "provisional_context", "source_paths", "notes"],
+            columns=["figure_id", "figure_group_code", "figure_group_id", "figure_group_label", "case_id", "phase_or_track", "model_name", "run_type", "date_token", "scenario_id", "figure_slug", "relative_path", "filename", "generation_mode", "ready_for_panel_presentation", "provisional_context", "source_paths", "notes", "status_key", "status_label", "status_role", "status_reportability", "status_official_status", "status_frozen_status", "status_provenance", "status_panel_text", "status_dashboard_summary"],
         )
         _write_text(figures_index_md_path, self._build_figures_index_markdown())
         _write_json(manifest_path, self._build_manifest(generated_at_utc))

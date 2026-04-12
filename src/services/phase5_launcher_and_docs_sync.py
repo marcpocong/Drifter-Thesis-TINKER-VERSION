@@ -12,6 +12,14 @@ from typing import Any
 import pandas as pd
 import yaml
 
+from src.core.artifact_status import get_artifact_status
+from src.services.mindoro_primary_validation_metadata import (
+    MINDORO_BASE_CASE_CONFIG_PATH,
+    MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH,
+    MINDORO_PRIMARY_VALIDATION_LAUNCHER_ALIAS_ENTRY_ID,
+    MINDORO_PRIMARY_VALIDATION_LAUNCHER_ENTRY_ID,
+)
+
 PHASE = "phase5_launcher_and_docs_sync"
 OUTPUT_DIR = Path("output") / "final_reproducibility_package"
 FINAL_VALIDATION_DIR = Path("output") / "final_validation_package"
@@ -32,6 +40,7 @@ DOC_PATHS = [
     Path("docs") / "QUICKSTART.md",
     Path("docs") / "COMMAND_MATRIX.md",
     Path("docs") / "LAUNCHER_USER_GUIDE.md",
+    Path("docs") / "MINDORO_PRIMARY_VALIDATION_MIGRATION.md",
     Path("docs") / "UI_GUIDE.md",
 ]
 
@@ -51,13 +60,13 @@ PROTOTYPE_OUTPUT_DIRS = [
         Path("output") / "prototype_2021_pygnome_similarity",
         "prototype_pygnome_similarity_summary",
         "prototype_2021_pygnome_similarity",
-        "Preferred accepted-segment OpenDrift-vs-PyGNOME support package built from the fixed 2021 debug lane.",
+        get_artifact_status("prototype_2021_support").panel_text,
     ),
     (
         Path("output") / "prototype_2016_pygnome_similarity",
         "prototype_legacy_pygnome_similarity_summary",
         "prototype_2016_pygnome_similarity",
-        "Legacy/debug transport-only PyGNOME similarity artifact preserved from the original 2016 prototype cases.",
+        get_artifact_status("prototype_2016_support").panel_text,
     ),
 ]
 
@@ -239,28 +248,36 @@ class Phase5LauncherAndDocsSyncService:
         return rows
 
     def _collect_case_registry(self) -> list[dict[str, Any]]:
+        prototype_2021_status = get_artifact_status("prototype_2021_support")
+        prototype_2016_status = get_artifact_status("prototype_2016_support")
         rows: list[dict[str, Any]] = [
             {
                 "case_id": "prototype_2021",
                 "workflow_mode": "prototype_2021",
-                "mode_label": "Preferred accepted-segment debug workflow",
-                "description": "Preferred debug/demo lane frozen from the latest accepted 2021 Phase 1 drifter segments.",
+                "mode_label": prototype_2021_status.panel_label,
+                "description": prototype_2021_status.provenance_label,
                 "config_path": "config/prototype_2021_cases.yaml",
+                "case_freeze_amendment_path": "",
+                "primary_launcher_entry_id": "prototype_2021_bundle",
+                "launcher_alias_entry_id": "",
                 "primary_output_root": "output/CASE_202103*",
                 "reportable_track_ids": "",
                 "appendix_or_support_track_ids": "prototype_pygnome_similarity_summary",
-                "notes": "Preferred debug/demo lane only; not the final Phase 1 study.",
+                "notes": prototype_2021_status.panel_text,
             },
             {
                 "case_id": "prototype_2016",
                 "workflow_mode": "prototype_2016",
-                "mode_label": "Legacy 2016 prototype workflow",
-                "description": "Backward-compatible prototype drifter-validation workflow kept for debugging and regression.",
+                "mode_label": prototype_2016_status.panel_label,
+                "description": prototype_2016_status.provenance_label,
                 "config_path": "config/settings.yaml",
+                "case_freeze_amendment_path": "",
+                "primary_launcher_entry_id": "prototype_legacy_bundle",
+                "launcher_alias_entry_id": "",
                 "primary_output_root": "output/CASE_2016-*",
                 "reportable_track_ids": "",
                 "appendix_or_support_track_ids": "prototype_legacy_pygnome_similarity_summary",
-                "notes": "Preserved for legacy reproducibility only; not the preferred debug lane and not the final Phase 1 study.",
+                "notes": prototype_2016_status.panel_text,
             }
         ]
         for config_rel_path in (
@@ -293,6 +310,23 @@ class Phase5LauncherAndDocsSyncService:
                     "mode_label": _coerce_text(config.get("mode_label")),
                     "description": _coerce_text(config.get("description")),
                     "config_path": str(config_rel_path),
+                    "case_freeze_amendment_path": (
+                        str(MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH)
+                        if case_id == "CASE_MINDORO_RETRO_2023"
+                        else ""
+                    ),
+                    "primary_launcher_entry_id": (
+                        MINDORO_PRIMARY_VALIDATION_LAUNCHER_ENTRY_ID
+                        if case_id == "CASE_MINDORO_RETRO_2023"
+                        else "dwh_reportable_bundle"
+                        if case_id == "CASE_DWH_RETRO_2010_72H"
+                        else ""
+                    ),
+                    "launcher_alias_entry_id": (
+                        MINDORO_PRIMARY_VALIDATION_LAUNCHER_ALIAS_ENTRY_ID
+                        if case_id == "CASE_MINDORO_RETRO_2023"
+                        else ""
+                    ),
                     "primary_output_root": f"output/{case_id}",
                     "reportable_track_ids": ";".join(track_ids),
                     "appendix_or_support_track_ids": ";".join(appendix_ids),
@@ -353,6 +387,15 @@ class Phase5LauncherAndDocsSyncService:
     def _infer_track_from_path(self, path: Path) -> tuple[str, str, str]:
         rel = _relative_to_repo(self.repo_root, path)
         rel_lower = rel.lower()
+        mindoro_crossmodel = get_artifact_status("mindoro_crossmodel_comparator")
+        mindoro_primary = get_artifact_status("mindoro_primary_validation")
+        mindoro_legacy = get_artifact_status("mindoro_legacy_march6")
+        mindoro_support = get_artifact_status("mindoro_legacy_support")
+        dwh_deterministic = get_artifact_status("dwh_deterministic_transfer")
+        dwh_ensemble = get_artifact_status("dwh_ensemble_transfer")
+        dwh_comparator = get_artifact_status("dwh_crossmodel_comparator")
+        prototype_2021 = get_artifact_status("prototype_2021_support")
+        prototype_2016 = get_artifact_status("prototype_2016_support")
         if "phase1_finalization_audit" in rel_lower:
             return "phase1", "phase1_regional_baseline", "Phase 1 regional baseline"
         if "phase2_finalization_audit" in rel_lower:
@@ -368,29 +411,29 @@ class Phase5LauncherAndDocsSyncService:
         if "figure_package_publication" in rel_lower:
             return "phase5", "figure_package_publication", "Publication-grade figure package"
         if "prototype_2021_pygnome_similarity" in rel_lower:
-            return "prototype", "prototype_pygnome_similarity_summary", "Prototype 2021 PyGNOME similarity summary"
+            return "prototype", "prototype_pygnome_similarity_summary", prototype_2021.label
         if "prototype_2016_pygnome_similarity" in rel_lower:
-            return "prototype", "prototype_legacy_pygnome_similarity_summary", "Prototype 2016 legacy PyGNOME similarity summary"
+            return "prototype", "prototype_legacy_pygnome_similarity_summary", prototype_2016.label
         if "trajectory_gallery" in rel_lower:
             return "phase5", "trajectory_gallery", "Trajectory gallery"
         if "final_reproducibility_package" in rel_lower:
             return "phase5", "phase5_sync", "Phase 5 reproducibility package"
         if "phase3c_external_case_run" in rel_lower:
-            return "phase3c", "C1", "DWH deterministic external transfer validation"
+            return "phase3c", "C1", dwh_deterministic.label
         if "phase3c_external_case_ensemble_comparison" in rel_lower:
-            return "phase3c", "C2", "DWH ensemble external transfer validation"
+            return "phase3c", "C2", dwh_ensemble.label
         if "phase3c_dwh_pygnome_comparator" in rel_lower:
-            return "phase3c", "C3", "DWH PyGNOME comparator"
+            return "phase3c", "C3", dwh_comparator.label
         if "phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison" in rel_lower:
-            return "phase3a", "A", "Mindoro March 13 -> March 14 cross-model comparator"
+            return "phase3a", "A", mindoro_crossmodel.label
         if "phase3b_extended_public_scored_march13_14_reinit" in rel_lower:
-            return "phase3b", "B1", "Mindoro March 13 -> March 14 NOAA reinit primary validation"
+            return "phase3b", "B1", mindoro_primary.label
         if "phase3b" in rel_lower and "extended" not in rel_lower and "multidate" not in rel_lower:
-            return "phase3b", "B2", "Mindoro legacy March 6 sparse strict reference"
+            return "phase3b", "B2", mindoro_legacy.label
         if "public_obs_appendix" in rel_lower or "multidate_public" in rel_lower:
-            return "phase3b", "B3", "Mindoro legacy March 3-6 broader-support reference"
+            return "phase3b", "B3", mindoro_support.label
         if "phase3b_extended_public" in rel_lower:
-            return "phase3b", "B1", "Mindoro March 13 -> March 14 NOAA reinit primary validation"
+            return "phase3b", "B1", mindoro_primary.label
         return "", "", ""
 
     def _collect_manifest_index(self) -> list[dict[str, Any]]:
@@ -505,6 +548,14 @@ class Phase5LauncherAndDocsSyncService:
         phase2_overall = self.phase2_audit.get("overall_verdict") or {}
         phase4_overall = self.phase4_manifest.get("overall_verdict") or {}
         final_headlines = self.final_validation_manifest.get("headlines") or {}
+        mindoro_crossmodel = get_artifact_status("mindoro_crossmodel_comparator")
+        mindoro_primary = get_artifact_status("mindoro_primary_validation")
+        mindoro_legacy = get_artifact_status("mindoro_legacy_march6")
+        mindoro_support = get_artifact_status("mindoro_legacy_support")
+        dwh_deterministic = get_artifact_status("dwh_deterministic_transfer")
+        dwh_ensemble = get_artifact_status("dwh_ensemble_transfer")
+        dwh_comparator = get_artifact_status("dwh_crossmodel_comparator")
+        phase4_oil = get_artifact_status("mindoro_phase4_oil_budget")
         upstream_blocker = (
             _coerce_text(phase4_overall.get("biggest_remaining_phase4_blocker"))
             or _coerce_text(phase2_overall.get("biggest_remaining_phase2_provisional_item"))
@@ -553,7 +604,7 @@ class Phase5LauncherAndDocsSyncService:
             {
                 "phase_id": "phase3a",
                 "track_id": "A",
-                "track_label": "Mindoro March 13 -> March 14 cross-model comparator",
+                "track_label": mindoro_crossmodel.label,
                 "readiness_status": "scientifically_informative_comparator",
                 "scientifically_reportable": True,
                 "scientifically_frozen": False,
@@ -563,14 +614,14 @@ class Phase5LauncherAndDocsSyncService:
                 "reportability_scope": "comparative_benchmark_discussion",
                 "summary": _headline_note(
                     "mindoro_crossmodel_top",
-                    "Mindoro March 13 -> March 14 cross-model comparison remains scientifically informative as a comparator benchmark.",
+                    mindoro_crossmodel.dashboard_summary,
                 ),
                 "evidence_path": _relative_to_repo(self.repo_root, self.repo_root / FINAL_VALIDATION_MANIFEST_JSON),
             },
             {
                 "phase_id": "phase3b",
                 "track_id": "B1",
-                "track_label": "Mindoro March 13 -> March 14 NOAA reinit primary validation",
+                "track_label": mindoro_primary.label,
                 "readiness_status": "scientifically_reportable_primary_validation",
                 "scientifically_reportable": True,
                 "scientifically_frozen": False,
@@ -580,14 +631,14 @@ class Phase5LauncherAndDocsSyncService:
                 "reportability_scope": "main_text_primary_validation",
                 "summary": _headline_note(
                     "mindoro_primary_reinit",
-                    "Mindoro March 13 -> March 14 is the promoted primary validation, reported with the explicit March 12 imagery caveat.",
+                    mindoro_primary.dashboard_summary,
                 ),
                 "evidence_path": _relative_to_repo(self.repo_root, self.repo_root / FINAL_VALIDATION_MANIFEST_JSON),
             },
             {
                 "phase_id": "phase3b",
                 "track_id": "B2",
-                "track_label": "Mindoro legacy March 6 sparse strict reference",
+                "track_label": mindoro_legacy.label,
                 "readiness_status": "scientifically_reportable_legacy_reference",
                 "scientifically_reportable": True,
                 "scientifically_frozen": False,
@@ -597,14 +648,14 @@ class Phase5LauncherAndDocsSyncService:
                 "reportability_scope": "legacy_sparse_reference",
                 "summary": _headline_note(
                     "mindoro_legacy_march6",
-                    "Mindoro March 6 remains a legacy sparse reference and should not be silently discarded.",
+                    mindoro_legacy.dashboard_summary,
                 ),
                 "evidence_path": _relative_to_repo(self.repo_root, self.repo_root / FINAL_VALIDATION_MANIFEST_JSON),
             },
             {
                 "phase_id": "phase3b",
                 "track_id": "B3",
-                "track_label": "Mindoro legacy March 3-6 broader-support reference",
+                "track_label": mindoro_support.label,
                 "readiness_status": "scientifically_reportable_legacy_reference",
                 "scientifically_reportable": True,
                 "scientifically_frozen": False,
@@ -614,14 +665,14 @@ class Phase5LauncherAndDocsSyncService:
                 "reportability_scope": "legacy_broader_support_reference",
                 "summary": _headline_note(
                     "mindoro_legacy_broader_support",
-                    "Mindoro March 3-6 broader-support remains scientifically informative legacy context, not a replacement for B1.",
+                    mindoro_support.dashboard_summary,
                 ),
                 "evidence_path": _relative_to_repo(self.repo_root, self.repo_root / FINAL_VALIDATION_MANIFEST_JSON),
             },
             {
                 "phase_id": "phase3c",
                 "track_id": "C1",
-                "track_label": "DWH deterministic external transfer validation",
+                "track_label": dwh_deterministic.label,
                 "readiness_status": "scientifically_reportable_transfer_validation",
                 "scientifically_reportable": True,
                 "scientifically_frozen": False,
@@ -631,14 +682,14 @@ class Phase5LauncherAndDocsSyncService:
                 "reportability_scope": "external_rich_data_transfer_validation",
                 "summary": _headline_note(
                     "dwh_deterministic_event",
-                    "DWH deterministic transfer validation is a reportable external-case success.",
+                    dwh_deterministic.dashboard_summary,
                 ),
                 "evidence_path": _relative_to_repo(self.repo_root, self.repo_root / FINAL_VALIDATION_MANIFEST_JSON),
             },
             {
                 "phase_id": "phase3c",
                 "track_id": "C2",
-                "track_label": "DWH ensemble external transfer validation",
+                "track_label": dwh_ensemble.label,
                 "readiness_status": "scientifically_reportable_transfer_validation",
                 "scientifically_reportable": True,
                 "scientifically_frozen": False,
@@ -648,14 +699,14 @@ class Phase5LauncherAndDocsSyncService:
                 "reportability_scope": "external_rich_data_transfer_validation",
                 "summary": _headline_note(
                     "dwh_ensemble_p50_event",
-                    "DWH ensemble p50 is reportable and leads the overall mean FSS comparison under the current case definition.",
+                    dwh_ensemble.dashboard_summary,
                 ),
                 "evidence_path": _relative_to_repo(self.repo_root, self.repo_root / FINAL_VALIDATION_MANIFEST_JSON),
             },
             {
                 "phase_id": "phase3c",
                 "track_id": "C3",
-                "track_label": "DWH PyGNOME comparator",
+                "track_label": dwh_comparator.label,
                 "readiness_status": "scientifically_reportable_comparator",
                 "scientifically_reportable": True,
                 "scientifically_frozen": False,
@@ -665,14 +716,14 @@ class Phase5LauncherAndDocsSyncService:
                 "reportability_scope": "cross_model_comparator",
                 "summary": _headline_note(
                     "dwh_pygnome_event",
-                    "DWH PyGNOME remains reportable as a comparator, not as truth.",
+                    dwh_comparator.dashboard_summary,
                 ),
                 "evidence_path": _relative_to_repo(self.repo_root, self.repo_root / FINAL_VALIDATION_MANIFEST_JSON),
             },
             {
                 "phase_id": "phase4",
                 "track_id": "mindoro_phase4",
-                "track_label": "Mindoro Phase 4 oil-type and shoreline workflow",
+                "track_label": phase4_oil.label,
                 "readiness_status": "scientifically_reportable_inherited_provisional",
                 "scientifically_reportable": bool(phase4_overall.get("scientifically_reportable_now")),
                 "scientifically_frozen": False,
@@ -680,7 +731,7 @@ class Phase5LauncherAndDocsSyncService:
                 "main_blocker": _coerce_text(phase4_overall.get("biggest_remaining_phase4_blocker")),
                 "reportable_now": bool(phase4_overall.get("scientifically_reportable_now")),
                 "reportability_scope": "mindoro_oil_type_and_shoreline_interpretation",
-                "summary": "Mindoro Phase 4 is scientifically reportable now, but inherited-provisional from upstream Phase 1/2 state.",
+                "summary": phase4_oil.dashboard_summary,
                 "evidence_path": _relative_to_repo(self.repo_root, self.repo_root / PHASE4_MANIFEST_JSON),
             },
             self._phase5_row(),
@@ -848,6 +899,11 @@ class Phase5LauncherAndDocsSyncService:
                 "",
                 "- Existing scientific Mindoro and DWH outputs were reused and not recomputed here.",
                 "- The existing `output/final_validation_package/` bundle was reused rather than rebuilt from scratch.",
+                (
+                    f"- Mindoro keeps the frozen base case definition in `{MINDORO_BASE_CASE_CONFIG_PATH.as_posix()}` "
+                    f"and records the promoted March 13 -> March 14 Phase 3B primary row through the separate "
+                    f"`{MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH.as_posix()}` amendment file."
+                ),
                 "- Mindoro Phase 4 now participates in the reproducibility/package layer via the current `phase4_run_manifest.json` and verdict bundle.",
                 "- The static `output/trajectory_gallery/` bundle now participates in the reproducibility/package layer as a read-only technical figure set.",
                 "- The static `output/trajectory_gallery_panel/` bundle now participates in the reproducibility/package layer as the polished panel-ready figure pack.",
@@ -885,6 +941,8 @@ class Phase5LauncherAndDocsSyncService:
             f"- Existing Phase 1 audit: `{_relative_to_repo(self.repo_root, self.repo_root / PHASE1_AUDIT_JSON)}`",
             f"- Existing Phase 2 audit: `{_relative_to_repo(self.repo_root, self.repo_root / PHASE2_AUDIT_JSON)}`",
             f"- Existing Mindoro Phase 4 manifest: `{_relative_to_repo(self.repo_root, self.repo_root / PHASE4_MANIFEST_JSON)}`",
+            f"- Frozen Mindoro base case definition: `{MINDORO_BASE_CASE_CONFIG_PATH.as_posix()}`",
+            f"- Mindoro primary-validation amendment file: `{MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH.as_posix()}`",
             "- Existing trajectory gallery outputs under `output/trajectory_gallery/` when present.",
             "- Existing polished panel gallery outputs under `output/trajectory_gallery_panel/` when present.",
             "- Existing publication-grade figure package outputs under `output/figure_package_publication/` when present.",
@@ -894,6 +952,7 @@ class Phase5LauncherAndDocsSyncService:
             "",
             "- No scientific score tables were recomputed here.",
             "- No finished Mindoro or DWH scientific outputs were overwritten.",
+            "- The March 3 -> March 6 Mindoro base case YAML remains frozen; the promoted March 13 -> March 14 row is recorded as an amendment rather than a silent rewrite.",
             "- The launcher/menu is now organized around current track categories instead of the older monolithic Mindoro full-chain story.",
             "- The first dashboard version is intentionally read-only and does not add scientific run buttons.",
         ]
@@ -1112,6 +1171,15 @@ class Phase5LauncherAndDocsSyncService:
                 ),
                 "scientific_scores_recomputed": False,
             },
+            "mindoro_primary_validation_promotion": {
+                "base_case_definition_path": MINDORO_BASE_CASE_CONFIG_PATH.as_posix(),
+                "case_freeze_amendment_path": MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH.as_posix(),
+                "primary_launcher_entry_id": MINDORO_PRIMARY_VALIDATION_LAUNCHER_ENTRY_ID,
+                "launcher_alias_entry_id": MINDORO_PRIMARY_VALIDATION_LAUNCHER_ALIAS_ENTRY_ID,
+                "base_case_window": "2023-03-03_to_2023-03-06",
+                "promoted_primary_window": "2023-03-13_to_2023-03-14",
+                "legacy_row_retained": "B2",
+            },
             "docs_updated": [
                 _relative_to_repo(self.repo_root, self.repo_root / path) for path in self.docs_updated
             ],
@@ -1171,6 +1239,9 @@ class Phase5LauncherAndDocsSyncService:
                 "mode_label",
                 "description",
                 "config_path",
+                "case_freeze_amendment_path",
+                "primary_launcher_entry_id",
+                "launcher_alias_entry_id",
                 "primary_output_root",
                 "reportable_track_ids",
                 "appendix_or_support_track_ids",

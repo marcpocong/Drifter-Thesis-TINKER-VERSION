@@ -84,6 +84,7 @@ This writes to `output/phase4/CASE_MINDORO_RETRO_2023/` and does not overwrite s
 Examples:
 
 ```powershell
+.\start.ps1 -Entry mindoro_phase3b_primary_public_validation -NoPause
 .\start.ps1 -Entry mindoro_reportable_core -NoPause
 .\start.ps1 -Entry dwh_reportable_bundle -NoPause
 ```
@@ -94,6 +95,9 @@ These are intentional rerun paths. Do not use them casually for status inspectio
 
 - Phase 1 is architecture-audited, but the final multi-year production rerun is still needed.
 - Phase 2 is scientifically usable, but not scientifically frozen.
+- The frozen Mindoro March 3 -> March 6 base case remains in `config/case_mindoro_retro_2023.yaml`; the promoted March 13 -> March 14 B1 row is tracked in `config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml`.
+- March 6 remains visible as a legacy honesty-only row, not as the primary Mindoro validation result.
+- March 13 -> March 14 must keep the shared-imagery caveat explicit, so do not describe it as independent day-to-day validation.
 - Phase 4 is reportable now for Mindoro, but inherited-provisional from the upstream Phase 1/2 status.
 - Phase 4 cross-model comparison is still deferred; the UI surfaces that status directly and does not fake Phase 4 PyGNOME comparison pages.
 - Prototype mode remains for debugging/regression only.

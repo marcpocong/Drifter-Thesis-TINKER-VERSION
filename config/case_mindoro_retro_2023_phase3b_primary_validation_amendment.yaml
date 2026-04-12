@@ -1,0 +1,48 @@
+amendment_id: mindoro_phase3b_primary_validation_promotion_v1
+applies_to_case_id: CASE_MINDORO_RETRO_2023
+base_case_definition_path: config/case_mindoro_retro_2023.yaml
+status: active
+amendment_type: phase3b_primary_public_validation_promotion
+summary: >
+  Promote March 13 -> March 14 as the canonical Phase 3B public-validation row in
+  packaging, figures, and launcher/docs semantics without mutating the original
+  March 3 -> March 6 official spill-case definition.
+
+promotion:
+  primary_track_id: B1
+  primary_phase_or_track: phase3b_reinit_primary
+  primary_track_label: Mindoro March 13 -> March 14 NOAA reinit primary validation
+  canonical_output_dir: output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit
+  canonical_launcher_entry_id: mindoro_phase3b_primary_public_validation
+  retained_launcher_alias_entry_id: mindoro_march13_14_noaa_reinit_stress_test
+  seed_observation_date: "2023-03-13"
+  target_observation_date: "2023-03-14"
+  shared_imagery_caveat: >
+    Both NOAA/NESDIS public products cite WorldView-3 imagery acquired on
+    2023-03-12, so the promoted March 13 -> March 14 row is a reinitialization-based
+    public-validation pair with shared-imagery provenance rather than a fully
+    independent day-to-day validation.
+
+legacy_retention:
+  legacy_honesty_track_id: B2
+  legacy_honesty_phase_or_track: phase3b_legacy_strict
+  legacy_honesty_output_dir: output/CASE_MINDORO_RETRO_2023/phase3b
+  legacy_honesty_label: Mindoro legacy March 6 sparse strict reference
+  broader_support_track_id: B3
+  broader_support_output_dir: output/CASE_MINDORO_RETRO_2023/public_obs_appendix
+  preserve_visible_legacy_outputs: true
+  preserve_visible_legacy_labels: true
+
+guardrails:
+  mutate_base_case_definition: false
+  pygnome_role: comparator_only
+  independent_day_to_day_validation_claim_allowed: false
+  preserve_march6_outputs: true
+  preserve_march3_6_support_outputs: true
+
+backward_compatibility:
+  output_directories_renamed: false
+  launcher_alias_retained: true
+  old_launcher_entry_id: mindoro_march13_14_noaa_reinit_stress_test
+  new_launcher_entry_id: mindoro_phase3b_primary_public_validation
+  migration_note_path: docs/MINDORO_PRIMARY_VALIDATION_MIGRATION.md

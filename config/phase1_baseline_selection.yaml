@@ -1,12 +1,12 @@
 baseline_id: phase1_historical_transport_baseline_v1
-description: "Frozen Phase 1 recipe selection consumed by official spill-case workflows"
+description: "Current default frozen Phase 1 recipe selection for official Mindoro spill-case workflows; evidence still comes from the preserved legacy three-date 2016 prototype"
 selected_recipe: cmems_era5
 source_kind: frozen_historical_artifact
 status_flag: valid
 valid: true
 provisional: false
 rerun_required: false
-selection_basis: "Frozen historical transport-calibration baseline"
+selection_basis: "Current default frozen baseline derived from the preserved legacy three-date 2016 prototype evidence"
 workflow_scope:
   - mindoro_retro_2023
 historical_validation_artifacts:
@@ -14,13 +14,15 @@ historical_validation_artifacts:
   - output/CASE_2016-09-06/validation/validation_ranking.csv
   - output/CASE_2016-09-17/validation/validation_ranking.csv
 notes:
-  - "Official spill-case workflows consume this baseline instead of running case-local drifter validation."
-  - "Override with BASELINE_SELECTION_PATH or BASELINE_RECIPE_OVERRIDE when needed."
+  - "Official Mindoro spill-case workflows currently consume this default baseline instead of running case-local drifter validation."
+  - "This file still points at the preserved three-date 2016 prototype evidence and is not the final 2016-2022 regional proof bundle."
+  - "Trial the staged candidate with BASELINE_SELECTION_PATH=output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml."
+  - "Promotion remains manual; do not auto-overwrite this file."
 chapter3_finalization_audit:
   target_historical_window:
     start_date: "2016-01-01"
     end_date: "2022-12-31"
-  regional_validation_box: [115.0, 122.0, 6.0, 14.5]
+  phase1_validation_box: [119.5, 124.5, 11.5, 16.5]
   core_pool_policy: "drogued_segments_only"
   segment_policy:
     horizon_hours: 72
@@ -30,11 +32,12 @@ chapter3_finalization_audit:
     - cmems_gfs
     - hycom_era5
     - hycom_gfs
-  current_local_evidence_scope: "legacy_three_case_prototype_debugging_only"
+  current_local_evidence_scope: "legacy_three_case_prototype_current_default_only"
   current_local_evidence_dates:
     - "2016-09-01"
     - "2016-09-06"
     - "2016-09-17"
+  staged_candidate_baseline_artifact: "output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml"
   expected_phase1_artifacts:
     accepted_segment_registry: ""
     rejected_segment_registry: ""
@@ -42,10 +45,11 @@ chapter3_finalization_audit:
     recipe_summary: ""
     recipe_ranking: ""
     frozen_baseline_artifact: "config/phase1_baseline_selection.yaml"
+    frozen_baseline_candidate: "output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml"
   loading_audit_policy:
     hard_fail_on_missing_required_forcing: true
     hard_fail_on_empty_valid_recipe_set: true
   audit_status:
     classification: implemented_but_provisional
     full_production_rerun_required: true
-    blocker: "The frozen recipe still comes from three legacy prototype dates, not from a completed 2016-2022 regional drifter-segment study."
+    blocker: "The current default frozen baseline file still points at the preserved three-date 2016 prototype evidence. The 2016-2022 regional rerun candidate exists, but adoption remains a manual BASELINE_SELECTION_PATH trial or promotion decision."

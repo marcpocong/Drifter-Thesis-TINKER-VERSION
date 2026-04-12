@@ -14,6 +14,8 @@ import pandas as pd
 import rasterio
 import xarray as xr
 
+from src.core.artifact_status import artifact_status_columns, record_matches_artifact_status
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FINAL_REPRO_DIR = Path("output") / "final_reproducibility_package"
 FINAL_VALIDATION_DIR = Path("output") / "final_validation_package"
@@ -140,9 +142,20 @@ def _attach_resolved_paths(df: pd.DataFrame, repo_root: str | Path | None = None
     return payload
 
 
+def _attach_status_fields(df: pd.DataFrame) -> pd.DataFrame:
+    if df.empty:
+        return df.copy()
+    payload = df.copy()
+    status_rows = [artifact_status_columns(row) for row in payload.to_dict(orient="records")]
+    status_df = pd.DataFrame(status_rows, index=payload.index)
+    for column in status_df.columns:
+        payload[column] = status_df[column]
+    return payload
+
+
 def publication_registry(repo_root: str | Path | None = None) -> pd.DataFrame:
     root = _root(repo_root)
-    return _attach_resolved_paths(read_csv(PUBLICATION_DIR / "publication_figure_registry.csv", root), root)
+    return _attach_status_fields(_attach_resolved_paths(read_csv(PUBLICATION_DIR / "publication_figure_registry.csv", root), root))
 
 
 def publication_manifest(repo_root: str | Path | None = None) -> dict[str, Any]:
@@ -151,12 +164,12 @@ def publication_manifest(repo_root: str | Path | None = None) -> dict[str, Any]:
 
 def panel_registry(repo_root: str | Path | None = None) -> pd.DataFrame:
     root = _root(repo_root)
-    return _attach_resolved_paths(read_csv(PANEL_GALLERY_DIR / "panel_figure_registry.csv", root), root)
+    return _attach_status_fields(_attach_resolved_paths(read_csv(PANEL_GALLERY_DIR / "panel_figure_registry.csv", root), root))
 
 
 def raw_gallery_index(repo_root: str | Path | None = None) -> pd.DataFrame:
     root = _root(repo_root)
-    return _attach_resolved_paths(read_csv(RAW_GALLERY_DIR / "trajectory_gallery_index.csv", root), root)
+    return _attach_status_fields(_attach_resolved_paths(read_csv(RAW_GALLERY_DIR / "trajectory_gallery_index.csv", root), root))
 
 
 def final_phase_status(repo_root: str | Path | None = None) -> pd.DataFrame:
@@ -237,8 +250,8 @@ def publication_talking_points(repo_root: str | Path | None = None) -> str:
 
 def _preferred_defense_patterns() -> list[tuple[str, str]]:
     return [
-        ("CASE_MINDORO_RETRO_2023", "strict_board"),
-        ("CASE_MINDORO_RETRO_2023", "opendrift_vs_pygnome_board"),
+        ("CASE_MINDORO_RETRO_2023", "mindoro_primary_validation_board"),
+        ("CASE_MINDORO_RETRO_2023", "mindoro_crossmodel_board"),
         ("CASE_MINDORO_RETRO_2023", "oil_budget_board"),
         ("CASE_MINDORO_RETRO_2023", "shoreline_impact_board"),
         ("CASE_DWH_RETRO_2010_72H", "daily_deterministic_board"),
@@ -291,6 +304,7 @@ def figure_subset(
     repo_root: str | Path | None = None,
     case_id: str = "",
     family_codes: list[str] | None = None,
+    status_keys: list[str] | None = None,
     recommended_only: bool = False,
     text_filter: str = "",
 ) -> pd.DataFrame:
@@ -313,6 +327,13 @@ def figure_subset(
     if family_codes:
         code_column = "figure_family_code" if "figure_family_code" in df.columns else "board_family_code" if "board_family_code" in df.columns else "figure_group_code"
         df = df.loc[df[code_column].astype(str).isin(family_codes)].copy()
+    if status_keys:
+        if "status_key" in df.columns:
+            df = df.loc[df["status_key"].astype(str).isin(status_keys)].copy()
+        else:
+            records = df.to_dict(orient="records")
+            mask = [any(record_matches_artifact_status(record, key) for key in status_keys) for record in records]
+            df = df.loc[mask].copy()
     if text_filter:
         lowered = text_filter.lower()
         searchable_columns = [column for column in df.columns if column in {"figure_id", "figure_family_label", "board_family_label", "figure_group_label", "model_names", "model_name", "notes", "short_plain_language_interpretation", "plain_language_interpretation"}]

@@ -26,6 +26,9 @@ from rasterio.plot import show
 from rasterio.warp import transform_bounds
 from shapely.geometry import MultiPoint
 
+from src.core.artifact_status import artifact_status_columns
+from src.services.mindoro_primary_validation_metadata import MINDORO_SHARED_IMAGERY_CAVEAT
+
 matplotlib.use("Agg")
 
 PHASE = "figure_package_publication"
@@ -103,6 +106,15 @@ class PublicationFigureRecord:
     recommended_for_paper: bool
     source_paths: str
     notes: str
+    status_key: str
+    status_label: str
+    status_role: str
+    status_reportability: str
+    status_official_status: str
+    status_frozen_status: str
+    status_provenance: str
+    status_panel_text: str
+    status_dashboard_summary: str
 
     def as_row(self) -> dict[str, Any]:
         return {
@@ -126,6 +138,15 @@ class PublicationFigureRecord:
             "recommended_for_paper": self.recommended_for_paper,
             "source_paths": self.source_paths,
             "notes": self.notes,
+            "status_key": self.status_key,
+            "status_label": self.status_label,
+            "status_role": self.status_role,
+            "status_reportability": self.status_reportability,
+            "status_official_status": self.status_official_status,
+            "status_frozen_status": self.status_frozen_status,
+            "status_provenance": self.status_provenance,
+            "status_panel_text": self.status_panel_text,
+            "status_dashboard_summary": self.status_dashboard_summary,
         }
 
 
@@ -1295,6 +1316,18 @@ class FigurePackagePublicationService:
         pixel_width: int,
         pixel_height: int,
     ) -> PublicationFigureRecord:
+        relative_path = _relative_to_repo(self.repo_root, path)
+        status = artifact_status_columns(
+            {
+                "case_id": str(spec["case_id"]),
+                "phase_or_track": str(spec["phase_or_track"]),
+                "run_type": str(spec["run_type"]),
+                "figure_slug": str(spec.get("figure_slug") or ""),
+                "relative_path": relative_path,
+                "notes": str(spec.get("notes") or ""),
+                "short_plain_language_interpretation": str(spec["short_plain_language_interpretation"]),
+            }
+        )
         record = PublicationFigureRecord(
             figure_id=path.stem,
             figure_family_code=str(spec["figure_family_code"]),
@@ -1307,7 +1340,7 @@ class FigurePackagePublicationService:
             scenario_id=str(spec.get("scenario_id") or ""),
             view_type=str(spec["view_type"]),
             variant=str(spec.get("variant") or ""),
-            relative_path=_relative_to_repo(self.repo_root, path),
+            relative_path=relative_path,
             file_path=str(path),
             pixel_width=int(pixel_width),
             pixel_height=int(pixel_height),
@@ -1316,6 +1349,15 @@ class FigurePackagePublicationService:
             recommended_for_paper=bool(spec.get("recommended_for_paper")),
             source_paths=" | ".join(path_value for path_value in source_paths if path_value),
             notes=str(spec.get("notes") or ""),
+            status_key=status["status_key"],
+            status_label=status["status_label"],
+            status_role=status["status_role"],
+            status_reportability=status["status_reportability"],
+            status_official_status=status["status_official_status"],
+            status_frozen_status=status["status_frozen_status"],
+            status_provenance=status["status_provenance"],
+            status_panel_text=status["status_panel_text"],
+            status_dashboard_summary=status["status_dashboard_summary"],
         )
         self.figure_records.append(record)
         return record
@@ -1898,7 +1940,7 @@ class FigurePackagePublicationService:
             return ["The March 13 -> March 14 reinit summary CSV was not available, so this figure should be read visually."]
         return [
             "March 13 -> March 14 is now the promoted Mindoro validation pair, seeded from the March 13 NOAA polygon and scored against the March 14 NOAA target.",
-            "Both NOAA/NESDIS products cite WorldView-3 imagery acquired on March 12, 2023, so this family should always be presented with that caveat.",
+            MINDORO_SHARED_IMAGERY_CAVEAT,
             f"The promoted OpenDrift R1 previous reinit p50 row reaches FSS beyond zero at 3/5/10 km with {int(row.get('forecast_nonzero_cells', 0))} forecast cells against {int(row.get('obs_nonzero_cells', 0))} observed cells.",
         ]
 
@@ -1909,7 +1951,7 @@ class FigurePackagePublicationService:
         return [
             f"March 6 remains the legacy sparse-reference honesty figure: the observed footprint is only {int(row.get('obs_nonzero_cells', 0))} non-zero cells.",
             f"The official p50 product is intentionally sparse here, with {int(row.get('forecast_nonzero_cells', 0))} forecast cells in this strict slice.",
-            "Use this family to explain why March 6 remains in the methods story even though it is no longer the promoted primary validation row.",
+            "Use this family to explain why March 6 remains visible for methods honesty even though it is no longer the promoted primary validation row.",
         ]
 
     def _mindoro_crossmodel_context_lines(self) -> list[str]:
@@ -1928,31 +1970,31 @@ class FigurePackagePublicationService:
         return [
             "This cross-model lane reuses the completed March 13 -> March 14 reinit outputs and adds one deterministic PyGNOME surrogate seeded from the same March 13 NOAA polygon.",
             f"{top['model_name']} currently ranks first in the promoted local cross-model bundle under the current case definition.",
-            "Use this family when the panel asks which model performed better on the promoted March 14 target.",
+            "PyGNOME remains comparator-only here, and the shared-imagery caveat still applies to the March 13 -> March 14 pair.",
         ]
 
     def _mindoro_comparison_context_lines(self) -> list[str]:
         return [
             "This comparison keeps the promoted OpenDrift reinit and PyGNOME comparator views side by side without treating PyGNOME as truth.",
             "In this lane, the score lines come from the March 14 NOAA target while the seed geometry comes from the March 13 NOAA polygon.",
-            "Use the labeled score lines only for the model layers shown in the figure, and keep the shared March 12 imagery caveat visible in the oral explanation.",
+            MINDORO_SHARED_IMAGERY_CAVEAT,
         ]
 
     def _dwh_deterministic_context_lines(self) -> list[str]:
         return [
-            "DWH remains the richest external transfer-validation case in the project, with observed and forecast extents both clearly visible here.",
-            "Use this case to show that the workflow transfers to a richer public-observation spill, not only to the sparse Mindoro validation slices.",
+            "DWH is a separate external transfer-validation/support case; Mindoro remains the main Philippine thesis case.",
+            "The DWH forcing rule is readiness-gated rather than Phase 1 drifter-selected baseline logic, and the current stack is HYCOM GOFS 3.1 currents + ERA5 winds + CMEMS wave/Stokes.",
         ]
 
     def _dwh_model_context_lines(self) -> list[str]:
         return [
-            "This board makes the OpenDrift versus PyGNOME comparison explicit without presenting PyGNOME as truth.",
+            "Observed DWH daily masks remain truth throughout these figures; PyGNOME is comparator-only.",
             "Each score line belongs to the matching model panel only; the observed corridor panel is included for visual reference.",
         ]
 
     def _dwh_trajectory_context_lines(self) -> list[str]:
         return [
-            "These trajectory views explain transport path and spread, not footprint overlap skill.",
+            "These trajectory views are appendix/support material for the separate DWH transfer-validation case rather than the main thesis case.",
             "Use the scored footprint figures when the panel asks about validation overlap rather than transport shape.",
         ]
 
@@ -1984,7 +2026,7 @@ class FigurePackagePublicationService:
         return self._compose_note_lines(self._mindoro_comparison_context_lines(), list(score_lines))
 
     def _mindoro_primary_publication_specs(self) -> list[dict[str, Any]]:
-        subtitle = "Mindoro | 13-14 March 2023 | promoted NOAA reinit validation | explicit March 12 imagery caveat"
+        subtitle = "Mindoro | 13-14 March 2023 | promoted NOAA reinit validation | shared-imagery caveat explicit"
         return [
             self._image_spec(
                 spec_id="mindoro_primary_seed_mask",
@@ -2000,7 +2042,7 @@ class FigurePackagePublicationService:
                 figure_title="Mindoro March 13 NOAA seed mask on the canonical grid",
                 subtitle=subtitle,
                 interpretation="This figure shows the promoted March 13 NOAA release geometry that seeds the next-day reinit validation.",
-                notes="Copied from the completed March 13 -> March 14 reinit QA bundle.",
+                notes="Copied from the completed March 13 -> March 14 reinit QA bundle with the shared-imagery caveat preserved.",
                 source_image_path=(
                     "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/"
                     "qa_march13_seed_mask_on_grid.png"
@@ -2020,7 +2062,7 @@ class FigurePackagePublicationService:
                 figure_title="Mindoro March 13 seed polygon versus March 14 NOAA target",
                 subtitle=subtitle,
                 interpretation="This figure makes the promoted next-day validation geometry explicit before model overlays are introduced.",
-                notes="Copied from the completed March 13 -> March 14 reinit QA bundle.",
+                notes="Copied from the completed March 13 -> March 14 reinit QA bundle with the shared-imagery caveat preserved.",
                 source_image_path=(
                     "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/"
                     "qa_march13_seed_vs_march14_target.png"
@@ -2039,8 +2081,8 @@ class FigurePackagePublicationService:
                 figure_slug="march14_r1_previous_overlay",
                 figure_title="Mindoro March 14 promoted OpenDrift R1 previous reinit overlay",
                 subtitle=subtitle,
-                interpretation="This is the promoted primary Mindoro validation overlay and should be used as the main March 14 result figure.",
-                notes="Copied from the completed March 13 -> March 14 reinit QA bundle.",
+                interpretation="This is the promoted primary Mindoro validation overlay and should be used as the main March 14 result figure with the shared-imagery caveat stated explicitly.",
+                notes="Copied from the completed March 13 -> March 14 reinit QA bundle with the shared-imagery caveat preserved.",
                 source_image_path=(
                     "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/"
                     "qa_march14_reinit_R1_previous_overlay.png"
@@ -2062,7 +2104,7 @@ class FigurePackagePublicationService:
                 figure_title="Mindoro March 14 R0 reinit overlay",
                 subtitle=subtitle,
                 interpretation="This companion figure shows the baseline stranding branch so the promoted R1 result can be compared against it honestly.",
-                notes="Copied from the completed March 13 -> March 14 reinit QA bundle.",
+                notes="Copied from the completed March 13 -> March 14 reinit QA bundle with the shared-imagery caveat preserved.",
                 source_image_path=(
                     "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/"
                     "qa_march14_reinit_R0_overlay.png"
@@ -2071,7 +2113,7 @@ class FigurePackagePublicationService:
         ]
 
     def _mindoro_crossmodel_publication_specs(self) -> list[dict[str, Any]]:
-        subtitle = "Mindoro | 13-14 March 2023 | promoted cross-model comparator on the March 14 NOAA target"
+        subtitle = "Mindoro | 13-14 March 2023 | promoted cross-model comparator on the March 14 NOAA target | shared-imagery caveat explicit"
         return [
             self._image_spec(
                 spec_id="mindoro_crossmodel_r1_overlay",
@@ -2087,7 +2129,7 @@ class FigurePackagePublicationService:
                 figure_title="Mindoro March 14 OpenDrift R1 previous reinit p50 versus target",
                 subtitle=subtitle,
                 interpretation="This figure shows the top-ranked OpenDrift model in the promoted March 14 cross-model bundle.",
-                notes="Copied from the completed March 13 -> March 14 cross-model comparison bundle.",
+                notes="Copied from the completed March 13 -> March 14 cross-model comparison bundle; PyGNOME remains comparator-only and the shared-imagery caveat remains explicit.",
                 source_image_path=(
                     "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/qa/"
                     "qa_march14_crossmodel_R1_previous_reinit_p50_overlay.png"
@@ -2109,7 +2151,7 @@ class FigurePackagePublicationService:
                 figure_title="Mindoro March 14 OpenDrift R0 reinit p50 versus target",
                 subtitle=subtitle,
                 interpretation="This figure keeps the baseline OpenDrift branch visible in the promoted March 14 cross-model discussion.",
-                notes="Copied from the completed March 13 -> March 14 cross-model comparison bundle.",
+                notes="Copied from the completed March 13 -> March 14 cross-model comparison bundle; PyGNOME remains comparator-only and the shared-imagery caveat remains explicit.",
                 source_image_path=(
                     "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/qa/"
                     "qa_march14_crossmodel_R0_reinit_p50_overlay.png"
@@ -2128,8 +2170,8 @@ class FigurePackagePublicationService:
                 figure_slug="march14_crossmodel_pygnome_overlay",
                 figure_title="Mindoro March 14 PyGNOME comparator versus target",
                 subtitle=subtitle,
-                interpretation="This figure preserves the PyGNOME comparator in the promoted March 14 lane without treating it as truth.",
-                notes="Copied from the completed March 13 -> March 14 cross-model comparison bundle.",
+                interpretation="This figure preserves the PyGNOME comparator in the promoted March 14 lane without treating it as truth or as a replacement for the primary OpenDrift row.",
+                notes="Copied from the completed March 13 -> March 14 cross-model comparison bundle; PyGNOME remains comparator-only and the shared-imagery caveat remains explicit.",
                 source_image_path=(
                     "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/qa/"
                     "qa_march14_crossmodel_pygnome_reinit_deterministic_overlay.png"
@@ -2154,7 +2196,7 @@ class FigurePackagePublicationService:
                 figure_title="Mindoro legacy March 6 strict overlay",
                 subtitle=subtitle,
                 interpretation="This figure is kept as the legacy sparse-reference honesty view rather than the promoted primary validation image.",
-                notes="Copied from the stored strict March 6 QA bundle.",
+                notes="Copied from the stored strict March 6 QA bundle and retained as an honesty-only legacy figure.",
                 source_image_path="output/CASE_MINDORO_RETRO_2023/phase3b/qa_phase3b_obsmask_vs_p50.png",
             ),
             self._image_spec(
@@ -2171,17 +2213,17 @@ class FigurePackagePublicationService:
                 figure_title="Mindoro legacy March 6 source/initialization/validation context",
                 subtitle=subtitle,
                 interpretation="This context figure explains how the legacy March 6 slice fits into the older Mindoro framing without pretending it is still the main result.",
-                notes="Copied from the stored strict March 6 QA bundle.",
+                notes="Copied from the stored strict March 6 QA bundle and retained as an honesty-only legacy context figure.",
                 source_image_path="output/CASE_MINDORO_RETRO_2023/phase3b/qa_phase3b_source_init_validation_overlay.png",
             ),
         ]
 
     def _mindoro_promoted_board_specs(self) -> list[dict[str, Any]]:
         primary_subtitle = (
-            "Mindoro | 13-14 March 2023 | promoted NOAA reinit validation | explicit March 12 imagery caveat"
+            "Mindoro | 13-14 March 2023 | promoted NOAA reinit validation | shared-imagery caveat explicit"
         )
         crossmodel_subtitle = (
-            "Mindoro | 13-14 March 2023 | promoted cross-model comparator on the March 14 NOAA target"
+            "Mindoro | 13-14 March 2023 | promoted cross-model comparator on the March 14 NOAA target | shared-imagery caveat explicit"
         )
         legacy_subtitle = "Mindoro | 6 March 2023 | legacy sparse-reference honesty view"
         return [
@@ -2196,8 +2238,8 @@ class FigurePackagePublicationService:
                 figure_slug="mindoro_primary_validation_board",
                 figure_title="Mindoro March 13 -> March 14 primary validation board",
                 subtitle=primary_subtitle,
-                interpretation="This is now the main Mindoro presentation board because it centers the promoted March 13 -> March 14 validation pair and the best OpenDrift result.",
-                notes="Board assembled from the completed March 13 -> March 14 reinit QA figures only.",
+                interpretation="This is now the main Mindoro presentation board because it centers the promoted March 13 -> March 14 validation pair and the best OpenDrift result while keeping the shared-imagery caveat explicit.",
+                notes="Board assembled from the completed March 13 -> March 14 reinit QA figures only, with the shared-imagery caveat preserved in the packaging text.",
                 note_lines=self._mindoro_primary_note_lines(
                     self._mindoro_primary_score_line("OpenDrift R1 previous reinit p50"),
                     self._mindoro_crossmodel_score_line("r0", "OpenDrift R0 reinit p50"),
@@ -2221,8 +2263,8 @@ class FigurePackagePublicationService:
                 figure_slug="mindoro_crossmodel_board",
                 figure_title="Mindoro March 13 -> March 14 cross-model comparator board",
                 subtitle=crossmodel_subtitle,
-                interpretation="This board answers the cross-model question on the promoted March 14 target without treating PyGNOME as truth.",
-                notes="Board assembled from the completed March 13 -> March 14 cross-model QA figures only.",
+                interpretation="This board answers the cross-model question on the promoted March 14 target without treating PyGNOME as truth and without upgrading the shared-imagery pair into an independent day-to-day validation claim.",
+                notes="Board assembled from the completed March 13 -> March 14 cross-model QA figures only; PyGNOME remains comparator-only and the shared-imagery caveat stays explicit.",
                 note_lines=self._mindoro_comparison_note_lines(
                     self._mindoro_crossmodel_score_line("r1", "OpenDrift R1 previous reinit p50"),
                     self._mindoro_crossmodel_score_line("r0", "OpenDrift R0 reinit p50"),
@@ -2246,8 +2288,8 @@ class FigurePackagePublicationService:
                 figure_slug="mindoro_legacy_march6_board",
                 figure_title="Mindoro legacy March 6 honesty / limitations board",
                 subtitle=legacy_subtitle,
-                interpretation="This board preserves the March 6 sparse-reference material transparently, but it is no longer the canonical main-validation board.",
-                notes="Board assembled from the stored strict March 6 QA figures only.",
+                interpretation="This board preserves the March 6 sparse-reference material transparently as an honesty-only legacy result, but it is no longer the canonical main-validation board.",
+                notes="Board assembled from the stored strict March 6 QA figures only and retained as an honesty-only legacy board.",
                 note_lines=self._mindoro_strict_note_lines(
                     self._mindoro_strict_score_line("Legacy strict March 6")
                 ),
@@ -2337,7 +2379,7 @@ class FigurePackagePublicationService:
             self._mindoro_event_score_line("ensemble", "OpenDrift consolidated ensemble trajectory"),
             self._mindoro_event_score_line("pygnome", "PyGNOME comparator"),
         )
-        common_subtitle_strict = "Mindoro | 6 March 2023 | strict public-observation stress test"
+        common_subtitle_strict = "Mindoro | 6 March 2023 | legacy sparse-reference honesty view"
         common_subtitle_event = "Mindoro | 4-6 March 2023 | March 5-inclusive public-comparison corridor"
 
         singles = [
@@ -3181,7 +3223,7 @@ class FigurePackagePublicationService:
                 figure_slug="eventcorridor_observation",
                 figure_title="DWH event-corridor observation",
                 subtitle="Deepwater Horizon | 21-23 May 2010 | public observation corridor",
-                interpretation="This figure isolates the DWH observed event corridor so the panel can see the target footprint before looking at the model layers.",
+                interpretation="This figure isolates the observed DWH event corridor that serves as truth for the separate external transfer-validation case before any model comparison is shown.",
                 notes="Built from the stored DWH event-corridor observation raster only.",
                 note_lines=note_lines_dwh_event_observation,
                 legend_keys=["observed_mask"],
@@ -3201,7 +3243,7 @@ class FigurePackagePublicationService:
                 figure_slug="eventcorridor_deterministic",
                 figure_title="DWH event corridor: OpenDrift deterministic",
                 subtitle="Deepwater Horizon | 21-23 May 2010 | deterministic event-corridor comparison",
-                interpretation="This figure shows the deterministic DWH event corridor against the observed corridor in a paper-friendly format.",
+                interpretation="This figure shows the readiness-gated HYCOM GOFS 3.1 currents + ERA5 winds + CMEMS wave/Stokes deterministic event corridor against the observed DWH truth corridor.",
                 notes="Built from stored DWH event-corridor rasters only.",
                 note_lines=note_lines_dwh_event_det,
                 legend_keys=["observed_mask", "deterministic_opendrift", "source_point"],
@@ -3225,7 +3267,7 @@ class FigurePackagePublicationService:
                 figure_slug="eventcorridor_p50",
                 figure_title="DWH event corridor: OpenDrift ensemble p50",
                 subtitle="Deepwater Horizon | 21-23 May 2010 | ensemble p50 event-corridor comparison",
-                interpretation="This figure shows the DWH ensemble p50 event corridor against the observed corridor.",
+                interpretation="This figure shows the DWH ensemble p50 event corridor against the observed DWH truth corridor on the same readiness-gated forcing stack.",
                 notes="Built from stored DWH event-corridor rasters only.",
                 note_lines=note_lines_dwh_event_p50,
                 legend_keys=["observed_mask", "ensemble_p50", "source_point"],
@@ -3249,7 +3291,7 @@ class FigurePackagePublicationService:
                 figure_slug="eventcorridor_p90",
                 figure_title="DWH event corridor: OpenDrift ensemble p90",
                 subtitle="Deepwater Horizon | 21-23 May 2010 | ensemble p90 event-corridor comparison",
-                interpretation="This figure shows the wider p90 event corridor against the observed corridor.",
+                interpretation="This figure shows the wider DWH ensemble p90 event corridor against the observed DWH truth corridor on the same readiness-gated forcing stack.",
                 notes="Built from stored DWH event-corridor rasters only.",
                 note_lines=note_lines_dwh_event_p90,
                 legend_keys=["observed_mask", "ensemble_p90", "source_point"],
@@ -3273,7 +3315,7 @@ class FigurePackagePublicationService:
                 figure_slug="eventcorridor_pygnome",
                 figure_title="DWH event corridor: PyGNOME comparator",
                 subtitle="Deepwater Horizon | 21-23 May 2010 | PyGNOME comparator event-corridor comparison",
-                interpretation="This figure shows the PyGNOME comparator corridor against the observed corridor with the same visual grammar.",
+                interpretation="This figure shows the PyGNOME comparator corridor against the observed DWH truth corridor while keeping PyGNOME in a comparator-only role.",
                 notes="Built from stored DWH comparator rasters only.",
                 note_lines=note_lines_dwh_event_pygnome,
                 legend_keys=["observed_mask", "pygnome", "source_point"],
@@ -3297,7 +3339,7 @@ class FigurePackagePublicationService:
                 figure_slug="deterministic_trajectory",
                 figure_title="DWH deterministic transport path",
                 subtitle="Deepwater Horizon | 20-23 May 2010 | deterministic OpenDrift trajectory",
-                interpretation="This figure gives the panel an intuitive picture of the DWH deterministic transport path.",
+                interpretation="This figure gives the panel an intuitive picture of the deterministic transport path behind the separate DWH external transfer-validation case.",
                 notes="Built from the stored DWH deterministic track NetCDF.",
                 note_lines=note_lines_dwh_tracks,
                 legend_keys=["deterministic_opendrift", "source_point"],
@@ -3318,7 +3360,7 @@ class FigurePackagePublicationService:
                 figure_slug="ensemble_sampled_trajectory",
                 figure_title="DWH sampled ensemble trajectories",
                 subtitle="Deepwater Horizon | 20-23 May 2010 | sampled member centroids and mean path",
-                interpretation="This figure shows how the DWH ensemble spreads around the main transport pathway while staying readable.",
+                interpretation="This figure shows how the DWH ensemble spreads around the main transport pathway while staying readable on the same readiness-gated forcing stack.",
                 notes="Built from stored DWH ensemble track NetCDFs only.",
                 note_lines=note_lines_dwh_tracks,
                 legend_keys=["ensemble_member_path", "centroid_path", "source_point"],
@@ -3338,7 +3380,7 @@ class FigurePackagePublicationService:
                 figure_slug="pygnome_trajectory",
                 figure_title="DWH PyGNOME comparator trajectory",
                 subtitle="Deepwater Horizon | 20-23 May 2010 | PyGNOME comparator trajectory",
-                interpretation="This figure gives the panel a like-for-like PyGNOME trajectory picture using the same framing as the OpenDrift transport figures.",
+                interpretation="This figure gives the panel a like-for-like PyGNOME trajectory picture while keeping PyGNOME as comparator-only against the observed DWH truth masks.",
                 notes="Built from the stored DWH PyGNOME track NetCDF.",
                 note_lines=note_lines_dwh_tracks,
                 legend_keys=["pygnome", "source_point"],
@@ -3359,7 +3401,7 @@ class FigurePackagePublicationService:
                 figure_slug="daily_deterministic_board",
                 figure_title="DWH deterministic forecast-vs-observation board",
                 subtitle="Deepwater Horizon | 21-23 May 2010 | daily deterministic comparisons",
-                interpretation="This board is ready for panel use because it shows the daily DWH comparisons with the same readable grammar across all three dates.",
+                interpretation="This board is ready for panel use because it shows the separate DWH external transfer-validation story on observed daily truth masks with the same readable grammar across all three dates.",
                 notes="Board assembled from publication-grade single figures only.",
                 note_lines=self._dwh_deterministic_note_lines(
                     self._dwh_deterministic_score_line("2010-05-21", "21 May"),
@@ -3384,7 +3426,7 @@ class FigurePackagePublicationService:
                 figure_slug="deterministic_vs_ensemble_board",
                 figure_title="DWH deterministic versus ensemble publication board",
                 subtitle="Deepwater Horizon | 21-23 May 2010 | deterministic, p50, and p90 side by side",
-                interpretation="This board is ready for panel use because it makes the deterministic-versus-ensemble footprint differences easy to see.",
+                interpretation="This board is ready for panel use because it compares deterministic, p50, and p90 against the observed DWH truth corridor on the same readiness-gated forcing stack.",
                 notes="Board assembled from publication-grade single figures only.",
                 note_lines=self._dwh_deterministic_note_lines(
                     self._dwh_event_score_line("deterministic", "Deterministic"),
@@ -3409,7 +3451,7 @@ class FigurePackagePublicationService:
                 figure_slug="opendrift_vs_pygnome_board",
                 figure_title="DWH OpenDrift versus PyGNOME publication board",
                 subtitle="Deepwater Horizon | 21-23 May 2010 | observation, official products, and PyGNOME comparator",
-                interpretation="This board is ready for panel use because it makes the OpenDrift-versus-PyGNOME comparison explicit in the richer DWH case.",
+                interpretation="This board is ready for panel use because it keeps observed DWH masks as truth and makes the OpenDrift-versus-PyGNOME comparator framing explicit in the separate external case.",
                 notes="Board assembled from publication-grade single figures only.",
                 note_lines=self._dwh_model_note_lines(
                     self._dwh_event_score_line("deterministic", "OpenDrift deterministic"),
@@ -3435,7 +3477,7 @@ class FigurePackagePublicationService:
                 figure_slug="trajectory_board",
                 figure_title="DWH trajectory publication board",
                 subtitle="Deepwater Horizon | 20-23 May 2010 | deterministic, ensemble, and PyGNOME trajectories",
-                interpretation="This board gives the panel a clean transport-path view of the DWH case before or after the footprint-comparison boards.",
+                interpretation="This board is appendix/support material for the separate DWH external transfer-validation case and explains transport path before score-based truth comparisons.",
                 notes="Board assembled from publication-grade trajectory figures only.",
                 note_lines=note_lines_dwh_tracks,
                 panels=[
@@ -3577,6 +3619,15 @@ class FigurePackagePublicationService:
                 "recommended_for_paper",
                 "source_paths",
                 "notes",
+                "status_key",
+                "status_label",
+                "status_role",
+                "status_reportability",
+                "status_official_status",
+                "status_frozen_status",
+                "status_provenance",
+                "status_panel_text",
+                "status_dashboard_summary",
             ],
         )
         return rows
@@ -3597,7 +3648,11 @@ class FigurePackagePublicationService:
                 lines.append("")
                 continue
             for record in sorted(family_records, key=lambda item: item.figure_id):
-                lines.append(f"- `{record.figure_id}`: {record.short_plain_language_interpretation}")
+                status_label = record.status_label or record.figure_family_label
+                provenance = f" Provenance: {record.status_provenance}" if record.status_provenance else ""
+                lines.append(
+                    f"- `{record.figure_id}` [{status_label}]: {record.short_plain_language_interpretation}{provenance}"
+                )
             lines.append("")
         return "\n".join(lines)
 
@@ -3612,8 +3667,10 @@ class FigurePackagePublicationService:
             "## Start Here",
             "",
         ]
-        for record in sorted(recommended, key=lambda item: item.figure_id):
-            lines.append(f"- `{record.figure_id}`: {record.short_plain_language_interpretation}")
+        for record in sorted(recommended, key=lambda item: (item.figure_family_code, item.figure_id)):
+            lines.append(
+                f"- `{record.figure_id}` [{record.status_label or record.figure_family_label}]: {record.status_panel_text or record.short_plain_language_interpretation}"
+            )
         lines.extend(
             [
                 "",
@@ -3621,7 +3678,7 @@ class FigurePackagePublicationService:
                 "",
             ]
         )
-        for record in sorted(paper_ready, key=lambda item: item.figure_id):
+        for record in sorted(paper_ready, key=lambda item: (item.figure_family_code, item.figure_id)):
             lines.append(f"- `{record.figure_id}`: suitable for single-image paper or appendix use.")
         if supporting_honesty:
             lines.extend(
@@ -3632,7 +3689,9 @@ class FigurePackagePublicationService:
                 ]
             )
             for record in sorted(supporting_honesty, key=lambda item: item.figure_id):
-                lines.append(f"- `{record.figure_id}`: use this figure when the panel asks why Phase 4 OpenDrift-versus-PyGNOME comparison is not shown.")
+                lines.append(
+                    f"- `{record.figure_id}` [{record.status_label or record.figure_family_label}]: {record.status_panel_text or 'Use this figure when the panel asks why Phase 4 OpenDrift-versus-PyGNOME comparison is not shown.'}"
+                )
         if prototype_support:
             lines.extend(
                 [
@@ -3643,7 +3702,7 @@ class FigurePackagePublicationService:
             )
             for record in sorted(prototype_support, key=lambda item: item.figure_id):
                 lines.append(
-                    f"- `{record.figure_id}`: legacy prototype comparator only; deterministic OpenDrift control versus deterministic PyGNOME, with PyGNOME shown as a comparator rather than truth."
+                    f"- `{record.figure_id}` [{record.status_label or record.figure_family_label}]: {record.status_panel_text or 'Legacy prototype comparator only; deterministic OpenDrift control versus deterministic PyGNOME, with PyGNOME shown as a comparator rather than truth.'}"
                 )
         if self.missing_optional_artifacts:
             lines.extend(["", "## Missing Optional Inputs", ""])
@@ -3654,8 +3713,16 @@ class FigurePackagePublicationService:
     def _build_manifest(self, generated_at_utc: str) -> dict[str, Any]:
         rows = [record.as_row() for record in self.figure_records]
         family_counts = {code: len([record for record in self.figure_records if record.figure_family_code == code]) for code in FIGURE_FAMILIES}
-        recommended = [record.figure_id for record in self.figure_records if record.recommended_for_main_defense]
-        paper_ready = [record.figure_id for record in self.figure_records if record.recommended_for_paper and record.variant == "paper"]
+        recommended = [
+            record.figure_id
+            for record in sorted(self.figure_records, key=lambda item: (item.figure_family_code, item.figure_id))
+            if record.recommended_for_main_defense
+        ]
+        paper_ready = [
+            record.figure_id
+            for record in sorted(self.figure_records, key=lambda item: (item.figure_family_code, item.figure_id))
+            if record.recommended_for_paper and record.variant == "paper"
+        ]
         deferred_note_figure_ids = [record.figure_id for record in self.figure_records if record.figure_family_code == "F"]
         return {
             "phase": PHASE,

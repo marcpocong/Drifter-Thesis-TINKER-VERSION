@@ -1,8 +1,9 @@
 workflow_mode: mindoro_retro_2023
 case_id: CASE_MINDORO_RETRO_2023
-description: "Official thesis-aligned retrospective Mindoro spill case"
-mode_label: "Official Mindoro retrospective workflow"
-region: [115.0, 122.0, 6.0, 14.5]
+description: "Official thesis-facing Mindoro spill-case scoring workflow"
+mode_label: "Official Mindoro spill-case workflow"
+mindoro_case_domain: [115.0, 122.0, 6.0, 14.5]
+phase3b_primary_validation_amendment_path: config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml
 
 initialization_mode: initialization_polygon
 release_mode: instantaneous_polygon
@@ -53,3 +54,8 @@ arcgis:
       geometry_type: point
       role: provenance_only
       event_time_utc: "2023-03-03T09:59:00Z"
+
+notes:
+  - The frozen base spill-case definition remains the March 3 -> March 6 official replay in this file.
+  - March 13 -> March 14 Phase 3B public-validation promotion is recorded separately in the amendment file above.
+  - March 6 legacy outputs remain visible for methods honesty and are not silently rewritten by the promotion.

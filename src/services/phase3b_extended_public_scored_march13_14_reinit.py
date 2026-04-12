@@ -1,4 +1,4 @@
-"""Appendix-only March 13 -> March 14 NOAA polygon-reinitialization stress test for Mindoro."""
+"""Mindoro Phase 3B March 13 -> March 14 primary public-validation source bundle."""
 
 from __future__ import annotations
 
@@ -21,6 +21,16 @@ from src.helpers.raster import GridBuilder, rasterize_particles, save_raster
 from src.helpers.scoring import apply_ocean_mask, load_sea_mask_array, precheck_same_grid
 from src.services.ensemble import OFFICIAL_ELEMENT_COUNT_OVERRIDE_ENV, normalize_time_index, run_official_spill_forecast
 from src.services.ingestion import DataIngestionService
+from src.services.mindoro_primary_validation_metadata import (
+    MINDORO_BASE_CASE_CONFIG_PATH,
+    MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH,
+    MINDORO_PRIMARY_VALIDATION_LAUNCHER_ALIAS_ENTRY_ID,
+    MINDORO_PRIMARY_VALIDATION_LAUNCHER_ENTRY_ID,
+    MINDORO_PRIMARY_VALIDATION_PHASE_OR_TRACK,
+    MINDORO_PRIMARY_VALIDATION_TRACK_ID,
+    MINDORO_PRIMARY_VALIDATION_TRACK_LABEL,
+    MINDORO_SHARED_IMAGERY_CAVEAT,
+)
 from src.services.phase3b_extended_public import EXTENDED_DIR_NAME
 from src.services.phase3b_multidate_public import _as_bool, _hash_file
 from src.services.scoring import OFFICIAL_PHASE3B_WINDOWS_KM, Phase3BScoringService
@@ -46,12 +56,11 @@ LOCAL_TIMEZONE = "Asia/Manila"
 MAX_OFFICIAL_START_OFFSET_HOURS = 3
 REQUESTED_ELEMENT_COUNT = 100000
 EXPECTED_ENSEMBLE_MEMBER_COUNT = 50
-TRACK_LABEL = "appendix_only_march13_14_noaa_reinit_stress_test"
+TRACK_LABEL = "mindoro_phase3b_primary_public_validation_reinit"
+PHASE_OR_TRACK = MINDORO_PRIMARY_VALIDATION_PHASE_OR_TRACK
+REPORTING_ROLE = "canonical_phase3b_public_validation_source"
 START_SOURCE_GEOMETRY_LABEL = "accepted_march13_noaa_processed_polygon"
-NOAA_SOURCE_LIMITATION_NOTE = (
-    "Both NOAA/NESDIS public products cite WorldView-3 imagery acquired on 2023-03-12, so this is an appendix "
-    "stress test of reinitialization and scoring behavior rather than a fully independent day-to-day validation pair."
-)
+NOAA_SOURCE_LIMITATION_NOTE = MINDORO_SHARED_IMAGERY_CAVEAT
 LOCKED_OUTPUT_FILES = [
     Path("output/CASE_MINDORO_RETRO_2023/phase3b/phase3b_pairing_manifest.csv"),
     Path("output/CASE_MINDORO_RETRO_2023/phase3b/phase3b_fss_by_date_window.csv"),
@@ -304,11 +313,13 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
                 "March 13 -> March 14 reinit forcing coverage is incomplete. "
                 f"See {self.output_dir / 'march13_14_reinit_forcing_window_manifest.json'} and {note}."
             )
+        self._clear_stale_forcing_blocked_note()
 
         branch_runs: list[dict] = []
         branch_products: list[dict] = []
         for branch in BRANCHES:
             run_info = self._run_or_reuse_branch(branch, selection, recipe_source, forcing_paths, seed_release)
+            self._sync_branch_model_run_manifests(branch, run_info, recipe_source)
             branch_runs.append(run_info)
             branch_products.append(self._build_branch_local_date_products(branch, run_info))
 
@@ -465,7 +476,7 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
             gfs_path = self.forcing_dir / wind_file
             if not gfs_path.exists():
                 raise FileNotFoundError(
-                    "GFS wind forcing was requested for the March 13 -> March 14 reinit stress test "
+                    "GFS wind forcing was requested for the March 13 -> March 14 primary public-validation rerun "
                     f"but is not available locally: {gfs_path}."
                 )
             downloads["wind"] = str(gfs_path)
@@ -534,6 +545,9 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
         payload = {
             "generated_at_utc": datetime.now(timezone.utc).isoformat(),
             "track": TRACK_LABEL,
+            "track_id": MINDORO_PRIMARY_VALIDATION_TRACK_ID,
+            "track_label": MINDORO_PRIMARY_VALIDATION_TRACK_LABEL,
+            "phase_or_track": PHASE_OR_TRACK,
             "recipe": recipe_name,
             "window": asdict(self.window),
             "rows": rows,
@@ -586,15 +600,22 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
                 forcing_override=forcing_paths,
                 sensitivity_context={
                     "track": TRACK_LABEL,
+                    "track_id": MINDORO_PRIMARY_VALIDATION_TRACK_ID,
+                    "track_label": MINDORO_PRIMARY_VALIDATION_TRACK_LABEL,
+                    "phase_or_track": PHASE_OR_TRACK,
                     "branch_id": branch.branch_id,
                     "branch_description": branch.description,
                     "recipe_source": recipe_source,
                     "seed_obs_date": MARCH13_NOAA_SOURCE_DATE,
                     "single_date_validation": MARCH14_NOAA_SOURCE_DATE,
                     "date_composite_rule": self.window.date_composite_rule,
-                    "appendix_only": True,
-                    "stress_test_kind": "polygon_reinitialization_nextday_localdate",
+                    "appendix_only": False,
+                    "reporting_role": REPORTING_ROLE,
+                    "primary_public_validation": True,
+                    "promotion_mode": "reinit_nextday_public_validation",
+                    "case_freeze_amendment_path": str(MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH),
                     "noaa_source_limitation_note": NOAA_SOURCE_LIMITATION_NOTE,
+                    "legacy_march6_outputs_preserved": True,
                 },
                 historical_baseline_provenance={
                     "recipe": selection.recipe,
@@ -656,6 +677,44 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
             or requested
         )
         return requested, actual
+
+    def _sync_branch_model_run_manifests(self, branch: ReinitBranchConfig, run_info: dict, recipe_source: str) -> None:
+        model_dir = Path(str(run_info["model_dir"]))
+        sensitivity_context = {
+            "track": TRACK_LABEL,
+            "track_id": MINDORO_PRIMARY_VALIDATION_TRACK_ID,
+            "track_label": MINDORO_PRIMARY_VALIDATION_TRACK_LABEL,
+            "phase_or_track": PHASE_OR_TRACK,
+            "branch_id": branch.branch_id,
+            "branch_description": branch.description,
+            "recipe_source": recipe_source,
+            "seed_obs_date": MARCH13_NOAA_SOURCE_DATE,
+            "single_date_validation": MARCH14_NOAA_SOURCE_DATE,
+            "date_composite_rule": self.window.date_composite_rule,
+            "appendix_only": False,
+            "reporting_role": REPORTING_ROLE,
+            "primary_public_validation": True,
+            "promotion_mode": "reinit_nextday_public_validation",
+            "case_freeze_amendment_path": str(MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH),
+            "noaa_source_limitation_note": NOAA_SOURCE_LIMITATION_NOTE,
+            "legacy_march6_outputs_preserved": True,
+        }
+        for manifest_path in (
+            model_dir / "forecast" / "forecast_manifest.json",
+            model_dir / "ensemble" / "ensemble_manifest.json",
+        ):
+            if not manifest_path.exists():
+                continue
+            payload = _read_json(manifest_path)
+            if not isinstance(payload, dict):
+                continue
+            payload["sensitivity_context"] = sensitivity_context
+            _write_json(manifest_path, payload)
+
+    def _clear_stale_forcing_blocked_note(self) -> None:
+        blocked_note = self.output_dir / "march13_14_reinit_forcing_blocked.md"
+        if blocked_note.exists():
+            blocked_note.unlink()
 
     def _build_branch_local_date_products(self, branch: ReinitBranchConfig, run_info: dict) -> dict:
         model_dir = Path(str(run_info["model_dir"]))
@@ -794,6 +853,11 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
                     "metric": "FSS",
                     "windows_km": ",".join(str(value) for value in OFFICIAL_PHASE3B_WINDOWS_KM),
                     "track_label": TRACK_LABEL,
+                    "track_id": MINDORO_PRIMARY_VALIDATION_TRACK_ID,
+                    "track_title": MINDORO_PRIMARY_VALIDATION_TRACK_LABEL,
+                    "phase_or_track": PHASE_OR_TRACK,
+                    "reporting_role": REPORTING_ROLE,
+                    "case_freeze_amendment_path": str(MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH),
                     "source_semantics": "march13_polygon_reinit_vs_march14_local_date_branch_p50",
                     "empty_forecast_reason": str(product["empty_forecast_reason"]),
                     "precheck_csv": "",
@@ -922,9 +986,10 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
         ).all()
         best_row = summary_df.sort_values(["mean_fss", "fss_1km", "branch_precedence"], ascending=[False, False, True]).iloc[0]
         lines = [
-            "# March 13 -> March 14 NOAA Reinit Stress Test Decision Note",
+            "# March 13 -> March 14 NOAA Reinit Primary Validation Decision Note",
             "",
-            "- Appendix-only track: true",
+            "- Canonical Phase 3B primary validation source: true",
+            "- Appendix-only track: false",
             f"- Seed source key: {start_row['source_key']}",
             f"- Seed source name: {start_row['source_name']}",
             f"- Target source key: {target_row['source_key']}",
@@ -947,12 +1012,15 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
         elif both_empty:
             lines.append("- Decision: Both branches produced empty March 14 p50 masks; inspect empty_forecast_reason before interpreting skill.")
         else:
-            lines.append("- Decision: At least one branch produced a scoreable March 14 p50 mask, so the reinit comparison is usable as appendix support.")
+            lines.append(
+                "- Decision: At least one branch produced a scoreable March 14 p50 mask, so this bundle is usable as the canonical "
+                "Phase 3B public-validation source row when the shared-imagery caveat is kept explicit."
+            )
         lines.extend(
             [
                 "",
-                "This is appendix-only support material.",
-                "It does not replace the frozen strict March 6 result, the within-horizon public main track, or the final validation package.",
+                "This bundle is the canonical Phase 3B public-validation source for packaging and figure builders.",
+                "It does not rewrite the frozen March 3 -> March 6 official case definition, and it does not delete the March 6 legacy honesty outputs.",
                 "The comparison is intentionally limited to R0 and R1_previous, with March 13 polygon reinitialization and March 14 scoring.",
             ]
         )
@@ -973,7 +1041,7 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
                 "- Status: blocked before any forecast rerun",
                 "",
                 "The accepted public polygon rasterized to zero ocean cells on the canonical scoring grid.",
-                "This appendix stress-test phase stops here instead of fabricating a forecast comparison against a non-scoreable target.",
+                "This primary public-validation source bundle stops here instead of fabricating a forecast comparison against a non-scoreable target.",
             ]
         )
         _write_text(path, text + "\n")
@@ -984,7 +1052,7 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
         lines = [
             "# March 13 -> March 14 Reinit Forcing Coverage Blocked",
             "",
-            "The appendix reinitialization stress test did not rerun the forecast branches because the prepared forcing window was incomplete.",
+            "The canonical Phase 3B public-validation rerun did not rerun the forecast branches because the prepared forcing window was incomplete.",
             "",
             "## Blocking Rows",
             "",
@@ -1063,9 +1131,24 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
         payload = {
             "generated_at_utc": datetime.now(timezone.utc).isoformat(),
             "track": TRACK_LABEL,
-            "appendix_only": True,
+            "track_id": MINDORO_PRIMARY_VALIDATION_TRACK_ID,
+            "track_label": MINDORO_PRIMARY_VALIDATION_TRACK_LABEL,
+            "phase_or_track": PHASE_OR_TRACK,
+            "appendix_only": False,
+            "reporting_role": REPORTING_ROLE,
             "workflow_mode": self.case.workflow_mode,
             "run_name": self.case.run_name,
+            "launcher_entry_ids": {
+                "canonical": MINDORO_PRIMARY_VALIDATION_LAUNCHER_ENTRY_ID,
+                "compatibility_alias": MINDORO_PRIMARY_VALIDATION_LAUNCHER_ALIAS_ENTRY_ID,
+            },
+            "case_definition": {
+                "base_case_definition_path": str(MINDORO_BASE_CASE_CONFIG_PATH),
+                "case_freeze_amendment_path": str(MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH),
+                "base_case_definition_preserved": True,
+                "base_case_definition_window": "2023-03-03_to_2023-03-06",
+                "promoted_primary_validation_window": "2023-03-13_to_2023-03-14",
+            },
             "window": asdict(self.window),
             "selected_start_source": {
                 "source_key": str(start_row["source_key"]),
@@ -1085,8 +1168,10 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
             },
             "seed_release": seed_release,
             "limitations": {
-                "appendix_only": True,
+                "appendix_only": False,
                 "noaa_source_limitation_note": NOAA_SOURCE_LIMITATION_NOTE,
+                "shared_imagery_caveat_prevents_independent_day_to_day_validation": True,
+                "legacy_march6_outputs_preserved": True,
             },
             "recipe": {
                 "recipe": selection.recipe,
@@ -1119,7 +1204,7 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
     def _verify_locked_outputs_unchanged(self) -> None:
         current = self._snapshot_locked_outputs()
         if current != self.locked_hashes_before:
-            raise RuntimeError("March 13 -> March 14 reinit stress test modified locked strict/public-main outputs.")
+            raise RuntimeError("March 13 -> March 14 primary public-validation bundle modified locked strict/public-main outputs.")
 
 
 def run_phase3b_extended_public_scored_march13_14_reinit() -> dict:

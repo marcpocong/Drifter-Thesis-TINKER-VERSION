@@ -580,9 +580,13 @@ class DWHPhase3CEnsembleComparisonService:
             "",
             "Phase 3C1 is deterministic DWH transfer validation. Phase 3C2 extends that branch to ensemble DWH transfer validation on the same public observation-derived masks and the same frozen DWH scoring grid.",
             "",
-            "DWH observed masks remain truth. The cumulative DWH layer remains context-only. This branch asks whether the ensemble footprint products add skill over deterministic OpenDrift on a richer external case.",
+            "Mindoro remains the main Philippine thesis case. DWH remains a separate external transfer-validation/support case.",
             "",
-            "The ensemble branch keeps the same forcing family and date-composite logic, while documenting DWH-specific differences such as clipping requested negative start offsets when the frozen forcing stack begins at the nominal case start time.",
+            "DWH observed masks remain truth. The cumulative DWH layer remains context-only. PyGNOME remains comparator-only in the later cross-model branch.",
+            "",
+            "The ensemble branch keeps the same readiness-gated forcing rule and date-composite logic, rather than any Phase 1 drifter-selected baseline logic, while documenting DWH-specific differences such as clipping requested negative start offsets when the frozen forcing stack begins at the nominal case start time.",
+            "",
+            "In the current repo state, that frozen DWH stack is HYCOM GOFS 3.1 currents + ERA5 winds + CMEMS wave/Stokes.",
         ]
         path.write_text("\n".join(lines) + "\n", encoding="utf-8")
         return path
@@ -700,11 +704,20 @@ class DWHPhase3CEnsembleComparisonService:
         manifest = {
             "case_id": CASE_ID,
             "phase": PHASE,
+            "phase_name": "Phase 3C - External case ensemble comparison",
+            "thesis_role": "external_transfer_validation_support_case",
+            "main_case_reference": "mindoro_retro_2023",
+            "main_case_note": "Mindoro remains the main Philippine thesis case; DWH is a separate external transfer-validation story.",
             "ensemble_success": ensemble_success,
             "successful_member_count": len(successful_members),
             "requested_member_count": self.ensemble_size,
             "deterministic_reused": True,
+            "truth_source": "public DWH observation-derived daily masks",
+            "truth_role": "observed_dwh_daily_masks_are_truth",
+            "pygnome_role": "comparator_only",
             "date_composite_logic_used": True,
+            "forcing_selection_rule": "Freeze the first complete real historical current+wind+wave stack that passes the scientific-readiness gate; do not use Phase 1 drifter-selected baseline logic.",
+            "current_forcing_stack": "HYCOM GOFS 3.1 currents + ERA5 winds + CMEMS wave/Stokes",
             "forcing_stack": stack,
             "ensemble_config": {
                 "ensemble_size": self.ensemble_size,

@@ -30,6 +30,7 @@ except ImportError:  # pragma: no cover - runtime dependency
 
 from src.core.base import BaseService
 from src.core.case_context import get_case_context
+from src.core.domain_semantics import resolve_phase1_validation_box
 from src.services.validation import TransportValidationService
 from src.utils.gfs_wind import (
     GFSWindDownloader,
@@ -135,7 +136,13 @@ class Phase1ProductionRerunService(BaseService):
         self.segment_horizon = pd.Timedelta(hours=self.segment_horizon_hours)
         self.expected_delta = pd.Timedelta(hours=self.segment_timestep_hours)
 
-        self.validation_box = [float(value) for value in (self.config.get("region") or self.case.region)]
+        self.validation_box = [
+            float(value)
+            for value in resolve_phase1_validation_box(
+                self.config,
+                {"phase1_validation_box": self.case.phase1_validation_box},
+            )
+        ]
         halo = float(self.config.get("drifter_acquisition_halo_degrees", 3.0))
         self.drifter_query_box = [
             self.validation_box[0] - halo,
@@ -462,7 +469,7 @@ class Phase1ProductionRerunService(BaseService):
                 elif actual_points != expected_points or not window["time"].diff().dropna().eq(self.expected_delta).all():
                     rejection_reason = "coverage_gap"
                 elif not start_in_box or not window_in_box:
-                    rejection_reason = "outside_regional_box"
+                    rejection_reason = "outside_phase1_validation_box"
                 elif not drogue_attached:
                     rejection_reason = "drogue_lost_within_window"
                 elif overlap_conflict:
@@ -488,7 +495,7 @@ class Phase1ProductionRerunService(BaseService):
                         "coverage_gap_detected": bool(rejection_reason == "coverage_gap"),
                         "start_point_in_validation_box": start_in_box,
                         "window_points_within_validation_box": window_in_box,
-                        "regional_box_status": "inside" if start_in_box and window_in_box else "outside",
+                        "phase1_validation_box_status": "inside" if start_in_box and window_in_box else "outside",
                         "non_overlap_status": "accepted" if not overlap_conflict else "rejected_overlap",
                         "drogue_status_complete": not drogue_missing,
                         "drogue_attached_through_window": drogue_attached,
@@ -961,7 +968,7 @@ class Phase1ProductionRerunService(BaseService):
     ) -> dict[str, Any]:
         return {
             "baseline_id": "phase1_historical_transport_baseline_candidate_2016_2022_v1",
-            "description": "Staged candidate Phase 1 baseline from the completed 2016-2022 regional production rerun",
+            "description": "Staged candidate Phase 1 baseline from the completed 2016-2022 regional transport-validation rerun",
             "selected_recipe": winning_recipe,
             "source_kind": "staged_production_candidate",
             "status_flag": "valid",
@@ -969,7 +976,7 @@ class Phase1ProductionRerunService(BaseService):
             "provisional": False,
             "rerun_required": False,
             "promotion_required": True,
-            "selection_basis": "Completed 2016-2022 regional drogued-only non-overlapping 72 h production rerun",
+            "selection_basis": "Completed 2016-2022 regional drogued-only non-overlapping 72 h transport-validation rerun",
             "workflow_scope": [
                 "phase1_regional_2016_2022",
                 "mindoro_retro_2023",
@@ -993,14 +1000,14 @@ class Phase1ProductionRerunService(BaseService):
                     "start_date": self.window_start.strftime("%Y-%m-%d"),
                     "end_date": self.window_end.strftime("%Y-%m-%d"),
                 },
-                "regional_validation_box": self.validation_box,
+                "phase1_validation_box": self.validation_box,
                 "core_pool_policy": "drogued_segments_only",
                 "segment_policy": {
                     "horizon_hours": self.segment_horizon_hours,
                     "overlap_policy": "non_overlapping",
                 },
                 "official_recipe_family": list(self.official_recipe_family),
-                "current_local_evidence_scope": "completed_2016_2022_regional_production_rerun",
+                "current_local_evidence_scope": "completed_2016_2022_regional_transport_validation_rerun",
                 "accepted_segment_count": int(len(accepted_df)),
                 "rejected_segment_count": int(len(rejected_df)),
                 "expected_phase1_artifacts": {

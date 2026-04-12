@@ -13,6 +13,7 @@ CASE_CONTEXT = get_case_context()
 WORKFLOW_MODE = CASE_CONTEXT.workflow_mode
 CASE_ID = CASE_CONTEXT.case_id
 CASE_IS_PROTOTYPE = CASE_CONTEXT.is_prototype
+ACTIVE_DOMAIN_NAME = CASE_CONTEXT.active_domain_name
 INITIALIZATION_MODE = CASE_CONTEXT.initialization_mode
 SOURCE_POINT_ROLE = CASE_CONTEXT.source_point_role
 SIMULATION_START_UTC = CASE_CONTEXT.simulation_start_utc
@@ -26,7 +27,11 @@ BASE_OUTPUT_DIR = Path("output") / RUN_NAME
 for sub in ["diagnostics", "ensemble", "gnome_comparison", "validation", "weathering"]:
     os.makedirs(BASE_OUTPUT_DIR / sub, exist_ok=True)
 
+# Backward-compatible alias for the current workflow's active domain.
 REGION = CASE_CONTEXT.region
+PHASE1_VALIDATION_BOX = CASE_CONTEXT.phase1_validation_box
+MINDORO_CASE_DOMAIN = CASE_CONTEXT.mindoro_case_domain
+LEGACY_PROTOTYPE_DISPLAY_DOMAIN = CASE_CONTEXT.legacy_prototype_display_domain
 GRID_RESOLUTION = _settings["grid_resolution"]
 RECIPE_COMPONENT_NAMES = _settings["recipe_component_names"]
 

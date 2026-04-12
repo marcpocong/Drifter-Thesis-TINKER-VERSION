@@ -12,14 +12,14 @@ This package synchronizes launcher/menu behavior, documentation, and reproducibi
 
 - `phase1` / `phase1_regional_baseline`: Architecture audited; the final 2016-2022 production rerun is still needed.
 - `phase2` / `phase2_machine_readable_forecast`: Scientifically usable as implemented, but not yet frozen.
-- `phase3a` / `A`: Mindoro March 13 -> March 14 cross-model comparison remains scientifically informative as a comparator benchmark. fss_1km=0.0000, fss_3km=0.0441, fss_5km=0.1371, fss_10km=0.2490
-- `phase3b` / `B1`: Mindoro March 13 -> March 14 is the promoted primary validation, reported with the explicit March 12 imagery caveat. fss_1km=0.0000, fss_3km=0.0441, fss_5km=0.1371, fss_10km=0.2490
-- `phase3b` / `B2`: Mindoro March 6 remains a legacy sparse reference and should not be silently discarded. fss_1km=0.0000, fss_3km=0.0000, fss_5km=0.0000, fss_10km=0.0000
-- `phase3b` / `B3`: Mindoro March 3-6 broader-support remains scientifically informative legacy context, not a replacement for B1. fss_1km=0.1722, fss_3km=0.2004, fss_5km=0.2166, fss_10km=0.2438
-- `phase3c` / `C1`: DWH deterministic transfer validation is a reportable external-case success. fss_1km=0.5033, fss_3km=0.5523, fss_5km=0.5700, fss_10km=0.6018
-- `phase3c` / `C2`: DWH ensemble p50 is reportable and leads the overall mean FSS comparison under the current case definition. fss_1km=0.4997, fss_3km=0.5299, fss_5km=0.5467, fss_10km=0.5790
-- `phase3c` / `C3`: DWH PyGNOME remains reportable as a comparator, not as truth. fss_1km=0.3197, fss_3km=0.3495, fss_5km=0.3689, fss_10km=0.4068
-- `phase4` / `mindoro_phase4`: Mindoro Phase 4 is scientifically reportable now, but inherited-provisional from upstream Phase 1/2 state.
+- `phase3a` / `A`: Comparator-only lane on the promoted March 14 target. fss_1km=0.0000, fss_3km=0.0441, fss_5km=0.1371, fss_10km=0.2490
+- `phase3b` / `B1`: Promoted primary validation; inherited-provisional; not frozen. fss_1km=0.0000, fss_3km=0.0441, fss_5km=0.1371, fss_10km=0.2490
+- `phase3b` / `B2`: Legacy honesty reference; not the promoted primary row. fss_1km=0.0000, fss_3km=0.0000, fss_5km=0.0000, fss_10km=0.0000
+- `phase3b` / `B3`: Legacy broader-support context; not a primary row. fss_1km=0.1722, fss_3km=0.2004, fss_5km=0.2166, fss_10km=0.2438
+- `phase3c` / `C1`: Main DWH transfer-validation track. fss_1km=0.5033, fss_3km=0.5523, fss_5km=0.5700, fss_10km=0.6018
+- `phase3c` / `C2`: DWH ensemble comparison on the same truth masks. fss_1km=0.4997, fss_3km=0.5299, fss_5km=0.5467, fss_10km=0.5790
+- `phase3c` / `C3`: DWH cross-model comparator; PyGNOME not truth. fss_1km=0.3197, fss_3km=0.3495, fss_5km=0.3689, fss_10km=0.4068
+- `phase4` / `mindoro_phase4`: Phase 4 OpenDrift/OpenOil-only interpretation; inherited-provisional.
 - `phase5` / `phase5_sync`: Launcher, docs, and reproducibility packaging are synchronized around the current repo state without rerunning expensive science.
 - `phase5` / `phase5_read_only_dashboard`: The local dashboard is now available as a read-only Phase 5 exploration layer built on the current packaging outputs and publication-grade figures.
 
@@ -27,6 +27,7 @@ This package synchronizes launcher/menu behavior, documentation, and reproducibi
 
 - Existing scientific Mindoro and DWH outputs were reused and not recomputed here.
 - The existing `output/final_validation_package/` bundle was reused rather than rebuilt from scratch.
+- Mindoro keeps the frozen base case definition in `config/case_mindoro_retro_2023.yaml` and records the promoted March 13 -> March 14 Phase 3B primary row through the separate `config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml` amendment file.
 - Mindoro Phase 4 now participates in the reproducibility/package layer via the current `phase4_run_manifest.json` and verdict bundle.
 - The static `output/trajectory_gallery/` bundle now participates in the reproducibility/package layer as a read-only technical figure set.
 - The static `output/trajectory_gallery_panel/` bundle now participates in the reproducibility/package layer as the polished panel-ready figure pack.

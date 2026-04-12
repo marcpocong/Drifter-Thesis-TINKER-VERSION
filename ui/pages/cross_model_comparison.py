@@ -19,11 +19,15 @@ ensure_repo_root_on_path(__file__)
 
 import streamlit as st
 
+from src.core.artifact_status import get_artifact_status
 from ui.data_access import figure_subset
-from ui.pages.common import filter_family, render_figure_cards, render_page_intro, render_status_callout, render_table
+from ui.pages.common import render_figure_cards, render_page_intro, render_status_callout, render_table
 
 
 def render(state: dict, ui_state: dict) -> None:
+    mindoro_status = get_artifact_status("mindoro_crossmodel_comparator")
+    dwh_status = get_artifact_status("dwh_crossmodel_comparator")
+
     render_page_intro(
         "Cross-Model Comparison",
         "This page keeps the cross-model story focused on the existing Phase 3 comparator products. It does not pretend that Phase 4 fate and shoreline comparison already exists.",
@@ -39,21 +43,21 @@ def render(state: dict, ui_state: dict) -> None:
     mindoro_figures = figure_subset(
         ui_state["visual_layer"],
         case_id="CASE_MINDORO_RETRO_2023",
-        family_codes=["C"] if ui_state["visual_layer"] == "publication" else None,
+        status_keys=[mindoro_status.key],
     )
     dwh_figures = figure_subset(
         ui_state["visual_layer"],
         case_id="CASE_DWH_RETRO_2010_72H",
-        family_codes=["I"] if ui_state["visual_layer"] == "publication" else None,
+        status_keys=[dwh_status.key],
     )
 
     tabs = st.tabs(["Mindoro", "DWH", "Comparison tables"])
 
     with tabs[0]:
         render_figure_cards(
-            filter_family(mindoro_figures, "C"),
-            title="Mindoro OpenDrift versus PyGNOME boards and singles",
-            caption="These are publication- and panel-facing Phase 3 comparator figures, not Phase 4 fate-comparison figures.",
+            mindoro_figures,
+            title=mindoro_status.panel_label,
+            caption="These are the promoted March 14 comparator figures and should stay separate from any Phase 4 fate-comparison claim.",
             limit=None if ui_state["advanced"] else 4,
         )
         render_table(
@@ -66,8 +70,8 @@ def render(state: dict, ui_state: dict) -> None:
 
     with tabs[1]:
         render_figure_cards(
-            filter_family(dwh_figures, "I"),
-            title="DWH OpenDrift versus PyGNOME boards and singles",
+            dwh_figures,
+            title=dwh_status.panel_label,
             caption="These figures help the panel compare model behavior on the richer DWH case without treating PyGNOME as truth.",
             limit=None if ui_state["advanced"] else 4,
         )

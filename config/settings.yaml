@@ -1,13 +1,18 @@
 # Settings and Core Application Constants
 
-# Region of Interest: Palawan, Philippines
+# Thesis-facing geographic semantics. Keep these concepts separate:
+# - phase1_validation_box: Chapter 3 historical/regional transport-validation box
+# - mindoro_case_domain: official Mindoro spill-case transport/scoring domain
+# - legacy_prototype_display_domain: prototype/debug plotting extent only
 # [min_lon, max_lon, min_lat, max_lat]
-region: [115.0, 122.0, 6.0, 14.5]
+phase1_validation_box: [119.5, 124.5, 11.5, 16.5]
+mindoro_case_domain: [115.0, 122.0, 6.0, 14.5]
+legacy_prototype_display_domain: [115.0, 122.0, 6.0, 14.5]
 
 # Workflow mode:
 # - prototype_2021       preferred accepted-segment debug/demo workflow
 # - prototype_2016       keeps the original multi-date debugging workflow
-# - mindoro_retro_2023   runs the fixed official thesis-aligned case
+# - mindoro_retro_2023   runs the official Mindoro spill-case scoring workflow
 # - dwh_retro_2010       runs the external Deepwater Horizon setup/scaffold workflow
 # - phase1_regional_2016_2022 runs the dedicated full regional Phase 1 production rerun
 workflow_mode: prototype_2021
@@ -19,8 +24,21 @@ workflow_case_files:
   dwh_retro_2010: config/case_dwh_retro_2010_72h.yaml
   phase1_regional_2016_2022: config/phase1_regional_2016_2022.yaml
 
-# Frozen Phase 1 baseline selection artifact for official spill-case workflows.
+# Current default frozen Phase 1 baseline selection artifact for official spill-case workflows.
 phase1_baseline_selection_path: config/phase1_baseline_selection.yaml
+
+# Official Phase 1 historical/regional audit metadata. This is intentionally
+# separate from the Mindoro spill-case domain and any prototype display extent
+# so audit alignment does not silently change other workflow semantics.
+phase1_official_audit:
+  historical_window:
+    start_date: "2016-01-01"
+    end_date: "2022-12-31"
+  phase1_validation_box: [119.5, 124.5, 11.5, 16.5]
+
+# Deprecated compatibility alias. Thesis-facing code should resolve one of the
+# explicit domain keys above instead of relying on `region`.
+region: [115.0, 122.0, 6.0, 14.5]
 
 # Prototype-only Phase 1 test date window (Golden Test)
 # You can provide a single date string like "2016-09-17" 

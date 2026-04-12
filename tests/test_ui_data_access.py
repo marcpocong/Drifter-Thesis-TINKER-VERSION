@@ -1,3 +1,5 @@
+import json
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -40,6 +42,64 @@ class UiDataAccessTests(unittest.TestCase):
             "curated_recommended_figures",
         ):
             self.assertIn(key, state)
+
+    def test_figure_subset_uses_status_keys_for_ambiguous_dwh_rows(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            publication_dir = root / "output" / "figure_package_publication"
+            publication_dir.mkdir(parents=True, exist_ok=True)
+            (publication_dir / "publication_figure_manifest.json").write_text(
+                json.dumps(
+                    {
+                        "recommended_main_defense_figures": [
+                            "mindoro_primary_validation_board",
+                            "mindoro_crossmodel_board",
+                            "daily_deterministic_board",
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+            (publication_dir / "publication_figure_registry.csv").write_text(
+                "\n".join(
+                    [
+                        "figure_id,case_id,phase_or_track,run_type,figure_slug,relative_path,recommended_for_main_defense",
+                        "mindoro_crossmodel_board,CASE_MINDORO_RETRO_2023,phase3a_reinit_crossmodel,comparison_board,mindoro_crossmodel_board,output/figure_package_publication/mindoro_crossmodel_board.png,true",
+                        "daily_deterministic_board,CASE_DWH_RETRO_2010_72H,phase3c_external_case_run,comparison_board,daily_deterministic_board,output/figure_package_publication/daily_deterministic_board.png,true",
+                        "mindoro_primary_validation_board,CASE_MINDORO_RETRO_2023,phase3b_reinit_primary,comparison_board,mindoro_primary_validation_board,output/figure_package_publication/mindoro_primary_validation_board.png,true",
+                        "deterministic_vs_ensemble_board,CASE_DWH_RETRO_2010_72H,phase3c_external_case_ensemble_comparison,comparison_board,deterministic_vs_ensemble_board,output/figure_package_publication/deterministic_vs_ensemble_board.png,false",
+                        "ensemble_sampled_trajectory,CASE_DWH_RETRO_2010_72H,phase3c_external_case_ensemble_comparison,single_trajectory,ensemble_sampled_trajectory,output/figure_package_publication/ensemble_sampled_trajectory.png,false",
+                    ]
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            registry = data_access.publication_registry(root)
+            by_id = registry.set_index("figure_id")
+            self.assertEqual(by_id.loc["mindoro_primary_validation_board", "status_key"], "mindoro_primary_validation")
+            self.assertEqual(by_id.loc["deterministic_vs_ensemble_board", "status_key"], "dwh_ensemble_transfer")
+            self.assertEqual(by_id.loc["ensemble_sampled_trajectory", "status_key"], "dwh_trajectory_context")
+
+            ensemble = data_access.figure_subset(
+                "publication",
+                repo_root=root,
+                case_id="CASE_DWH_RETRO_2010_72H",
+                status_keys=["dwh_ensemble_transfer"],
+            )
+            self.assertEqual(ensemble["figure_id"].tolist(), ["deterministic_vs_ensemble_board"])
+
+            trajectories = data_access.figure_subset(
+                "publication",
+                repo_root=root,
+                case_id="CASE_DWH_RETRO_2010_72H",
+                status_keys=["dwh_trajectory_context"],
+            )
+            self.assertEqual(trajectories["figure_id"].tolist(), ["ensemble_sampled_trajectory"])
+
+            recommended = data_access.curated_recommended_figures(root)
+            self.assertEqual(recommended.iloc[0]["figure_id"], "mindoro_primary_validation_board")
+            self.assertEqual(recommended.iloc[1]["figure_id"], "mindoro_crossmodel_board")
 
 
 if __name__ == "__main__":

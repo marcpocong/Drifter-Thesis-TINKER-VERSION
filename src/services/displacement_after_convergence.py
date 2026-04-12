@@ -51,7 +51,7 @@ HYPOTHESIS_RERUNS = {
     "transport_model_structural_limitation": "transport-model limitation rerun",
     "observation_strictness_from_tiny_march6_target": "observation-resolution sensitivity rerun",
     "forcing_domain_halo_or_subset_issue": "forcing-domain rerun",
-    "remaining_legacy_broad_region_contamination": "forcing-domain rerun",
+    "remaining_broad_case_domain_contamination": "forcing-domain rerun",
     "wave_or_stokes_attach_mismatch": "forcing-domain rerun",
     "march3_initialization_geometry_rescue_path_bias": "initialization repair rerun",
     "release_centroid_offset_vs_processed_march3_polygon": "initialization repair rerun",
@@ -314,8 +314,8 @@ def _read_source_text_flags() -> dict:
             continue
         text = path.read_text(encoding="utf-8")
         flags[str(path)] = {
-            "contains_official_case_region_fallback": "official_case_region_fallback" in text,
-            "contains_legacy_region_plus_pad": "legacy_region_plus_3deg_pad" in text or "REGION[0]-pad" in text,
+            "contains_official_active_domain_fallback": "official_active_domain_fallback" in text,
+            "contains_legacy_display_domain_plus_pad": "legacy_prototype_display_domain_plus_3deg_pad" in text or "REGION[0]-pad" in text,
             "contains_case_region_reference": "case.region" in text or "case_context.region" in text,
         }
     return flags
@@ -422,15 +422,15 @@ def rank_displacement_after_convergence_hypotheses(metrics: dict) -> list[dict]:
     legacy_score = 0.08
     legacy_support: list[str] = []
     legacy_counter: list[str] = []
-    if metrics.get("actual_legacy_broad_region_usage_detected", False):
+    if metrics.get("actual_broad_case_domain_usage_detected", False):
         legacy_score += 0.35
-        legacy_support.append("Actual manifest or forcing bounds still indicate legacy broad-region usage.")
+        legacy_support.append("Actual manifest or forcing bounds still indicate broad Mindoro spill-case domain usage.")
     else:
-        legacy_counter.append("Current manifest evidence does not indicate broad-region usage.")
-    if metrics.get("source_has_official_region_fallbacks", False):
+        legacy_counter.append("Current manifest evidence does not indicate broad Mindoro spill-case domain usage.")
+    if metrics.get("source_has_official_active_domain_fallbacks", False):
         legacy_score += 0.04
-        legacy_support.append("Source retains official case-region fallback branches for missing-grid situations.")
-    add("remaining_legacy_broad_region_contamination", "remaining legacy broad-region contamination in official prep/runtime", legacy_score, legacy_support, legacy_counter)
+        legacy_support.append("Source retains official active-domain fallback branches for missing-grid situations.")
+    add("remaining_broad_case_domain_contamination", "remaining broad-case-domain contamination in official prep/runtime", legacy_score, legacy_support, legacy_counter)
 
     wave_score = 0.05
     wave_support: list[str] = []
@@ -683,7 +683,7 @@ class DisplacementAfterConvergenceAudit:
 
         audit_statuses = _audit_reader_statuses(high_phase2_audit)
         source_flags = _read_source_text_flags()
-        source_has_fallbacks = any(flag.get("contains_official_case_region_fallback") for flag in source_flags.values())
+        source_has_fallbacks = any(flag.get("contains_official_active_domain_fallback") for flag in source_flags.values())
         download_config = (download_manifest.get(self.case.run_name) or {}).get("config") or {}
         download_bbox_source = str(download_config.get("bbox_source", ""))
         actual_legacy_usage = (
@@ -721,8 +721,8 @@ class DisplacementAfterConvergenceAudit:
             "current_tail_extension_max_gap_hours": float(audit_statuses.get("current_tail_extension_max_gap_hours", 0.0)),
             "forcing_bounds_cover_canonical_halo": forcing_bounds_cover_canonical_halo,
             "download_manifest_uses_canonical_bbox": download_bbox_source.startswith("canonical_scoring_grid_display_bounds_plus"),
-            "actual_legacy_broad_region_usage_detected": actual_legacy_usage,
-            "source_has_official_region_fallbacks": source_has_fallbacks,
+            "actual_broad_case_domain_usage_detected": actual_legacy_usage,
+            "source_has_official_active_domain_fallbacks": source_has_fallbacks,
             "wave_reader_loaded_for_all_runs": (
                 audit_statuses.get("by_forcing_kind", {}).get("wave", {}).get("loaded_count", 0) == audit_statuses.get("run_count", -1)
                 and not audit_statuses.get("by_forcing_kind", {}).get("wave", {}).get("missing_required_variables_values")
@@ -794,7 +794,8 @@ class DisplacementAfterConvergenceAudit:
                 "ensemble_configuration": high_ensemble_manifest.get("ensemble_configuration") or ensemble_manifest.get("ensemble_configuration") or {},
             },
             "forcing_domain_checks": {
-                "case_region_wgs84": list(self.case.region),
+                "active_case_domain_wgs84": list(self.case.region),
+                "mindoro_case_domain_wgs84": list(self.case.mindoro_case_domain),
                 "scoring_grid_display_bounds_wgs84": display_bounds,
                 "halo_degrees": halo_degrees,
                 "canonical_scoring_domain_plus_halo_wgs84": halo_bounds,
@@ -884,9 +885,9 @@ class DisplacementAfterConvergenceAudit:
         lines.extend(
             [
                 "",
-                "## Broad-Region Check",
+                "## Broad-Domain Check",
                 "",
-                "The broad legacy case region remains present in the case config and in guarded fallback/source-QA code paths, but the current official download manifest and shoreline forcing-domain manifest use the canonical scoring-grid display bounds plus the 0.50 degree halo. No current artifact evidence supports broad-region contamination as the primary remaining failure.",
+                "The broad Mindoro spill-case domain remains present in compatibility fields and guarded fallback/source-QA code paths, but the current official download manifest and shoreline forcing-domain manifest use the canonical scoring-grid display bounds plus the 0.50 degree halo. No current artifact evidence supports broad-domain contamination as the primary remaining failure.",
                 "",
                 "## Recommendation",
                 "",

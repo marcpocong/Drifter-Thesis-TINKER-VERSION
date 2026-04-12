@@ -1,11 +1,12 @@
 workflow_mode: prototype_2021
 mode_label: Preferred 2021 accepted-segment debug workflow
 description: Preferred debug/demo workflow frozen from the latest accepted 2021 strict-gate drifter segments.
-region: [119.5, 124.5, 11.5, 16.5]
+legacy_prototype_display_domain: [119.5, 124.5, 11.5, 16.5]
 notes:
   - Accepted-segment debug support only.
   - Deterministic OpenDrift versus deterministic PyGNOME comparator only.
   - Not the final Chapter 3 evidence base.
+  - The prototype display extent is not the official study-area label for Phase 1 or the Mindoro spill case.
 drifter:
   required: true
   mode: fixed_drifter_segment_window

@@ -329,6 +329,9 @@ class PrototypePygnomeSimilaritySummaryTests(unittest.TestCase):
             self.assertEqual(sorted(figure_registry_df["model_name"].unique().tolist()), ["opendrift", "opendrift_vs_pygnome", "pygnome"])
             self.assertTrue(figure_registry_df["notes"].str.contains("density-derived inner/outer support envelopes", regex=False).any())
             self.assertFalse(figure_registry_df["notes"].str.contains("50%|90%", regex=True).any())
+            self.assertIn("status_key", figure_registry_df.columns)
+            self.assertIn("status_label", figure_registry_df.columns)
+            self.assertTrue((figure_registry_df["status_key"] == "prototype_2016_support").all())
 
             manifest = json.loads(Path(results["manifest_json"]).read_text(encoding="utf-8"))
             self.assertTrue(manifest["legacy_debug_only"])
@@ -336,6 +339,8 @@ class PrototypePygnomeSimilaritySummaryTests(unittest.TestCase):
             self.assertEqual(manifest["headline"]["top_ranked_case_id"], "CASE_2016-09-06")
             self.assertEqual(manifest["figure_counts"]["single_forecast_figures"], 18)
             self.assertEqual(manifest["figure_counts"]["comparison_boards"], 3)
+            self.assertIn("Prototype 2016 legacy debug support", summary_text)
+            self.assertIn("Provenance:", captions_text)
 
     def test_sparse_masks_use_tight_crop_and_render_visible_footprints(self):
         with tempfile.TemporaryDirectory() as tmpdir:

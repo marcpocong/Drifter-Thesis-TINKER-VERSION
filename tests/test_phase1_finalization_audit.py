@@ -55,7 +55,9 @@ phase1_recipe_architecture:
             (root / "README.md").write_text("prototype_2016\n", encoding="utf-8")
             (root / "config" / "settings.yaml").write_text(
                 """
-region: [115.0, 122.0, 6.0, 14.5]
+mindoro_case_domain: [115.0, 122.0, 6.0, 14.5]
+legacy_prototype_display_domain: [115.0, 122.0, 6.0, 14.5]
+phase1_validation_box: [115.0, 122.0, 6.0, 14.5]
 workflow_mode: prototype_2016
 """,
                 encoding="utf-8",
@@ -122,7 +124,7 @@ historical_validation_artifacts:
   - output/CASE_2016-09-06/validation/validation_ranking.csv
   - output/CASE_2016-09-17/validation/validation_ranking.csv
 chapter3_finalization_audit:
-  regional_validation_box: [115.0, 122.0, 6.0, 14.5]
+  phase1_validation_box: [115.0, 122.0, 6.0, 14.5]
   segment_policy:
     horizon_hours: 72
 """,

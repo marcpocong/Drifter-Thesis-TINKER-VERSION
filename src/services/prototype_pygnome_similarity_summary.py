@@ -23,6 +23,9 @@ from matplotlib.colors import to_rgba
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch, Polygon, Rectangle
 
+from src.core.artifact_status import artifact_status_columns, status_for_track_id
+from src.core.domain_semantics import resolve_legacy_prototype_display_domain
+
 PHASE = "prototype_pygnome_similarity_summary"
 DEFAULT_OUTPUT_DIRS = {
     "prototype_2016": Path("output") / "prototype_2016_pygnome_similarity",
@@ -199,7 +202,7 @@ class PrototypePygnomeSimilaritySummaryService:
                 "output_dir": Path(str(cfg.get("similarity_output_root") or DEFAULT_OUTPUT_DIRS["prototype_2021"])),
                 "prototype_case_dates": (),
                 "case_ids": tuple(case_ids),
-                "domain_bounds": tuple(cfg.get("region") or DOMAIN_BOUNDS),
+                "domain_bounds": tuple(resolve_legacy_prototype_display_domain(cfg, settings)),
                 "support_context_mode": str(cfg.get("support_context_mode") or "neutral_case_local"),
                 "case_metadata_by_id": {str(item["case_id"]): item for item in cases},
             }
@@ -212,7 +215,7 @@ class PrototypePygnomeSimilaritySummaryService:
             "output_dir": DEFAULT_OUTPUT_DIRS["prototype_2016"],
             "prototype_case_dates": prototype_dates,
             "case_ids": tuple(case_ids),
-            "domain_bounds": tuple(settings.get("region") or DOMAIN_BOUNDS),
+            "domain_bounds": tuple(resolve_legacy_prototype_display_domain(settings)),
             "support_context_mode": "mindoro_canonical",
             "case_metadata_by_id": {},
         }
@@ -1266,6 +1269,18 @@ class PrototypePygnomeSimilaritySummaryService:
         if source_point_path is not None:
             source_paths.append(str(source_point_path.relative_to(self.repo_root)))
         return {
+            **artifact_status_columns(
+                {
+                    "case_id": item["case_id"],
+                    "phase_or_track": "prototype_pygnome_similarity_summary",
+                    "run_type": "single_forecast",
+                    "relative_path": str(output_path.relative_to(self.repo_root)),
+                    "notes": f"{self._support_status_phrase()} transport comparator with {self._context_phrase()}.",
+                    "short_plain_language_interpretation": interpretation,
+                    "legacy_debug_only": self.workflow_mode == "prototype_2016",
+                    "workflow_mode": self.workflow_mode,
+                }
+            ),
             "figure_id": output_path.stem,
             "case_id": item["case_id"],
             "phase_or_track": "prototype_pygnome_similarity_summary",
@@ -1364,6 +1379,18 @@ class PrototypePygnomeSimilaritySummaryService:
         if source_point_path is not None:
             source_paths.append(str(source_point_path.relative_to(self.repo_root)))
         return {
+            **artifact_status_columns(
+                {
+                    "case_id": item["case_id"],
+                    "phase_or_track": "prototype_pygnome_similarity_summary",
+                    "run_type": "comparison_board",
+                    "relative_path": str(output_path.relative_to(self.repo_root)),
+                    "notes": f"{self._support_status_phrase()} transport comparator board with {self._context_phrase()}.",
+                    "short_plain_language_interpretation": interpretation,
+                    "legacy_debug_only": self.workflow_mode == "prototype_2016",
+                    "workflow_mode": self.workflow_mode,
+                }
+            ),
             "figure_id": output_path.stem,
             "case_id": item["case_id"],
             "phase_or_track": "prototype_pygnome_similarity_summary",
@@ -1484,6 +1511,7 @@ class PrototypePygnomeSimilaritySummaryService:
 
     def _build_summary_markdown(self, similarity_rows: list[dict[str, Any]]) -> str:
         df = pd.DataFrame(similarity_rows).sort_values("relative_similarity_rank")
+        workflow_status = status_for_track_id(self.workflow_mode)
         cohort_phrase = (
             "the configured accepted-segment 2021 deterministic OpenDrift control vs deterministic PyGNOME transport benchmarks"
             if self.workflow_mode == "prototype_2021"
@@ -1504,6 +1532,9 @@ class PrototypePygnomeSimilaritySummaryService:
             "Relative similarity ranking:",
             "",
         ]
+        if workflow_status:
+            lines.insert(7, f"- provenance: {workflow_status.provenance_label}")
+            lines.insert(7, f"- status label: {workflow_status.label}")
         for _, row in df.iterrows():
             lines.append(
                 f"- Rank {int(row['relative_similarity_rank'])}: `{row['case_id']}` | "
@@ -1553,7 +1584,13 @@ class PrototypePygnomeSimilaritySummaryService:
             case_df = figure_df[figure_df["case_id"] == case_id]
             for _, row in case_df.iterrows():
                 label = "board" if row["view_type"] == "board" else f"{row['hour']} h {row['model_label']}"
-                lines.append(f"- `{row['figure_id']}` ({label}): {row['short_plain_language_interpretation']}")
+                status_label = str(row.get("status_label") or "").strip()
+                provenance = str(row.get("status_provenance") or "").strip()
+                status_text = f" [{status_label}]" if status_label else ""
+                provenance_text = f" Provenance: {provenance}" if provenance else ""
+                lines.append(
+                    f"- `{row['figure_id']}` ({label}){status_text}: {row['short_plain_language_interpretation']}{provenance_text}"
+                )
             lines.append("")
         return "\n".join(lines)
 
@@ -1605,6 +1642,15 @@ class PrototypePygnomeSimilaritySummaryService:
                 "notes",
                 "legacy_debug_only",
                 "pygnome_role",
+                "status_key",
+                "status_label",
+                "status_role",
+                "status_reportability",
+                "status_official_status",
+                "status_frozen_status",
+                "status_provenance",
+                "status_panel_text",
+                "status_dashboard_summary",
             ],
         )
 

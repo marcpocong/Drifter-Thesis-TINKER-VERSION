@@ -36,8 +36,10 @@ Target architecture:
 Current local state:
 
 - the dedicated `phase1_production_rerun` lane now materializes the missing 2016-2022 accepted/rejected corpus, loading audit, metrics, summary, ranking, and staged candidate baseline under `output/phase1_production_rerun/`
+- the official Phase 1 audit box/window is `119.5-124.5E / 11.5-16.5N` over `2016-2022`
+- the current default spill-case baseline remains `config/phase1_baseline_selection.yaml`, whose evidence base is still the preserved `2016-09-01`, `2016-09-06`, and `2016-09-17` prototype rankings
 - the regional rerun is scientific-only by default and does not auto-run `phase1_audit` or `phase5_sync`
-- `config/phase1_baseline_selection.yaml` is intentionally not overwritten; downstream spill-case use of the new baseline remains a manual override/promotion decision
+- `config/phase1_baseline_selection.yaml` is intentionally not overwritten; downstream spill-case use of the staged candidate should go through `BASELINE_SELECTION_PATH` or an explicit promotion decision
 
 ## Phase 2 Boundary
 
@@ -66,8 +68,11 @@ Mindoro and DWH serve different roles:
 - DWH Phase 3C provides external rich-data transfer validation
 
 These should not be collapsed into a single validation claim. Mindoro remains the main Philippine case; DWH remains the external rich-data transfer benchmark.
+Within Mindoro, the original March 3 -> March 6 case definition remains frozen in `config/case_mindoro_retro_2023.yaml`, while the promoted March 13 -> March 14 B1 row is recorded separately in `config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml`. This preserves provenance and keeps March 6 visible as a legacy honesty-only row instead of silently rewriting history.
+The March 13 -> March 14 row is therefore the canonical public-validation row for thesis reporting, but it still carries a shared-imagery guardrail because both NOAA/NESDIS public products cite the same March 12 WorldView-3 imagery. PyGNOME remains comparator-only in that promoted lane.
 
 Unlike Mindoro, DWH Phase 3C does not use a Phase 1 drifter-selected forcing recipe. It uses a frozen historical forcing stack chosen by a scientific-readiness gate: the first complete real current+wind+wave stack for the DWH May 20-23, 2010 window that is not smoke-only, spans the required window, exposes the required variables with usable metadata, opens cleanly in the OpenDrift reader, and passes a small end-to-end reader-check forecast. In the current repo state, that frozen DWH stack is HYCOM GOFS 3.1 currents plus ERA5 winds plus CMEMS wave/Stokes.
+Observed DWH daily masks remain truth, the cumulative DWH layer remains context-only, and PyGNOME remains comparator-only within that separate external-case story.
 
 ## Phase 4 Boundary
 
@@ -113,6 +118,7 @@ The launcher source of truth is `config/launcher_matrix.json`. It defines:
 - read-only utilities are visible and easy to run
 - non-existent UI features are not advertised as if they already exist, while the implemented raw gallery, panel gallery, and publication-grade figure package are exposed honestly as separate safe utilities
 - the expensive `phase1_production_rerun` scientific entry exists as a separate historical/regional workflow instead of being hidden inside the Mindoro spill-case bundle
+- the promoted Mindoro B1 row now has its own canonical scientific entry, `mindoro_phase3b_primary_public_validation`, while `mindoro_march13_14_noaa_reinit_stress_test` survives only as a backward-compatible alias
 
 ## Packaging Architecture
 
@@ -128,3 +134,4 @@ The repo now has two different packaging layers:
 - `ui/`: read-only local dashboard that consumes those packages and archives without becoming a scientific rerun surface
 
 Phase 5 reuses the final validation package rather than replacing it. The validation package remains the thesis summary bundle; the reproducibility package is the reproducibility/indexing layer around the current repo state; the prototype PyGNOME similarity package is a legacy/debug comparator summary only; the raw trajectory gallery is the technical figure archive; the polished panel gallery is the intermediate non-technical review layer; the publication figure package is the canonical presentation layer for defense slides and paper-ready single figures; and the UI is the read-only local explorer over that same packaged state.
+The Mindoro packaging outputs now also carry explicit provenance fields for the promoted B1 row, including the frozen base case path, the amendment path, the row role, launcher IDs, and the shared-imagery caveat so that the primary/legacy distinction survives into downstream tables and figure manifests.

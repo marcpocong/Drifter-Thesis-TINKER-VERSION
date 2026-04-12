@@ -12,10 +12,12 @@
 | `trajectory_gallery_panel` | read-only packaging/help | `mindoro_retro_2023` | build the polished panel-ready figure board pack from existing outputs | cheap | `.\start.ps1 -Entry trajectory_gallery_panel -NoPause` |
 | `figure_package_publication` | read-only packaging/help | `mindoro_retro_2023` | build the canonical publication-grade single-figure and board package from existing outputs | cheap | `.\start.ps1 -Entry figure_package_publication -NoPause` |
 | `phase1_production_rerun` | scientific/reportable | `phase1_regional_2016_2022` | run the full 2016-2022 historical/regional Phase 1 rerun and stage a candidate baseline artifact only | expensive | `.\start.ps1 -Entry phase1_production_rerun -NoPause` |
+| `mindoro_phase3b_primary_public_validation` | scientific/reportable | `mindoro_retro_2023` | rerun the canonical Mindoro March 13 -> March 14 Phase 3B public-validation row without rewriting the frozen March 3 -> March 6 case definition | expensive | `.\start.ps1 -Entry mindoro_phase3b_primary_public_validation -NoPause` |
 | `mindoro_phase4_only` | scientific/reportable | `mindoro_retro_2023` | rerun only Mindoro Phase 4 | moderate | `.\start.ps1 -Entry mindoro_phase4_only -NoPause` |
 | `mindoro_reportable_core` | scientific/reportable | `mindoro_retro_2023` | intentional rerun of the main Mindoro reportable chain | expensive | `.\start.ps1 -Entry mindoro_reportable_core -NoPause` |
 | `dwh_reportable_bundle` | scientific/reportable | `dwh_retro_2010` | intentional rerun of the DWH Phase 3C bundle | expensive | `.\start.ps1 -Entry dwh_reportable_bundle -NoPause` |
 | `mindoro_appendix_sensitivity_bundle` | sensitivity/appendix | `mindoro_retro_2023` | rerun appendix and sensitivity branches | expensive | `.\start.ps1 -Entry mindoro_appendix_sensitivity_bundle -NoPause` |
+| `mindoro_march13_14_noaa_reinit_stress_test` | sensitivity/appendix | `mindoro_retro_2023` | backward-compatible alias that still resolves to the promoted March 13 -> March 14 bundle and comparator lane | expensive | `.\start.ps1 -Entry mindoro_march13_14_noaa_reinit_stress_test -NoPause` |
 | `prototype_2021_bundle` | legacy prototype | `prototype_2021` | preferred accepted-segment debug/demo path; exact 2021 drifter windows, official Phase 1 recipe family only, and transport-core bundle only | moderate | `.\start.ps1 -Entry prototype_2021_bundle -NoPause` |
 | `prototype_legacy_bundle` | legacy prototype | `prototype_2016` | legacy debug/regression only; prep attempts best-effort GFS, pads forcing coverage for the preserved ensemble jitter, writes the legacy similarity package after benchmark, and keeps `3`/`3b` only as appendix/smoke follow-ons | moderate | `.\start.ps1 -Entry prototype_legacy_bundle -NoPause` |
 
@@ -43,9 +45,17 @@ docker-compose exec -T -e WORKFLOW_MODE=phase1_regional_2016_2022 -e PIPELINE_PH
 docker-compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=prep pipeline python -m src
 docker-compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 pipeline python -m src
 docker-compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=official_phase3b pipeline python -m src
+docker-compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=phase3b_extended_public_scored_march13_14_reinit pipeline python -m src
 docker-compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=phase3b_multidate_public pipeline python -m src
 docker-compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=phase4_oiltype_and_shoreline pipeline python -m src
 docker-compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison gnome python -m src
+```
+
+Candidate-baseline trial for the official Mindoro spill-case lane:
+
+```bash
+docker-compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e BASELINE_SELECTION_PATH=output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml pipeline python -m src
+docker-compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e BASELINE_SELECTION_PATH=output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml -e PIPELINE_PHASE=phase4_oiltype_and_shoreline pipeline python -m src
 ```
 
 DWH lane:
@@ -87,3 +97,7 @@ docker-compose exec -T -e WORKFLOW_MODE=prototype_2016 -e PIPELINE_PHASE=3 gnome
 - Prototype GFS is best-effort in the legacy lane; the dedicated Phase 1 regional rerun remains the strict GFS-required workflow.
 - Keep `3` and `3b` as legacy appendix/smoke paths, not part of the preferred `prototype_2021` proof story.
 - The dedicated Phase 1 rerun stages `output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml` only; do not treat it as an automatic overwrite of `config/phase1_baseline_selection.yaml`.
+- Use `BASELINE_SELECTION_PATH` for downstream trials against the staged candidate; keep promotion of `config/phase1_baseline_selection.yaml` explicit and manual.
+- Keep `config/case_mindoro_retro_2023.yaml` frozen as the March 3 -> March 6 base case; the promoted March 13 -> March 14 B1 row is carried by amendment, not by silent rewrite.
+- `mindoro_march13_14_noaa_reinit_stress_test` is now an alias, not the authoritative scientific label.
+- Do not claim independent day-to-day validation for March 13 -> March 14 while the shared-imagery caveat still applies, and do not treat PyGNOME as anything other than a comparator.

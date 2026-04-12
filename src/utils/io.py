@@ -303,11 +303,6 @@ def load_baseline_selection(selection_path: str | Path | None = None) -> tuple[P
     return path, data
 
 
-def resolve_frozen_baseline_recipe(selection_path: str | Path | None = None) -> str:
-    """Resolve the recipe for official workflows from an explicit frozen baseline artifact."""
-    return resolve_recipe_selection().recipe
-
-
 def resolve_recipe_selection(
     ranking_csv: str | Path = None,
     default: str = DEFAULT_VALIDATED_FALLBACK_RECIPE,

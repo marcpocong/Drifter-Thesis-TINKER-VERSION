@@ -19,12 +19,16 @@ ensure_repo_root_on_path(__file__)
 
 import streamlit as st
 
+from src.core.artifact_status import get_artifact_status
 from ui.data_access import figure_subset
-from ui.pages.common import filter_family, render_figure_cards, render_page_intro, render_status_callout, render_table
+from ui.pages.common import render_figure_cards, render_page_intro, render_status_callout, render_table
 from ui.plots import phase4_budget_summary_figure
 
 
 def render(state: dict, ui_state: dict) -> None:
+    oil_status = get_artifact_status("mindoro_phase4_oil_budget")
+    shoreline_status = get_artifact_status("mindoro_phase4_shoreline")
+
     render_page_intro(
         "Phase 4 Oil-Type & Shoreline",
         "This page presents the current Mindoro Phase 4 interpretation layer as it exists now: scientifically reportable on the current transport framework, but still inherited-provisional from the upstream Phase 1 and Phase 2 freeze story.",
@@ -33,7 +37,7 @@ def render(state: dict, ui_state: dict) -> None:
 
     render_status_callout(
         "Current scope",
-        "These figures and tables are OpenDrift/OpenOil outputs only. They are suitable for current interpretation, but they are not a cross-model Phase 4 comparison.",
+        oil_status.panel_text,
         "info",
     )
 
@@ -46,7 +50,7 @@ def render(state: dict, ui_state: dict) -> None:
     figures = figure_subset(
         ui_state["visual_layer"],
         case_id="CASE_MINDORO_RETRO_2023",
-        family_codes=["E"] if ui_state["visual_layer"] == "publication" else None,
+        status_keys=[oil_status.key, shoreline_status.key],
     )
 
     st.pyplot(phase4_budget_summary_figure(state["phase4_budget_summary"]), width="stretch")
@@ -55,9 +59,9 @@ def render(state: dict, ui_state: dict) -> None:
 
     with tabs[0]:
         render_figure_cards(
-            filter_family(figures, "E"),
+            figures,
             title="Mindoro Phase 4 figures",
-            caption="Panel-friendly mode leads with the oil-budget board and the shoreline-impact board, then exposes scenario-specific single figures as needed.",
+            caption="Panel-friendly mode leads with the oil-budget and shoreline boards, then exposes scenario-specific singles as needed.",
             limit=None if ui_state["advanced"] else 5,
         )
 

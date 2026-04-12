@@ -1,4 +1,4 @@
-"""Appendix-only March 13 -> March 14 NOAA reinit cross-model comparator."""
+"""Mindoro Phase 3A comparator-only March 13 -> March 14 cross-model bundle."""
 
 from __future__ import annotations
 
@@ -16,6 +16,14 @@ from src.helpers.metrics import calculate_fss
 from src.helpers.raster import extract_particles_at_time, rasterize_particles, save_raster
 from src.helpers.scoring import apply_ocean_mask, precheck_same_grid
 from src.services.gnome_comparison import GNOME_AVAILABLE, GnomeComparisonService
+from src.services.mindoro_primary_validation_metadata import (
+    MINDORO_BASE_CASE_CONFIG_PATH,
+    MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH,
+    MINDORO_PRIMARY_VALIDATION_PHASE_OR_TRACK,
+    MINDORO_PRIMARY_VALIDATION_TRACK_ID,
+    MINDORO_PRIMARY_VALIDATION_TRACK_LABEL,
+    MINDORO_SHARED_IMAGERY_CAVEAT,
+)
 from src.services.phase3b_extended_public_scored_march13_14_reinit import (
     LOCAL_TIMEZONE,
     MARCH13_14_REINIT_DIR_NAME,
@@ -50,7 +58,7 @@ except ImportError:  # pragma: no cover
 
 PHASE = "phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison"
 PAIR_ROLE = "march14_nextday_reinit_crossmodel_compare"
-TRACK_LABEL = "appendix_only_march13_14_noaa_reinit_crossmodel_compare"
+TRACK_LABEL = "mindoro_phase3a_primary_public_validation_crossmodel_compare"
 PYGNOME_TRACK_ID = "pygnome_reinit_deterministic"
 PYGNOME_TRACK_NAME = "pygnome_reinit_deterministic_vs_march14_noaa"
 PYGNOME_MODEL_NAME = "PyGNOME deterministic March 13 reinit comparator"
@@ -568,14 +576,15 @@ class Phase3BExtendedPublicScoredMarch1314ReinitPyGnomeComparisonService(
         lines = [
             "# March 13 -> March 14 NOAA Reinit Cross-Model Comparator",
             "",
-            "This appendix-only comparator reuses the completed March 13 -> March 14 OpenDrift reinit outputs, then adds one deterministic PyGNOME surrogate run seeded from the same accepted March 13 NOAA polygon.",
+            "This comparator-only bundle reuses the completed March 13 -> March 14 OpenDrift reinit outputs, then adds one deterministic PyGNOME surrogate run seeded from the same accepted March 13 NOAA polygon.",
             "",
             "## Guardrails",
             "",
             "- PyGNOME is comparator-only and is never used as truth.",
+            f"- The canonical Phase 3B row remains {MINDORO_PRIMARY_VALIDATION_TRACK_ID}: {MINDORO_PRIMARY_VALIDATION_TRACK_LABEL}.",
             "- The completed March 13 -> March 14 OpenDrift reinit outputs are reused and hash-checked rather than modified.",
             "- The frozen strict March 6 outputs and final validation package remain unchanged.",
-            f"- Limitation note: {NOAA_SOURCE_LIMITATION_NOTE}",
+            f"- Limitation note: {MINDORO_SHARED_IMAGERY_CAVEAT}",
             "- PyGNOME still does not reproduce the exact OpenDrift gridded current/wave/Stokes stack.",
             "",
             "## Recommendation",
@@ -638,9 +647,17 @@ class Phase3BExtendedPublicScoredMarch1314ReinitPyGnomeComparisonService(
             "generated_at_utc": datetime.now(timezone.utc).isoformat(),
             "phase": PHASE,
             "track": TRACK_LABEL,
-            "appendix_only": True,
+            "appendix_only": False,
+            "reporting_role": "phase3a_comparator_only",
             "workflow_mode": self.case.workflow_mode,
             "run_name": self.case.run_name,
+            "case_definition": {
+                "base_case_definition_path": str(MINDORO_BASE_CASE_CONFIG_PATH),
+                "case_freeze_amendment_path": str(MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH),
+                "base_case_definition_preserved": True,
+                "paired_primary_track_id": MINDORO_PRIMARY_VALIDATION_TRACK_ID,
+                "paired_primary_phase_or_track": MINDORO_PRIMARY_VALIDATION_PHASE_OR_TRACK,
+            },
             "window": {
                 "simulation_start_utc": self.window.simulation_start_utc,
                 "simulation_end_utc": self.window.simulation_end_utc,
@@ -668,8 +685,10 @@ class Phase3BExtendedPublicScoredMarch1314ReinitPyGnomeComparisonService(
             },
             "seed_release": seed_release,
             "limitations": {
-                "appendix_only": True,
+                "appendix_only": False,
+                "comparator_only": True,
                 "noaa_source_limitation_note": NOAA_SOURCE_LIMITATION_NOTE,
+                "shared_imagery_caveat_prevents_independent_day_to_day_validation": True,
                 "pygnome_structural_mismatch": "PyGNOME deterministic comparator does not reproduce the exact OpenDrift gridded current/wave/Stokes stack.",
             },
             "upstream_reinit": {

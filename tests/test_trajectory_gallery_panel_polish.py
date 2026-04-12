@@ -94,6 +94,16 @@ class TrajectoryGalleryPanelPolishTests(unittest.TestCase):
             self.assertEqual(len(registry_df), 10)
             self.assertIn("case_mindoro_retro_2023", "".join(registry_df["figure_id"].tolist()))
             self.assertTrue((registry_df["recommended_for_main_defense"] == True).any())  # noqa: E712
+            self.assertIn("status_key", registry_df.columns)
+            self.assertIn("status_label", registry_df.columns)
+            self.assertIn("status_provenance", registry_df.columns)
+            primary_row = registry_df[registry_df["figure_id"].str.contains("mindoro_primary_reinit_board", na=False)].iloc[0]
+            self.assertEqual(primary_row["status_key"], "mindoro_primary_validation")
+            dwh_traj_row = registry_df[registry_df["figure_id"].str.contains("dwh_trajectory_board", na=False)].iloc[0]
+            self.assertEqual(dwh_traj_row["status_key"], "dwh_trajectory_context")
+
+            captions_text = captions_path.read_text(encoding="utf-8")
+            self.assertIn("Provenance:", captions_text)
 
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
             self.assertTrue(manifest["built_from_existing_outputs_only"])

@@ -375,7 +375,20 @@ class FigurePackagePublicationTests(unittest.TestCase):
             registry_df = pd.read_csv(results["registry_csv"])
             self.assertIn("pixel_width", registry_df.columns)
             self.assertIn("pixel_height", registry_df.columns)
+            self.assertIn("status_key", registry_df.columns)
+            self.assertIn("status_provenance", registry_df.columns)
             self.assertEqual(len(registry_df), len(manifest["figures"]))
+
+            dwh_ensemble_board = registry_df[
+                (registry_df["case_id"] == "CASE_DWH_RETRO_2010_72H")
+                & registry_df["figure_id"].str.contains("deterministic_vs_ensemble_board", na=False)
+            ].iloc[0]
+            self.assertEqual(dwh_ensemble_board["status_key"], "dwh_ensemble_transfer")
+            dwh_trajectory_board = registry_df[
+                (registry_df["case_id"] == "CASE_DWH_RETRO_2010_72H")
+                & registry_df["figure_id"].str.contains("trajectory_board", na=False)
+            ].iloc[0]
+            self.assertEqual(dwh_trajectory_board["status_key"], "dwh_trajectory_context")
 
             expected_single_dims = (
                 int(service._single_size()[0] * service._dpi()),
@@ -401,6 +414,8 @@ class FigurePackagePublicationTests(unittest.TestCase):
 
             registry_text = Path(results["registry_csv"]).read_text(encoding="utf-8")
             self.assertIn("crossmodel_comparison_deferred", registry_text)
+            captions_text = Path(results["captions_md"]).read_text(encoding="utf-8")
+            self.assertIn("Provenance:", captions_text)
 
     def test_publication_package_surfaces_prototype_support_family_k_when_registry_exists(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -423,11 +438,12 @@ class FigurePackagePublicationTests(unittest.TestCase):
             self.assertEqual(len(boards), 1)
             self.assertTrue((singles["recommended_for_paper"] == True).all())
             self.assertTrue((boards["recommended_for_paper"] == False).all())
+            self.assertTrue((family_k["status_key"] == "prototype_2016_support").all())
             self.assertTrue((family_k["notes"].str.contains("Support-only publication copy")).all())
 
             talking_points = Path(results["talking_points_md"]).read_text(encoding="utf-8")
             self.assertIn("Prototype Support Figures", talking_points)
-            self.assertIn("deterministic OpenDrift control versus deterministic PyGNOME", talking_points)
+            self.assertIn("Legacy debug support only; comparator-only and not final Phase 1 evidence.", talking_points)
 
 
 if __name__ == "__main__":

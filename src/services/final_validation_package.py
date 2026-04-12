@@ -9,6 +9,21 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from src.services.mindoro_primary_validation_metadata import (
+    MINDORO_BASE_CASE_CONFIG_PATH,
+    MINDORO_LEGACY_MARCH6_TRACK_ID,
+    MINDORO_LEGACY_MARCH6_TRACK_LABEL,
+    MINDORO_LEGACY_SUPPORT_TRACK_ID,
+    MINDORO_LEGACY_SUPPORT_TRACK_LABEL,
+    MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH,
+    MINDORO_PRIMARY_VALIDATION_LAUNCHER_ALIAS_ENTRY_ID,
+    MINDORO_PRIMARY_VALIDATION_LAUNCHER_ENTRY_ID,
+    MINDORO_PRIMARY_VALIDATION_MIGRATION_NOTE_PATH,
+    MINDORO_PRIMARY_VALIDATION_TRACK_ID,
+    MINDORO_PRIMARY_VALIDATION_TRACK_LABEL,
+    MINDORO_SHARED_IMAGERY_CAVEAT,
+)
+
 
 PHASE = "final_validation_package"
 OUTPUT_DIR = Path("output") / PHASE
@@ -340,6 +355,11 @@ class FinalValidationPackageService:
             "transport_model": transport_model,
             "provisional_transport_model": bool(row.get("provisional_transport_model", True)),
             "shoreline_mask_status": "dwh_epsg32616_scoring_grid_with_sea_mask_applied",
+            "case_definition_path": "",
+            "case_freeze_amendment_path": "",
+            "base_case_definition_preserved": False,
+            "row_role": "scientific_result" if track_id != "C3" else "comparator_only",
+            "shared_imagery_caveat": "",
             "notes": notes,
             "source_summary_path": str(
                 DWH_DIR
@@ -365,8 +385,8 @@ class FinalValidationPackageService:
         rows.append(
             {
                 "case_id": MINDORO_CASE_ID,
-                "track_id": "B1",
-                "track_label": "Mindoro March 13 -> March 14 NOAA reinit primary validation",
+                "track_id": MINDORO_PRIMARY_VALIDATION_TRACK_ID,
+                "track_label": MINDORO_PRIMARY_VALIDATION_TRACK_LABEL,
                 "model_comparator": "OpenDrift R1 previous reinit p50",
                 "validation_dates": "2023-03-14",
                 "result_scope": "primary_nextday_reinit_validation",
@@ -383,11 +403,16 @@ class FinalValidationPackageService:
                 "transport_model": "oceandrift",
                 "provisional_transport_model": True,
                 "shoreline_mask_status": "canonical_mindoro_scoring_grid_ocean_mask_applied",
+                "case_definition_path": str(MINDORO_BASE_CASE_CONFIG_PATH),
+                "case_freeze_amendment_path": str(MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH),
+                "base_case_definition_preserved": True,
+                "row_role": "primary_public_validation",
+                "shared_imagery_caveat": MINDORO_SHARED_IMAGERY_CAVEAT,
                 "notes": (
                     "Primary Mindoro validation now uses the March 13 NOAA polygon as the reinitialization geometry "
                     "and scores the March 14 NOAA target against the completed OpenDrift R1 previous p50 branch. "
-                    "Both NOAA/NESDIS products cite March 12 WorldView-3 imagery, so this is reported with an "
-                    "explicit same-imagery caveat rather than as a fully independent day-to-day pair."
+                    "The base March 3 -> March 6 case definition remains frozen in config, and this promoted row is "
+                    "authorized by a separate Phase 3B amendment with an explicit same-imagery caveat."
                 ),
                 "source_summary_path": str(MINDORO_REINIT_DIR / "march13_14_reinit_summary.csv"),
                 "source_pairing_path": str(MINDORO_REINIT_DIR / "march13_14_reinit_branch_pairing_manifest.csv"),
@@ -400,8 +425,8 @@ class FinalValidationPackageService:
         rows.append(
             {
                 "case_id": MINDORO_CASE_ID,
-                "track_id": "B2",
-                "track_label": "Mindoro legacy March 6 sparse strict reference",
+                "track_id": MINDORO_LEGACY_MARCH6_TRACK_ID,
+                "track_label": MINDORO_LEGACY_MARCH6_TRACK_LABEL,
                 "model_comparator": "OpenDrift ensemble p50 official primary",
                 "validation_dates": "2023-03-06",
                 "result_scope": "legacy_sparse_single_date_reference",
@@ -418,8 +443,13 @@ class FinalValidationPackageService:
                 "transport_model": "oceandrift",
                 "provisional_transport_model": True,
                 "shoreline_mask_status": "canonical_mindoro_scoring_grid_ocean_mask_applied",
+                "case_definition_path": str(MINDORO_BASE_CASE_CONFIG_PATH),
+                "case_freeze_amendment_path": str(MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH),
+                "base_case_definition_preserved": True,
+                "row_role": "legacy_honesty_only",
+                "shared_imagery_caveat": "",
                 "notes": (
-                    "Legacy sparse-reference row preserved for methodology honesty. The accepted WWF March 6 "
+                    "Legacy honesty-only row preserved for methodology honesty. The accepted WWF March 6 "
                     "validation mask rasterized to only two observed ocean cells, so this remains valuable context "
                     "but no longer serves as the canonical Mindoro validation row."
                 ),
@@ -433,8 +463,8 @@ class FinalValidationPackageService:
         rows.append(
             {
                 "case_id": MINDORO_CASE_ID,
-                "track_id": "B3",
-                "track_label": "Mindoro legacy March 3-6 broader-support reference",
+                "track_id": MINDORO_LEGACY_SUPPORT_TRACK_ID,
+                "track_label": MINDORO_LEGACY_SUPPORT_TRACK_LABEL,
                 "model_comparator": "OpenDrift ensemble p50 appendix support union",
                 "validation_dates": "2023-03-03_to_2023-03-06",
                 "result_scope": "legacy_broader_support_reference",
@@ -451,6 +481,11 @@ class FinalValidationPackageService:
                 "transport_model": "oceandrift",
                 "provisional_transport_model": True,
                 "shoreline_mask_status": "canonical_mindoro_scoring_grid_ocean_mask_applied",
+                "case_definition_path": str(MINDORO_BASE_CASE_CONFIG_PATH),
+                "case_freeze_amendment_path": str(MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH),
+                "base_case_definition_preserved": True,
+                "row_role": "legacy_support_only",
+                "shared_imagery_caveat": "",
                 "notes": (
                     "Legacy broader-support reference preserved for narrative context. This March 3-6 public "
                     "observation union remains informative, but it should not be confused with the promoted "
@@ -484,6 +519,11 @@ class FinalValidationPackageService:
                     "transport_model": str(row["transport_model"]),
                     "provisional_transport_model": bool(row["provisional_transport_model"]),
                     "shoreline_mask_status": "canonical_mindoro_scoring_grid_ocean_mask_applied",
+                    "case_definition_path": str(MINDORO_BASE_CASE_CONFIG_PATH),
+                    "case_freeze_amendment_path": str(MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH),
+                    "base_case_definition_preserved": True,
+                    "row_role": "comparator_only",
+                    "shared_imagery_caveat": MINDORO_SHARED_IMAGERY_CAVEAT,
                     "notes": (
                         "Comparator track only; the accepted March 14 NOAA observation mask remains truth. "
                         + str(row.get("structural_limitations", "") or "")
@@ -526,6 +566,11 @@ class FinalValidationPackageService:
                 "status": "complete",
                 "truth_source": "accepted March 14 NOAA/NESDIS observation mask",
                 "primary_output_dir": str(MINDORO_REINIT_CROSSMODEL_DIR),
+                "case_definition_path": str(MINDORO_BASE_CASE_CONFIG_PATH),
+                "case_freeze_amendment_path": str(MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH),
+                "launcher_entry_id": MINDORO_PRIMARY_VALIDATION_LAUNCHER_ALIAS_ENTRY_ID,
+                "launcher_alias_entry_id": "",
+                "row_role": "comparator_only",
                 "reporting_role": "comparative discussion",
                 "main_text_priority": "primary",
                 "notes": (
@@ -535,36 +580,52 @@ class FinalValidationPackageService:
             },
             {
                 "case_id": MINDORO_CASE_ID,
-                "track_id": "B1",
-                "track_label": "Mindoro March 13 -> March 14 NOAA reinit primary validation",
+                "track_id": MINDORO_PRIMARY_VALIDATION_TRACK_ID,
+                "track_label": MINDORO_PRIMARY_VALIDATION_TRACK_LABEL,
                 "status": "complete",
                 "truth_source": "accepted March 14 NOAA/NESDIS observation mask with March 13 NOAA seed polygon",
                 "primary_output_dir": str(MINDORO_REINIT_DIR),
+                "case_definition_path": str(MINDORO_BASE_CASE_CONFIG_PATH),
+                "case_freeze_amendment_path": str(MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH),
+                "launcher_entry_id": MINDORO_PRIMARY_VALIDATION_LAUNCHER_ENTRY_ID,
+                "launcher_alias_entry_id": MINDORO_PRIMARY_VALIDATION_LAUNCHER_ALIAS_ENTRY_ID,
+                "row_role": "primary_public_validation",
                 "reporting_role": "main-text primary validation",
                 "main_text_priority": "primary",
                 "notes": (
-                    "Promoted primary Mindoro row sourced from the completed R1_previous reinit branch. Both NOAA "
-                    "products cite March 12 WorldView-3 imagery, so the main text must retain that caveat explicitly."
+                    "Promoted primary Mindoro row sourced from the completed R1_previous reinit branch. The frozen "
+                    "March 3 -> March 6 case definition remains untouched in config, and the promotion is recorded in "
+                    "a separate amendment file with the shared-imagery caveat stated explicitly."
                 ),
             },
             {
                 "case_id": MINDORO_CASE_ID,
-                "track_id": "B2",
-                "track_label": "Mindoro legacy March 6 sparse strict reference",
+                "track_id": MINDORO_LEGACY_MARCH6_TRACK_ID,
+                "track_label": MINDORO_LEGACY_MARCH6_TRACK_LABEL,
                 "status": "complete",
                 "truth_source": "accepted WWF March 6 validation mask",
                 "primary_output_dir": str(MINDORO_DIR / "phase3b"),
+                "case_definition_path": str(MINDORO_BASE_CASE_CONFIG_PATH),
+                "case_freeze_amendment_path": str(MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH),
+                "launcher_entry_id": "mindoro_reportable_core",
+                "launcher_alias_entry_id": "",
+                "row_role": "legacy_honesty_only",
                 "reporting_role": "legacy reference",
                 "main_text_priority": "secondary",
-                "notes": "Legacy sparse reference preserved because the processed strict March 6 target is extremely small.",
+                "notes": "Legacy honesty-only reference preserved because the processed strict March 6 target is extremely small.",
             },
             {
                 "case_id": MINDORO_CASE_ID,
-                "track_id": "B3",
-                "track_label": "Mindoro legacy March 3-6 broader-support reference",
+                "track_id": MINDORO_LEGACY_SUPPORT_TRACK_ID,
+                "track_label": MINDORO_LEGACY_SUPPORT_TRACK_LABEL,
                 "status": "complete",
                 "truth_source": "accepted within-horizon public observation union",
                 "primary_output_dir": str(MINDORO_DIR / "public_obs_appendix"),
+                "case_definition_path": str(MINDORO_BASE_CASE_CONFIG_PATH),
+                "case_freeze_amendment_path": str(MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH),
+                "launcher_entry_id": "mindoro_reportable_core",
+                "launcher_alias_entry_id": "",
+                "row_role": "legacy_support_only",
                 "reporting_role": "legacy reference",
                 "main_text_priority": "secondary",
                 "notes": "Legacy broader-support reference only; keep it visible, but do not present it as the replacement primary row.",
@@ -576,6 +637,11 @@ class FinalValidationPackageService:
                 "status": "complete",
                 "truth_source": "DWH daily public observation-derived masks for 2010-05-21 to 2010-05-23",
                 "primary_output_dir": str(DWH_DIR / "phase3c_external_case_run"),
+                "case_definition_path": "",
+                "case_freeze_amendment_path": "",
+                "launcher_entry_id": "dwh_reportable_bundle",
+                "launcher_alias_entry_id": "",
+                "row_role": "scientific_result",
                 "reporting_role": "main-text scientific result",
                 "main_text_priority": "primary",
                 "notes": "Real historical HYCOM + ERA5 + CMEMS wave/Stokes forcing stack.",
@@ -587,6 +653,11 @@ class FinalValidationPackageService:
                 "status": "complete",
                 "truth_source": "same DWH daily public masks as C1",
                 "primary_output_dir": str(DWH_DIR / "phase3c_external_case_ensemble_comparison"),
+                "case_definition_path": "",
+                "case_freeze_amendment_path": "",
+                "launcher_entry_id": "dwh_reportable_bundle",
+                "launcher_alias_entry_id": "",
+                "row_role": "scientific_result",
                 "reporting_role": "comparative discussion",
                 "main_text_priority": "primary",
                 "notes": "p50 leads by overall mean FSS; deterministic remains strongest on the May 21-23 event corridor.",
@@ -598,6 +669,11 @@ class FinalValidationPackageService:
                 "status": "complete",
                 "truth_source": "same DWH daily public masks as C1",
                 "primary_output_dir": str(DWH_DIR / "phase3c_dwh_pygnome_comparator"),
+                "case_definition_path": "",
+                "case_freeze_amendment_path": "",
+                "launcher_entry_id": "dwh_reportable_bundle",
+                "launcher_alias_entry_id": "",
+                "row_role": "comparator_only",
                 "reporting_role": "comparative discussion",
                 "main_text_priority": "secondary",
                 "notes": "Comparator only; DWH observed masks remain truth.",
@@ -615,6 +691,11 @@ class FinalValidationPackageService:
                         str(MINDORO_DIR / "source_history_reconstruction_r1"),
                     ]
                 ),
+                "case_definition_path": str(MINDORO_BASE_CASE_CONFIG_PATH),
+                "case_freeze_amendment_path": str(MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH),
+                "launcher_entry_id": "mindoro_appendix_sensitivity_bundle",
+                "launcher_alias_entry_id": "",
+                "row_role": "appendix_sensitivity",
                 "reporting_role": "appendix_only",
                 "main_text_priority": "appendix",
                 "notes": "Sensitivity branches remain informative but do not replace the main thesis tracks.",
@@ -718,7 +799,8 @@ class FinalValidationPackageService:
                     "service_url": str(row["service_url"]),
                     "notes": (
                         str(row.get("notes", "") or "")
-                        + " | Primary package caveat: both March 13 and March 14 NOAA products cite March 12 WorldView-3 imagery."
+                        + " | Primary package caveat: "
+                        + MINDORO_SHARED_IMAGERY_CAVEAT
                     ).strip(" |"),
                 }
             )
@@ -819,7 +901,7 @@ class FinalValidationPackageService:
                 "statement": str(self.mindoro_reinit_manifest["limitations"]["noaa_source_limitation_note"]),
                 "implication": (
                     "Present March 13 -> March 14 as the canonical Mindoro validation track, but state clearly that "
-                    "it is a reinitialization stress test with shared March 12 imagery provenance."
+                    "it is a reinitialization-based public-validation pair with shared March 12 imagery provenance rather than independent day-to-day validation."
                 ),
                 "source_artifact": str(MINDORO_REINIT_DIR / "march13_14_reinit_run_manifest.json"),
             },
@@ -828,7 +910,7 @@ class FinalValidationPackageService:
                 "case_id": MINDORO_CASE_ID,
                 "track_id": "B2",
                 "category": "legacy_sparse_reference",
-                "statement": "Mindoro March 6 remains a legacy sparse strict reference with only two observed ocean cells after processing.",
+                "statement": "Mindoro March 6 remains a legacy honesty-only sparse strict reference with only two observed ocean cells after processing.",
                 "implication": "Retain March 6 in methods and limitations discussion, but do not present it as the primary Mindoro validation row.",
                 "source_artifact": str(MINDORO_DIR / "phase3b" / "phase3b_summary.csv"),
             },
@@ -969,7 +1051,7 @@ class FinalValidationPackageService:
             "# Final Validation Claims Guardrails",
             "",
             "- Mindoro B1 is now the March 13 -> March 14 NOAA reinit validation and should be described with the explicit March 12 WorldView-3 caveat.",
-            "- Mindoro B2 and B3 remain legacy/reference rows and should not be silently rewritten as if they never existed.",
+            "- Mindoro B2 and B3 remain legacy/reference rows, with B2 framed as honesty-only, and they should not be silently rewritten as if they never existed.",
             "- PyGNOME is a comparator, not truth, in both the promoted Mindoro cross-model lane and the DWH cross-model comparison.",
             "- DWH observed masks are truth for Phase 3C.",
             "- DWH currently demonstrates workflow transferability and meaningful spatial skill under real historical forcing.",
@@ -1003,6 +1085,7 @@ class FinalValidationPackageService:
             "- Keep Mindoro as the main Philippine case.",
             "- Keep DWH as the rich-data external transfer-validation branch.",
             "- Present Phase 3A as comparator-only benchmarking, not as a truth-source replacement.",
+            "- Preserve `config/case_mindoro_retro_2023.yaml` as the frozen March 3 -> March 6 case definition and carry the Phase 3B promotion through the amendment file instead.",
             "- Present March 13 -> March 14 as the canonical Mindoro validation with the shared-imagery caveat stated explicitly.",
             "- Keep March 6 and March 3-6 visible as legacy/reference material rather than deleting or hiding them.",
         ]
@@ -1023,7 +1106,7 @@ class FinalValidationPackageService:
             "Interpretation notes:",
             "",
             "- The promoted Mindoro row is a March 13 -> March 14 reinitialization test and must carry the caveat that both NOAA products cite March 12 WorldView-3 imagery.",
-            "- The legacy March 6 row should still be interpreted as a difficult sparse-data edge case rather than erased from the methods story.",
+            "- The legacy March 6 row should still be interpreted as an honesty-only difficult sparse-data edge case rather than erased from the methods story.",
             "- The legacy March 3-6 broader-support row remains helpful context, but it is not the same claim as the promoted B1 reinit validation.",
             "- The promoted Mindoro comparator lane shows OpenDrift R1 previous reinit p50 leading the March 13 -> March 14 cross-model comparison under the current case definition.",
             "- The DWH external case shows that the workflow transfers to a richer observation setting with meaningful spatial skill.",
@@ -1054,7 +1137,7 @@ class FinalValidationPackageService:
                 f"{headlines['mindoro_crossmodel_top']['fss_10km']:.4f}."
             ),
             (
-                f"- Mindoro legacy March 6 sparse reference (B2): FSS(1/3/5/10 km) = "
+                f"- Mindoro legacy March 6 honesty-only sparse reference (B2): FSS(1/3/5/10 km) = "
                 f"{headlines['mindoro_legacy_march6']['fss_1km']:.4f}, {headlines['mindoro_legacy_march6']['fss_3km']:.4f}, "
                 f"{headlines['mindoro_legacy_march6']['fss_5km']:.4f}, {headlines['mindoro_legacy_march6']['fss_10km']:.4f}; "
                 f"IoU={headlines['mindoro_legacy_march6']['iou']:.4f}; Dice={headlines['mindoro_legacy_march6']['dice']:.4f}."
@@ -1087,6 +1170,7 @@ class FinalValidationPackageService:
             "",
             "## Recommended Final Structure",
             "",
+            f"- Base-case provenance: keep `{MINDORO_BASE_CASE_CONFIG_PATH}` frozen for March 3 -> March 6 and carry the B1 promotion through `{MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH}`.",
             "- Main text: Mindoro B1 as the March 13 -> March 14 primary validation with the shared-imagery caveat plus DWH Phase 3C as the rich-data transfer-validation success.",
             "- Comparative discussion: Mindoro A cross-model comparator and DWH deterministic-vs-ensemble-vs-PyGNOME comparison.",
             "- Legacy/reference and sensitivities: Mindoro B2/B3 legacy rows, recipe/init/source-history sensitivities, and optional future DWH extensions.",
@@ -1145,6 +1229,16 @@ class FinalValidationPackageService:
             },
             "headlines": headlines,
             "final_recommendation": recommendation,
+            "mindoro_primary_validation_promotion": {
+                "base_case_definition_path": str(MINDORO_BASE_CASE_CONFIG_PATH),
+                "case_freeze_amendment_path": str(MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH),
+                "migration_note_path": str(MINDORO_PRIMARY_VALIDATION_MIGRATION_NOTE_PATH),
+                "primary_track_id": MINDORO_PRIMARY_VALIDATION_TRACK_ID,
+                "primary_track_label": MINDORO_PRIMARY_VALIDATION_TRACK_LABEL,
+                "legacy_honesty_track_id": MINDORO_LEGACY_MARCH6_TRACK_ID,
+                "legacy_support_track_id": MINDORO_LEGACY_SUPPORT_TRACK_ID,
+                "shared_imagery_caveat": MINDORO_SHARED_IMAGERY_CAVEAT,
+            },
             "recommended_final_chapter_structure": [
                 "Phase 1 = Transport Validation and Baseline Configuration Selection",
                 "Phase 2 = Standardized Machine-Readable Forecast Product Generation",

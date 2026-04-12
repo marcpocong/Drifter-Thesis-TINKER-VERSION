@@ -1,9 +1,9 @@
 workflow_mode: phase1_regional_2016_2022
 workflow_track: historical_regional_validation
 case_id: phase1_production_rerun
-description: "Dedicated full scientific Phase 1 regional drifter-validation rerun for 2016-2022"
+description: "Dedicated full scientific Phase 1 regional transport-validation rerun for 2016-2022"
 mode_label: "Historical/regional Phase 1 production rerun"
-region: [119.5, 124.5, 11.5, 16.5]
+phase1_validation_box: [119.5, 124.5, 11.5, 16.5]
 forcing_bbox_halo_degrees: 0.5
 drifter_acquisition_halo_degrees: 3.0
 output_root: output/phase1_production_rerun

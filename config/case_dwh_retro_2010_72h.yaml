@@ -3,6 +3,9 @@ case_id: CASE_DWH_RETRO_2010_72H
 spill_name: "Deepwater Horizon retrospective 72h public-validation case"
 description: "External rich-data transfer-validation scaffold using public Deepwater Horizon daily composite oil-spill layers"
 mode_label: "External Deepwater Horizon retrospective setup workflow"
+thesis_role: external_transfer_validation_support_case
+main_case_reference: mindoro_retro_2023
+main_case_note: "Mindoro remains the main Philippine thesis case; DWH is a separate external transfer-validation story."
 region: [-92.0, -84.0, 26.5, 31.0]
 
 published_time_zone: "date-composite labels only; exact sub-daily acquisition timezone is not defensible from the public FeatureServer"
@@ -66,6 +69,8 @@ scientific_forcing:
   phase: dwh_phase3c_scientific_forcing_ready
   non_scientific_smoke: false
   source_is_smoke_only: false
+  selection_rule: "Freeze the first complete real historical current+wind+wave stack that passes the DWH scientific-readiness gate; do not use Phase 1 drifter-selected baseline logic."
+  current_frozen_stack: "HYCOM GOFS 3.1 currents + ERA5 winds + CMEMS wave/Stokes"
   required_window_start_utc: "2010-05-20T00:00:00Z"
   required_window_end_utc: "2010-05-23T23:59:59Z"
   request_end_utc: "2010-05-24T00:00:00Z"
@@ -81,7 +86,10 @@ phase3c_external_case_run:
   phase: phase3c_external_case_run
   phase_name: "Phase 3C - External Rich-Data Spill Transfer Validation"
   truth_source: public_dwh_observation_derived_daily_masks
+  truth_role: observed_daily_masks_are_truth
   date_composite_logic_used: true
+  forcing_selection_rule: readiness_gated_historical_stack_not_phase1_drifter_selected
+  current_forcing_stack: "HYCOM GOFS 3.1 currents + ERA5 winds + CMEMS wave/Stokes"
   deterministic_control:
     enabled: true
     transport_model: opendrift_oceandrift
@@ -118,6 +126,7 @@ phase3c_dwh_pygnome_comparator:
   oil_type: oil_crude
   wave_stokes_policy: "Record the limitation explicitly when the PyGNOME branch cannot attach the scientific DWH wave/Stokes product with clean parity."
   truth_role: comparator_only
+  observed_truth_role: observed_daily_masks_are_truth
   recommendation_policy: "Choose one final thesis-facing recommendation after combining reused OpenDrift scores with the new PyGNOME comparator scores."
 
 drifter:

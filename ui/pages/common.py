@@ -95,7 +95,8 @@ def filter_family(df: pd.DataFrame, code: str) -> pd.DataFrame:
 
 def _figure_header(row: pd.Series) -> tuple[str, str]:
     family = str(
-        row.get("figure_family_label")
+        row.get("status_label")
+        or row.get("figure_family_label")
         or row.get("board_family_label")
         or row.get("figure_group_label")
         or row.get("figure_id")
@@ -109,6 +110,12 @@ def _figure_header(row: pd.Series) -> tuple[str, str]:
     ]
     subtitle = " | ".join(bit for bit in subtitle_bits if bit and bit != "nan")
     return family, subtitle
+
+
+def _status_summary_text(row: pd.Series) -> tuple[str, str]:
+    summary = str(row.get("status_dashboard_summary") or "").strip()
+    provenance = str(row.get("status_provenance") or "").strip()
+    return summary, provenance
 
 
 def render_figure_cards(
@@ -132,10 +139,13 @@ def render_figure_cards(
             row = pd.Series(record)
             figure_path = resolve_repo_path(row.get("resolved_path") or row.get("file_path") or row.get("relative_path"))
             title_text, subtitle = _figure_header(row)
+            status_summary, provenance = _status_summary_text(row)
             with column:
                 st.markdown(f"#### {title_text}")
                 if subtitle:
                     st.caption(subtitle)
+                if status_summary:
+                    st.caption(status_summary)
                 if figure_path and figure_path.exists():
                     st.image(str(figure_path), width="stretch")
                     st.download_button(
@@ -158,6 +168,8 @@ def render_figure_cards(
                 notes = str(row.get("notes", "")).strip()
                 if notes and notes != interpretation:
                     st.caption(notes)
+                if provenance:
+                    st.caption(f"Provenance: {provenance}")
 
 
 def render_source_artifact_summary(row: pd.Series) -> None:

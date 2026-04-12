@@ -245,10 +245,14 @@ class Phase4OilTypeAndShorelineService:
             or ((self.forecast_manifest.get("baseline_provenance") or {}).get("recipe"))
             or ""
         )
+        self.baseline_selection_path = _resolve_repo_path(
+            self.repo_root,
+            self._baseline_selection_source(),
+        )
         self.recipe_family_status = get_phase2_recipe_family_status(
             run_name=self.run_name,
             selected_recipe=self.selected_recipe,
-            selection_path=self.repo_root / "config" / "phase1_baseline_selection.yaml",
+            selection_path=self.baseline_selection_path,
         )
         self.transport_forcing_bundle = self._resolve_transport_forcing_bundle()
         self.phase1_status = self._load_phase1_status()
@@ -353,7 +357,7 @@ class Phase4OilTypeAndShorelineService:
         }
 
     def _load_phase1_status(self) -> dict[str, Any]:
-        audit_status = get_phase1_baseline_audit_status(self.repo_root / "config" / "phase1_baseline_selection.yaml")
+        audit_status = get_phase1_baseline_audit_status(self.baseline_selection_path)
         return {
             "phase1_finalization_classification": str(audit_status.get("classification") or ""),
             "phase1_frozen_story_complete": not bool(

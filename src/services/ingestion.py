@@ -39,7 +39,7 @@ except ImportError:
     gpd = None
 
 from src.core.case_context import get_case_context
-from src.core.constants import REGION, RUN_NAME
+from src.core.constants import RUN_NAME
 from src.core.base import BaseService
 from src.exceptions.custom import DataLoadingError
 from src.models.ingestion import IngestionManifest
@@ -127,7 +127,7 @@ class DataIngestionService(BaseService):
         )
         if self.case_context.is_official:
             self.bbox = list(self.case_context.region)
-            self.bbox_source = "official_case_region_fallback_before_scoring_grid"
+            self.bbox_source = "official_active_domain_fallback_before_scoring_grid"
             try:
                 from src.helpers.scoring import get_scoring_grid_artifact_paths, get_scoring_grid_spec
 
@@ -144,20 +144,26 @@ class DataIngestionService(BaseService):
                     )
             except Exception:
                 self.bbox = list(self.case_context.region)
-                self.bbox_source = "official_case_region_fallback_before_scoring_grid"
+                self.bbox_source = "official_active_domain_fallback_before_scoring_grid"
         elif self.case_context.workflow_mode == "prototype_2021":
             self.bbox = derive_bbox_from_display_bounds(
-                list(self.case_context.region),
+                list(self.case_context.legacy_prototype_display_domain),
                 halo_degrees=self.official_forcing_halo_degrees,
             )
             self.bbox_source = (
-                f"prototype_2021_region_plus_{self.official_forcing_halo_degrees:.2f}deg_halo"
+                f"prototype_2021_display_domain_plus_{self.official_forcing_halo_degrees:.2f}deg_halo"
             )
         else:
             # Pad bounding box heavily to prevent edge-clipping during interpolation for low-res models like NCEP
             pad = 3.0
-            self.bbox = [REGION[0]-pad, REGION[1]+pad, REGION[2]-pad, REGION[3]+pad]
-            self.bbox_source = "legacy_region_plus_3deg_pad"
+            prototype_display_domain = list(self.case_context.legacy_prototype_display_domain)
+            self.bbox = [
+                prototype_display_domain[0] - pad,
+                prototype_display_domain[1] + pad,
+                prototype_display_domain[2] - pad,
+                prototype_display_domain[3] + pad,
+            ]
+            self.bbox_source = "legacy_prototype_display_domain_plus_3deg_pad"
         self.grid = GridBuilder() if self.case_context.is_prototype else None
         self.gfs_downloader = GFSWindDownloader(
             forcing_box=self.bbox,

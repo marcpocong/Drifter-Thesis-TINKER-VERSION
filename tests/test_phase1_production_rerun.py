@@ -28,7 +28,11 @@ def _case_context_stub() -> SimpleNamespace:
         is_historical_regional=True,
         is_official=False,
         is_prototype=False,
+        active_domain_name="phase1_validation_box",
         region=[119.5, 124.5, 11.5, 16.5],
+        phase1_validation_box=[119.5, 124.5, 11.5, 16.5],
+        mindoro_case_domain=[115.0, 122.0, 6.0, 14.5],
+        legacy_prototype_display_domain=[115.0, 122.0, 6.0, 14.5],
         run_name="phase1_production_rerun",
     )
 
@@ -40,7 +44,7 @@ def _build_test_repo(root: Path) -> None:
             "workflow_mode": "phase1_regional_2016_2022",
             "workflow_track": "historical_regional_validation",
             "case_id": "phase1_production_rerun",
-            "region": [119.5, 124.5, 11.5, 16.5],
+            "phase1_validation_box": [119.5, 124.5, 11.5, 16.5],
             "drifter_acquisition_halo_degrees": 3.0,
             "forcing_bbox_halo_degrees": 0.5,
             "output_root": "output/phase1_production_rerun",
@@ -224,7 +228,7 @@ class Phase1ProductionRerunTests(unittest.TestCase):
             self.assertIn("overlaps_prior_accepted_window", rejected_reasons)
             self.assertIn("insufficient_duration", rejected_reasons)
             self.assertIn("drogue_lost_within_window", rejected_reasons)
-            self.assertIn("outside_regional_box", rejected_reasons)
+            self.assertIn("outside_phase1_validation_box", rejected_reasons)
 
     def test_run_stages_candidate_without_overwriting_canonical_baseline(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -249,7 +253,7 @@ class Phase1ProductionRerunTests(unittest.TestCase):
                     {
                         "segment_id": "B_20170101T000000Z_20170104T000000Z",
                         "segment_status": "rejected",
-                        "rejection_reason": "outside_regional_box",
+                        "rejection_reason": "outside_phase1_validation_box",
                         "drifter_id": "B",
                         "start_time_utc": "2017-01-01T00:00:00+00:00",
                         "end_time_utc": "2017-01-04T00:00:00+00:00",

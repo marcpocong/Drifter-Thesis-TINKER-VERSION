@@ -29,8 +29,12 @@ def _official_case_context_stub(case_definition_path: str | None = None) -> Simp
         is_historical_regional=False,
         is_official=True,
         is_prototype=False,
+        active_domain_name="mindoro_case_domain",
         run_name="CASE_MINDORO_RETRO_2023",
         region=[115.0, 122.0, 6.0, 14.5],
+        phase1_validation_box=[119.5, 124.5, 11.5, 16.5],
+        mindoro_case_domain=[115.0, 122.0, 6.0, 14.5],
+        legacy_prototype_display_domain=[115.0, 122.0, 6.0, 14.5],
         case_definition_path=case_definition_path,
         forcing_start_utc="2023-03-03T09:59:00Z",
         forcing_end_utc="2023-03-06T09:59:00Z",
@@ -55,7 +59,7 @@ def _build_minimal_repo(root: Path) -> None:
         {
             "workflow_mode": "mindoro_retro_2023",
             "case_id": "CASE_MINDORO_RETRO_2023",
-            "region": [115.0, 122.0, 6.0, 14.5],
+            "mindoro_case_domain": [115.0, 122.0, 6.0, 14.5],
             "forcing_bbox_halo_degrees": 0.5,
         },
     )

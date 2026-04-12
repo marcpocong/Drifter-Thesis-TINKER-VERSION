@@ -18,6 +18,9 @@ from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch, Rectangle
 
+from src.core.artifact_status import artifact_status_columns
+from src.services.mindoro_primary_validation_metadata import MINDORO_SHARED_IMAGERY_CAVEAT
+
 matplotlib.use("Agg")
 
 PHASE = "trajectory_gallery_panel_polish"
@@ -80,6 +83,15 @@ class PanelFigureRecord:
     recommended_for_main_defense: bool
     source_paths: str
     notes: str
+    status_key: str
+    status_label: str
+    status_role: str
+    status_reportability: str
+    status_official_status: str
+    status_frozen_status: str
+    status_provenance: str
+    status_panel_text: str
+    status_dashboard_summary: str
 
     def as_row(self) -> dict[str, Any]:
         return {
@@ -99,6 +111,15 @@ class PanelFigureRecord:
             "recommended_for_main_defense": self.recommended_for_main_defense,
             "source_paths": self.source_paths,
             "notes": self.notes,
+            "status_key": self.status_key,
+            "status_label": self.status_label,
+            "status_role": self.status_role,
+            "status_reportability": self.status_reportability,
+            "status_official_status": self.status_official_status,
+            "status_frozen_status": self.status_frozen_status,
+            "status_provenance": self.status_provenance,
+            "status_panel_text": self.status_panel_text,
+            "status_dashboard_summary": self.status_dashboard_summary,
         }
 
 
@@ -436,6 +457,16 @@ class TrajectoryGalleryPanelPolishService:
         source_paths: list[str],
         notes: str,
     ) -> PanelFigureRecord:
+        status = artifact_status_columns(
+            {
+                "case_id": case_id,
+                "phase_or_track": phase_or_track,
+                "run_type": run_type,
+                "relative_path": _relative_to_repo(self.repo_root, destination),
+                "notes": notes,
+                "plain_language_interpretation": interpretation,
+            }
+        )
         record = PanelFigureRecord(
             figure_id=destination.stem,
             board_family_code=board_family_code,
@@ -453,6 +484,15 @@ class TrajectoryGalleryPanelPolishService:
             recommended_for_main_defense=recommended,
             source_paths=";".join(sorted({path for path in source_paths if path})),
             notes=notes,
+            status_key=status["status_key"],
+            status_label=status["status_label"],
+            status_role=status["status_role"],
+            status_reportability=status["status_reportability"],
+            status_official_status=status["status_official_status"],
+            status_frozen_status=status["status_frozen_status"],
+            status_provenance=status["status_provenance"],
+            status_panel_text=status["status_panel_text"],
+            status_dashboard_summary=status["status_dashboard_summary"],
         )
         self.panel_records.append(record)
         return record
@@ -684,7 +724,7 @@ class TrajectoryGalleryPanelPolishService:
         if summary.empty:
             return [
                 "March 13 -> March 14 reinit summary CSV was not available.",
-                "Interpret this board visually and keep the March 12 shared-imagery caveat explicit.",
+                "Interpret this board visually and keep the shared-imagery caveat explicit.",
             ]
         row = summary.iloc[0]
         return [
@@ -694,7 +734,7 @@ class TrajectoryGalleryPanelPolishService:
                 f"{float(row.get('fss_5km', 0.0)):.3f}/{float(row.get('fss_10km', 0.0)):.3f} with "
                 f"{int(row.get('forecast_nonzero_cells', 0))} forecast cells against {int(row.get('obs_nonzero_cells', 0))} observed cells."
             ),
-            "Both NOAA/NESDIS products cite WorldView-3 imagery acquired on March 12, 2023, so this board must be narrated with that same-imagery caveat.",
+            MINDORO_SHARED_IMAGERY_CAVEAT,
         ]
 
     def _mindoro_strict_metrics(self) -> list[str]:
@@ -702,13 +742,13 @@ class TrajectoryGalleryPanelPolishService:
         if summary.empty:
             return [
                 "Strict March 6 metrics summary CSV was not available.",
-                "Interpret this board as a sparse stress test, not broad-support validation.",
+                "Interpret this board as a legacy honesty-only sparse-reference result, not the main validation claim.",
             ]
         row = summary.iloc[0]
         return [
-            f"Strict March 6 remains the hard sparse stress test. Forecast non-zero cells: {int(row.get('forecast_nonzero_cells', 0))}; observed cells: {int(row.get('obs_nonzero_cells', 0))}.",
-            f"All FSS windows remain {float(row.get('fss_10km', 0.0)):.2f} or lower in this strict setup, so the key message is stress-test behavior rather than broad overlap skill.",
-            "Use this board to explain why the panel should read March 6 as a demanding boundary case.",
+            f"March 6 remains the legacy sparse-reference honesty row. Forecast non-zero cells: {int(row.get('forecast_nonzero_cells', 0))}; observed cells: {int(row.get('obs_nonzero_cells', 0))}.",
+            f"All FSS windows remain {float(row.get('fss_10km', 0.0)):.2f} or lower in this strict setup, so the key message is limitations honesty rather than broad overlap skill.",
+            "Use this board to explain why the panel should read March 6 as retained honesty context rather than as the primary Mindoro result.",
         ]
 
     def _mindoro_crossmodel_metrics(self) -> list[str]:
@@ -731,6 +771,7 @@ class TrajectoryGalleryPanelPolishService:
                 if not pygnome.empty
                 else ""
             ),
+            f"PyGNOME remains comparator-only. {MINDORO_SHARED_IMAGERY_CAVEAT}",
         ]
 
     def _dwh_event_metrics(self) -> dict[str, float]:
@@ -834,7 +875,7 @@ class TrajectoryGalleryPanelPolishService:
         return self._compose_board(
             board_family_code="A",
             board_title="Mindoro March 13 -> March 14 primary validation",
-            subtitle="Mindoro | 13-14 March 2023 | promoted NOAA reinit validation | explicit March 12 imagery caveat",
+            subtitle="Mindoro | 13-14 March 2023 | promoted NOAA reinit validation | shared-imagery caveat explicit",
             case_id="CASE_MINDORO_RETRO_2023",
             phase_or_track="phase3b_reinit_primary",
             date_token="2023-03-13_to_2023-03-14",
@@ -845,13 +886,13 @@ class TrajectoryGalleryPanelPolishService:
                 self._image_slot("March 13 seed mask on grid", "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/qa_march13_seed_mask_on_grid.png"),
                 self._image_slot("March 13 seed vs March 14 target", "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/qa_march13_seed_vs_march14_target.png"),
                 self._image_slot("Promoted R1 previous reinit overlay", "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/qa_march14_reinit_R1_previous_overlay.png"),
-                self._text_slot("Why this board matters", "This is now the canonical Mindoro validation board. It keeps the seed polygon, next-day target, and best-performing OpenDrift reinit overlay together while staying transparent about the shared March 12 imagery caveat."),
+                self._text_slot("Why this board matters", "This is now the canonical Mindoro validation board. It keeps the seed polygon, next-day target, and best-performing OpenDrift reinit overlay together while staying transparent about the shared-imagery caveat."),
             ],
             legend_keys=["observed_mask", "ensemble_p50", "initialization_polygon", "validation_polygon"],
             metric_lines=self._mindoro_primary_metrics(),
             interpretation="The promoted March 13 -> March 14 board is presentation-ready as the main Mindoro validation board, provided the shared-imagery caveat is stated honestly.",
-            caption="Use this board as the main Mindoro validation slide. It shows the March 13 NOAA seed geometry, the March 14 NOAA target, and the promoted OpenDrift R1 previous reinit result in one place.",
-            notes="Built from stored March 13 -> March 14 reinit QA figures only.",
+            caption="Use this board as the main Mindoro validation slide. It shows the March 13 NOAA seed geometry, the March 14 NOAA target, and the promoted OpenDrift R1 previous reinit result in one place while keeping the shared-imagery caveat explicit.",
+            notes="Built from stored March 13 -> March 14 reinit QA figures only, with the shared-imagery caveat preserved in the panel text.",
             recommended=True,
         )
 
@@ -875,8 +916,8 @@ class TrajectoryGalleryPanelPolishService:
             legend_keys=["observed_mask", "deterministic_opendrift", "ensemble_p50", "pygnome"],
             metric_lines=self._mindoro_crossmodel_metrics(),
             interpretation="The promoted March 14 cross-model board gives a clean side-by-side answer to the model-comparison question while keeping PyGNOME in a comparator-only role.",
-            caption="Use this board when the panel asks which model performed better on the promoted March 14 target. It keeps both OpenDrift reinit branches and the deterministic PyGNOME comparator visible together.",
-            notes="Built from stored March 13 -> March 14 cross-model QA figures only.",
+            caption="Use this board when the panel asks which model performed better on the promoted March 14 target. It keeps both OpenDrift reinit branches and the deterministic PyGNOME comparator visible together without treating PyGNOME as truth.",
+            notes="Built from stored March 13 -> March 14 cross-model QA figures only; PyGNOME remains comparator-only and the shared-imagery caveat stays explicit.",
             recommended=True,
         )
 
@@ -884,7 +925,7 @@ class TrajectoryGalleryPanelPolishService:
         return self._compose_board(
             board_family_code="C",
             board_title="Mindoro legacy March 6 honesty / limitations",
-            subtitle="Mindoro | 6 March 2023 | legacy sparse-reference stress test retained for methods honesty",
+            subtitle="Mindoro | 6 March 2023 | legacy sparse-reference honesty board retained for methods transparency",
             case_id="CASE_MINDORO_RETRO_2023",
             phase_or_track="phase3b_legacy_strict",
             date_token="2023-03-06",
@@ -901,7 +942,7 @@ class TrajectoryGalleryPanelPolishService:
             metric_lines=self._mindoro_strict_metrics(),
             interpretation="This board keeps the legacy March 6 sparse-reference result visible for transparency, but it should be framed as an honesty and limitations board rather than the main validation board.",
             caption="Use this board when the panel asks why March 6 is no longer the main Mindoro result. It shows the preserved sparse-reference evidence without pretending it is the best summary of overall performance.",
-            notes="Built from stored March 6 strict QA figures plus one promoted March 13 -> March 14 context panel.",
+            notes="Built from stored March 6 strict QA figures plus one promoted March 13 -> March 14 context panel, and retained as an honesty-only legacy board.",
             recommended=False,
         )
 
@@ -936,12 +977,13 @@ class TrajectoryGalleryPanelPolishService:
     def _build_dwh_deterministic_board(self) -> PanelFigureRecord | None:
         summary = _read_csv(self.repo_root / DWH_SUMMARY)
         metric_lines = [
-            "DWH is the rich-data external transfer-validation case and remains one of the strongest reportable parts of the project.",
+            "DWH is a separate external transfer-validation/support case; Mindoro remains the main Philippine thesis case.",
+            "Observed DWH daily masks remain truth, and the current frozen stack is HYCOM GOFS 3.1 currents + ERA5 winds + CMEMS wave/Stokes.",
         ]
         if not summary.empty:
             event = summary.loc[summary["pair_role"] == "event_corridor"].iloc[0]
             metric_lines.append(f"Deterministic event-corridor mean FSS is {float(np.mean([event['fss_1km'], event['fss_3km'], event['fss_5km'], event['fss_10km']])):.3f}.")
-        metric_lines.append("This board is the easiest way to show the panel that the workflow transfers to a richer external case.")
+        metric_lines.append("This board is the easiest way to show the panel that the workflow transfers to a richer external case without displacing Mindoro as the main thesis case.")
         return self._compose_board(
             board_family_code="G",
             board_title="DWH deterministic forecast vs observation",
@@ -960,8 +1002,8 @@ class TrajectoryGalleryPanelPolishService:
             ],
             legend_keys=["observed_mask", "deterministic_opendrift", "source_point"],
             metric_lines=metric_lines,
-            interpretation="The DWH deterministic board is panel-ready and supports the plain-language claim that the transport framework transfers successfully to a richer external case.",
-            caption="This board shows the strongest single external-case validation story in the project. It pairs daily and event-corridor overlap views with the underlying deterministic transport path so non-technical readers can follow the transfer-validation narrative.",
+            interpretation="The DWH deterministic board is panel-ready and supports the plain-language claim that a separate external transfer-validation case succeeds on observed DWH truth masks.",
+            caption="This board shows the strongest single external-case validation story in the project while keeping Mindoro as the main thesis case. It pairs daily and event-corridor overlap views with the underlying deterministic transport path so non-technical readers can follow the transfer-validation narrative.",
             notes="Built from stored DWH deterministic QA figures and the raw deterministic track map.",
             recommended=True,
         )
@@ -990,8 +1032,8 @@ class TrajectoryGalleryPanelPolishService:
                 f"Ensemble p50 event-corridor mean FSS: {metrics.get('OpenDrift ensemble p50', float('nan')):.3f}.",
                 f"Ensemble p90 event-corridor mean FSS: {metrics.get('OpenDrift ensemble p90', float('nan')):.3f}.",
             ],
-            interpretation="This board is ready for the panel because it explains the practical meaning of deterministic, p50, and p90 products side by side on the DWH case.",
-            caption="This board explains how the DWH deterministic, p50, and p90 products differ. It is especially useful when the panel wants to understand why the ensemble products are not simply 'better' or 'worse' than the deterministic control.",
+            interpretation="This board is ready for the panel because it explains deterministic, p50, and p90 side by side against the observed DWH truth corridor on the same readiness-gated forcing stack.",
+            caption="This board explains how the DWH deterministic, p50, and p90 products differ against the observed DWH truth corridor. It is especially useful when the panel wants to understand why the ensemble products are not simply 'better' or 'worse' than the deterministic control.",
             notes="Built from stored DWH deterministic and ensemble QA figures plus the raw gallery overlays.",
             recommended=True,
         )
@@ -1020,8 +1062,8 @@ class TrajectoryGalleryPanelPolishService:
                 f"OpenDrift ensemble p50 event-corridor mean FSS: {metrics.get('OpenDrift ensemble p50', float('nan')):.3f}.",
                 f"PyGNOME deterministic event-corridor mean FSS: {metrics.get('PyGNOME deterministic', float('nan')):.3f}.",
             ],
-            interpretation="The DWH model-comparison board is presentation-ready because it clearly positions PyGNOME as a comparator and keeps the OpenDrift-rich-data success story visible.",
-            caption="Use this board when the panel wants a direct OpenDrift-versus-PyGNOME comparison on the DWH case. It keeps the comparator framing explicit while showing that both models are being judged against the same public observation masks.",
+            interpretation="The DWH model-comparison board is presentation-ready because it clearly positions PyGNOME as comparator-only while keeping the observed DWH truth masks and OpenDrift transfer-validation result visible.",
+            caption="Use this board when the panel wants a direct OpenDrift-versus-PyGNOME comparison on the DWH case. It keeps the comparator framing explicit while showing that both models are being judged against the same observed DWH truth masks.",
             notes="Built from stored DWH comparator QA figures and the deterministic event-corridor overlay.",
             recommended=True,
         )
@@ -1053,11 +1095,11 @@ class TrajectoryGalleryPanelPolishService:
             panels=panels,
             legend_keys=["deterministic_opendrift", "ensemble_p50", "ensemble_p90", "pygnome", "source_point"],
             metric_lines=[
-                "This board is more about transport intuition than about headline metrics.",
+                "This board is appendix/support material for the separate DWH transfer-validation case rather than a main-thesis headline figure.",
                 "Use it when the panel wants to see how the DWH particle clouds travel before the overlap products are thresholded or summarized.",
             ],
-            interpretation="The DWH trajectory board is useful appendix-support material because it makes the model-path behavior visible before score comparisons.",
-            caption="This board is the DWH trajectory-oriented companion to the score-based comparison boards. It gives the panel a more intuitive view of how the OpenDrift and PyGNOME particle families move over time.",
+            interpretation="The DWH trajectory board is useful appendix-support material because it makes the model-path behavior visible before score comparisons on the observed DWH truth masks.",
+            caption="This board is the DWH trajectory-oriented companion to the score-based comparison boards for the separate external transfer-validation case. It gives the panel a more intuitive view of how the OpenDrift and PyGNOME particle families move over time.",
             notes="Built from the raw DWH deterministic track map, the raw ensemble overlay, and a new read-only sampled PyGNOME track panel derived from the stored comparator NetCDF.",
             recommended=False,
         )
@@ -1086,11 +1128,15 @@ class TrajectoryGalleryPanelPolishService:
             "These polished boards are read-only reinterpretations of existing outputs. No expensive scientific branch was rerun to generate this panel pack.",
             "",
         ]
-        for record in sorted(self.panel_records, key=lambda item: item.figure_id):
+        for record in sorted(self.panel_records, key=lambda item: (item.board_family_code, item.figure_id)):
             lines.append(f"## {record.board_family_code}. {record.board_family_label}")
             lines.append("")
             lines.append(f"- File: `{record.relative_path}`")
             lines.append(f"- Main-defense figure: `{str(record.recommended_for_main_defense).lower()}`")
+            if record.status_label:
+                lines.append(f"- Status: {record.status_label}")
+            if record.status_provenance:
+                lines.append(f"- Provenance: {record.status_provenance}")
             lines.append(f"- Interpretation: {record.plain_language_interpretation}")
             lines.append("")
         return "\n".join(lines)
@@ -1103,8 +1149,10 @@ class TrajectoryGalleryPanelPolishService:
             "Recommended first-pass figures for the main defense presentation:",
             "",
         ]
-        for record in recommended:
-            lines.append(f"- `{record.figure_id}`: {record.plain_language_interpretation}")
+        for record in sorted(recommended, key=lambda item: (item.board_family_code, item.figure_id)):
+            lines.append(
+                f"- `{record.figure_id}` [{record.status_label or record.board_family_label}]: {record.status_panel_text or record.plain_language_interpretation}"
+            )
         lines.extend(
             [
                 "",
@@ -1112,9 +1160,11 @@ class TrajectoryGalleryPanelPolishService:
                 "",
             ]
         )
-        for record in self.panel_records:
+        for record in sorted(self.panel_records, key=lambda item: (item.board_family_code, item.figure_id)):
             if not record.recommended_for_main_defense:
-                lines.append(f"- `{record.figure_id}`: {record.plain_language_interpretation}")
+                lines.append(
+                    f"- `{record.figure_id}` [{record.status_label or record.board_family_label}]: {record.status_panel_text or record.plain_language_interpretation}"
+                )
         return "\n".join(lines)
 
     def _build_manifest(self, generated_at_utc: str) -> dict[str, Any]:
@@ -1137,7 +1187,11 @@ class TrajectoryGalleryPanelPolishService:
             },
             "board_families_requested": BOARD_FAMILIES,
             "board_families_generated": sorted({record.board_family_code for record in self.panel_records}),
-            "recommended_main_defense_figures": [record.figure_id for record in self.panel_records if record.recommended_for_main_defense],
+            "recommended_main_defense_figures": [
+                record.figure_id
+                for record in sorted(self.panel_records, key=lambda item: (item.board_family_code, item.figure_id))
+                if record.recommended_for_main_defense
+            ],
             "missing_optional_artifacts": self.missing_optional_artifacts,
             "figures": [record.as_row() for record in self.panel_records],
         }
@@ -1145,7 +1199,7 @@ class TrajectoryGalleryPanelPolishService:
     def run(self) -> dict[str, Any]:
         generated_at_utc = pd.Timestamp.now(tz="UTC").isoformat()
         self._build_boards()
-        figure_rows = [record.as_row() for record in sorted(self.panel_records, key=lambda item: item.figure_id)]
+        figure_rows = [record.as_row() for record in sorted(self.panel_records, key=lambda item: (item.board_family_code, item.figure_id))]
         registry_path = self.output_dir / "panel_figure_registry.csv"
         manifest_path = self.output_dir / "panel_figure_manifest.json"
         captions_path = self.output_dir / "panel_figure_captions.md"
@@ -1170,6 +1224,15 @@ class TrajectoryGalleryPanelPolishService:
                 "recommended_for_main_defense",
                 "source_paths",
                 "notes",
+                "status_key",
+                "status_label",
+                "status_role",
+                "status_reportability",
+                "status_official_status",
+                "status_frozen_status",
+                "status_provenance",
+                "status_panel_text",
+                "status_dashboard_summary",
             ],
         )
         _write_json(manifest_path, self._build_manifest(generated_at_utc))
@@ -1183,7 +1246,11 @@ class TrajectoryGalleryPanelPolishService:
             "talking_points_md": str(talking_points_path),
             "figure_count": len(self.panel_records),
             "board_families_generated": sorted({record.board_family_code for record in self.panel_records}),
-            "recommended_main_defense_figures": [record.figure_id for record in self.panel_records if record.recommended_for_main_defense],
+            "recommended_main_defense_figures": [
+                record.figure_id
+                for record in sorted(self.panel_records, key=lambda item: (item.board_family_code, item.figure_id))
+                if record.recommended_for_main_defense
+            ],
             "side_by_side_comparison_boards_produced": True,
             "plain_language_captions_produced": True,
             "missing_optional_artifacts": self.missing_optional_artifacts,

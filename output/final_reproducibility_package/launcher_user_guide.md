@@ -21,25 +21,28 @@ Use the PowerShell launcher from the repository root. The launcher is now organi
 
 Intentional scientific reruns or reportable output builders.
 
-- `mindoro_reportable_core`: Mindoro reportable core bundle. Workflow mode = `mindoro_retro_2023`. Cost = `expensive`. Safe read-only default = `false`. Phases = prep, 1_2, 3b, phase3b_multidate_public, phase4_oiltype_and_shoreline.
-  Note: Use only when an intentional scientific rerun of the main Mindoro reportable path is desired.
+- `mindoro_reportable_core`: Mindoro reportable core bundle. Workflow mode = `mindoro_retro_2023`. Cost = `expensive`. Safe read-only default = `false`. Phases = prep, 1_2, phase3b_extended_public, phase3b_extended_public_scored_march13_14_reinit, 3b, phase3b_multidate_public, phase4_oiltype_and_shoreline.
+  Note: Use only when an intentional scientific rerun of the main Mindoro reportable path, including the promoted B1 row, is desired.
   Run with: `./start.ps1 -Entry mindoro_reportable_core -NoPause`
 - `phase1_production_rerun`: Phase 1 regional production rerun. Workflow mode = `phase1_regional_2016_2022`. Cost = `expensive`. Safe read-only default = `false`. Phases = phase1_production_rerun.
   Note: Scientific rerun only. This does not overwrite config/phase1_baseline_selection.yaml and does not auto-run phase1_audit or phase5_sync.
   Run with: `./start.ps1 -Entry phase1_production_rerun -NoPause`
+- `mindoro_phase3b_primary_public_validation`: Mindoro Phase 3B primary public validation. Workflow mode = `mindoro_retro_2023`. Cost = `expensive`. Safe read-only default = `false`. Phases = phase3b_extended_public, phase3b_extended_public_scored_march13_14_reinit.
+  Note: Canonical B1 builder. This does not delete or relabel the March 6 legacy honesty row.
+  Run with: `./start.ps1 -Entry mindoro_phase3b_primary_public_validation -NoPause`
 - `mindoro_phase4_only`: Mindoro Phase 4 only. Workflow mode = `mindoro_retro_2023`. Cost = `moderate`. Safe read-only default = `false`. Phases = phase4_oiltype_and_shoreline.
   Note: Does not overwrite stored Mindoro or DWH Phase 3 validation outputs.
   Run with: `./start.ps1 -Entry mindoro_phase4_only -NoPause`
 - `dwh_reportable_bundle`: DWH Phase 3C reportable bundle. Workflow mode = `dwh_retro_2010`. Cost = `expensive`. Safe read-only default = `false`. Phases = phase3c_external_case_setup, dwh_phase3c_scientific_forcing_ready, phase3c_external_case_run, phase3c_external_case_ensemble_comparison, phase3c_dwh_pygnome_comparator.
-  Note: This is the full DWH scientific rerun path and should only be used intentionally.
+  Note: Separate external transfer-validation story only. Mindoro remains the main Philippine thesis case; DWH observed masks remain truth; PyGNOME remains comparator-only; current frozen stack is HYCOM GOFS 3.1 + ERA5 + CMEMS wave/Stokes.
   Run with: `./start.ps1 -Entry dwh_reportable_bundle -NoPause`
 
 ### Sensitivity / appendix tracks
 
-Supporting branches that are informative but not the main reportable path.
+Supporting branches and backward-compatible aliases that are informative but not the main reportable path.
 
 - `mindoro_appendix_sensitivity_bundle`: Mindoro appendix / sensitivity bundle. Workflow mode = `mindoro_retro_2023`. Cost = `expensive`. Safe read-only default = `false`. Phases = public_obs_appendix, phase3b_extended_public, phase3b_extended_public_scored, phase3b_extended_public_scored_march23, phase3b_extended_public_scored_march13_14_reinit, phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison, horizon_survival_audit, transport_retention_fix, official_rerun_r1, init_mode_sensitivity_r1, source_history_reconstruction_r1, pygnome_public_comparison, ensemble_threshold_sensitivity, recipe_sensitivity_r1_multibranch.
-  Note: These tracks are informative and reportable as support material, but they are not the main-text scientific core.
+  Note: These tracks are informative and reportable as support material, but the promoted B1 row now has its own scientific launcher entry.
   Run with: `./start.ps1 -Entry mindoro_appendix_sensitivity_bundle -NoPause`
 - `mindoro_march6_recovery_sensitivity`: Mindoro March 6 recovery sensitivity. Workflow mode = `mindoro_retro_2023`. Cost = `moderate`. Safe read-only default = `true`. Phases = march6_recovery_sensitivity.
   Note: Appendix-only. This does not replace or relabel the frozen strict March 6 official result.
@@ -47,8 +50,8 @@ Supporting branches that are informative but not the main reportable path.
 - `mindoro_march23_extended_public_stress_test`: Mindoro March 23 extended public stress test. Workflow mode = `mindoro_retro_2023`. Cost = `expensive`. Safe read-only default = `false`. Phases = phase3b_extended_public, phase3b_extended_public_scored_march23.
   Note: Appendix-only. This does not replace the frozen strict March 6 official result or the final validation package.
   Run with: `./start.ps1 -Entry mindoro_march23_extended_public_stress_test -NoPause`
-- `mindoro_march13_14_noaa_reinit_stress_test`: Mindoro March 13-14 NOAA reinit stress test. Workflow mode = `mindoro_retro_2023`. Cost = `expensive`. Safe read-only default = `false`. Phases = phase3b_extended_public, phase3b_extended_public_scored_march13_14_reinit, phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison.
-  Note: Appendix-only. This does not replace the frozen strict March 6 official result or the final validation package.
+- `mindoro_march13_14_noaa_reinit_stress_test`: Legacy alias: Mindoro March 13-14 primary validation bundle. Workflow mode = `mindoro_retro_2023`. Cost = `expensive`. Safe read-only default = `false`. Phases = phase3b_extended_public, phase3b_extended_public_scored_march13_14_reinit, phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison.
+  Note: Compatibility alias retained for older scripts. B1 is primary, B2 is legacy honesty-only, and PyGNOME remains comparator-only.
   Run with: `./start.ps1 -Entry mindoro_march13_14_noaa_reinit_stress_test -NoPause`
 
 ### Read-only packaging / help utilities
@@ -81,8 +84,11 @@ Safe utilities that summarize or audit the current repo state without rerunning 
 
 Backward-compatible prototype workflows preserved for debugging and regression.
 
+- `prototype_2021_bundle`: Prototype 2021 preferred debug bundle. Workflow mode = `prototype_2021`. Cost = `moderate`. Safe read-only default = `false`. Phases = prep, 1_2, benchmark, prototype_pygnome_similarity_summary.
+  Note: Preferred debug/demo lane only. Built from the two accepted 2021 strict-gate drifter segments, uses the official four-recipe Phase 1 family, and stops at the transport-core bundle. Phase 3B and Phase 4 are separate and are not part of this proof path.
+  Run with: `./start.ps1 -Entry prototype_2021_bundle -NoPause`
 - `prototype_legacy_bundle`: Prototype 2016 legacy bundle. Workflow mode = `prototype_2016`. Cost = `moderate`. Safe read-only default = `false`. Phases = prep, 1_2, benchmark, prototype_pygnome_similarity_summary, 3, 3b.
-  Note: Backward-compatible debug/regression path only. Not the final Chapter 3 Phase 1 study. Prototype prep now attempts GFS too, but missing GFS remains best-effort and does not collapse the legacy bundle. The PyGNOME similarity step is transport-only, comparator-only, and now writes actual 24/48/72 h forecast singles plus one side-by-side board per case.
+  Note: Backward-compatible legacy debug/regression path only. Not the preferred debug lane and not the final Chapter 3 Phase 1 study. Prototype prep now attempts GFS too, but missing GFS remains best-effort and does not collapse the legacy bundle. The PyGNOME similarity step is transport-only, comparator-only, and now writes actual 24/48/72 h forecast singles plus one side-by-side board per case. Phases 3 and 3B remain legacy appendix/smoke checks here.
   Run with: `./start.ps1 -Entry prototype_legacy_bundle -NoPause`
 
 ## Guardrails

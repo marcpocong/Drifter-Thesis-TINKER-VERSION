@@ -12,6 +12,13 @@ from pathlib import Path
 import pandas as pd
 import yaml
 
+from src.core.domain_semantics import (
+    coerce_bounds,
+    resolve_legacy_prototype_display_domain,
+    resolve_mindoro_case_domain,
+    resolve_phase1_validation_box,
+)
+
 SETTINGS_PATH = Path(__file__).resolve().parent.parent.parent / "config" / "settings.yaml"
 DEFAULT_MINDORO_FEATURE_SERVER = (
     "https://services1.arcgis.com/RTK5Unh1Z71JKIiR/ArcGIS/rest/services/"
@@ -82,11 +89,15 @@ class CaseLayerConfig:
 class CaseContext:
     workflow_mode: str
     workflow_lane: str
+    active_domain_name: str
     mode_label: str
     case_id: str
     run_name: str
     description: str
     region: list[float]
+    phase1_validation_box: list[float]
+    mindoro_case_domain: list[float]
+    legacy_prototype_display_domain: list[float]
     is_prototype: bool
     initialization_mode: str
     source_point_role: str
@@ -264,6 +275,17 @@ def _default_historical_regional_layer_specs(
     return init_layer, validation_layer, provenance_layer
 
 
+def _resolve_repo_domains(
+    settings: dict,
+    *sources: dict | None,
+) -> tuple[list[float], list[float], list[float]]:
+    phase1_audit = settings.get("phase1_official_audit") or {}
+    phase1_validation_box = resolve_phase1_validation_box(*sources, phase1_audit, settings)
+    mindoro_case_domain = resolve_mindoro_case_domain(*sources, settings)
+    legacy_prototype_display_domain = resolve_legacy_prototype_display_domain(*sources, settings)
+    return phase1_validation_box, mindoro_case_domain, legacy_prototype_display_domain
+
+
 def _load_official_context(settings: dict, workflow_mode: str) -> CaseContext:
     case_files = settings.get("workflow_case_files") or {}
     case_path = Path(os.environ.get("CASE_CONFIG_PATH") or case_files.get(workflow_mode, ""))
@@ -273,6 +295,10 @@ def _load_official_context(settings: dict, workflow_mode: str) -> CaseContext:
         )
 
     cfg = _load_yaml(case_path)
+    phase1_validation_box, mindoro_case_domain, legacy_prototype_display_domain = _resolve_repo_domains(
+        settings,
+        cfg,
+    )
     arcgis_cfg = cfg.get("arcgis") or {}
     layers_cfg = arcgis_cfg.get("layers") or {}
     service_url = arcgis_cfg.get("feature_server_url", DEFAULT_MINDORO_FEATURE_SERVER)
@@ -291,14 +317,24 @@ def _load_official_context(settings: dict, workflow_mode: str) -> CaseContext:
         )
 
     run_name = os.environ.get("RUN_NAME", cfg["case_id"])
+    if cfg.get("mindoro_case_domain") is not None or workflow_mode == "mindoro_retro_2023":
+        active_domain_name = "mindoro_case_domain"
+        active_region = list(mindoro_case_domain)
+    else:
+        active_domain_name = "configured_case_domain"
+        active_region = coerce_bounds(cfg.get("region") or mindoro_case_domain, "region")
     return CaseContext(
         workflow_mode=workflow_mode,
         workflow_lane="official_spill_case",
+        active_domain_name=active_domain_name,
         mode_label=cfg.get("mode_label", "Official workflow"),
         case_id=cfg["case_id"],
         run_name=run_name,
         description=cfg.get("description", cfg["case_id"]),
-        region=cfg.get("region", settings["region"]),
+        region=active_region,
+        phase1_validation_box=phase1_validation_box,
+        mindoro_case_domain=mindoro_case_domain,
+        legacy_prototype_display_domain=legacy_prototype_display_domain,
         is_prototype=False,
         initialization_mode=cfg.get("initialization_mode", "initialization_polygon"),
         source_point_role=cfg.get("source_point_role", "provenance_only"),
@@ -347,15 +383,20 @@ def _load_prototype_context(settings: dict) -> CaseContext:
         end_time_utc,
     )
     run_name = os.environ.get("RUN_NAME", f"CASE_{active_date}")
+    phase1_validation_box, mindoro_case_domain, legacy_prototype_display_domain = _resolve_repo_domains(settings)
 
     return CaseContext(
         workflow_mode="prototype_2016",
         workflow_lane="prototype",
+        active_domain_name="legacy_prototype_display_domain",
         mode_label="Prototype 2016 debugging workflow",
         case_id=run_name,
         run_name=run_name,
         description="Prototype debugging workflow preserving the original 2016 multi-date behavior",
-        region=settings["region"],
+        region=list(legacy_prototype_display_domain),
+        phase1_validation_box=phase1_validation_box,
+        mindoro_case_domain=mindoro_case_domain,
+        legacy_prototype_display_domain=legacy_prototype_display_domain,
         is_prototype=True,
         initialization_mode="initialization_polygon",
         source_point_role="active_release_fallback",
@@ -422,15 +463,24 @@ def _load_configured_prototype_context(settings: dict, workflow_mode: str) -> Ca
     )
     case_ids = tuple(str(item.get("case_id") or "").strip() for item in configured_cases if str(item.get("case_id") or "").strip())
     run_name = os.environ.get("RUN_NAME", str(selected_case.get("run_name") or selected_case["case_id"]))
+    phase1_validation_box, mindoro_case_domain, legacy_prototype_display_domain = _resolve_repo_domains(
+        settings,
+        cfg,
+        selected_case,
+    )
 
     return CaseContext(
         workflow_mode=workflow_mode,
         workflow_lane="prototype",
+        active_domain_name="legacy_prototype_display_domain",
         mode_label=str(cfg.get("mode_label") or "Preferred accepted-segment debug workflow"),
         case_id=str(selected_case["case_id"]),
         run_name=run_name,
         description=str(selected_case.get("description") or cfg.get("description") or selected_case["case_id"]),
-        region=list(selected_case.get("region") or cfg.get("region") or settings["region"]),
+        region=list(legacy_prototype_display_domain),
+        phase1_validation_box=phase1_validation_box,
+        mindoro_case_domain=mindoro_case_domain,
+        legacy_prototype_display_domain=legacy_prototype_display_domain,
         is_prototype=True,
         initialization_mode="drifter_segment_start",
         source_point_role="active_release_fallback",
@@ -466,6 +516,10 @@ def _load_historical_regional_context(settings: dict, workflow_mode: str) -> Cas
         )
 
     cfg = _load_yaml(case_path)
+    phase1_validation_box, mindoro_case_domain, legacy_prototype_display_domain = _resolve_repo_domains(
+        settings,
+        cfg,
+    )
     historical_window = cfg.get("historical_window") or {}
     start_utc = str(historical_window.get("start_utc") or "2016-01-01T00:00:00Z")
     end_utc = str(historical_window.get("end_utc") or "2022-12-31T23:59:59Z")
@@ -478,11 +532,15 @@ def _load_historical_regional_context(settings: dict, workflow_mode: str) -> Cas
     return CaseContext(
         workflow_mode=workflow_mode,
         workflow_lane="historical_regional_validation",
+        active_domain_name="phase1_validation_box",
         mode_label=cfg.get("mode_label", "Historical/regional validation workflow"),
         case_id=str(cfg.get("case_id") or "phase1_production_rerun"),
         run_name=run_name,
         description=cfg.get("description", run_name),
-        region=cfg.get("region", settings["region"]),
+        region=list(phase1_validation_box),
+        phase1_validation_box=phase1_validation_box,
+        mindoro_case_domain=mindoro_case_domain,
+        legacy_prototype_display_domain=legacy_prototype_display_domain,
         is_prototype=False,
         initialization_mode=cfg.get("initialization_mode", "regional_drifter_segment_window"),
         source_point_role=cfg.get("source_point_role", "drifter_segment_start"),
@@ -530,6 +588,7 @@ def get_case_log_lines() -> list[str]:
     return [
         f"workflow_mode      : {case.workflow_mode}",
         f"case_id            : {case.case_id}",
+        f"active_domain_name : {case.active_domain_name}",
         f"transport_track    : {case.transport_track}",
         f"recipe_resolution  : {case.recipe_resolution_mode}",
         f"initialization_mode: {case.initialization_mode}",

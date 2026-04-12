@@ -11,6 +11,7 @@ from typing import Any
 import pandas as pd
 import yaml
 
+from src.core.domain_semantics import resolve_phase1_validation_box
 from src.services.validation import (
     PHASE1_LOADING_AUDIT_POLICY,
     PHASE1_LOADING_AUDIT_SCHEMA_VERSION,
@@ -88,6 +89,7 @@ class Phase1FinalizationAuditService:
         self.settings_cfg = _read_yaml(self.settings_path)
         self.recipes_cfg = _read_yaml(self.recipes_path)
         self.baseline_cfg = _read_yaml(self.baseline_path)
+        self.phase1_audit_settings = self.settings_cfg.get("phase1_official_audit") or {}
         self.baseline_audit_cfg = self.baseline_cfg.get("chapter3_finalization_audit") or {}
         self.legacy_aliases = get_phase1_legacy_recipe_aliases(self.recipes_path)
         self.official_recipe_family = set(get_official_phase1_recipe_family(self.recipes_path))
@@ -215,7 +217,11 @@ class Phase1FinalizationAuditService:
         year_text = ", ".join(str(value) for value in sorted(found_years)) or "none"
         ranking_paths = [item["ranking_path"] for item in self.prototype_rankings]
         audit_paths = [item["audit_path"] for item in self.prototype_audits]
-        regional_box = self.baseline_audit_cfg.get("regional_validation_box") or self.settings_cfg.get("region") or []
+        phase1_box = resolve_phase1_validation_box(
+            self.baseline_audit_cfg,
+            self.phase1_audit_settings,
+            self.settings_cfg,
+        )
         has_drogue_columns = any("drog" in column.lower() for column in self.prototype_drifter_columns)
         legacy_runtime_recipe_gap = sorted(EXPECTED_OFFICIAL_RECIPE_FAMILY - self.runtime_recipe_ids)
         gfs_available = any(path.name == "gfs_wind.nc" for path in self.data_root.glob("forcing/*/gfs_wind.nc"))
@@ -243,22 +249,25 @@ class Phase1FinalizationAuditService:
                 evidence_paths=ranking_paths,
             ),
             self._requirement(
-                requirement_id="fixed_regional_validation_box",
+                requirement_id="fixed_phase1_validation_box",
                 requirement_group="core_architecture",
-                chapter3_requirement="Phase 1 uses a fixed regional validation box.",
-                classification="implemented_but_provisional" if regional_box else "missing",
+                chapter3_requirement="Phase 1 uses a fixed phase1_validation_box.",
+                classification="implemented_but_provisional" if phase1_box else "missing",
                 scientifically_ready=False,
                 full_production_rerun_required=True,
-                low_risk_patch_applied=bool(self.baseline_audit_cfg.get("regional_validation_box")),
+                low_risk_patch_applied=bool(
+                    self.baseline_audit_cfg.get("phase1_validation_box")
+                    or self.baseline_audit_cfg.get("regional_validation_box")
+                ),
                 evidence_summary=(
-                    f"Fixed regional-box metadata is present with bounds {regional_box}."
-                    if regional_box
-                    else "No fixed regional validation box metadata was found."
+                    f"Fixed Phase 1 validation-box metadata is present with bounds {phase1_box}."
+                    if phase1_box
+                    else "No fixed phase1_validation_box metadata was found."
                 ),
                 blocker=(
                     "The box is frozen in metadata but has not yet been exercised through the final 2016-2022 accepted/rejected segment study."
-                    if regional_box
-                    else "Regional validation box metadata is absent."
+                    if phase1_box
+                    else "phase1_validation_box metadata is absent."
                 ),
                 evidence_paths=[str(self.baseline_path.relative_to(self.repo_root)), str(self.settings_path.relative_to(self.repo_root))],
             ),
@@ -554,7 +563,7 @@ class Phase1FinalizationAuditService:
             "## What This Patch Finalizes",
             "",
             "- Adds a dedicated `phase1_finalization_audit` route that writes its own audit package under `output/phase1_finalization_audit/`.",
-            "- Freezes explicit metadata for the Chapter 3 target window, regional box, segment policy, and recipe-family intent without pretending the scientific study already exists.",
+            "- Freezes explicit metadata for the Chapter 3 target window, Phase 1 validation box, segment policy, and recipe-family intent without pretending the scientific study already exists.",
             "- Makes Phase 1 loading-audit hard-fail/status fields explicit in code for the next real regional rerun.",
             "- Clarifies that the preserved `prototype_2016` workflow is a legacy debugging path, not the final Chapter 3 Phase 1 evidence base.",
             "",
