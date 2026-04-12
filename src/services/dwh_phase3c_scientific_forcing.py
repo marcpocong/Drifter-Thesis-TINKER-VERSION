@@ -970,6 +970,10 @@ def run_dwh_phase3c_scientific_forcing_ready() -> dict:
         f"- reader_check_run_succeeded: {reader_check['manifest'].get('reader_check_run_succeeded', False)}",
         f"- recommendation: {recommendation}",
         "",
+        "Selection policy: DWH Phase 3C freezes the first complete real historical current+wind+wave stack that passes the scientific-readiness gate; it is not chosen by a Phase 1 drifter recipe ranking.",
+        "",
+        "Scientific-ready means each selected source is not smoke-only, spans the required May 20-23, 2010 window, exposes the required variables with usable metadata, opens cleanly in the OpenDrift reader, and the assembled stack completes the small reader-check forecast.",
+        "",
         "This is a forcing-reader compatibility check only. It is not the final Phase 3C scientific result table.",
     ]
     reader_report_md.write_text("\n".join(report_lines) + "\n", encoding="utf-8")

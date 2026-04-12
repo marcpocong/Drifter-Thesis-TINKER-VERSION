@@ -1,6 +1,6 @@
 {
   "phase": "phase5_launcher_and_docs_sync",
-  "generated_at_utc": "2026-04-11T13:32:02.959389+00:00",
+  "generated_at_utc": "2026-04-12T05:55:54.401642+00:00",
   "repo_root": "/app",
   "output_dir": "output/final_reproducibility_package",
   "launcher_catalog": {
@@ -8,6 +8,7 @@
     "entrypoint": "start.ps1",
     "catalog_version": "phase5_launcher_matrix_v2",
     "safe_read_only_entry_ids": [
+      "mindoro_march6_recovery_sensitivity",
       "phase1_audit",
       "phase2_audit",
       "final_validation_package",
@@ -80,43 +81,57 @@
     {
       "phase_id": "phase3a",
       "track_id": "A",
-      "track_label": "Mindoro Phase 3A benchmark comparator",
+      "track_label": "Mindoro March 13 -> March 14 cross-model comparator",
       "readiness_status": "scientifically_informative_comparator",
       "scientifically_reportable": true,
       "scientifically_frozen": false,
       "inherited_provisional": true,
-      "main_blocker": "Comparator-only track; upstream Mindoro transport baseline is still not frozen.",
+      "main_blocker": "Comparator-only track with a shared-imagery caveat; upstream Mindoro transport baseline is still not frozen.",
       "reportable_now": true,
       "reportability_scope": "comparative_benchmark_discussion",
-      "summary": "Mindoro Phase 3A remains scientifically informative as a comparator benchmark. ",
+      "summary": "Mindoro March 13 -> March 14 cross-model comparison remains scientifically informative as a comparator benchmark. fss_1km=0.0000, fss_3km=0.0441, fss_5km=0.1371, fss_10km=0.2490",
       "evidence_path": "output/final_validation_package/final_validation_manifest.json"
     },
     {
       "phase_id": "phase3b",
       "track_id": "B1",
-      "track_label": "Mindoro strict March 6 stress test",
-      "readiness_status": "scientifically_informative_sparse_stress_test",
+      "track_label": "Mindoro March 13 -> March 14 NOAA reinit primary validation",
+      "readiness_status": "scientifically_reportable_primary_validation",
       "scientifically_reportable": true,
       "scientifically_frozen": false,
       "inherited_provisional": true,
       "main_blocker": "The frozen recipe still comes from three legacy prototype dates, not from a completed 2016-2022 regional drifter-segment study.",
       "reportable_now": true,
-      "reportability_scope": "main_text_sparse_stress_test",
-      "summary": "Mindoro strict March 6 is a hard sparse stress test and should not be treated as broad-support validation. fss_1km=0.0000, fss_3km=0.0000, fss_5km=0.0000, fss_10km=0.0000",
+      "reportability_scope": "main_text_primary_validation",
+      "summary": "Mindoro March 13 -> March 14 is the promoted primary validation, reported with the explicit March 12 imagery caveat. fss_1km=0.0000, fss_3km=0.0441, fss_5km=0.1371, fss_10km=0.2490",
       "evidence_path": "output/final_validation_package/final_validation_manifest.json"
     },
     {
       "phase_id": "phase3b",
       "track_id": "B2",
-      "track_label": "Mindoro broader public-support track",
-      "readiness_status": "scientifically_reportable_support_track",
+      "track_label": "Mindoro legacy March 6 sparse strict reference",
+      "readiness_status": "scientifically_reportable_legacy_reference",
       "scientifically_reportable": true,
       "scientifically_frozen": false,
       "inherited_provisional": true,
       "main_blocker": "The frozen recipe still comes from three legacy prototype dates, not from a completed 2016-2022 regional drifter-segment study.",
       "reportable_now": true,
-      "reportability_scope": "supporting_public_observation_context",
-      "summary": "Mindoro broader public-support remains scientifically informative support material, not a replacement for B1. fss_1km=0.1722, fss_3km=0.2004, fss_5km=0.2166, fss_10km=0.2438",
+      "reportability_scope": "legacy_sparse_reference",
+      "summary": "Mindoro March 6 remains a legacy sparse reference and should not be silently discarded. fss_1km=0.0000, fss_3km=0.0000, fss_5km=0.0000, fss_10km=0.0000",
+      "evidence_path": "output/final_validation_package/final_validation_manifest.json"
+    },
+    {
+      "phase_id": "phase3b",
+      "track_id": "B3",
+      "track_label": "Mindoro legacy March 3-6 broader-support reference",
+      "readiness_status": "scientifically_reportable_legacy_reference",
+      "scientifically_reportable": true,
+      "scientifically_frozen": false,
+      "inherited_provisional": true,
+      "main_blocker": "The frozen recipe still comes from three legacy prototype dates, not from a completed 2016-2022 regional drifter-segment study.",
+      "reportable_now": true,
+      "reportability_scope": "legacy_broader_support_reference",
+      "summary": "Mindoro March 3-6 broader-support remains scientifically informative legacy context, not a replacement for B1. fss_1km=0.1722, fss_3km=0.2004, fss_5km=0.2166, fss_10km=0.2438",
       "evidence_path": "output/final_validation_package/final_validation_manifest.json"
     },
     {
@@ -205,7 +220,7 @@
     }
   ],
   "manifest_index_summary": {
-    "row_count": 82,
+    "row_count": 116,
     "missing_optional_artifacts": [
       "output/phase4/CASE_DWH_RETRO_2010_72H/phase4_run_manifest.json"
     ]

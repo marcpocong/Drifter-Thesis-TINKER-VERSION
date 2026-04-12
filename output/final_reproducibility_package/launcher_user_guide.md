@@ -6,6 +6,7 @@ Use the PowerShell launcher from the repository root. The launcher is now organi
 
 - `./start.ps1 -List -NoPause` shows the current menu catalog without starting Docker work.
 - `./start.ps1 -Help -NoPause` prints guidance and safe entry IDs.
+- `./start.ps1 -Entry mindoro_march6_recovery_sensitivity -NoPause` runs the safe read-only entry `Mindoro March 6 recovery sensitivity`.
 - `./start.ps1 -Entry phase1_audit -NoPause` runs the safe read-only entry `Phase 1 finalization audit`.
 - `./start.ps1 -Entry phase2_audit -NoPause` runs the safe read-only entry `Phase 2 finalization audit`.
 - `./start.ps1 -Entry final_validation_package -NoPause` runs the safe read-only entry `Final validation package refresh`.
@@ -23,6 +24,9 @@ Intentional scientific reruns or reportable output builders.
 - `mindoro_reportable_core`: Mindoro reportable core bundle. Workflow mode = `mindoro_retro_2023`. Cost = `expensive`. Safe read-only default = `false`. Phases = prep, 1_2, 3b, phase3b_multidate_public, phase4_oiltype_and_shoreline.
   Note: Use only when an intentional scientific rerun of the main Mindoro reportable path is desired.
   Run with: `./start.ps1 -Entry mindoro_reportable_core -NoPause`
+- `phase1_production_rerun`: Phase 1 regional production rerun. Workflow mode = `phase1_regional_2016_2022`. Cost = `expensive`. Safe read-only default = `false`. Phases = phase1_production_rerun.
+  Note: Scientific rerun only. This does not overwrite config/phase1_baseline_selection.yaml and does not auto-run phase1_audit or phase5_sync.
+  Run with: `./start.ps1 -Entry phase1_production_rerun -NoPause`
 - `mindoro_phase4_only`: Mindoro Phase 4 only. Workflow mode = `mindoro_retro_2023`. Cost = `moderate`. Safe read-only default = `false`. Phases = phase4_oiltype_and_shoreline.
   Note: Does not overwrite stored Mindoro or DWH Phase 3 validation outputs.
   Run with: `./start.ps1 -Entry mindoro_phase4_only -NoPause`
@@ -34,9 +38,18 @@ Intentional scientific reruns or reportable output builders.
 
 Supporting branches that are informative but not the main reportable path.
 
-- `mindoro_appendix_sensitivity_bundle`: Mindoro appendix / sensitivity bundle. Workflow mode = `mindoro_retro_2023`. Cost = `expensive`. Safe read-only default = `false`. Phases = public_obs_appendix, phase3b_extended_public, phase3b_extended_public_scored, horizon_survival_audit, transport_retention_fix, official_rerun_r1, init_mode_sensitivity_r1, source_history_reconstruction_r1, pygnome_public_comparison, ensemble_threshold_sensitivity, recipe_sensitivity_r1_multibranch.
+- `mindoro_appendix_sensitivity_bundle`: Mindoro appendix / sensitivity bundle. Workflow mode = `mindoro_retro_2023`. Cost = `expensive`. Safe read-only default = `false`. Phases = public_obs_appendix, phase3b_extended_public, phase3b_extended_public_scored, phase3b_extended_public_scored_march23, phase3b_extended_public_scored_march13_14_reinit, phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison, horizon_survival_audit, transport_retention_fix, official_rerun_r1, init_mode_sensitivity_r1, source_history_reconstruction_r1, pygnome_public_comparison, ensemble_threshold_sensitivity, recipe_sensitivity_r1_multibranch.
   Note: These tracks are informative and reportable as support material, but they are not the main-text scientific core.
   Run with: `./start.ps1 -Entry mindoro_appendix_sensitivity_bundle -NoPause`
+- `mindoro_march6_recovery_sensitivity`: Mindoro March 6 recovery sensitivity. Workflow mode = `mindoro_retro_2023`. Cost = `moderate`. Safe read-only default = `true`. Phases = march6_recovery_sensitivity.
+  Note: Appendix-only. This does not replace or relabel the frozen strict March 6 official result.
+  Run with: `./start.ps1 -Entry mindoro_march6_recovery_sensitivity -NoPause`
+- `mindoro_march23_extended_public_stress_test`: Mindoro March 23 extended public stress test. Workflow mode = `mindoro_retro_2023`. Cost = `expensive`. Safe read-only default = `false`. Phases = phase3b_extended_public, phase3b_extended_public_scored_march23.
+  Note: Appendix-only. This does not replace the frozen strict March 6 official result or the final validation package.
+  Run with: `./start.ps1 -Entry mindoro_march23_extended_public_stress_test -NoPause`
+- `mindoro_march13_14_noaa_reinit_stress_test`: Mindoro March 13-14 NOAA reinit stress test. Workflow mode = `mindoro_retro_2023`. Cost = `expensive`. Safe read-only default = `false`. Phases = phase3b_extended_public, phase3b_extended_public_scored_march13_14_reinit, phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison.
+  Note: Appendix-only. This does not replace the frozen strict March 6 official result or the final validation package.
+  Run with: `./start.ps1 -Entry mindoro_march13_14_noaa_reinit_stress_test -NoPause`
 
 ### Read-only packaging / help utilities
 
@@ -68,8 +81,8 @@ Safe utilities that summarize or audit the current repo state without rerunning 
 
 Backward-compatible prototype workflows preserved for debugging and regression.
 
-- `prototype_legacy_bundle`: Prototype 2016 legacy bundle. Workflow mode = `prototype_2016`. Cost = `moderate`. Safe read-only default = `false`. Phases = prep, 1_2, benchmark, 3, 3b.
-  Note: Backward-compatible debug/regression path only. Not the final Chapter 3 Phase 1 study.
+- `prototype_legacy_bundle`: Prototype 2016 legacy bundle. Workflow mode = `prototype_2016`. Cost = `moderate`. Safe read-only default = `false`. Phases = prep, 1_2, benchmark, prototype_pygnome_similarity_summary, 3, 3b.
+  Note: Backward-compatible debug/regression path only. Not the final Chapter 3 Phase 1 study. Prototype prep now attempts GFS too, but missing GFS remains best-effort and does not collapse the legacy bundle. The PyGNOME similarity step is transport-only, comparator-only, and now writes actual 24/48/72 h forecast singles plus one side-by-side board per case.
   Run with: `./start.ps1 -Entry prototype_legacy_bundle -NoPause`
 
 ## Guardrails

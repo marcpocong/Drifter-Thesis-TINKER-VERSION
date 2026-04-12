@@ -76,6 +76,10 @@ class GnomeComparisonService:
         start_time: str,
         output_name: str = "pygnome_deterministic_control.nc",
         random_seed: int = 20230303,
+        polygon_path: str | Path | None = None,
+        seed_time_override: str | None = None,
+        duration_hours: int | None = None,
+        time_step_minutes: int | None = None,
     ) -> tuple[Path, dict]:
         """
         Run a deterministic transport-style PyGNOME scenario for Phase 3A benchmarking.
@@ -86,13 +90,18 @@ class GnomeComparisonService:
         if not GNOME_AVAILABLE:
             raise RuntimeError("PyGNOME benchmark scenario requires the gnome container.")
 
-        duration_hours = self.gnome_cfg.get(
-            "duration_hours", self.sim_cfg["duration_hours"]
+        duration_hours = (
+            int(duration_hours)
+            if duration_hours is not None
+            else int(self.gnome_cfg.get("duration_hours", self.sim_cfg["duration_hours"]))
         )
-        time_step_minutes = self.gnome_cfg.get(
-            "time_step_minutes", self.sim_cfg["time_step_minutes"]
+        time_step_minutes = (
+            int(time_step_minutes)
+            if time_step_minutes is not None
+            else int(self.gnome_cfg.get("time_step_minutes", self.sim_cfg["time_step_minutes"]))
         )
         t_start = pd.to_datetime(start_time).to_pydatetime()
+        release_start = pd.to_datetime(seed_time_override or start_time).to_pydatetime()
         wind_speed_ms = float(self.gnome_cfg.get("benchmark_wind_speed_ms", 5.0))
 
         model = Model(
@@ -127,6 +136,8 @@ class GnomeComparisonService:
         cluster_lons, cluster_lats, _ = resolve_polygon_seeding(
             num_clusters,
             random_seed=random_seed,
+            polygon_path=polygon_path,
+            seed_time_override=seed_time_override,
         )
         cluster_counts = np.full(num_clusters, benchmark_particles // num_clusters, dtype=int)
         cluster_counts[: benchmark_particles % num_clusters] += 1
@@ -138,7 +149,7 @@ class GnomeComparisonService:
             model.spills += surface_point_line_spill(
                 num_elements=int(particle_count),
                 start_position=(float(cl_lon), float(cl_lat), 0.0),
-                release_time=t_start,
+                release_time=release_start,
                 amount=float(cluster_mass_tonnes),
                 units="tonnes",
                 substance=oil,
@@ -166,6 +177,15 @@ class GnomeComparisonService:
             "oil_key": first_oil_key,
             "oil_type": gnome_oil_type,
             "release_start_utc": str(pd.to_datetime(start_time).strftime("%Y-%m-%dT%H:%M:%SZ")),
+            "seed_time_override_utc": (
+                str(pd.to_datetime(seed_time_override).strftime("%Y-%m-%dT%H:%M:%SZ"))
+                if seed_time_override
+                else ""
+            ),
+            "polygon_path_override": str(polygon_path) if polygon_path else "",
+            "custom_polygon_override_used": bool(polygon_path),
+            "duration_hours": int(duration_hours),
+            "time_step_minutes": int(time_step_minutes),
         }
         return nc_path, metadata
 

@@ -12,6 +12,9 @@ Container routing via the PIPELINE_PHASE environment variable:
   PIPELINE_PHASE=phase3b_multidate_public -> Official multi-date public-observation Phase 3B
   PIPELINE_PHASE=phase3b_extended_public -> Official extended-horizon public-observation Phase 3B guardrail
   PIPELINE_PHASE=phase3b_extended_public_scored -> Appendix-only short extended public-observation scoring
+  PIPELINE_PHASE=phase3b_extended_public_scored_march23 -> Appendix-only March 23 extended public branch stress test
+  PIPELINE_PHASE=phase3b_extended_public_scored_march13_14_reinit -> Appendix-only March 13 -> March 14 NOAA reinit stress test
+  PIPELINE_PHASE=phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison -> Appendix-only March 13 -> March 14 NOAA reinit cross-model comparator
   PIPELINE_PHASE=horizon_survival_audit -> Read-only short-extended horizon survival diagnosis
   PIPELINE_PHASE=transport_retention_fix -> Official transport-retention sensitivity diagnostics
   PIPELINE_PHASE=official_rerun_r1 -> Promote selected R1 retention mode and rescore strict/short tracks
@@ -21,6 +24,7 @@ Container routing via the PIPELINE_PHASE environment variable:
   PIPELINE_PHASE=ensemble_threshold_sensitivity -> Calibrate ensemble footprint thresholds without rerunning
   PIPELINE_PHASE=recipe_sensitivity_r1_multibranch -> Test R1 OpenDrift recipe/branch matrix vs PyGNOME
   PIPELINE_PHASE=public_obs_appendix -> Official appendix-only public observation expansion
+  PIPELINE_PHASE=march6_recovery_sensitivity -> Appendix-only March 6 threshold/buffer/branch recovery matrix
   PIPELINE_PHASE=phase3c_external_case_setup -> External rich-data spill setup and observation ingestion
   PIPELINE_PHASE=dwh_phase3c_forcing_adapter_and_non_scientific_smoke_forecast -> DWH forcing adapter status + non-scientific smoke forecast
   PIPELINE_PHASE=dwh_phase3c_scientific_forcing_ready -> DWH scientific historical forcing readiness check
@@ -30,10 +34,13 @@ Container routing via the PIPELINE_PHASE environment variable:
   PIPELINE_PHASE=final_validation_package -> Read-only thesis package built from completed Mindoro + DWH outputs
   PIPELINE_PHASE=phase1_finalization_audit -> Read-only Chapter 3 Phase 1 architecture audit and verdict
   PIPELINE_PHASE=phase2_finalization_audit -> Read-only Chapter 3 Phase 2 semantics/manifests audit and verdict
+  PIPELINE_PHASE=phase1_production_rerun -> Dedicated full 2016-2022 historical/regional Phase 1 production rerun
+  PIPELINE_PHASE=mindoro_local_recipe_experiment -> Stage a Mindoro-local recipe candidate and replay the Mindoro event comparison with GFS
   PIPELINE_PHASE=phase4_oiltype_and_shoreline -> Mindoro Phase 4 oil-type fate and shoreline-impact workflow
   PIPELINE_PHASE=phase4_crossmodel_comparability_audit -> Read-only Phase 4 OpenDrift-vs-PyGNOME comparability audit
   PIPELINE_PHASE=phase5_launcher_and_docs_sync -> Read-only launcher/docs/reproducibility package sync
   PIPELINE_PHASE=trajectory_gallery_build -> Read-only static trajectory/overlay/shoreline figure gallery
+  PIPELINE_PHASE=prototype_pygnome_similarity_summary -> Read-only cross-case prototype OpenDrift-vs-PyGNOME transport summary
   PIPELINE_PHASE=3               -> Phase 3 (oil weathering & PyGNOME comparison)
   PIPELINE_PHASE=benchmark       -> Phase 3A cross-model benchmark
 
@@ -55,7 +62,7 @@ def print_workflow_context():
 
 
 def _prep_command_hint() -> str:
-    workflow_mode = os.environ.get("WORKFLOW_MODE", "prototype_2016")
+    workflow_mode = os.environ.get("WORKFLOW_MODE", "prototype_2021")
     return (
         "docker-compose -f docker-compose.yml exec -T "
         f"-e WORKFLOW_MODE={workflow_mode} -e PIPELINE_PHASE=prep pipeline python -m src"
@@ -80,12 +87,27 @@ def ensure_prepared_inputs(
     if not missing_specs:
         return
 
+    required_missing = [spec for spec in missing_specs if spec.get("required", True)]
+    optional_missing = [spec for spec in missing_specs if not spec.get("required", True)]
+
+    if not required_missing:
+        print(f"Optional prepared inputs are still missing for {phase_label}, but this workflow can continue.")
+        for spec in optional_missing:
+            print(f"  - {spec['label']}: {spec['path']}")
+            print(f"    source: {spec['source']} (best-effort input)")
+        return
+
     print(f"Missing prepared inputs for {phase_label}.")
     print("This phase is read-only and will not download or preprocess data.")
     print("Missing files:")
-    for spec in missing_specs:
+    for spec in required_missing:
         print(f"  - {spec['label']}: {spec['path']}")
         print(f"    source: {spec['source']}")
+    if optional_missing:
+        print("Optional inputs that are also missing:")
+        for spec in optional_missing:
+            print(f"  - {spec['label']}: {spec['path']}")
+            print(f"    source: {spec['source']} (best-effort input)")
     print("Run the pipeline-only prep stage first:")
     print(f"  {_prep_command_hint()}")
     sys.exit(1)
@@ -249,7 +271,12 @@ def run_phase1_and_2():
     from src.core.case_context import get_case_context
     from src.core.constants import RUN_NAME
     from src.services.ensemble import run_ensemble, run_official_spill_forecast
-    from src.utils.io import resolve_best_recipe, resolve_recipe_selection, resolve_spill_origin
+    from src.utils.io import (
+        get_transport_recipe_family_for_workflow,
+        resolve_best_recipe,
+        resolve_recipe_selection,
+        resolve_spill_origin,
+    )
 
     case = get_case_context()
 
@@ -290,7 +317,10 @@ def run_phase1_and_2():
 
     print("Starting Phase 1: Transport Validation Pipeline...")
     print_workflow_context()
-    print("Prototype mode is preserved for debugging and regression checks only; it is not the final Chapter 3 Phase 1 study.")
+    if case.workflow_mode == "prototype_2021":
+        print("prototype_2021 is the preferred accepted-segment debug lane. It is stronger than the legacy 2016 prototype, but it is still not the final Chapter 3 Phase 1 study.")
+    else:
+        print("Prototype mode is preserved for debugging and regression checks only; it is not the final Chapter 3 Phase 1 study.")
 
     ensure_data_exists(RUN_NAME, require_drifter=True)
     drifter_path = Path(f"data/drifters/{RUN_NAME}/drifters_noaa.csv")
@@ -298,9 +328,10 @@ def run_phase1_and_2():
     print(f"Loading drifter data from {drifter_path}...")
     drifter_df = load_drifter_data(drifter_path)
 
+    prototype_recipe_family = get_transport_recipe_family_for_workflow(case.workflow_mode)
     service = TransportValidationService()
-    print("Running validation service across all recipes...")
-    rankings = service.run_validation(drifter_df)
+    print("Running validation service across the workflow-selected transport recipe family...")
+    rankings = service.run_validation(drifter_df, recipe_names=prototype_recipe_family)
     print("\nFinal rankings (lower NCS is better):")
     print(rankings)
 
@@ -491,6 +522,43 @@ def run_benchmark():
     )
 
 
+def run_prototype_pygnome_similarity_summary_phase():
+    from src.services.prototype_pygnome_similarity_summary import run_prototype_pygnome_similarity_summary
+    from src.core.case_context import get_case_context
+
+    case = get_case_context()
+    print(f"Starting {case.workflow_mode} PyGNOME similarity summary...")
+    if case.workflow_mode == "prototype_2021":
+        print(
+            "This phase is support-only and builds a consolidated transport benchmark summary "
+            "from the configured accepted-segment 2021 deterministic OpenDrift-vs-deterministic PyGNOME outputs."
+        )
+    else:
+        print(
+            "This phase is legacy/debug only and builds a consolidated transport benchmark summary "
+            "from the existing three 2016 deterministic OpenDrift-vs-deterministic PyGNOME outputs."
+        )
+
+    results = run_prototype_pygnome_similarity_summary()
+
+    print("\nPrototype PyGNOME similarity summary complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print(f"Case registry: {results['case_registry_csv']}")
+    print(f"Similarity summary CSV: {results['similarity_by_case_csv']}")
+    print(f"FSS by case/window CSV: {results['fss_by_case_window_csv']}")
+    print(f"KL by case/hour CSV: {results['kl_by_case_hour_csv']}")
+    print(f"Figure registry: {results['figure_registry_csv']}")
+    print(f"Figure captions: {results['figure_captions_md']}")
+    print(f"Manifest: {results['manifest_json']}")
+    print(f"Summary: {results['summary_md']}")
+    print(f"Single forecast figures: {results['single_figure_count']}")
+    print(f"Comparison boards: {results['board_figure_count']}")
+    print(f"Top-ranked case: {results['top_ranked_case_id']}")
+    print(f"Top-ranked mean FSS @ 5 km: {results['top_ranked_mean_fss_5km']:.4f}")
+    print(f"Top-ranked mean KL: {results['top_ranked_mean_kl']:.4f}")
+    print(f"Cases summarized: {results['case_count']}")
+
+
 def run_phase3b():
     from src.core.constants import BASE_OUTPUT_DIR, RUN_NAME
     from src.core.case_context import get_case_context
@@ -592,6 +660,52 @@ def run_public_obs_appendix_phase():
     print(f"Inventory JSON: {results['inventory_json']}")
     print(f"Accepted quantitative appendix dates: {', '.join(results['accepted_quantitative_dates'])}")
     print(f"Recommendation: {results['recommendation']}")
+
+
+def run_march6_recovery_sensitivity_phase():
+    from src.core.case_context import PROTOTYPE_CASE_ID_ENV, get_case_context
+    from src.core.constants import RUN_NAME
+    from src.services.march6_recovery_sensitivity import run_march6_recovery_sensitivity
+    from src.utils.io import resolve_recipe_selection
+
+    case = get_case_context()
+    if not case.is_official:
+        print("march6_recovery_sensitivity is only supported for official spill-case workflows.")
+        sys.exit(1)
+
+    print("Starting appendix-only March 6 recovery sensitivity matrix...")
+    print_workflow_context()
+
+    selection = resolve_recipe_selection()
+    ensure_prepared_inputs(
+        RUN_NAME,
+        recipe_name=selection.recipe,
+        require_drifter=case.drifter_required,
+        phase_label="March 6 recovery sensitivity",
+    )
+    print_recipe_selection(selection, label="Frozen historical baseline")
+
+    results = run_march6_recovery_sensitivity()
+    print("\nMarch 6 recovery sensitivity complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print(f"Matrix CSV: {results['matrix_csv']}")
+    print(f"Summary CSV: {results['summary_csv']}")
+    print(f"Report: {results['report_md']}")
+    print(f"Run manifest: {results['run_manifest_json']}")
+    best_r1 = results.get("best_r1_candidate") or {}
+    best_overall = results.get("best_overall_candidate") or {}
+    if best_r1:
+        print(
+            "Best R1 candidate: "
+            f"{best_r1.get('threshold_label')} @ {best_r1.get('buffer_km')} km "
+            f"(mean FSS={best_r1.get('mean_fss')})"
+        )
+    if best_overall:
+        print(
+            "Best overall candidate: "
+            f"{best_overall.get('branch_id')} + {best_overall.get('threshold_label')} "
+            f"@ {best_overall.get('buffer_km')} km (mean FSS={best_overall.get('mean_fss')})"
+        )
 
 
 def run_convergence_after_shoreline_phase():
@@ -723,6 +837,88 @@ def run_phase3b_extended_public_scored_phase():
     print(f"Event-corridor summary: {results['eventcorridor_summary_md']}")
     print(f"Forcing extension worked cleanly: {results['forcing_extension_clean']}")
     print(f"Medium tier recommendation: {results['medium_tier_recommendation']}")
+
+
+def run_phase3b_extended_public_scored_march23_phase():
+    from src.core.case_context import get_case_context
+    from src.services.phase3b_extended_public_scored_march23 import run_phase3b_extended_public_scored_march23
+
+    case = get_case_context()
+    if not case.is_official:
+        print("phase3b_extended_public_scored_march23 is only supported for official spill-case workflows.")
+        sys.exit(1)
+
+    print("Starting appendix-only March 23 extended public branch stress test...")
+    print_workflow_context()
+
+    results = run_phase3b_extended_public_scored_march23()
+    print("\nMarch 23 extended public branch stress test complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print(f"Accepted March 23 source key: {results['accepted_source_key']}")
+    print(f"Summary: {results['summary_csv']}")
+    print(f"Per-window FSS: {results['fss_csv']}")
+    print(f"Diagnostics: {results['diagnostics_csv']}")
+    print(f"Branch survival summary: {results['branch_survival_csv']}")
+    print(f"Decision note: {results['decision_note_md']}")
+    print(f"Run manifest: {results['run_manifest_json']}")
+
+
+def run_phase3b_extended_public_scored_march13_14_reinit_phase():
+    from src.core.case_context import get_case_context
+    from src.services.phase3b_extended_public_scored_march13_14_reinit import (
+        run_phase3b_extended_public_scored_march13_14_reinit,
+    )
+
+    case = get_case_context()
+    if not case.is_official:
+        print("phase3b_extended_public_scored_march13_14_reinit is only supported for official spill-case workflows.")
+        sys.exit(1)
+
+    print("Starting appendix-only March 13 -> March 14 NOAA reinit stress test...")
+    print_workflow_context()
+
+    results = run_phase3b_extended_public_scored_march13_14_reinit()
+    print("\nMarch 13 -> March 14 NOAA reinit stress test complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print(f"Start source key: {results['start_source_key']}")
+    print(f"Target source key: {results['target_source_key']}")
+    print(f"Summary: {results['summary_csv']}")
+    print(f"Per-window FSS: {results['fss_csv']}")
+    print(f"Diagnostics: {results['diagnostics_csv']}")
+    print(f"Branch survival summary: {results['branch_survival_csv']}")
+    print(f"Decision note: {results['decision_note_md']}")
+    print(f"Run manifest: {results['run_manifest_json']}")
+
+
+def run_phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison_phase():
+    from src.core.case_context import get_case_context
+    from src.services.phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison import (
+        run_phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison,
+    )
+
+    case = get_case_context()
+    if not case.is_official:
+        print(
+            "phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison is only supported for official spill-case workflows."
+        )
+        sys.exit(1)
+
+    print("Starting appendix-only March 13 -> March 14 NOAA reinit cross-model comparator...")
+    print_workflow_context()
+
+    results = run_phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison()
+    print("\nMarch 13 -> March 14 NOAA reinit cross-model comparator complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print(f"Start source key: {results['start_source_key']}")
+    print(f"Target source key: {results['target_source_key']}")
+    print(f"Summary: {results['summary_csv']}")
+    print(f"Per-window FSS: {results['fss_csv']}")
+    print(f"Diagnostics: {results['diagnostics_csv']}")
+    print(f"Tracks registry: {results['tracks_registry_csv']}")
+    print(f"Ranking: {results['ranking_csv']}")
+    print(f"Top-ranked track: {results['winner_track_id']} ({results['winner_model_name']})")
+    print(f"Decision note: {results['memo_md']}")
+    print(f"Run manifest: {results['run_manifest_json']}")
 
 
 def run_horizon_survival_audit_phase():
@@ -1356,17 +1552,23 @@ def run_final_validation_package_phase():
     print("Recommended final chapter structure:")
     for item in results["recommended_final_chapter_structure"]:
         print(f"  - {item}")
-    print("Headline Mindoro strict result:")
-    strict = headlines["mindoro_strict"]
+    print("Headline Mindoro promoted primary result:")
+    strict = headlines["mindoro_primary_reinit"]
     print(
         f"  - FSS(1/3/5/10 km) = {strict['fss_1km']:.4f}, {strict['fss_3km']:.4f}, "
         f"{strict['fss_5km']:.4f}, {strict['fss_10km']:.4f}"
     )
-    support = headlines["mindoro_broader_support"]
-    print("Headline Mindoro broader-support result:")
+    support = headlines["mindoro_legacy_broader_support"]
+    print("Headline Mindoro legacy broader-support result:")
     print(
         f"  - FSS(1/3/5/10 km) = {support['fss_1km']:.4f}, {support['fss_3km']:.4f}, "
         f"{support['fss_5km']:.4f}, {support['fss_10km']:.4f}"
+    )
+    legacy_sparse = headlines["mindoro_legacy_march6"]
+    print("Headline Mindoro legacy sparse March 6 result:")
+    print(
+        f"  - FSS(1/3/5/10 km) = {legacy_sparse['fss_1km']:.4f}, {legacy_sparse['fss_3km']:.4f}, "
+        f"{legacy_sparse['fss_5km']:.4f}, {legacy_sparse['fss_10km']:.4f}"
     )
     dwh_det = headlines["dwh_deterministic_event"]
     print("Headline DWH deterministic result:")
@@ -1439,6 +1641,69 @@ def run_phase2_finalization_audit_phase():
     print(f"Later Phase 1 production rerun still needed for full freeze: {verdict['requires_phase1_production_rerun_for_full_freeze']}")
     print(f"Legacy recipe drift still leaks into official mode: {verdict['legacy_recipe_drift_leaks_into_official_mode']}")
     print(f"Biggest remaining provisional item: {verdict['biggest_remaining_phase2_provisional_item']}")
+
+
+def run_phase1_production_rerun_phase():
+    from src.services.phase1_production_rerun import run_phase1_production_rerun
+
+    print("Starting dedicated Phase 1 regional production rerun...")
+    print(
+        "This is an expensive scientific rerun for the 2016-2022 historical/regional drifter pool. "
+        "It stages a candidate baseline artifact only and will not overwrite config/phase1_baseline_selection.yaml."
+    )
+
+    results = run_phase1_production_rerun()
+
+    print("\nPhase 1 production rerun complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print(f"Accepted segments: {results['accepted_segment_count']}")
+    print(f"Rejected segments: {results['rejected_segment_count']}")
+    print(f"Winning recipe: {results['winning_recipe']}")
+    print(f"GFS-capable recipes really ran: {results['gfs_capable_recipes_ran']}")
+    print(f"Drifter registry: {results['drifter_registry_csv']}")
+    print(f"Loading audit: {results['loading_audit_csv']}")
+    print(f"Segment metrics: {results['segment_metrics_csv']}")
+    print(f"Recipe summary: {results['recipe_summary_csv']}")
+    print(f"Recipe ranking: {results['recipe_ranking_csv']}")
+    print(f"Candidate baseline artifact: {results['candidate_baseline_path']}")
+    print("Next manual follow-ups only:")
+    print("  - Trial downstream runs with BASELINE_SELECTION_PATH pointed at the candidate artifact")
+    print("  - Run phase1_audit manually if you want the read-only audit bundle refreshed")
+    print("  - Run phase5_sync manually if you want launcher/docs/package outputs refreshed")
+
+
+def run_mindoro_local_recipe_experiment_phase():
+    from src.services.mindoro_local_recipe_experiment import run_mindoro_local_recipe_experiment
+
+    print("Starting Mindoro-local recipe experiment...")
+    print(
+        "This workflow stages a Mindoro-local candidate baseline from existing Phase 1 outputs, "
+        "prepares missing GFS wind forcing for the official Mindoro case if needed, and reruns the "
+        "Mindoro event-scale recipe comparison in a separate experiment directory."
+    )
+    print("The canonical config/phase1_baseline_selection.yaml will remain unchanged.")
+
+    results = run_mindoro_local_recipe_experiment()
+
+    print("\nMindoro-local recipe experiment complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print(f"Mindoro-local subset registry: {results['subset_registry_csv']}")
+    print(f"Local recipe summary: {results['recipe_summary_csv']}")
+    print(f"Local recipe ranking: {results['recipe_ranking_csv']}")
+    print(f"Candidate baseline artifact: {results['candidate_baseline_path']}")
+    print(f"Decision report: {results['report_md']}")
+    print(f"Manifest: {results['manifest_json']}")
+    print(f"Frozen baseline recipe: {results['frozen_baseline_recipe']}")
+    print(f"Mindoro-local candidate recipe: {results['local_candidate_recipe']}")
+    print(f"Best event-scale recipe: {results['event_best_recipe'] or 'none'}")
+    print(f"Candidate beats frozen baseline on event corridor: {results['candidate_beats_frozen']}")
+    print(
+        "GFS recipes included in the replay: "
+        f"{', '.join(results['gfs_recipes_included']) if results['gfs_recipes_included'] else 'none'}"
+    )
+    if results["gfs_recipes_skipped"]:
+        print(f"GFS recipes still skipped: {', '.join(results['gfs_recipes_skipped'])}")
+    print(f"Event comparison outputs: {results['comparison_output_dir']}")
 
 
 def run_phase4_oiltype_and_shoreline_phase():
@@ -1634,6 +1899,12 @@ def main():
     if phase == "phase2_finalization_audit":
         run_phase2_finalization_audit_phase()
         return
+    if phase == "phase1_production_rerun":
+        run_phase1_production_rerun_phase()
+        return
+    if phase == "mindoro_local_recipe_experiment":
+        run_mindoro_local_recipe_experiment_phase()
+        return
     if phase == "phase4_oiltype_and_shoreline":
         run_phase4_oiltype_and_shoreline_phase()
         return
@@ -1645,6 +1916,9 @@ def main():
         return
     if phase == "trajectory_gallery_build":
         run_trajectory_gallery_build_phase()
+        return
+    if phase == "prototype_pygnome_similarity_summary":
+        run_prototype_pygnome_similarity_summary_phase()
         return
     if phase == "trajectory_gallery_panel_polish":
         run_trajectory_gallery_panel_polish_phase()
@@ -1660,16 +1934,19 @@ def main():
             f"Prototype workflow detected. Executing orchestrator for "
             f"{len(case.orchestration_dates)} cases..."
         )
-        for date in case.orchestration_dates:
+        for token in case.orchestration_dates:
             print(f"\n{'=' * 60}")
-            print(f"Spawning pipeline for CASE {date}")
+            print(f"Spawning pipeline for CASE {token}")
             print(f"{'=' * 60}")
             env = os.environ.copy()
-            env["PHASE_1_START_DATE"] = date
+            if case.workflow_mode == "prototype_2016":
+                env["PHASE_1_START_DATE"] = token
+            else:
+                env[PROTOTYPE_CASE_ID_ENV] = token
             env["RUN_SPAWNED"] = "1"
             result = subprocess.run([sys.executable, "-m", "src"], env=env)
             if result.returncode != 0:
-                print(f"Pipeline failed for case {date}. Continuing to next case...")
+                print(f"Pipeline failed for case {token}. Continuing to next case...")
         return
 
     if phase == "prep":
@@ -1690,6 +1967,12 @@ def main():
         run_phase3b_extended_public_phase()
     elif phase == "phase3b_extended_public_scored":
         run_phase3b_extended_public_scored_phase()
+    elif phase == "phase3b_extended_public_scored_march23":
+        run_phase3b_extended_public_scored_march23_phase()
+    elif phase == "phase3b_extended_public_scored_march13_14_reinit":
+        run_phase3b_extended_public_scored_march13_14_reinit_phase()
+    elif phase == "phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison":
+        run_phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison_phase()
     elif phase == "horizon_survival_audit":
         run_horizon_survival_audit_phase()
     elif phase == "transport_retention_fix":
@@ -1708,6 +1991,8 @@ def main():
         run_recipe_sensitivity_r1_multibranch_phase()
     elif phase == "public_obs_appendix":
         run_public_obs_appendix_phase()
+    elif phase == "march6_recovery_sensitivity":
+        run_march6_recovery_sensitivity_phase()
     elif phase == "phase3c_external_case_setup":
         run_phase3c_external_case_setup_phase()
     elif phase == "dwh_phase3c_forcing_adapter_and_non_scientific_smoke_forecast":
@@ -1726,6 +2011,10 @@ def main():
         run_phase1_finalization_audit_phase()
     elif phase == "phase2_finalization_audit":
         run_phase2_finalization_audit_phase()
+    elif phase == "phase1_production_rerun":
+        run_phase1_production_rerun_phase()
+    elif phase == "mindoro_local_recipe_experiment":
+        run_mindoro_local_recipe_experiment_phase()
     elif phase == "phase4_oiltype_and_shoreline":
         run_phase4_oiltype_and_shoreline_phase()
     elif phase == "phase4_crossmodel_comparability_audit":

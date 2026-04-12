@@ -6,6 +6,7 @@ palette:
   shoreline: "#8b8178"
   observed_mask: "#2f3a46"
   deterministic_opendrift: "#165ba8"
+  ensemble_consolidated: "#0f766e"
   ensemble_p50: "#1f7a4d"
   ensemble_p90: "#72b6ff"
   pygnome: "#9b4dca"
@@ -21,6 +22,7 @@ palette:
 legend_labels:
   observed_mask: "Observed spill extent"
   deterministic_opendrift: "OpenDrift deterministic forecast"
+  ensemble_consolidated: "OpenDrift consolidated ensemble trajectory"
   ensemble_p50: "OpenDrift ensemble p50 footprint"
   ensemble_p90: "OpenDrift ensemble p90 footprint"
   pygnome: "PyGNOME comparator"
@@ -34,6 +36,8 @@ legend_labels:
   oil_base: "Fixed base medium-heavy proxy"
   oil_heavier: "Heavier oil scenario"
 typography:
+  font_family: "Arial"
+  font_fallbacks: ["DejaVu Sans", "Liberation Sans", "sans-serif"]
   title_size: 19
   subtitle_size: 10
   panel_title_size: 11

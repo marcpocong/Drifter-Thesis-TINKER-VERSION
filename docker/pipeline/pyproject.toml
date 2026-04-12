@@ -31,6 +31,8 @@ rioxarray = "^0.15.0"
 erddapy = "2.3.0"
 copernicusmarine = "2.3.0"
 cdsapi = "^0.7.0"
+cfgrib = "^0.9.15.1"
+eccodes = "^2.46.0"
 
 # Utilities
 pyyaml = "^6.0"

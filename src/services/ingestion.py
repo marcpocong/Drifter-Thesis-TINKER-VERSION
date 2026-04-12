@@ -44,11 +44,14 @@ from src.core.base import BaseService
 from src.exceptions.custom import DataLoadingError
 from src.models.ingestion import IngestionManifest
 from src.helpers.raster import GridBuilder
+from src.utils.gfs_wind import GFSWindDownloader
 from src.utils.io import get_prepared_input_manifest_path, get_prepared_input_specs
 
 # Setup logging
 logger = logging.getLogger(__name__)
 OFFICIAL_FORCING_HALO_DEGREES_DEFAULT = 0.5
+PROTOTYPE_FORCING_HALO_HOURS_DEFAULT = 3.0
+PROTOTYPE_GFS_ANALYSIS_DELTA_HOURS = 6
 
 
 def derive_bbox_from_display_bounds(
@@ -68,6 +71,24 @@ def derive_bbox_from_display_bounds(
         min_lat - halo,
         max_lat + halo,
     ]
+
+
+def _normalize_utc_timestamp(value: str | pd.Timestamp) -> pd.Timestamp:
+    timestamp = pd.Timestamp(value)
+    if timestamp.tzinfo is None:
+        return timestamp.tz_localize("UTC")
+    return timestamp.tz_convert("UTC")
+
+
+def compute_prototype_forcing_window(
+    start_utc: str | pd.Timestamp,
+    end_utc: str | pd.Timestamp,
+    halo_hours: float,
+) -> tuple[pd.Timestamp, pd.Timestamp]:
+    start_time = _normalize_utc_timestamp(start_utc)
+    end_time = _normalize_utc_timestamp(end_utc)
+    halo = pd.Timedelta(hours=float(halo_hours))
+    return start_time - halo, end_time + halo
 
 class ArcGISLayerIngestionError(RuntimeError):
     pass
@@ -93,13 +114,13 @@ class DataIngestionService(BaseService):
         self.arcgis_dir.mkdir(parents=True, exist_ok=True)
         self.prepared_dir.mkdir(parents=True, exist_ok=True)
 
-        self.start_date = self.case_context.forcing_start_date
-        self.end_date = self.case_context.forcing_end_date
+        drifter_mode = getattr(self.case_context, "drifter_mode", "prototype_scan" if self.case_context.is_prototype else "fixed_case_window")
         self.drifter_search_dates = (
             list(self.case_context.prototype_case_dates)
-            if self.case_context.is_prototype
+            if drifter_mode == "prototype_scan"
             else [self.case_context.forcing_start_date]
         )
+        self.prototype_forcing_halo_hours = self._resolve_prototype_forcing_halo_hours()
 
         self.official_forcing_halo_degrees = float(
             self.case_config.get("forcing_bbox_halo_degrees", OFFICIAL_FORCING_HALO_DEGREES_DEFAULT)
@@ -124,12 +145,28 @@ class DataIngestionService(BaseService):
             except Exception:
                 self.bbox = list(self.case_context.region)
                 self.bbox_source = "official_case_region_fallback_before_scoring_grid"
+        elif self.case_context.workflow_mode == "prototype_2021":
+            self.bbox = derive_bbox_from_display_bounds(
+                list(self.case_context.region),
+                halo_degrees=self.official_forcing_halo_degrees,
+            )
+            self.bbox_source = (
+                f"prototype_2021_region_plus_{self.official_forcing_halo_degrees:.2f}deg_halo"
+            )
         else:
             # Pad bounding box heavily to prevent edge-clipping during interpolation for low-res models like NCEP
             pad = 3.0
             self.bbox = [REGION[0]-pad, REGION[1]+pad, REGION[2]-pad, REGION[3]+pad]
             self.bbox_source = "legacy_region_plus_3deg_pad"
         self.grid = GridBuilder() if self.case_context.is_prototype else None
+        self.gfs_downloader = GFSWindDownloader(
+            forcing_box=self.bbox,
+            expected_delta=pd.Timedelta(hours=PROTOTYPE_GFS_ANALYSIS_DELTA_HOURS),
+        )
+        self._apply_forcing_window(
+            self.case_context.forcing_start_utc,
+            self.case_context.forcing_end_utc,
+        )
 
     @staticmethod
     def _assert_pipeline_role():
@@ -169,16 +206,63 @@ class DataIngestionService(BaseService):
             self.bbox,
             self.bbox_source,
         )
+
+    def _resolve_prototype_forcing_halo_hours(self) -> float:
+        if not self.case_context.is_prototype:
+            return 0.0
+
+        settings = {}
+        settings_path = Path("config/settings.yaml")
+        if settings_path.exists():
+            with open(settings_path, "r", encoding="utf-8") as handle:
+                settings = yaml.safe_load(handle) or {}
+        if settings.get("prototype_forcing_halo_hours") is not None:
+            return float(settings["prototype_forcing_halo_hours"])
+
+        ensemble_path = Path("config/ensemble.yaml")
+        if ensemble_path.exists():
+            with open(ensemble_path, "r", encoding="utf-8") as handle:
+                ensemble_cfg = yaml.safe_load(handle) or {}
+            perturbations = ensemble_cfg.get("perturbations") or {}
+            if perturbations.get("time_shift_hours") is not None:
+                return float(perturbations["time_shift_hours"])
+
+        return PROTOTYPE_FORCING_HALO_HOURS_DEFAULT
+
+    def _apply_forcing_window(self, nominal_start_utc: str, nominal_end_utc: str) -> None:
+        nominal_start = _normalize_utc_timestamp(nominal_start_utc)
+        nominal_end = _normalize_utc_timestamp(nominal_end_utc)
+        if self.case_context.is_prototype:
+            effective_start, effective_end = compute_prototype_forcing_window(
+                nominal_start,
+                nominal_end,
+                halo_hours=self.prototype_forcing_halo_hours,
+            )
+        else:
+            effective_start, effective_end = nominal_start, nominal_end
+
+        self.nominal_forcing_start_utc = nominal_start.strftime("%Y-%m-%dT%H:%M:%SZ")
+        self.nominal_forcing_end_utc = nominal_end.strftime("%Y-%m-%dT%H:%M:%SZ")
+        self.effective_forcing_start_utc = effective_start.strftime("%Y-%m-%dT%H:%M:%SZ")
+        self.effective_forcing_end_utc = effective_end.strftime("%Y-%m-%dT%H:%M:%SZ")
+        self.start_date = effective_start.strftime("%Y-%m-%d")
+        self.end_date = effective_end.strftime("%Y-%m-%d")
+
+    def _manifest_config(self) -> dict[str, str]:
+        return {
+            "bbox": str(self.bbox),
+            "bbox_source": self.bbox_source,
+            "nominal_forcing_start_utc": self.nominal_forcing_start_utc,
+            "nominal_forcing_end_utc": self.nominal_forcing_end_utc,
+            "effective_forcing_start_utc": self.effective_forcing_start_utc,
+            "effective_forcing_end_utc": self.effective_forcing_end_utc,
+            "prototype_forcing_halo_hours": str(self.prototype_forcing_halo_hours),
+        }
         
     def run(self):
         """Execute the ingestion logic."""
         manifest = IngestionManifest(
-            config={
-                "bbox": str(self.bbox),
-                "bbox_source": self.bbox_source,
-                "start_date": self.start_date,
-                "end_date": self.end_date
-            }
+            config=self._manifest_config()
         )
 
         try:
@@ -191,12 +275,16 @@ class DataIngestionService(BaseService):
                     self.case_context.workflow_mode,
                 )
                 manifest.downloads["drifters"] = "SKIPPED_FROZEN_PHASE1_BASELINE"
+            manifest.config.update(self._manifest_config())
 
             if self.case_context.is_official:
                 manifest.downloads["arcgis"] = self.download_arcgis_layers()
                 self._refresh_official_forcing_bbox_from_scoring_grid()
-                manifest.config["bbox"] = str(self.bbox)
-                manifest.config["bbox_source"] = self.bbox_source
+                self.gfs_downloader = GFSWindDownloader(
+                    forcing_box=self.bbox,
+                    expected_delta=pd.Timedelta(hours=PROTOTYPE_GFS_ANALYSIS_DELTA_HOURS),
+                )
+                manifest.config.update(self._manifest_config())
             
             # 2. Download HYCOM
             manifest.downloads["hycom"] = self.download_hycom()
@@ -207,6 +295,9 @@ class DataIngestionService(BaseService):
             
             # 4. Download ERA5
             manifest.downloads["era5"] = self.download_era5()
+
+            if self.case_context.is_prototype:
+                manifest.downloads["gfs"] = self.download_gfs(strict=False)
 
             # 5. Download NCEP
             manifest.downloads["ncep"] = self.download_ncep()
@@ -292,6 +383,9 @@ class DataIngestionService(BaseService):
             )
             return "SKIPPED_FROZEN_PHASE1_BASELINE"
 
+        if self.case_context.drifter_mode == "fixed_drifter_segment_window":
+            return self._download_fixed_segment_drifter()
+
         logger.info("Scanning for NOAA Drifter data...")
 
         for date_str in self.drifter_search_dates:
@@ -333,8 +427,10 @@ class DataIngestionService(BaseService):
                         continue
                     
                     logger.info(f"Found {len(df)} drifter points in window {start_str}")
-                    self.start_date = start_str
-                    self.end_date = end_str
+                    self._apply_forcing_window(
+                        f"{start_str}T00:00:00Z",
+                        f"{end_str}T00:00:00Z",
+                    )
                     
                     # Normalize column names
                     df = df.rename(columns={
@@ -358,6 +454,113 @@ class DataIngestionService(BaseService):
 
         logger.warning("No drifters found.")
         return "SKIPPED_NO_DATA_FOUND"
+
+    def _normalize_drifter_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+        return df.rename(
+            columns={
+                "latitude (degrees_north)": "lat",
+                "longitude (degrees_east)": "lon",
+                "time (UTC)": "time",
+            }
+        )
+
+    def _download_fixed_segment_drifter(self) -> str:
+        if not self.case_context.configured_drifter_id:
+            raise RuntimeError(
+                f"{self.case_context.workflow_mode} requires configured_drifter_id for exact-segment acquisition."
+            )
+
+        start_ts = _normalize_utc_timestamp(self.case_context.release_start_utc)
+        end_ts = _normalize_utc_timestamp(self.case_context.simulation_end_utc)
+        logger.info(
+            "Fetching exact NOAA drifter segment for %s: ID=%s, %s -> %s",
+            self.case_context.run_name,
+            self.case_context.configured_drifter_id,
+            start_ts.isoformat(),
+            end_ts.isoformat(),
+        )
+
+        try:
+            erddap = ERDDAP(
+                server="https://osmc.noaa.gov/erddap",
+                protocol="tabledap",
+            )
+            erddap.dataset_id = "drifter_6hour_qc"
+            erddap.constraints = {
+                "time>=": start_ts.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "time<=": end_ts.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "latitude>=": self.bbox[2],
+                "latitude<=": self.bbox[3],
+                "longitude>=": self.bbox[0],
+                "longitude<=": self.bbox[1],
+            }
+            erddap.variables = ["time", "latitude", "longitude", "ID", "ve", "vn"]
+            df = erddap.to_pandas()
+        except Exception as exc:
+            err_str = str(exc)
+            if any(token in err_str for token in ("503", "502", "504", "10060", "Timeout")):
+                raise RuntimeError(f"ERDDAP server unavailable while fetching fixed drifter segment: {err_str}")
+            raise
+
+        if df.empty:
+            raise RuntimeError(
+                f"No NOAA drifter rows were returned for {self.case_context.run_name} "
+                f"({start_ts.strftime('%Y-%m-%dT%H:%M:%SZ')} -> {end_ts.strftime('%Y-%m-%dT%H:%M:%SZ')})."
+            )
+
+        df = self._normalize_drifter_columns(df)
+        if "time" not in df.columns or "ID" not in df.columns:
+            raise RuntimeError(
+                f"NOAA drifter response for {self.case_context.run_name} is missing required columns."
+            )
+
+        df["ID"] = df["ID"].astype(str).str.strip()
+        df["time"] = pd.to_datetime(df["time"], utc=True)
+        segment_df = df[df["ID"] == str(self.case_context.configured_drifter_id)].copy()
+        if segment_df.empty:
+            raise RuntimeError(
+                f"Configured drifter_id={self.case_context.configured_drifter_id} was not present in the NOAA response "
+                f"for {self.case_context.run_name}."
+            )
+
+        segment_df = segment_df.sort_values("time").reset_index(drop=True)
+        expected_times = pd.date_range(start_ts, end_ts, freq="6H", tz="UTC")
+        actual_times = pd.DatetimeIndex(segment_df["time"])
+        if len(segment_df) != len(expected_times) or not actual_times.equals(expected_times):
+            raise RuntimeError(
+                f"{self.case_context.run_name} did not return the exact configured 6-hour drifter segment. "
+                f"Expected {len(expected_times)} rows for ID={self.case_context.configured_drifter_id}, "
+                f"got {len(segment_df)}."
+            )
+
+        segment_df["time"] = segment_df["time"].dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+        output_path = self.drifter_dir / "drifters_noaa.csv"
+        segment_df.to_csv(output_path, index=False)
+        self._apply_forcing_window(self.case_context.forcing_start_utc, self.case_context.forcing_end_utc)
+        return str(output_path)
+
+    def download_gfs(self, *, strict: bool = False) -> dict[str, Any] | str:
+        output_path = self.forcing_dir / "gfs_wind.nc"
+        try:
+            return self.gfs_downloader.download(
+                start_time=self.effective_forcing_start_utc,
+                end_time=self.effective_forcing_end_utc,
+                output_path=output_path,
+                scratch_dir=self.forcing_dir,
+            )
+        except Exception as exc:
+            if strict:
+                raise
+            logger.warning(
+                "Best-effort GFS wind prep failed for prototype workflow %s: %s",
+                self.case_context.workflow_mode,
+                exc,
+            )
+            return {
+                "status": "best_effort_failed",
+                "error": str(exc),
+                "path": str(output_path),
+            }
 
     def download_hycom(self) -> str:
         """Download HYCOM currents via OPeNDAP."""

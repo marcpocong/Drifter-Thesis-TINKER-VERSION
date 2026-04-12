@@ -17,6 +17,18 @@ def _write_json(path: Path, payload: dict) -> None:
 
 
 class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
+    def test_read_json_tolerates_utf8_bom(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            path = root / "bom.json"
+            path.write_text("\ufeff{\n  \"status\": \"ok\"\n}\n", encoding="utf-8")
+
+            from src.services.phase5_launcher_and_docs_sync import _read_json
+
+            payload = _read_json(path)
+
+            self.assertEqual(payload["status"], "ok")
+
     def test_load_launcher_matrix_reads_safe_defaults(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -250,6 +262,7 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
             (root / "output" / "trajectory_gallery").mkdir(parents=True, exist_ok=True)
             (root / "output" / "trajectory_gallery_panel").mkdir(parents=True, exist_ok=True)
             (root / "output" / "figure_package_publication").mkdir(parents=True, exist_ok=True)
+            (root / "output" / "prototype_2016_pygnome_similarity").mkdir(parents=True, exist_ok=True)
 
             (root / "output" / "CASE_MINDORO_RETRO_2023" / "phase3b" / "phase3b_summary.csv").write_text(
                 "metric,value\nfss_1km,0.0\n",
@@ -285,12 +298,13 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
                         "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/phase3c_summary.csv",
                     ],
                     "headlines": {
-                        "mindoro_strict": {"fss_1km": 0.0, "fss_3km": 0.0, "fss_5km": 0.0, "fss_10km": 0.0},
-                        "mindoro_broader_support": {"fss_1km": 0.17, "fss_3km": 0.20, "fss_5km": 0.22, "fss_10km": 0.24},
+                        "mindoro_primary_reinit": {"fss_1km": 0.0, "fss_3km": 0.044, "fss_5km": 0.137, "fss_10km": 0.249},
+                        "mindoro_legacy_march6": {"fss_1km": 0.0, "fss_3km": 0.0, "fss_5km": 0.0, "fss_10km": 0.0},
+                        "mindoro_legacy_broader_support": {"fss_1km": 0.17, "fss_3km": 0.20, "fss_5km": 0.22, "fss_10km": 0.24},
                         "dwh_deterministic_event": {"fss_1km": 0.50, "fss_3km": 0.55, "fss_5km": 0.57, "fss_10km": 0.60},
                         "dwh_ensemble_p50_event": {"fss_1km": 0.49, "fss_3km": 0.53, "fss_5km": 0.55, "fss_10km": 0.58},
                         "dwh_pygnome_event": {"fss_1km": 0.32, "fss_3km": 0.35, "fss_5km": 0.37, "fss_10km": 0.41},
-                        "mindoro_benchmark_top": {"eventcorridor_mean_fss": 0.31},
+                        "mindoro_crossmodel_top": {"mean_fss": 0.108},
                     },
                 },
             )
@@ -298,9 +312,10 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
                 "\n".join(
                     [
                         "case_id,track_id,track_label,status,truth_source,primary_output_dir,reporting_role,main_text_priority,notes",
-                        "CASE_MINDORO_RETRO_2023,A,Mindoro benchmark,complete,public masks,output/CASE_MINDORO_RETRO_2023/pygnome_public_comparison,comparative discussion,secondary,Comparator",
-                        "CASE_MINDORO_RETRO_2023,B1,Mindoro strict,complete,WWF March 6 mask,output/CASE_MINDORO_RETRO_2023/phase3b,main-text stress test,primary,Strict stress test",
-                        "CASE_MINDORO_RETRO_2023,B2,Mindoro broader support,complete,public union,output/CASE_MINDORO_RETRO_2023/public_obs_appendix,supporting interpretation,secondary,Support track",
+                        "CASE_MINDORO_RETRO_2023,A,Mindoro March 13 -> March 14 cross-model comparator,complete,March 14 NOAA mask,output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison,comparative discussion,primary,Comparator only",
+                        "CASE_MINDORO_RETRO_2023,B1,Mindoro March 13 -> March 14 NOAA reinit primary validation,complete,March 14 NOAA mask with March 13 seed polygon,output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit,main-text primary validation,primary,Promoted primary row with March 12 imagery caveat",
+                        "CASE_MINDORO_RETRO_2023,B2,Mindoro legacy March 6 sparse strict reference,complete,WWF March 6 mask,output/CASE_MINDORO_RETRO_2023/phase3b,legacy reference,secondary,Legacy sparse reference",
+                        "CASE_MINDORO_RETRO_2023,B3,Mindoro legacy March 3-6 broader-support reference,complete,public union,output/CASE_MINDORO_RETRO_2023/public_obs_appendix,legacy reference,secondary,Legacy broader-support reference",
                         "CASE_DWH_RETRO_2010_72H,C1,DWH deterministic,complete,DWH public masks,output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run,main-text scientific result,primary,Transfer validation",
                         "CASE_DWH_RETRO_2010_72H,C2,DWH ensemble,complete,DWH public masks,output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_ensemble_comparison,comparative discussion,primary,Ensemble validation",
                         "CASE_DWH_RETRO_2010_72H,C3,DWH PyGNOME,complete,DWH public masks,output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator,comparative discussion,secondary,Comparator only",
@@ -376,6 +391,19 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
                 "figure_id,relative_path\nsample_publication,output/figure_package_publication/sample_publication.png\n",
                 encoding="utf-8",
             )
+            (root / "output" / "prototype_2016_pygnome_similarity" / "prototype_pygnome_similarity_manifest.json").write_text(
+                "{}\n",
+                encoding="utf-8",
+            )
+            (root / "output" / "prototype_2016_pygnome_similarity" / "prototype_pygnome_similarity_summary.md").write_text(
+                "prototype summary\n",
+                encoding="utf-8",
+            )
+            (root / "output" / "prototype_2016_pygnome_similarity" / "figures").mkdir(parents=True, exist_ok=True)
+            (root / "output" / "prototype_2016_pygnome_similarity" / "figures" / "prototype_single.png").write_text(
+                "png\n",
+                encoding="utf-8",
+            )
             (root / "ui").mkdir(parents=True, exist_ok=True)
             (root / "ui" / "app.py").write_text("print('ui')\n", encoding="utf-8")
 
@@ -413,6 +441,10 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
             self.assertTrue(((phase_status_df["phase_id"] == "phase5") & (phase_status_df["track_id"] == "phase5_sync")).any())
             self.assertTrue(((phase_status_df["phase_id"] == "phase5") & (phase_status_df["track_id"] == "phase5_read_only_dashboard")).any())
             self.assertTrue(((phase_status_df["phase_id"] == "phase4") & (phase_status_df["track_id"] == "mindoro_phase4")).any())
+            self.assertTrue((phase_status_df["track_id"] == "A").any())
+            self.assertTrue((phase_status_df["track_id"] == "B1").any())
+            self.assertTrue((phase_status_df["track_id"] == "B2").any())
+            self.assertTrue((phase_status_df["track_id"] == "B3").any())
 
             manifest_index_df = pd.read_csv(results["final_manifest_index_csv"])
             optional_row = manifest_index_df[manifest_index_df["track_id"] == "dwh_phase4_appendix_pilot"].iloc[0]
@@ -436,6 +468,25 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
                 (
                     (output_catalog_df["track_id"] == "figure_package_publication")
                     & (output_catalog_df["artifact_type"] == "publication_figure_manifest.json")
+                ).any()
+            )
+            self.assertTrue(
+                (
+                    (output_catalog_df["track_id"] == "prototype_legacy_pygnome_similarity_summary")
+                    & (output_catalog_df["artifact_type"] == "prototype_pygnome_similarity_manifest.json")
+                ).any()
+            )
+            self.assertTrue(
+                (
+                    (output_catalog_df["track_id"] == "prototype_legacy_pygnome_similarity_summary")
+                    & (output_catalog_df["relative_path"] == "output/prototype_2016_pygnome_similarity/figures/prototype_single.png")
+                ).any()
+            )
+
+            self.assertTrue(
+                (
+                    (manifest_index_df["track_id"] == "prototype_legacy_pygnome_similarity_summary")
+                    & (manifest_index_df["relative_path"] == "output/prototype_2016_pygnome_similarity/prototype_pygnome_similarity_manifest.json")
                 ).any()
             )
 

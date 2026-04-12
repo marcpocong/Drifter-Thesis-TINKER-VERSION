@@ -858,11 +858,18 @@ class EnsembleForecastService:
         start_time,
         num_elements: int,
         random_seed: int | None = None,
+        polygon_path: str | Path | None = None,
+        seed_time_override: str | None = None,
     ):
         """Seed particles across the configured initialization polygon."""
         from src.utils.io import resolve_polygon_seeding
 
-        lons, lats, _ = resolve_polygon_seeding(num_elements, random_seed=random_seed)
+        lons, lats, _ = resolve_polygon_seeding(
+            num_elements,
+            random_seed=random_seed,
+            polygon_path=polygon_path,
+            seed_time_override=seed_time_override,
+        )
         model.seed_elements(
             lon=lons,
             lat=lats,
@@ -882,12 +889,22 @@ class EnsembleForecastService:
         from src.utils.io import resolve_provenance_source_point
 
         mode = str(self.seed_overrides.get("initialization_mode") or self.case.initialization_mode)
+        polygon_override_path = self.seed_overrides.get("polygon_vector_path")
+        polygon_source_geometry = str(
+            self.seed_overrides.get("source_geometry_label")
+            or ("custom_processed_polygon_override" if polygon_override_path else "processed_march3_initialization_polygon")
+        )
         seed_record = {
             "initialization_mode": mode,
-            "source_geometry_path": str(self.case.initialization_layer.processed_vector_path(self.case.run_name)),
+            "source_geometry_path": str(
+                Path(str(polygon_override_path))
+                if polygon_override_path
+                else self.case.initialization_layer.processed_vector_path(self.case.run_name)
+            ),
             "source_point_path": str(self.case.provenance_layer.processed_vector_path(self.case.run_name)),
-            "release_geometry": "processed_march3_initialization_polygon",
+            "release_geometry": polygon_source_geometry,
             "point_release_surrogate": "not_applicable",
+            "custom_polygon_override_used": bool(polygon_override_path),
             "random_seed": random_seed if random_seed is not None else "",
         }
 
@@ -930,6 +947,8 @@ class EnsembleForecastService:
                 start_time,
                 num_elements=num_elements,
                 random_seed=random_seed,
+                polygon_path=polygon_override_path,
+                seed_time_override=self.seed_overrides.get("seed_time_override"),
             )
 
         if audit is not None:

@@ -6,6 +6,19 @@ import json
 from pathlib import Path
 from typing import Any
 
+try:
+    from ui.bootstrap import ensure_repo_root_on_path
+except ModuleNotFoundError:
+    import sys
+
+    _UI_DIR = Path(__file__).resolve().parents[1]
+    _UI_DIR_TEXT = str(_UI_DIR)
+    if _UI_DIR_TEXT not in sys.path:
+        sys.path.insert(0, _UI_DIR_TEXT)
+    from bootstrap import ensure_repo_root_on_path
+
+ensure_repo_root_on_path(__file__)
+
 import pandas as pd
 import streamlit as st
 

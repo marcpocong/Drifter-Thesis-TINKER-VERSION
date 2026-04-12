@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import json
+import shutil
 import textwrap
 from dataclasses import dataclass
+from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 from typing import Any
 
@@ -28,6 +30,7 @@ matplotlib.use("Agg")
 
 PHASE = "figure_package_publication"
 OUTPUT_DIR = Path("output") / "figure_package_publication"
+LOCAL_FONT_DIR = Path("output") / "_local_fonts"
 STYLE_CONFIG_PATH = Path("config") / "publication_figure_style.yaml"
 MINDORO_LABELS_PATH = Path("config") / "publication_map_labels_mindoro.csv"
 DWH_LABELS_PATH = Path("config") / "publication_map_labels_dwh.csv"
@@ -37,8 +40,15 @@ FINAL_PHASE_STATUS_CSV = FINAL_REPRO_DIR / "final_phase_status_registry.csv"
 
 MINDORO_FORECAST_MANIFEST = Path("output") / "CASE_MINDORO_RETRO_2023" / "forecast" / "forecast_manifest.json"
 MINDORO_PHASE3B_SUMMARY = Path("output") / "CASE_MINDORO_RETRO_2023" / "phase3b" / "phase3b_summary.csv"
-MINDORO_MODEL_RANKING = Path("output") / "CASE_MINDORO_RETRO_2023" / "pygnome_public_comparison" / "pygnome_public_comparison_model_ranking.csv"
-MINDORO_PUBLIC_SUMMARY = Path("output") / "CASE_MINDORO_RETRO_2023" / "pygnome_public_comparison" / "pygnome_public_comparison_summary.csv"
+MINDORO_REINIT_SUMMARY = (
+    Path("output") / "CASE_MINDORO_RETRO_2023" / "phase3b_extended_public_scored_march13_14_reinit" / "march13_14_reinit_summary.csv"
+)
+MINDORO_REINIT_CROSSMODEL_SUMMARY = (
+    Path("output")
+    / "CASE_MINDORO_RETRO_2023"
+    / "phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison"
+    / "march13_14_reinit_crossmodel_summary.csv"
+)
 MINDORO_PHASE4_DIR = Path("output") / "phase4" / "CASE_MINDORO_RETRO_2023"
 MINDORO_PHASE4_MANIFEST = MINDORO_PHASE4_DIR / "phase4_run_manifest.json"
 PHASE4_CROSSMODEL_AUDIT_DIR = Path("output") / "phase4_crossmodel_comparability_audit"
@@ -53,11 +63,13 @@ DWH_PYGNOME_DIR = Path("output") / "CASE_DWH_RETRO_2010_72H" / "phase3c_dwh_pygn
 DWH_RUN_MANIFEST = DWH_RUN_DIR / "phase3c_run_manifest.json"
 DWH_SUMMARY = DWH_RUN_DIR / "phase3c_summary.csv"
 DWH_ALL_RESULTS = DWH_PYGNOME_DIR / "phase3c_dwh_all_results_table.csv"
+PREFERRED_PROTOTYPE_SIMILARITY_DIR = Path("output") / "prototype_2021_pygnome_similarity"
+LEGACY_PROTOTYPE_SIMILARITY_DIR = Path("output") / "prototype_2016_pygnome_similarity"
 
 FIGURE_FAMILIES: dict[str, str] = {
-    "A": "Mindoro strict March 6 publication package",
-    "B": "Mindoro March 4-6 event-corridor publication package",
-    "C": "Mindoro OpenDrift vs PyGNOME publication package",
+    "A": "Mindoro March 13 -> March 14 primary validation package",
+    "B": "Mindoro March 13 -> March 14 cross-model publication package",
+    "C": "Mindoro legacy March 6 honesty / limitations package",
     "D": "Mindoro trajectory publication package",
     "E": "Mindoro Phase 4 OpenDrift-only publication package",
     "F": "Mindoro Phase 4 cross-model deferred note package",
@@ -65,6 +77,7 @@ FIGURE_FAMILIES: dict[str, str] = {
     "H": "DWH deterministic vs ensemble publication package",
     "I": "DWH OpenDrift vs PyGNOME publication package",
     "J": "DWH trajectory publication package",
+    "K": "Prototype accepted-segment OpenDrift vs PyGNOME support package",
 }
 
 
@@ -83,6 +96,8 @@ class PublicationFigureRecord:
     variant: str
     relative_path: str
     file_path: str
+    pixel_width: int
+    pixel_height: int
     short_plain_language_interpretation: str
     recommended_for_main_defense: bool
     recommended_for_paper: bool
@@ -104,6 +119,8 @@ class PublicationFigureRecord:
             "variant": self.variant,
             "relative_path": self.relative_path,
             "file_path": self.file_path,
+            "pixel_width": self.pixel_width,
+            "pixel_height": self.pixel_height,
             "short_plain_language_interpretation": self.short_plain_language_interpretation,
             "recommended_for_main_defense": self.recommended_for_main_defense,
             "recommended_for_paper": self.recommended_for_paper,
@@ -222,21 +239,87 @@ def _safe_float(value: Any, default: float = 0.0) -> float:
     return result
 
 
+def _optional_float(value: Any) -> float | None:
+    try:
+        result = float(value)
+    except (TypeError, ValueError):
+        return None
+    if np.isnan(result):
+        return None
+    return result
+
+
 class FigurePackagePublicationService:
     def __init__(self, repo_root: str | Path = ".", output_dir: str | Path | None = None):
         self.repo_root = Path(repo_root).resolve()
         self.output_dir = Path(output_dir) if output_dir else self.repo_root / OUTPUT_DIR
         self.style = load_publication_style_config(self.repo_root / STYLE_CONFIG_PATH)
+        self._configure_typography()
         self.mindoro_labels = _read_csv(self.repo_root / MINDORO_LABELS_PATH)
         self.dwh_labels = _read_csv(self.repo_root / DWH_LABELS_PATH)
         self.mindoro_forecast_manifest = _read_json(self.repo_root / MINDORO_FORECAST_MANIFEST)
+        self.mindoro_phase3b_summary = _read_csv(self.repo_root / MINDORO_PHASE3B_SUMMARY)
+        self.mindoro_reinit_summary = _read_csv(self.repo_root / MINDORO_REINIT_SUMMARY)
+        self.mindoro_reinit_crossmodel_summary = _read_csv(self.repo_root / MINDORO_REINIT_CROSSMODEL_SUMMARY)
         self.mindoro_phase4_manifest = _read_json(self.repo_root / MINDORO_PHASE4_MANIFEST)
         self.dwh_run_manifest = _read_json(self.repo_root / DWH_RUN_MANIFEST)
+        self.dwh_summary = _read_csv(self.repo_root / DWH_SUMMARY)
+        self.dwh_all_results = _read_csv(self.repo_root / DWH_ALL_RESULTS)
+        self.prototype_similarity_dir, self.prototype_similarity_registry_path = self._resolve_prototype_support_dir()
+        self.prototype_similarity_figure_registry = _read_csv(self.prototype_similarity_registry_path)
         self.final_phase_status = _read_csv(self.repo_root / FINAL_PHASE_STATUS_CSV)
         self.figure_records: list[PublicationFigureRecord] = []
         self.missing_optional_artifacts: list[dict[str, str]] = []
         self._raster_cache: dict[Path, dict[str, Any]] = {}
         self._vector_cache: dict[tuple[Path, str], gpd.GeoDataFrame] = {}
+
+    def _resolve_prototype_support_dir(self) -> tuple[Path, Path]:
+        preferred_dir = self.repo_root / PREFERRED_PROTOTYPE_SIMILARITY_DIR
+        preferred_registry = preferred_dir / "prototype_pygnome_figure_registry.csv"
+        if preferred_registry.exists():
+            return preferred_dir, preferred_registry
+        legacy_dir = self.repo_root / LEGACY_PROTOTYPE_SIMILARITY_DIR
+        legacy_registry = legacy_dir / "prototype_pygnome_figure_registry.csv"
+        return legacy_dir, legacy_registry
+
+    def _configure_typography(self) -> None:
+        typography = self.style.get("typography") or {}
+        font_family = str(typography.get("font_family") or "Arial").strip() or "Arial"
+        fallbacks = [
+            str(item).strip()
+            for item in (typography.get("font_fallbacks") or ["DejaVu Sans", "Liberation Sans", "sans-serif"])
+            if str(item).strip()
+        ]
+        candidate_paths: list[Path] = []
+        for value in typography.get("font_paths") or []:
+            candidate_paths.append(self._resolve(value))
+        local_font_dir = self.repo_root / LOCAL_FONT_DIR
+        if local_font_dir.exists():
+            candidate_paths.extend(sorted(local_font_dir.glob("*.ttf")))
+            candidate_paths.extend(sorted(local_font_dir.glob("*.otf")))
+        seen: set[Path] = set()
+        for path in candidate_paths:
+            if not path.exists():
+                continue
+            resolved = path.resolve()
+            if resolved in seen:
+                continue
+            seen.add(resolved)
+            try:
+                matplotlib.font_manager.fontManager.addfont(str(resolved))
+            except Exception:
+                continue
+        resolved_family = font_family
+        try:
+            matplotlib.font_manager.findfont(font_family, fallback_to_default=False)
+        except Exception:
+            resolved_family = fallbacks[0] if fallbacks else "sans-serif"
+        sans_serif = [resolved_family]
+        for candidate in [font_family, *fallbacks]:
+            if candidate and candidate not in sans_serif:
+                sans_serif.append(candidate)
+        matplotlib.rcParams["font.family"] = [resolved_family]
+        matplotlib.rcParams["font.sans-serif"] = sans_serif
 
     def _record_missing(self, path: Path, notes: str) -> None:
         entry = {"relative_path": _relative_to_repo(self.repo_root, path), "notes": notes}
@@ -331,11 +414,68 @@ class FigurePackagePublicationService:
         row = self.final_phase_status.loc[mask].iloc[0]
         return row.get(column, default)
 
+    def _projected_bounds_from_grid(
+        self,
+        grid: dict[str, Any],
+        default: tuple[float, float, float, float],
+    ) -> tuple[float, float, float, float]:
+        explicit = (
+            _optional_float(grid.get("min_x")),
+            _optional_float(grid.get("min_y")),
+            _optional_float(grid.get("max_x")),
+            _optional_float(grid.get("max_y")),
+        )
+        if all(value is not None for value in explicit):
+            min_x, min_y, max_x, max_y = explicit
+            return float(min_x), float(min_y), float(max_x), float(max_y)
+
+        extent = grid.get("extent") or []
+        if not isinstance(extent, (list, tuple)) or len(extent) != 4:
+            return default
+        values = [_optional_float(value) for value in extent]
+        if any(value is None for value in values):
+            return default
+
+        candidates = [
+            (float(values[0]), float(values[1]), float(values[2]), float(values[3])),
+            (float(values[0]), float(values[2]), float(values[1]), float(values[3])),
+        ]
+        expected_width = None
+        expected_height = None
+        width_cells = _optional_float(grid.get("width"))
+        height_cells = _optional_float(grid.get("height"))
+        res_x = _optional_float(grid.get("resolution_x"))
+        res_y = _optional_float(grid.get("resolution_y"))
+        resolution = _optional_float(grid.get("resolution"))
+        if width_cells is not None and (res_x is not None or resolution is not None):
+            expected_width = width_cells * float(res_x if res_x is not None else resolution)
+        if height_cells is not None and (res_y is not None or resolution is not None):
+            expected_height = height_cells * float(res_y if res_y is not None else resolution)
+
+        scored: list[tuple[float, tuple[float, float, float, float]]] = []
+        for candidate in candidates:
+            min_x, min_y, max_x, max_y = candidate
+            if max_x <= min_x or max_y <= min_y:
+                continue
+            width = max_x - min_x
+            height = max_y - min_y
+            if expected_width is not None and expected_height is not None:
+                score = abs(width - expected_width) + abs(height - expected_height)
+            else:
+                score = width + height
+            scored.append((score, candidate))
+        if not scored:
+            return default
+        return min(scored, key=lambda item: item[0])[1]
+
     def _case_context(self, case_id: str) -> dict[str, Any]:
         if case_id == "CASE_MINDORO_RETRO_2023":
             grid = self.mindoro_forecast_manifest.get("grid") or {}
             source_geometry = self.mindoro_forecast_manifest.get("source_geometry") or {}
-            full_bounds = tuple(grid.get("extent") or [274000.0, 398000.0, 1355000.0, 1524000.0])
+            full_bounds = self._projected_bounds_from_grid(
+                grid,
+                (274000.0, 1355000.0, 398000.0, 1524000.0),
+            )
             full_bounds_wgs84 = tuple(grid.get("display_bounds_wgs84") or [120.9096, 122.0622, 12.2494, 13.7837])
             return {
                 "case_label": "Mindoro",
@@ -641,6 +781,30 @@ class FigurePackagePublicationService:
         context = self._case_context(case_id)
         return tuple(float(value) for value in context.get("full_bounds_wgs84"))
 
+    def _preferred_scale_km(self, case_id: str, width_m: float) -> float:
+        locator_rules = self._locator_rules()
+        preferred_scale_km = _optional_float(
+            locator_rules.get("mindoro_scale_km") if case_id == "CASE_MINDORO_RETRO_2023" else locator_rules.get("dwh_scale_km")
+        )
+        if preferred_scale_km is not None and (preferred_scale_km * 1000.0) <= (width_m * 0.60):
+            return preferred_scale_km
+        if width_m <= 25000:
+            return 5.0
+        if width_m <= 60000:
+            return 10.0
+        if width_m <= 150000:
+            return 25.0
+        return 100.0
+
+    def _geographic_aspect(self, latitude: float) -> float:
+        cosine = abs(float(np.cos(np.deg2rad(latitude))))
+        return 1.0 / max(cosine, 1e-6)
+
+    def _figure_pixel_size(self, fig: plt.Figure) -> tuple[int, int]:
+        fig.canvas.draw()
+        width, height = fig.canvas.get_width_height()
+        return int(width), int(height)
+
     def _add_locator(self, ax: plt.Axes, case_id: str, crop_bounds: tuple[float, float, float, float] | None, target_crs: str) -> None:
         context = self._case_context(case_id)
         locator_outline = self._load_vector(context["shoreline_path"], "EPSG:4326")
@@ -661,45 +825,42 @@ class FigurePackagePublicationService:
         lat_span = full_bounds[3] - full_bounds[2]
         ax.set_xlim(full_bounds[0] - (lon_span * pad_fraction), full_bounds[1] + (lon_span * pad_fraction))
         ax.set_ylim(full_bounds[2] - (lat_span * pad_fraction), full_bounds[3] + (lat_span * pad_fraction))
+        center_lat = ((full_bounds[2] - (lat_span * pad_fraction)) + (full_bounds[3] + (lat_span * pad_fraction))) / 2.0
+        ax.set_aspect(self._geographic_aspect(center_lat), adjustable="box")
         ax.set_title("Locator", fontsize=10, loc="left")
         ax.set_xlabel("Longitude", fontsize=7)
         ax.set_ylabel("Latitude", fontsize=7)
         ax.tick_params(labelsize=6)
         ax.annotate("N", xy=(0.92, 0.86), xytext=(0.92, 0.68), xycoords="axes fraction", textcoords="axes fraction", arrowprops={"arrowstyle": "-|>", "color": "#111827", "lw": 1.1}, ha="center", va="center", fontsize=8, color="#111827", fontweight="bold")
 
-    def _add_scale_bar(self, ax: plt.Axes, bounds: tuple[float, float, float, float]) -> None:
+    def _add_scale_bar(self, ax: plt.Axes, bounds: tuple[float, float, float, float], case_id: str) -> None:
         min_x, min_y, max_x, max_y = bounds
         width = max_x - min_x
         height = max_y - min_y
-        if width <= 25000:
-            scale_km = 5
-        elif width <= 60000:
-            scale_km = 10
-        elif width <= 150000:
-            scale_km = 25
-        else:
-            scale_km = 100
+        scale_km = self._preferred_scale_km(case_id, width)
         length_m = float(scale_km) * 1000.0
         x0 = min_x + (width * 0.05)
         y0 = min_y + (height * 0.05)
         ax.plot([x0, x0 + length_m], [y0, y0], color="#111827", linewidth=2.4, zorder=9)
-        ax.text(x0 + (length_m / 2.0), y0 + (height * 0.02), f"{scale_km} km", fontsize=7, color="#111827", ha="center", va="bottom")
+        scale_label = int(scale_km) if float(scale_km).is_integer() else scale_km
+        ax.text(x0 + (length_m / 2.0), y0 + (height * 0.02), f"{scale_label} km", fontsize=7, color="#111827", ha="center", va="bottom")
 
     def _add_north_arrow(self, ax: plt.Axes) -> None:
         ax.annotate("N", xy=(0.95, 0.90), xytext=(0.95, 0.72), xycoords="axes fraction", textcoords="axes fraction", arrowprops={"arrowstyle": "-|>", "color": "#111827", "lw": 1.3}, ha="center", va="center", fontsize=9, color="#111827", fontweight="bold")
 
-    def _apply_map_axes_style(self, ax: plt.Axes, target_crs: str, bounds: tuple[float, float, float, float]) -> None:
+    def _apply_map_axes_style(self, ax: plt.Axes, target_crs: str, bounds: tuple[float, float, float, float], case_id: str) -> None:
         ax.set_facecolor((self.style.get("layout") or {}).get("axes_facecolor") or "#f7fbfd")
         ax.grid(True, linestyle="--", linewidth=0.35, color=(self.style.get("layout") or {}).get("grid_color") or "#cbd5e1", alpha=0.45)
         if "326" in target_crs or "3857" in target_crs:
             ax.set_xlabel(f"{target_crs} Easting (m)")
             ax.set_ylabel(f"{target_crs} Northing (m)")
+            ax.set_aspect("equal", adjustable="box")
         else:
             ax.set_xlabel("Longitude")
             ax.set_ylabel("Latitude")
         ax.set_xlim(bounds[0], bounds[2])
         ax.set_ylim(bounds[1], bounds[3])
-        self._add_scale_bar(ax, bounds)
+        self._add_scale_bar(ax, bounds, case_id)
         self._add_north_arrow(ax)
 
     def _render_spatial_panel(self, ax: plt.Axes, spec: dict[str, Any]) -> dict[str, Any]:
@@ -734,7 +895,7 @@ class FigurePackagePublicationService:
             crop_bounds = tuple(float(value) for value in context["full_bounds"])
         else:
             crop_bounds = self._expand_crop_bounds(crop_bounds, view_type=str(spec.get("view_type") or "zoom"))
-        self._apply_map_axes_style(ax, target_crs, crop_bounds)
+        self._apply_map_axes_style(ax, target_crs, crop_bounds, case_id)
         ax.set_title(str(spec["panel_title"]), fontsize=float((self.style.get("typography") or {}).get("panel_title_size") or 11), loc="left")
         return {"source_paths": source_paths, "crop_bounds": crop_bounds, "target_crs": target_crs}
 
@@ -759,7 +920,7 @@ class FigurePackagePublicationService:
         crop_bounds = self._union_bounds(crop_candidates) or tuple(float(value) for value in context["full_bounds"])
         crop_bounds = self._expand_crop_bounds(crop_bounds, view_type=str(spec.get("view_type") or "zoom"))
         self._add_geographic_labels(ax, case_id, target_crs)
-        self._apply_map_axes_style(ax, target_crs, crop_bounds)
+        self._apply_map_axes_style(ax, target_crs, crop_bounds, case_id)
         ax.set_title(str(spec["panel_title"]), fontsize=float((self.style.get("typography") or {}).get("panel_title_size") or 11), loc="left")
         return {"source_paths": source_paths, "crop_bounds": crop_bounds, "target_crs": target_crs}
 
@@ -798,7 +959,7 @@ class FigurePackagePublicationService:
         crop_bounds = self._union_bounds(all_bounds) or tuple(float(value) for value in context["full_bounds"])
         crop_bounds = self._expand_crop_bounds(crop_bounds, view_type=str(spec.get("view_type") or "zoom"))
         self._add_geographic_labels(ax, case_id, target_crs)
-        self._apply_map_axes_style(ax, target_crs, crop_bounds)
+        self._apply_map_axes_style(ax, target_crs, crop_bounds, case_id)
         ax.set_title(str(spec["panel_title"]), fontsize=float((self.style.get("typography") or {}).get("panel_title_size") or 11), loc="left")
         return {"source_paths": source_paths, "crop_bounds": crop_bounds, "target_crs": target_crs}
 
@@ -886,7 +1047,7 @@ class FigurePackagePublicationService:
         crop_bounds = self._union_bounds(all_bounds) or tuple(float(value) for value in context["full_bounds"])
         crop_bounds = self._expand_crop_bounds(crop_bounds, view_type=str(spec.get("view_type") or "zoom"))
         self._add_geographic_labels(ax, case_id, target_crs)
-        self._apply_map_axes_style(ax, target_crs, crop_bounds)
+        self._apply_map_axes_style(ax, target_crs, crop_bounds, case_id)
         ax.set_title(str(spec["panel_title"]), fontsize=float((self.style.get("typography") or {}).get("panel_title_size") or 11), loc="left")
         return {"source_paths": source_paths, "crop_bounds": crop_bounds, "target_crs": target_crs}
 
@@ -1071,7 +1232,7 @@ class FigurePackagePublicationService:
         ) or tuple(float(value) for value in context["full_bounds"])
         crop_bounds = self._expand_crop_bounds(crop_bounds, view_type=str(spec.get("view_type") or "close"))
         self._add_geographic_labels(ax, case_id, target_crs)
-        self._apply_map_axes_style(ax, target_crs, crop_bounds)
+        self._apply_map_axes_style(ax, target_crs, crop_bounds, case_id)
         ax.set_title(str(spec["panel_title"]), fontsize=float((self.style.get("typography") or {}).get("panel_title_size") or 11), loc="left")
         source_paths.append(_relative_to_repo(self.repo_root, path))
         return {"source_paths": source_paths, "crop_bounds": crop_bounds, "target_crs": target_crs}
@@ -1125,7 +1286,15 @@ class FigurePackagePublicationService:
             figure_slug=str(spec["figure_slug"]),
         )
 
-    def _register_figure(self, spec: dict[str, Any], path: Path, source_paths: list[str]) -> PublicationFigureRecord:
+    def _register_figure(
+        self,
+        spec: dict[str, Any],
+        path: Path,
+        source_paths: list[str],
+        *,
+        pixel_width: int,
+        pixel_height: int,
+    ) -> PublicationFigureRecord:
         record = PublicationFigureRecord(
             figure_id=path.stem,
             figure_family_code=str(spec["figure_family_code"]),
@@ -1140,6 +1309,8 @@ class FigurePackagePublicationService:
             variant=str(spec.get("variant") or ""),
             relative_path=_relative_to_repo(self.repo_root, path),
             file_path=str(path),
+            pixel_width=int(pixel_width),
+            pixel_height=int(pixel_height),
             short_plain_language_interpretation=str(spec["short_plain_language_interpretation"]),
             recommended_for_main_defense=bool(spec.get("recommended_for_main_defense")),
             recommended_for_paper=bool(spec.get("recommended_for_paper")),
@@ -1149,7 +1320,31 @@ class FigurePackagePublicationService:
         self.figure_records.append(record)
         return record
 
+    def _image_pixel_size(self, path: Path) -> tuple[int, int]:
+        image = plt.imread(path)
+        return int(image.shape[1]), int(image.shape[0])
+
+    def _save_external_image_figure(self, spec: dict[str, Any]) -> PublicationFigureRecord:
+        source_path = self._resolve(str(spec["source_image_path"]))
+        if not source_path.exists():
+            raise FileNotFoundError(f"External image source missing for publication figure: {source_path}")
+        output_path = self._figure_path(spec)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source_path, output_path)
+        pixel_width, pixel_height = self._image_pixel_size(output_path)
+        source_paths = [str(Path(str(spec["source_image_path"])).as_posix())]
+        source_paths.extend(str(item) for item in spec.get("source_paths", []) if str(item))
+        return self._register_figure(
+            spec,
+            output_path,
+            list(dict.fromkeys(source_paths)),
+            pixel_width=pixel_width,
+            pixel_height=pixel_height,
+        )
+
     def _save_single_figure(self, spec: dict[str, Any]) -> PublicationFigureRecord:
+        if str(spec.get("renderer")) == "external_image":
+            return self._save_external_image_figure(spec)
         output_path = self._figure_path(spec)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         is_spatial = str(spec["renderer"]) in {"spatial", "track", "ensemble_track", "corridor", "shoreline_segment"}
@@ -1182,9 +1377,16 @@ class FigurePackagePublicationService:
             self._add_note_box(note_ax, str(spec.get("note_box_title") or "How to read this figure"), [str(item) for item in spec.get("note_lines", [])])
         fig.suptitle(str(spec["figure_title"]), x=0.05, y=0.965, ha="left", fontsize=float((self.style.get("typography") or {}).get("title_size") or 19), fontweight="bold")
         fig.text(0.05, 0.932, str(spec["subtitle"]), ha="left", va="top", fontsize=float((self.style.get("typography") or {}).get("subtitle_size") or 10), color="#475569")
-        fig.savefig(output_path, dpi=self._dpi(), bbox_inches="tight")
+        pixel_width, pixel_height = self._figure_pixel_size(fig)
+        fig.savefig(output_path, dpi=self._dpi())
         plt.close(fig)
-        return self._register_figure(spec, output_path, [str(item) for item in render_info.get("source_paths", [])])
+        return self._register_figure(
+            spec,
+            output_path,
+            [str(item) for item in render_info.get("source_paths", [])],
+            pixel_width=pixel_width,
+            pixel_height=pixel_height,
+        )
 
     def _save_board_figure(self, spec: dict[str, Any], saved_figures: dict[str, PublicationFigureRecord]) -> PublicationFigureRecord:
         output_path = self._figure_path(spec)
@@ -1232,9 +1434,16 @@ class FigurePackagePublicationService:
         self._add_note_box(note_ax, str(spec.get("note_box_title") or "Board reading guide"), [str(item) for item in spec.get("note_lines", [])])
         fig.suptitle(str(spec["figure_title"]), x=0.04, y=0.965, ha="left", fontsize=float((self.style.get("typography") or {}).get("title_size") or 19), fontweight="bold")
         fig.text(0.04, 0.932, str(spec["subtitle"]), ha="left", va="top", fontsize=float((self.style.get("typography") or {}).get("subtitle_size") or 10), color="#475569")
-        fig.savefig(output_path, dpi=self._dpi(), bbox_inches="tight")
+        pixel_width, pixel_height = self._figure_pixel_size(fig)
+        fig.savefig(output_path, dpi=self._dpi())
         plt.close(fig)
-        return self._register_figure(spec, output_path, source_paths)
+        return self._register_figure(
+            spec,
+            output_path,
+            source_paths,
+            pixel_width=pixel_width,
+            pixel_height=pixel_height,
+        )
 
     def _spatial_spec(
         self,
@@ -1452,6 +1661,53 @@ class FigurePackagePublicationService:
             "source_paths": source_paths or [],
         }
 
+    def _image_spec(
+        self,
+        *,
+        spec_id: str,
+        figure_family_code: str,
+        case_id: str,
+        phase_or_track: str,
+        date_token: str,
+        model_names: str,
+        run_type: str,
+        view_type: str,
+        variant: str,
+        figure_slug: str,
+        figure_title: str,
+        subtitle: str,
+        interpretation: str,
+        notes: str,
+        source_image_path: str,
+        source_paths: list[str] | None = None,
+        recommended_for_main_defense: bool = False,
+        recommended_for_paper: bool = False,
+    ) -> dict[str, Any]:
+        return {
+            "spec_id": spec_id,
+            "renderer": "external_image",
+            "figure_family_code": figure_family_code,
+            "case_id": case_id,
+            "phase_or_track": phase_or_track,
+            "date_token": date_token,
+            "model_names": model_names,
+            "run_type": run_type,
+            "scenario_id": "",
+            "view_type": view_type,
+            "variant": variant,
+            "figure_slug": figure_slug,
+            "figure_title": figure_title,
+            "subtitle": subtitle,
+            "legend_keys": [],
+            "note_lines": [],
+            "short_plain_language_interpretation": interpretation,
+            "recommended_for_main_defense": recommended_for_main_defense,
+            "recommended_for_paper": recommended_for_paper,
+            "notes": notes,
+            "source_image_path": source_image_path,
+            "source_paths": source_paths or [],
+        }
+
     def _board_spec(
         self,
         *,
@@ -1496,68 +1752,521 @@ class FigurePackagePublicationService:
             "panels": panels,
         }
 
-    def _mindoro_strict_note_lines(self) -> list[str]:
-        summary = _read_csv(self.repo_root / MINDORO_PHASE3B_SUMMARY)
-        if summary.empty:
-            return ["The strict March 6 summary CSV was not available, so this figure should be read visually."]
-        row = summary.loc[summary["pair_id"] == "official_primary_march6"]
-        if row.empty:
-            row = summary.iloc[[0]]
-        item = row.iloc[0]
-        return [
-            f"March 6 is the hard sparse stress test: the observed footprint is only {int(item.get('obs_nonzero_cells', 0))} non-zero cells.",
-            f"The official p50 product is intentionally sparse here, with {int(item.get('forecast_nonzero_cells', 0))} forecast cells in this strict slice.",
-            f"Use the close-up variants to judge overlap honestly; the wide regional map alone is not enough for this target.",
-        ]
+    def _normalize_date_token(self, value: Any) -> str:
+        return str(value or "").strip().replace("_to_", "/")
 
-    def _mindoro_event_lines(self) -> list[str]:
-        ranking = _read_csv(self.repo_root / MINDORO_MODEL_RANKING)
-        if ranking.empty:
-            return ["The broader March 4-6 event-corridor ranking CSV was not available."]
-        top = ranking.sort_values("eventcorridor_rank").iloc[0]
-        return [
-            f"The broader March 4-6 event corridor is easier to read than the strict March 6 snapshot and gives the panel a fuller transport story.",
-            f"{top['model_name']} ranks first in the local event-corridor comparator bundle with mean FSS {float(top['eventcorridor_mean_fss']):.3f}.",
-            "This family is useful when the panel needs context beyond the strict one-day stress test.",
-        ]
+    def _format_score_value(self, value: float | None) -> str:
+        if value is None:
+            return "n/a"
+        rounded = Decimal(str(value)).quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)
+        return f"{rounded:.3f}"
 
-    def _dwh_deterministic_lines(self, date_token: str) -> list[str]:
-        summary = _read_csv(self.repo_root / DWH_SUMMARY)
-        if summary.empty:
-            return ["The DWH deterministic summary CSV was not available."]
-        if "/" in date_token or "_to_" in date_token:
-            row = summary.loc[summary["pair_role"] == "event_corridor"]
+    def _compose_note_lines(self, context_lines: list[str], score_lines: list[str] | None = None) -> list[str]:
+        lines = [str(line) for line in context_lines if str(line).strip()]
+        for line in score_lines or []:
+            if str(line).strip():
+                lines.append(str(line))
+        return lines
+
+    def _row_mean_fss(self, row: pd.Series | dict[str, Any] | None) -> float | None:
+        if row is None:
+            return None
+        if isinstance(row, dict):
+            getter = row.get
         else:
-            row = summary.loc[(summary["pair_role"] == "per_date") & (summary["pairing_date_utc"].astype(str) == date_token)]
-        if row.empty:
-            row = summary.iloc[[0]]
-        item = row.iloc[0]
+            getter = row.get
+        mean_value = _optional_float(getter("mean_fss"))
+        if mean_value is not None:
+            return mean_value
+        values = [_optional_float(getter(f"fss_{window}km")) for window in (1, 3, 5, 10)]
+        finite = [value for value in values if value is not None]
+        if not finite:
+            return None
+        return float(np.mean(finite))
+
+    def _format_fss_line(self, row: pd.Series | dict[str, Any] | None, label: str = "") -> str:
+        if row is None:
+            return ""
+        if isinstance(row, dict):
+            getter = row.get
+        else:
+            getter = row.get
+        values = [_optional_float(getter(f"fss_{window}km")) for window in (1, 3, 5, 10)]
+        if not any(value is not None for value in values):
+            return ""
+        mean_value = self._row_mean_fss(row)
+        prefix = f"{label} " if label else ""
+        formatted_values = "/".join(self._format_score_value(value) for value in values)
+        return f"{prefix}FSS(1/3/5/10 km): {formatted_values}; mean: {self._format_score_value(mean_value)}."
+
+    def _mindoro_primary_row(self) -> pd.Series | None:
+        summary = self.mindoro_reinit_summary
+        if summary.empty:
+            return None
+        if "branch_id" in summary.columns:
+            row = summary.loc[summary["branch_id"].astype(str) == "R1_previous"]
+            if not row.empty:
+                return row.iloc[0]
+        return summary.iloc[0]
+
+    def _mindoro_strict_row(self) -> pd.Series | None:
+        summary = self.mindoro_phase3b_summary
+        if summary.empty:
+            return None
+        if "pair_id" in summary.columns:
+            row = summary.loc[summary["pair_id"].astype(str) == "official_primary_march6"]
+            if not row.empty:
+                return row.iloc[0]
+        return summary.iloc[0]
+
+    def _mindoro_crossmodel_row(self, model_key: str) -> pd.Series | None:
+        summary = self.mindoro_reinit_crossmodel_summary
+        if summary.empty:
+            return None
+        track_map = {
+            "r1": "R1_previous_reinit_p50",
+            "ensemble": "R1_previous_reinit_p50",
+            "r0": "R0_reinit_p50",
+            "deterministic": "R0_reinit_p50",
+            "pygnome": "pygnome_reinit_deterministic",
+        }
+        track_id = track_map.get(model_key, "")
+        if track_id and "track_id" in summary.columns:
+            row = summary.loc[summary["track_id"].astype(str) == track_id]
+            if not row.empty:
+                return row.iloc[0]
+        model_map = {
+            "r1": "OpenDrift R1 previous reinit p50",
+            "ensemble": "OpenDrift R1 previous reinit p50",
+            "r0": "OpenDrift R0 reinit p50",
+            "deterministic": "OpenDrift R0 reinit p50",
+            "pygnome": "PyGNOME deterministic March 13 reinit comparator",
+        }
+        model_name = model_map.get(model_key, "")
+        if model_name and "model_name" in summary.columns:
+            row = summary.loc[summary["model_name"].astype(str) == model_name]
+            if not row.empty:
+                return row.iloc[0]
+        return summary.iloc[0]
+
+    def _dwh_deterministic_row(self, date_token: str) -> pd.Series | None:
+        summary = self.dwh_summary
+        if summary.empty:
+            return None
+        normalized_date = self._normalize_date_token(date_token)
+        pair_role = "event_corridor" if "/" in normalized_date else "per_date"
+        filters = pd.Series(True, index=summary.index)
+        if "pair_role" in summary.columns:
+            filters &= summary["pair_role"].astype(str) == pair_role
+        if "pairing_date_utc" in summary.columns:
+            filters &= summary["pairing_date_utc"].map(self._normalize_date_token) == normalized_date
+        row = summary.loc[filters]
+        if not row.empty:
+            return row.iloc[0]
+        if "pair_role" in summary.columns:
+            fallback = summary.loc[summary["pair_role"].astype(str) == pair_role]
+            if not fallback.empty:
+                return fallback.iloc[0]
+        return summary.iloc[0]
+
+    def _dwh_event_model_row(self, model_key: str) -> pd.Series | None:
+        summary = self.dwh_all_results
+        if summary.empty:
+            return None
+        filters = pd.Series(True, index=summary.index)
+        if "pair_role" in summary.columns:
+            filters &= summary["pair_role"].astype(str) == "event_corridor"
+        model_map = {
+            "deterministic": "OpenDrift deterministic",
+            "p50": "OpenDrift ensemble p50",
+            "p90": "OpenDrift ensemble p90",
+            "pygnome": "PyGNOME deterministic",
+        }
+        model_name = model_map.get(model_key, "")
+        if model_name and "model_result" in summary.columns:
+            row = summary.loc[filters & (summary["model_result"].astype(str) == model_name)]
+            if not row.empty:
+                return row.iloc[0]
+        row = summary.loc[filters]
+        if not row.empty:
+            return row.iloc[0]
+        return summary.iloc[0]
+
+    def _mindoro_primary_context_lines(self) -> list[str]:
+        row = self._mindoro_primary_row()
+        if row is None:
+            return ["The March 13 -> March 14 reinit summary CSV was not available, so this figure should be read visually."]
         return [
-            f"DWH remains the richest external transfer-validation case in the project, with observed and forecast extents both clearly visible here.",
-            f"Mean FSS across the standard windows is about {float(np.mean([item.get('fss_1km', 0.0), item.get('fss_3km', 0.0), item.get('fss_5km', 0.0), item.get('fss_10km', 0.0)])):.3f}.",
-            "This figure is useful for showing that the workflow transfers to a richer public-observation case, not just to the sparse Mindoro validation slices.",
+            "March 13 -> March 14 is now the promoted Mindoro validation pair, seeded from the March 13 NOAA polygon and scored against the March 14 NOAA target.",
+            "Both NOAA/NESDIS products cite WorldView-3 imagery acquired on March 12, 2023, so this family should always be presented with that caveat.",
+            f"The promoted OpenDrift R1 previous reinit p50 row reaches FSS beyond zero at 3/5/10 km with {int(row.get('forecast_nonzero_cells', 0))} forecast cells against {int(row.get('obs_nonzero_cells', 0))} observed cells.",
         ]
 
-    def _dwh_model_lines(self) -> list[str]:
-        table = _read_csv(self.repo_root / DWH_ALL_RESULTS)
-        if table.empty:
-            return ["The DWH OpenDrift vs PyGNOME comparison table was not available."]
-        event_rows = table.loc[table["pair_role"] == "event_corridor"].copy()
-        if event_rows.empty:
-            event_rows = table.copy()
-        det = event_rows.loc[event_rows["model_result"] == "OpenDrift deterministic"]
-        p50 = event_rows.loc[event_rows["model_result"] == "OpenDrift ensemble p50"]
-        pygnome = event_rows.loc[event_rows["model_result"] == "PyGNOME deterministic"]
-        lines = [
-            "This board makes the OpenDrift versus PyGNOME comparison explicit without presenting PyGNOME as truth.",
+    def _mindoro_strict_context_lines(self) -> list[str]:
+        row = self._mindoro_strict_row()
+        if row is None:
+            return ["The strict March 6 summary CSV was not available, so this figure should be read visually."]
+        return [
+            f"March 6 remains the legacy sparse-reference honesty figure: the observed footprint is only {int(row.get('obs_nonzero_cells', 0))} non-zero cells.",
+            f"The official p50 product is intentionally sparse here, with {int(row.get('forecast_nonzero_cells', 0))} forecast cells in this strict slice.",
+            "Use this family to explain why March 6 remains in the methods story even though it is no longer the promoted primary validation row.",
         ]
-        if not det.empty:
-            lines.append(f"OpenDrift deterministic event-corridor mean FSS: {float(det.iloc[0]['mean_fss']):.3f}.")
-        if not p50.empty:
-            lines.append(f"OpenDrift ensemble p50 event-corridor mean FSS: {float(p50.iloc[0]['mean_fss']):.3f}.")
-        if not pygnome.empty:
-            lines.append(f"PyGNOME event-corridor mean FSS: {float(pygnome.iloc[0]['mean_fss']):.3f}.")
-        return lines[:3]
+
+    def _mindoro_crossmodel_context_lines(self) -> list[str]:
+        summary = self.mindoro_reinit_crossmodel_summary
+        if summary.empty:
+            return ["The March 13 -> March 14 cross-model summary CSV was not available."]
+        ranking = summary.copy()
+        if "mean_fss" not in ranking.columns:
+            ranking["mean_fss"] = ranking.apply(self._row_mean_fss, axis=1)
+        if "track_tie_break_order" not in ranking.columns:
+            ranking["track_tie_break_order"] = range(len(ranking))
+        top = ranking.sort_values(
+            ["mean_fss", "fss_1km", "iou", "nearest_distance_to_obs_m", "track_tie_break_order"],
+            ascending=[False, False, False, True, True],
+        ).iloc[0]
+        return [
+            "This cross-model lane reuses the completed March 13 -> March 14 reinit outputs and adds one deterministic PyGNOME surrogate seeded from the same March 13 NOAA polygon.",
+            f"{top['model_name']} currently ranks first in the promoted local cross-model bundle under the current case definition.",
+            "Use this family when the panel asks which model performed better on the promoted March 14 target.",
+        ]
+
+    def _mindoro_comparison_context_lines(self) -> list[str]:
+        return [
+            "This comparison keeps the promoted OpenDrift reinit and PyGNOME comparator views side by side without treating PyGNOME as truth.",
+            "In this lane, the score lines come from the March 14 NOAA target while the seed geometry comes from the March 13 NOAA polygon.",
+            "Use the labeled score lines only for the model layers shown in the figure, and keep the shared March 12 imagery caveat visible in the oral explanation.",
+        ]
+
+    def _dwh_deterministic_context_lines(self) -> list[str]:
+        return [
+            "DWH remains the richest external transfer-validation case in the project, with observed and forecast extents both clearly visible here.",
+            "Use this case to show that the workflow transfers to a richer public-observation spill, not only to the sparse Mindoro validation slices.",
+        ]
+
+    def _dwh_model_context_lines(self) -> list[str]:
+        return [
+            "This board makes the OpenDrift versus PyGNOME comparison explicit without presenting PyGNOME as truth.",
+            "Each score line belongs to the matching model panel only; the observed corridor panel is included for visual reference.",
+        ]
+
+    def _dwh_trajectory_context_lines(self) -> list[str]:
+        return [
+            "These trajectory views explain transport path and spread, not footprint overlap skill.",
+            "Use the scored footprint figures when the panel asks about validation overlap rather than transport shape.",
+        ]
+
+    def _mindoro_primary_score_line(self, label: str = "") -> str:
+        return self._format_fss_line(self._mindoro_primary_row(), label)
+
+    def _mindoro_strict_score_line(self, label: str = "") -> str:
+        return self._format_fss_line(self._mindoro_strict_row(), label)
+
+    def _mindoro_crossmodel_score_line(self, model_key: str, label: str = "") -> str:
+        return self._format_fss_line(self._mindoro_crossmodel_row(model_key), label)
+
+    def _dwh_deterministic_score_line(self, date_token: str, label: str = "") -> str:
+        return self._format_fss_line(self._dwh_deterministic_row(date_token), label)
+
+    def _dwh_event_score_line(self, model_key: str, label: str = "") -> str:
+        return self._format_fss_line(self._dwh_event_model_row(model_key), label)
+
+    def _mindoro_primary_note_lines(self, *score_lines: str) -> list[str]:
+        return self._compose_note_lines(self._mindoro_primary_context_lines(), list(score_lines))
+
+    def _mindoro_strict_note_lines(self, *score_lines: str) -> list[str]:
+        return self._compose_note_lines(self._mindoro_strict_context_lines(), list(score_lines))
+
+    def _mindoro_crossmodel_note_lines(self, *score_lines: str) -> list[str]:
+        return self._compose_note_lines(self._mindoro_crossmodel_context_lines(), list(score_lines))
+
+    def _mindoro_comparison_note_lines(self, *score_lines: str) -> list[str]:
+        return self._compose_note_lines(self._mindoro_comparison_context_lines(), list(score_lines))
+
+    def _mindoro_primary_publication_specs(self) -> list[dict[str, Any]]:
+        subtitle = "Mindoro | 13-14 March 2023 | promoted NOAA reinit validation | explicit March 12 imagery caveat"
+        return [
+            self._image_spec(
+                spec_id="mindoro_primary_seed_mask",
+                figure_family_code="A",
+                case_id="CASE_MINDORO_RETRO_2023",
+                phase_or_track="phase3b_reinit_primary",
+                date_token="2023-03-13",
+                model_names="observation",
+                run_type="single_seed_observation",
+                view_type="single",
+                variant="paper",
+                figure_slug="march13_seed_mask_on_grid",
+                figure_title="Mindoro March 13 NOAA seed mask on the canonical grid",
+                subtitle=subtitle,
+                interpretation="This figure shows the promoted March 13 NOAA release geometry that seeds the next-day reinit validation.",
+                notes="Copied from the completed March 13 -> March 14 reinit QA bundle.",
+                source_image_path=(
+                    "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/"
+                    "qa_march13_seed_mask_on_grid.png"
+                ),
+            ),
+            self._image_spec(
+                spec_id="mindoro_primary_seed_vs_target",
+                figure_family_code="A",
+                case_id="CASE_MINDORO_RETRO_2023",
+                phase_or_track="phase3b_reinit_primary",
+                date_token="2023-03-13_to_2023-03-14",
+                model_names="observation",
+                run_type="single_seed_target_compare",
+                view_type="single",
+                variant="paper",
+                figure_slug="march13_seed_vs_march14_target",
+                figure_title="Mindoro March 13 seed polygon versus March 14 NOAA target",
+                subtitle=subtitle,
+                interpretation="This figure makes the promoted next-day validation geometry explicit before model overlays are introduced.",
+                notes="Copied from the completed March 13 -> March 14 reinit QA bundle.",
+                source_image_path=(
+                    "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/"
+                    "qa_march13_seed_vs_march14_target.png"
+                ),
+            ),
+            self._image_spec(
+                spec_id="mindoro_primary_r1_overlay",
+                figure_family_code="A",
+                case_id="CASE_MINDORO_RETRO_2023",
+                phase_or_track="phase3b_reinit_primary",
+                date_token="2023-03-14",
+                model_names="opendrift",
+                run_type="single_primary_overlay",
+                view_type="single",
+                variant="paper",
+                figure_slug="march14_r1_previous_overlay",
+                figure_title="Mindoro March 14 promoted OpenDrift R1 previous reinit overlay",
+                subtitle=subtitle,
+                interpretation="This is the promoted primary Mindoro validation overlay and should be used as the main March 14 result figure.",
+                notes="Copied from the completed March 13 -> March 14 reinit QA bundle.",
+                source_image_path=(
+                    "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/"
+                    "qa_march14_reinit_R1_previous_overlay.png"
+                ),
+                recommended_for_main_defense=True,
+                recommended_for_paper=True,
+            ),
+            self._image_spec(
+                spec_id="mindoro_primary_r0_overlay",
+                figure_family_code="A",
+                case_id="CASE_MINDORO_RETRO_2023",
+                phase_or_track="phase3b_reinit_primary",
+                date_token="2023-03-14",
+                model_names="opendrift",
+                run_type="single_primary_overlay",
+                view_type="single",
+                variant="paper",
+                figure_slug="march14_r0_overlay",
+                figure_title="Mindoro March 14 R0 reinit overlay",
+                subtitle=subtitle,
+                interpretation="This companion figure shows the baseline stranding branch so the promoted R1 result can be compared against it honestly.",
+                notes="Copied from the completed March 13 -> March 14 reinit QA bundle.",
+                source_image_path=(
+                    "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/"
+                    "qa_march14_reinit_R0_overlay.png"
+                ),
+            ),
+        ]
+
+    def _mindoro_crossmodel_publication_specs(self) -> list[dict[str, Any]]:
+        subtitle = "Mindoro | 13-14 March 2023 | promoted cross-model comparator on the March 14 NOAA target"
+        return [
+            self._image_spec(
+                spec_id="mindoro_crossmodel_r1_overlay",
+                figure_family_code="B",
+                case_id="CASE_MINDORO_RETRO_2023",
+                phase_or_track="phase3a_reinit_crossmodel",
+                date_token="2023-03-14",
+                model_names="opendrift",
+                run_type="single_model_overlay",
+                view_type="single",
+                variant="paper",
+                figure_slug="march14_crossmodel_r1_overlay",
+                figure_title="Mindoro March 14 OpenDrift R1 previous reinit p50 versus target",
+                subtitle=subtitle,
+                interpretation="This figure shows the top-ranked OpenDrift model in the promoted March 14 cross-model bundle.",
+                notes="Copied from the completed March 13 -> March 14 cross-model comparison bundle.",
+                source_image_path=(
+                    "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/qa/"
+                    "qa_march14_crossmodel_R1_previous_reinit_p50_overlay.png"
+                ),
+                recommended_for_main_defense=True,
+                recommended_for_paper=True,
+            ),
+            self._image_spec(
+                spec_id="mindoro_crossmodel_r0_overlay",
+                figure_family_code="B",
+                case_id="CASE_MINDORO_RETRO_2023",
+                phase_or_track="phase3a_reinit_crossmodel",
+                date_token="2023-03-14",
+                model_names="opendrift",
+                run_type="single_model_overlay",
+                view_type="single",
+                variant="paper",
+                figure_slug="march14_crossmodel_r0_overlay",
+                figure_title="Mindoro March 14 OpenDrift R0 reinit p50 versus target",
+                subtitle=subtitle,
+                interpretation="This figure keeps the baseline OpenDrift branch visible in the promoted March 14 cross-model discussion.",
+                notes="Copied from the completed March 13 -> March 14 cross-model comparison bundle.",
+                source_image_path=(
+                    "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/qa/"
+                    "qa_march14_crossmodel_R0_reinit_p50_overlay.png"
+                ),
+            ),
+            self._image_spec(
+                spec_id="mindoro_crossmodel_pygnome_overlay",
+                figure_family_code="B",
+                case_id="CASE_MINDORO_RETRO_2023",
+                phase_or_track="phase3a_reinit_crossmodel",
+                date_token="2023-03-14",
+                model_names="pygnome",
+                run_type="single_model_overlay",
+                view_type="single",
+                variant="paper",
+                figure_slug="march14_crossmodel_pygnome_overlay",
+                figure_title="Mindoro March 14 PyGNOME comparator versus target",
+                subtitle=subtitle,
+                interpretation="This figure preserves the PyGNOME comparator in the promoted March 14 lane without treating it as truth.",
+                notes="Copied from the completed March 13 -> March 14 cross-model comparison bundle.",
+                source_image_path=(
+                    "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/qa/"
+                    "qa_march14_crossmodel_pygnome_reinit_deterministic_overlay.png"
+                ),
+            ),
+        ]
+
+    def _mindoro_legacy_publication_specs(self) -> list[dict[str, Any]]:
+        subtitle = "Mindoro | 6 March 2023 | legacy sparse-reference honesty view"
+        return [
+            self._image_spec(
+                spec_id="mindoro_legacy_strict_overlay",
+                figure_family_code="C",
+                case_id="CASE_MINDORO_RETRO_2023",
+                phase_or_track="phase3b_legacy_strict",
+                date_token="2023-03-06",
+                model_names="opendrift",
+                run_type="single_legacy_overlay",
+                view_type="single",
+                variant="paper",
+                figure_slug="legacy_strict_overlay",
+                figure_title="Mindoro legacy March 6 strict overlay",
+                subtitle=subtitle,
+                interpretation="This figure is kept as the legacy sparse-reference honesty view rather than the promoted primary validation image.",
+                notes="Copied from the stored strict March 6 QA bundle.",
+                source_image_path="output/CASE_MINDORO_RETRO_2023/phase3b/qa_phase3b_obsmask_vs_p50.png",
+            ),
+            self._image_spec(
+                spec_id="mindoro_legacy_strict_context",
+                figure_family_code="C",
+                case_id="CASE_MINDORO_RETRO_2023",
+                phase_or_track="phase3b_legacy_strict",
+                date_token="2023-03-03_to_2023-03-06",
+                model_names="opendrift",
+                run_type="single_legacy_context",
+                view_type="single",
+                variant="paper",
+                figure_slug="legacy_strict_context",
+                figure_title="Mindoro legacy March 6 source/initialization/validation context",
+                subtitle=subtitle,
+                interpretation="This context figure explains how the legacy March 6 slice fits into the older Mindoro framing without pretending it is still the main result.",
+                notes="Copied from the stored strict March 6 QA bundle.",
+                source_image_path="output/CASE_MINDORO_RETRO_2023/phase3b/qa_phase3b_source_init_validation_overlay.png",
+            ),
+        ]
+
+    def _mindoro_promoted_board_specs(self) -> list[dict[str, Any]]:
+        primary_subtitle = (
+            "Mindoro | 13-14 March 2023 | promoted NOAA reinit validation | explicit March 12 imagery caveat"
+        )
+        crossmodel_subtitle = (
+            "Mindoro | 13-14 March 2023 | promoted cross-model comparator on the March 14 NOAA target"
+        )
+        legacy_subtitle = "Mindoro | 6 March 2023 | legacy sparse-reference honesty view"
+        return [
+            self._board_spec(
+                spec_id="mindoro_primary_board",
+                figure_family_code="A",
+                case_id="CASE_MINDORO_RETRO_2023",
+                phase_or_track="phase3b_reinit_primary",
+                date_token="2023-03-13_to_2023-03-14",
+                model_names="opendrift",
+                run_type="comparison_board",
+                figure_slug="mindoro_primary_validation_board",
+                figure_title="Mindoro March 13 -> March 14 primary validation board",
+                subtitle=primary_subtitle,
+                interpretation="This is now the main Mindoro presentation board because it centers the promoted March 13 -> March 14 validation pair and the best OpenDrift result.",
+                notes="Board assembled from the completed March 13 -> March 14 reinit QA figures only.",
+                note_lines=self._mindoro_primary_note_lines(
+                    self._mindoro_primary_score_line("OpenDrift R1 previous reinit p50"),
+                    self._mindoro_crossmodel_score_line("r0", "OpenDrift R0 reinit p50"),
+                ),
+                panels=[
+                    {"panel_title": "March 13 seed mask on grid", "source_spec_id": "mindoro_primary_seed_mask"},
+                    {"panel_title": "March 13 seed vs March 14 target", "source_spec_id": "mindoro_primary_seed_vs_target"},
+                    {"panel_title": "Promoted R1 previous reinit overlay", "source_spec_id": "mindoro_primary_r1_overlay"},
+                    {"panel_title": "R0 baseline branch overlay", "source_spec_id": "mindoro_primary_r0_overlay"},
+                ],
+                recommended_for_main_defense=True,
+            ),
+            self._board_spec(
+                spec_id="mindoro_crossmodel_board",
+                figure_family_code="B",
+                case_id="CASE_MINDORO_RETRO_2023",
+                phase_or_track="phase3a_reinit_crossmodel",
+                date_token="2023-03-14",
+                model_names="opendrift_vs_pygnome",
+                run_type="comparison_board",
+                figure_slug="mindoro_crossmodel_board",
+                figure_title="Mindoro March 13 -> March 14 cross-model comparator board",
+                subtitle=crossmodel_subtitle,
+                interpretation="This board answers the cross-model question on the promoted March 14 target without treating PyGNOME as truth.",
+                notes="Board assembled from the completed March 13 -> March 14 cross-model QA figures only.",
+                note_lines=self._mindoro_comparison_note_lines(
+                    self._mindoro_crossmodel_score_line("r1", "OpenDrift R1 previous reinit p50"),
+                    self._mindoro_crossmodel_score_line("r0", "OpenDrift R0 reinit p50"),
+                    self._mindoro_crossmodel_score_line("pygnome", "PyGNOME comparator"),
+                ),
+                panels=[
+                    {"panel_title": "OpenDrift R1 previous reinit p50", "source_spec_id": "mindoro_crossmodel_r1_overlay"},
+                    {"panel_title": "OpenDrift R0 reinit p50", "source_spec_id": "mindoro_crossmodel_r0_overlay"},
+                    {"panel_title": "PyGNOME deterministic comparator", "source_spec_id": "mindoro_crossmodel_pygnome_overlay"},
+                ],
+                recommended_for_main_defense=True,
+            ),
+            self._board_spec(
+                spec_id="mindoro_legacy_board",
+                figure_family_code="C",
+                case_id="CASE_MINDORO_RETRO_2023",
+                phase_or_track="phase3b_legacy_strict",
+                date_token="2023-03-06",
+                model_names="opendrift",
+                run_type="comparison_board",
+                figure_slug="mindoro_legacy_march6_board",
+                figure_title="Mindoro legacy March 6 honesty / limitations board",
+                subtitle=legacy_subtitle,
+                interpretation="This board preserves the March 6 sparse-reference material transparently, but it is no longer the canonical main-validation board.",
+                notes="Board assembled from the stored strict March 6 QA figures only.",
+                note_lines=self._mindoro_strict_note_lines(
+                    self._mindoro_strict_score_line("Legacy strict March 6")
+                ),
+                panels=[
+                    {"panel_title": "Legacy strict overlay", "source_spec_id": "mindoro_legacy_strict_overlay"},
+                    {"panel_title": "Legacy source/init/validation context", "source_spec_id": "mindoro_legacy_strict_context"},
+                ],
+                recommended_for_main_defense=False,
+            ),
+        ]
+
+    def _dwh_deterministic_note_lines(self, *score_lines: str) -> list[str]:
+        return self._compose_note_lines(self._dwh_deterministic_context_lines(), list(score_lines))
+
+    def _dwh_model_note_lines(self, *score_lines: str) -> list[str]:
+        return self._compose_note_lines(self._dwh_model_context_lines(), list(score_lines))
+
+    def _dwh_trajectory_note_lines(self) -> list[str]:
+        return self._compose_note_lines(self._dwh_trajectory_context_lines())
 
     def _phase4_lines(self) -> list[str]:
         summary = _read_csv(self.repo_root / (MINDORO_PHASE4_DIR / "phase4_oil_budget_summary.csv"))
@@ -1597,18 +2306,39 @@ class FigurePackagePublicationService:
         return [str(_relative_to_repo(self.repo_root, path)) for path in sorted((self.repo_root / DWH_ENSEMBLE_DIR / "tracks").glob("member_*.nc"))]
 
     def _mindoro_publication_specs(self) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        singles = []
+        singles.extend(self._mindoro_primary_publication_specs())
+        singles.extend(self._mindoro_crossmodel_publication_specs())
+        singles.extend(self._mindoro_legacy_publication_specs())
+        boards = self._mindoro_promoted_board_specs()
+        return singles, boards
+
         strict_obs = "data/arcgis/CASE_MINDORO_RETRO_2023/obs_mask_2023-03-06.tif"
-        strict_p50 = "output/CASE_MINDORO_RETRO_2023/pygnome_public_comparison/products/C2_od_ensemble_p50/mask_p50_2023-03-06_datecomposite.tif"
+        strict_p50 = "output/CASE_MINDORO_RETRO_2023/ensemble/mask_p50_2023-03-06_datecomposite.tif"
         event_obs = "output/CASE_MINDORO_RETRO_2023/pygnome_public_comparison/observations/eventcorridor_obs_union_2023-03-04_to_2023-03-06.tif"
         event_det = "output/CASE_MINDORO_RETRO_2023/pygnome_public_comparison/products/C1_od_deterministic/od_control_eventcorridor_model_union_2023-03-04_to_2023-03-06.tif"
-        event_p50 = "output/CASE_MINDORO_RETRO_2023/pygnome_public_comparison/products/C2_od_ensemble_p50/od_ensemble_p50_eventcorridor_model_union_2023-03-04_to_2023-03-06.tif"
+        event_ensemble = "output/CASE_MINDORO_RETRO_2023/pygnome_public_comparison/products/C2_od_ensemble_consolidated/od_ensemble_consolidated_eventcorridor_model_union_2023-03-04_to_2023-03-06.tif"
         event_pygnome = "output/CASE_MINDORO_RETRO_2023/pygnome_public_comparison/products/C3_pygnome_deterministic/pygnome_eventcorridor_model_union_2023-03-04_to_2023-03-06.tif"
         deterministic_track = "output/CASE_MINDORO_RETRO_2023/forecast/deterministic_control_cmems_era5.nc"
         pygnome_track = "output/CASE_MINDORO_RETRO_2023/pygnome_public_comparison/products/C3_pygnome_deterministic/pygnome_deterministic_control.nc"
-        note_lines_strict = self._mindoro_strict_note_lines()
-        note_lines_event = self._mindoro_event_lines()
+        strict_score_line = self._mindoro_strict_score_line()
+        event_det_score_line = self._mindoro_event_score_line("deterministic")
+        event_ensemble_score_line = self._mindoro_event_score_line("ensemble")
+        event_pygnome_score_line = self._mindoro_event_score_line("pygnome")
+        note_lines_strict_observation = self._mindoro_strict_note_lines()
+        note_lines_strict_scored = self._mindoro_strict_note_lines(strict_score_line)
+        note_lines_event_observation = self._mindoro_event_note_lines()
+        note_lines_event_det = self._mindoro_event_note_lines(event_det_score_line)
+        note_lines_event_ensemble = self._mindoro_event_note_lines(event_ensemble_score_line)
+        note_lines_comparison_det = self._mindoro_comparison_note_lines(event_det_score_line)
+        note_lines_comparison_ensemble = self._mindoro_comparison_note_lines(event_ensemble_score_line)
+        note_lines_comparison_pygnome = self._mindoro_comparison_note_lines(event_pygnome_score_line)
+        note_lines_comparison_overlay = self._mindoro_comparison_note_lines(
+            self._mindoro_event_score_line("ensemble", "OpenDrift consolidated ensemble trajectory"),
+            self._mindoro_event_score_line("pygnome", "PyGNOME comparator"),
+        )
         common_subtitle_strict = "Mindoro | 6 March 2023 | strict public-observation stress test"
-        common_subtitle_event = "Mindoro | 4-6 March 2023 | broader public-support event corridor"
+        common_subtitle_event = "Mindoro | 4-6 March 2023 | March 5-inclusive public-comparison corridor"
 
         singles = [
             self._spatial_spec(
@@ -1626,7 +2356,7 @@ class FigurePackagePublicationService:
                 subtitle=common_subtitle_strict,
                 interpretation="This figure isolates the tiny strict March 6 observed target so the panel can see what the forecast is being judged against.",
                 notes="Built from the stored March 6 observed mask only.",
-                note_lines=note_lines_strict,
+                note_lines=note_lines_strict_observation,
                 legend_keys=["observed_mask", "validation_polygon"],
                 raster_layers=[{"path": strict_obs, "legend_key": "observed_mask", "alpha": 0.42, "zorder": 5}],
                 show_source=False,
@@ -1649,7 +2379,7 @@ class FigurePackagePublicationService:
                 subtitle=common_subtitle_strict,
                 interpretation="This figure shows the official OpenDrift ensemble p50 product on its own, without the observation overlaid.",
                 notes="Built from the stored OpenDrift ensemble p50 March 6 raster.",
-                note_lines=note_lines_strict,
+                note_lines=note_lines_strict_scored,
                 legend_keys=["ensemble_p50", "source_point", "validation_polygon"],
                 raster_layers=[{"path": strict_p50, "legend_key": "ensemble_p50", "alpha": 0.38, "zorder": 5}],
                 show_source=True,
@@ -1672,7 +2402,7 @@ class FigurePackagePublicationService:
                 subtitle=common_subtitle_strict,
                 interpretation="This zoom view is the core strict March 6 comparison figure and should be paired with the dedicated close-up.",
                 notes="Built from the stored March 6 observed mask and official p50 raster.",
-                note_lines=note_lines_strict,
+                note_lines=note_lines_strict_scored,
                 legend_keys=["observed_mask", "ensemble_p50", "source_point", "validation_polygon"],
                 raster_layers=[
                     {"path": strict_obs, "legend_key": "observed_mask", "alpha": 0.42, "zorder": 5},
@@ -1699,7 +2429,7 @@ class FigurePackagePublicationService:
                 subtitle=common_subtitle_strict,
                 interpretation="This locator/context figure shows where the strict March 6 overlap problem sits within the wider Mindoro domain.",
                 notes="Built from the same stored March 6 rasters with a forced regional locator view.",
-                note_lines=note_lines_strict,
+                note_lines=note_lines_strict_scored,
                 legend_keys=["observed_mask", "ensemble_p50", "source_point", "validation_polygon"],
                 raster_layers=[
                     {"path": strict_obs, "legend_key": "observed_mask", "alpha": 0.42, "zorder": 5},
@@ -1725,7 +2455,7 @@ class FigurePackagePublicationService:
                 subtitle=common_subtitle_strict,
                 interpretation="This forced close-up is the figure the panel should use to inspect the strict March 6 overlap honestly.",
                 notes="Built from the stored March 6 rasters with forced close-up padding rules.",
-                note_lines=note_lines_strict,
+                note_lines=note_lines_strict_scored,
                 legend_keys=["observed_mask", "ensemble_p50", "source_point", "validation_polygon"],
                 raster_layers=[
                     {"path": strict_obs, "legend_key": "observed_mask", "alpha": 0.42, "zorder": 5},
@@ -1752,7 +2482,7 @@ class FigurePackagePublicationService:
                 subtitle=common_subtitle_event,
                 interpretation="This figure isolates the broader observed event corridor that complements the sparse strict March 6 target.",
                 notes="Built from the stored Mindoro event-corridor observation raster.",
-                note_lines=note_lines_event,
+                note_lines=note_lines_event_observation,
                 legend_keys=["observed_mask"],
                 raster_layers=[{"path": event_obs, "legend_key": "observed_mask", "alpha": 0.42, "zorder": 5}],
                 show_source=False,
@@ -1772,13 +2502,13 @@ class FigurePackagePublicationService:
                 subtitle=common_subtitle_event,
                 interpretation="This figure shows the OpenDrift deterministic event corridor without the observed mask on top of it.",
                 notes="Built from the stored deterministic event-corridor raster.",
-                note_lines=note_lines_event,
+                note_lines=note_lines_event_det,
                 legend_keys=["deterministic_opendrift", "source_point"],
                 raster_layers=[{"path": event_det, "legend_key": "deterministic_opendrift", "alpha": 0.34, "zorder": 5}],
                 show_source=True,
             ),
             self._spatial_spec(
-                spec_id="mindoro_event_p50_zoom",
+                spec_id="mindoro_event_ensemble_zoom",
                 figure_family_code="B",
                 case_id="CASE_MINDORO_RETRO_2023",
                 phase_or_track="phase3b_support",
@@ -1787,14 +2517,14 @@ class FigurePackagePublicationService:
                 run_type="single_forecast",
                 view_type="zoom",
                 variant="paper",
-                figure_slug="eventcorridor_p50",
-                figure_title="Mindoro March 4-6 ensemble p50 event corridor",
+                figure_slug="eventcorridor_ensemble_consolidated",
+                figure_title="Mindoro March 4-6 consolidated ensemble corridor",
                 subtitle=common_subtitle_event,
-                interpretation="This figure shows the OpenDrift ensemble p50 event corridor on its own.",
-                notes="Built from the stored p50 event-corridor raster.",
-                note_lines=note_lines_event,
-                legend_keys=["ensemble_p50", "source_point"],
-                raster_layers=[{"path": event_p50, "legend_key": "ensemble_p50", "alpha": 0.32, "zorder": 5}],
+                interpretation="This figure shows the corridor obtained by consolidating all stored ensemble runs into one support trajectory.",
+                notes="Built from the stored consolidated-ensemble event-corridor raster.",
+                note_lines=note_lines_event_ensemble,
+                legend_keys=["ensemble_consolidated", "source_point"],
+                raster_layers=[{"path": event_ensemble, "legend_key": "ensemble_consolidated", "alpha": 0.32, "zorder": 5}],
                 show_source=True,
             ),
         ]
@@ -1810,16 +2540,16 @@ class FigurePackagePublicationService:
                     run_type="single_overlay",
                     view_type="locator",
                     variant="paper",
-                    figure_slug="eventcorridor_obs_vs_p50",
+                    figure_slug="eventcorridor_obs_vs_ensemble_consolidated",
                     figure_title="Mindoro March 4-6 event corridor regional context",
                     subtitle=common_subtitle_event,
                     interpretation="This locator figure shows where the broader March 4-6 corridor sits within the full Mindoro domain.",
-                    notes="Built from the stored observation and p50 event-corridor rasters.",
-                    note_lines=note_lines_event,
-                    legend_keys=["observed_mask", "ensemble_p50", "source_point"],
+                    notes="Built from the stored observation and consolidated-ensemble event-corridor rasters.",
+                    note_lines=note_lines_event_ensemble,
+                    legend_keys=["observed_mask", "ensemble_consolidated", "source_point"],
                     raster_layers=[
                         {"path": event_obs, "legend_key": "observed_mask", "alpha": 0.40, "zorder": 5},
-                        {"path": event_p50, "legend_key": "ensemble_p50", "alpha": 0.30, "zorder": 6},
+                        {"path": event_ensemble, "legend_key": "ensemble_consolidated", "alpha": 0.30, "zorder": 6},
                     ],
                     show_source=True,
                 ),
@@ -1833,16 +2563,16 @@ class FigurePackagePublicationService:
                     run_type="single_overlay",
                     view_type="close",
                     variant="paper",
-                    figure_slug="eventcorridor_obs_vs_p50",
+                    figure_slug="eventcorridor_obs_vs_ensemble_consolidated",
                     figure_title="Mindoro March 4-6 event corridor close-up",
                     subtitle=common_subtitle_event,
                     interpretation="This close-up makes the broader event-corridor overlap readable at the spill scale instead of the regional scale.",
-                    notes="Built from the stored observation and p50 event-corridor rasters.",
-                    note_lines=note_lines_event,
-                    legend_keys=["observed_mask", "ensemble_p50", "source_point"],
+                    notes="Built from the stored observation and consolidated-ensemble event-corridor rasters.",
+                    note_lines=note_lines_event_ensemble,
+                    legend_keys=["observed_mask", "ensemble_consolidated", "source_point"],
                     raster_layers=[
                         {"path": event_obs, "legend_key": "observed_mask", "alpha": 0.40, "zorder": 5},
-                        {"path": event_p50, "legend_key": "ensemble_p50", "alpha": 0.30, "zorder": 6},
+                        {"path": event_ensemble, "legend_key": "ensemble_consolidated", "alpha": 0.30, "zorder": 6},
                     ],
                     show_source=True,
                 ),
@@ -1861,7 +2591,7 @@ class FigurePackagePublicationService:
                     subtitle="Mindoro | 4-6 March 2023 | OpenDrift comparator view",
                     interpretation="This single figure shows the deterministic OpenDrift corridor against the observed corridor in a paper-friendly format.",
                     notes="Built from stored comparator rasters only.",
-                    note_lines=note_lines_event,
+                    note_lines=note_lines_comparison_det,
                     legend_keys=["observed_mask", "deterministic_opendrift", "source_point"],
                     raster_layers=[
                         {"path": event_obs, "legend_key": "observed_mask", "alpha": 0.40, "zorder": 5},
@@ -1870,7 +2600,7 @@ class FigurePackagePublicationService:
                     show_source=True,
                 ),
                 self._spatial_spec(
-                    spec_id="mindoro_comparison_p50_zoom",
+                    spec_id="mindoro_comparison_ensemble_zoom",
                     figure_family_code="C",
                     case_id="CASE_MINDORO_RETRO_2023",
                     phase_or_track="phase3a_benchmark",
@@ -1879,16 +2609,16 @@ class FigurePackagePublicationService:
                     run_type="single_model",
                     view_type="zoom",
                     variant="paper",
-                    figure_slug="comparison_opendrift_p50",
-                    figure_title="Mindoro OpenDrift ensemble p50 vs observed corridor",
+                    figure_slug="comparison_opendrift_ensemble_consolidated",
+                    figure_title="Mindoro consolidated ensemble trajectory vs observed corridor",
                     subtitle="Mindoro | 4-6 March 2023 | OpenDrift comparator view",
-                    interpretation="This single figure shows the ensemble p50 corridor against the observed corridor.",
+                    interpretation="This single figure shows the consolidated ensemble trajectory corridor against the observed corridor.",
                     notes="Built from stored comparator rasters only.",
-                    note_lines=note_lines_event,
-                    legend_keys=["observed_mask", "ensemble_p50", "source_point"],
+                    note_lines=note_lines_comparison_ensemble,
+                    legend_keys=["observed_mask", "ensemble_consolidated", "source_point"],
                     raster_layers=[
                         {"path": event_obs, "legend_key": "observed_mask", "alpha": 0.40, "zorder": 5},
-                        {"path": event_p50, "legend_key": "ensemble_p50", "alpha": 0.28, "zorder": 6},
+                        {"path": event_ensemble, "legend_key": "ensemble_consolidated", "alpha": 0.28, "zorder": 6},
                     ],
                     show_source=True,
                 ),
@@ -1907,7 +2637,7 @@ class FigurePackagePublicationService:
                     subtitle="Mindoro | 4-6 March 2023 | PyGNOME comparator view",
                     interpretation="This single figure shows the PyGNOME comparator corridor against the observed corridor with the same visual grammar used for OpenDrift.",
                     notes="Built from stored comparator rasters only.",
-                    note_lines=note_lines_event,
+                    note_lines=note_lines_comparison_pygnome,
                     legend_keys=["observed_mask", "pygnome", "source_point"],
                     raster_layers=[
                         {"path": event_obs, "legend_key": "observed_mask", "alpha": 0.40, "zorder": 5},
@@ -1926,15 +2656,15 @@ class FigurePackagePublicationService:
                     view_type="close",
                     variant="paper",
                     figure_slug="comparison_overlay",
-                    figure_title="Mindoro close-up: observed corridor, OpenDrift p50, and PyGNOME",
+                    figure_title="Mindoro close-up: observed corridor, consolidated ensemble, and PyGNOME",
                     subtitle="Mindoro | 4-6 March 2023 | close crop around the overlap union",
-                    interpretation="This close-up overlay is useful when the panel wants a compact direct comparison between the observed corridor, the official p50 corridor, and the PyGNOME comparator.",
+                    interpretation="This close-up overlay is useful when the panel wants a compact direct comparison between the observed corridor, the consolidated ensemble corridor, and the PyGNOME comparator.",
                     notes="Built from stored comparator rasters only.",
-                    note_lines=note_lines_event,
-                    legend_keys=["observed_mask", "ensemble_p50", "pygnome", "source_point"],
+                    note_lines=note_lines_comparison_overlay,
+                    legend_keys=["observed_mask", "ensemble_consolidated", "pygnome", "source_point"],
                     raster_layers=[
                         {"path": event_obs, "legend_key": "observed_mask", "alpha": 0.42, "zorder": 5},
-                        {"path": event_p50, "legend_key": "ensemble_p50", "alpha": 0.28, "zorder": 6},
+                        {"path": event_ensemble, "legend_key": "ensemble_consolidated", "alpha": 0.28, "zorder": 6},
                         {"path": event_pygnome, "legend_key": "pygnome", "alpha": 0.22, "zorder": 7},
                     ],
                     show_source=True,
@@ -2054,7 +2784,11 @@ class FigurePackagePublicationService:
                 subtitle=common_subtitle_strict,
                 interpretation="This board is one of the most important defense slides because it makes the hard strict March 6 case readable.",
                 notes="Board assembled from publication-grade single figures only.",
-                note_lines=note_lines_strict,
+                note_lines=self._mindoro_strict_note_lines(
+                    self._mindoro_strict_score_line("Official forecast"),
+                    self._mindoro_strict_score_line("Zoomed overlay"),
+                    self._mindoro_strict_score_line("Forced close-up"),
+                ),
                 panels=[
                     {"panel_title": "Observed target", "source_spec_id": "mindoro_strict_obs_zoom"},
                     {"panel_title": "Official forecast", "source_spec_id": "mindoro_strict_forecast_zoom"},
@@ -2079,11 +2813,15 @@ class FigurePackagePublicationService:
                     subtitle=common_subtitle_event,
                     interpretation="This board gives the panel a broader public-support context than the strict March 6 board alone.",
                     notes="Board assembled from publication-grade single figures only.",
-                    note_lines=note_lines_event,
+                    note_lines=self._mindoro_event_note_lines(
+                        self._mindoro_event_score_line("deterministic", "Deterministic OpenDrift"),
+                        self._mindoro_event_score_line("ensemble", "Consolidated ensemble trajectory"),
+                        self._mindoro_event_score_line("ensemble", "Close-up overlay"),
+                    ),
                     panels=[
                         {"panel_title": "Observed corridor", "source_spec_id": "mindoro_event_observation_zoom"},
                         {"panel_title": "Deterministic OpenDrift", "source_spec_id": "mindoro_event_deterministic_zoom"},
-                        {"panel_title": "Official ensemble p50", "source_spec_id": "mindoro_event_p50_zoom"},
+                        {"panel_title": "Consolidated ensemble trajectory", "source_spec_id": "mindoro_event_ensemble_zoom"},
                         {"panel_title": "Close-up overlay", "source_spec_id": "mindoro_event_overlay_close"},
                     ],
                     recommended_for_main_defense=False,
@@ -2101,11 +2839,15 @@ class FigurePackagePublicationService:
                     subtitle="Mindoro | 4-6 March 2023 | observation, official products, and PyGNOME comparator",
                     interpretation="This board is ready for panel use because it makes the OpenDrift-versus-PyGNOME comparison explicit without treating PyGNOME as truth.",
                     notes="Board assembled from publication-grade single figures only.",
-                    note_lines=note_lines_event,
+                    note_lines=self._mindoro_comparison_note_lines(
+                        self._mindoro_event_score_line("deterministic", "OpenDrift deterministic"),
+                        self._mindoro_event_score_line("ensemble", "OpenDrift consolidated ensemble trajectory"),
+                        self._mindoro_event_score_line("pygnome", "PyGNOME comparator"),
+                    ),
                     panels=[
                         {"panel_title": "Observed corridor", "source_spec_id": "mindoro_event_observation_zoom"},
                         {"panel_title": "OpenDrift deterministic", "source_spec_id": "mindoro_comparison_od_zoom"},
-                        {"panel_title": "OpenDrift ensemble p50", "source_spec_id": "mindoro_comparison_p50_zoom"},
+                        {"panel_title": "OpenDrift consolidated ensemble trajectory", "source_spec_id": "mindoro_comparison_ensemble_zoom"},
                         {"panel_title": "PyGNOME comparator", "source_spec_id": "mindoro_comparison_pygnome_zoom"},
                     ],
                     recommended_for_main_defense=True,
@@ -2344,7 +3086,15 @@ class FigurePackagePublicationService:
         event_pygnome = "output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator/products/pygnome_eventcorridor_union_2010-05-21_to_2010-05-23.tif"
         det_track = "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/tracks/opendrift_control_dwh_phase3c.nc"
         pygnome_track = "output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator/tracks/pygnome_dwh_phase3c.nc"
-        lines_event = self._dwh_model_lines()
+        note_lines_dwh_21 = self._dwh_deterministic_note_lines(self._dwh_deterministic_score_line("2010-05-21"))
+        note_lines_dwh_22 = self._dwh_deterministic_note_lines(self._dwh_deterministic_score_line("2010-05-22"))
+        note_lines_dwh_23 = self._dwh_deterministic_note_lines(self._dwh_deterministic_score_line("2010-05-23"))
+        note_lines_dwh_event_observation = self._dwh_model_note_lines()
+        note_lines_dwh_event_det = self._dwh_deterministic_note_lines(self._dwh_event_score_line("deterministic"))
+        note_lines_dwh_event_p50 = self._dwh_deterministic_note_lines(self._dwh_event_score_line("p50"))
+        note_lines_dwh_event_p90 = self._dwh_deterministic_note_lines(self._dwh_event_score_line("p90"))
+        note_lines_dwh_event_pygnome = self._dwh_model_note_lines(self._dwh_event_score_line("pygnome"))
+        note_lines_dwh_tracks = self._dwh_trajectory_note_lines()
         singles = [
             self._spatial_spec(
                 spec_id="dwh_2010_05_21_overlay",
@@ -2361,7 +3111,7 @@ class FigurePackagePublicationService:
                 subtitle="Deepwater Horizon | 21 May 2010 | deterministic OpenDrift vs public observation mask",
                 interpretation="This daily figure shows the first DWH date-composite comparison with both the forecast and observed footprint clearly visible.",
                 notes="Built from stored DWH observation and deterministic forecast rasters only.",
-                note_lines=self._dwh_deterministic_lines("2010-05-21"),
+                note_lines=note_lines_dwh_21,
                 legend_keys=["observed_mask", "deterministic_opendrift", "source_point"],
                 raster_layers=[
                     {"path": obs_21, "legend_key": "observed_mask", "alpha": 0.42, "zorder": 5},
@@ -2385,7 +3135,7 @@ class FigurePackagePublicationService:
                 subtitle="Deepwater Horizon | 22 May 2010 | deterministic OpenDrift vs public observation mask",
                 interpretation="This daily figure shows the second DWH date-composite comparison with the same publication grammar.",
                 notes="Built from stored DWH observation and deterministic forecast rasters only.",
-                note_lines=self._dwh_deterministic_lines("2010-05-22"),
+                note_lines=note_lines_dwh_22,
                 legend_keys=["observed_mask", "deterministic_opendrift", "source_point"],
                 raster_layers=[
                     {"path": obs_22, "legend_key": "observed_mask", "alpha": 0.42, "zorder": 5},
@@ -2409,7 +3159,7 @@ class FigurePackagePublicationService:
                 subtitle="Deepwater Horizon | 23 May 2010 | deterministic OpenDrift vs public observation mask",
                 interpretation="This daily figure shows the third DWH date-composite comparison with the same publication grammar.",
                 notes="Built from stored DWH observation and deterministic forecast rasters only.",
-                note_lines=self._dwh_deterministic_lines("2010-05-23"),
+                note_lines=note_lines_dwh_23,
                 legend_keys=["observed_mask", "deterministic_opendrift", "source_point"],
                 raster_layers=[
                     {"path": obs_23, "legend_key": "observed_mask", "alpha": 0.42, "zorder": 5},
@@ -2433,7 +3183,7 @@ class FigurePackagePublicationService:
                 subtitle="Deepwater Horizon | 21-23 May 2010 | public observation corridor",
                 interpretation="This figure isolates the DWH observed event corridor so the panel can see the target footprint before looking at the model layers.",
                 notes="Built from the stored DWH event-corridor observation raster only.",
-                note_lines=self._dwh_deterministic_lines("2010-05-21_to_2010-05-23"),
+                note_lines=note_lines_dwh_event_observation,
                 legend_keys=["observed_mask"],
                 raster_layers=[{"path": event_obs, "legend_key": "observed_mask", "alpha": 0.42, "zorder": 5}],
                 show_source=False,
@@ -2453,7 +3203,7 @@ class FigurePackagePublicationService:
                 subtitle="Deepwater Horizon | 21-23 May 2010 | deterministic event-corridor comparison",
                 interpretation="This figure shows the deterministic DWH event corridor against the observed corridor in a paper-friendly format.",
                 notes="Built from stored DWH event-corridor rasters only.",
-                note_lines=self._dwh_deterministic_lines("2010-05-21_to_2010-05-23"),
+                note_lines=note_lines_dwh_event_det,
                 legend_keys=["observed_mask", "deterministic_opendrift", "source_point"],
                 raster_layers=[
                     {"path": event_obs, "legend_key": "observed_mask", "alpha": 0.40, "zorder": 5},
@@ -2477,7 +3227,7 @@ class FigurePackagePublicationService:
                 subtitle="Deepwater Horizon | 21-23 May 2010 | ensemble p50 event-corridor comparison",
                 interpretation="This figure shows the DWH ensemble p50 event corridor against the observed corridor.",
                 notes="Built from stored DWH event-corridor rasters only.",
-                note_lines=self._dwh_deterministic_lines("2010-05-21_to_2010-05-23"),
+                note_lines=note_lines_dwh_event_p50,
                 legend_keys=["observed_mask", "ensemble_p50", "source_point"],
                 raster_layers=[
                     {"path": event_obs, "legend_key": "observed_mask", "alpha": 0.40, "zorder": 5},
@@ -2501,7 +3251,7 @@ class FigurePackagePublicationService:
                 subtitle="Deepwater Horizon | 21-23 May 2010 | ensemble p90 event-corridor comparison",
                 interpretation="This figure shows the wider p90 event corridor against the observed corridor.",
                 notes="Built from stored DWH event-corridor rasters only.",
-                note_lines=self._dwh_deterministic_lines("2010-05-21_to_2010-05-23"),
+                note_lines=note_lines_dwh_event_p90,
                 legend_keys=["observed_mask", "ensemble_p90", "source_point"],
                 raster_layers=[
                     {"path": event_obs, "legend_key": "observed_mask", "alpha": 0.40, "zorder": 5},
@@ -2525,7 +3275,7 @@ class FigurePackagePublicationService:
                 subtitle="Deepwater Horizon | 21-23 May 2010 | PyGNOME comparator event-corridor comparison",
                 interpretation="This figure shows the PyGNOME comparator corridor against the observed corridor with the same visual grammar.",
                 notes="Built from stored DWH comparator rasters only.",
-                note_lines=lines_event,
+                note_lines=note_lines_dwh_event_pygnome,
                 legend_keys=["observed_mask", "pygnome", "source_point"],
                 raster_layers=[
                     {"path": event_obs, "legend_key": "observed_mask", "alpha": 0.40, "zorder": 5},
@@ -2549,7 +3299,7 @@ class FigurePackagePublicationService:
                 subtitle="Deepwater Horizon | 20-23 May 2010 | deterministic OpenDrift trajectory",
                 interpretation="This figure gives the panel an intuitive picture of the DWH deterministic transport path.",
                 notes="Built from the stored DWH deterministic track NetCDF.",
-                note_lines=self._dwh_deterministic_lines("2010-05-21_to_2010-05-23"),
+                note_lines=note_lines_dwh_tracks,
                 legend_keys=["deterministic_opendrift", "source_point"],
                 renderer="track",
                 track_path=det_track,
@@ -2570,7 +3320,7 @@ class FigurePackagePublicationService:
                 subtitle="Deepwater Horizon | 20-23 May 2010 | sampled member centroids and mean path",
                 interpretation="This figure shows how the DWH ensemble spreads around the main transport pathway while staying readable.",
                 notes="Built from stored DWH ensemble track NetCDFs only.",
-                note_lines=self._dwh_deterministic_lines("2010-05-21_to_2010-05-23"),
+                note_lines=note_lines_dwh_tracks,
                 legend_keys=["ensemble_member_path", "centroid_path", "source_point"],
                 renderer="ensemble_track",
                 track_paths=self._dwh_member_paths(),
@@ -2590,7 +3340,7 @@ class FigurePackagePublicationService:
                 subtitle="Deepwater Horizon | 20-23 May 2010 | PyGNOME comparator trajectory",
                 interpretation="This figure gives the panel a like-for-like PyGNOME trajectory picture using the same framing as the OpenDrift transport figures.",
                 notes="Built from the stored DWH PyGNOME track NetCDF.",
-                note_lines=lines_event,
+                note_lines=note_lines_dwh_tracks,
                 legend_keys=["pygnome", "source_point"],
                 renderer="track",
                 track_path=pygnome_track,
@@ -2611,7 +3361,11 @@ class FigurePackagePublicationService:
                 subtitle="Deepwater Horizon | 21-23 May 2010 | daily deterministic comparisons",
                 interpretation="This board is ready for panel use because it shows the daily DWH comparisons with the same readable grammar across all three dates.",
                 notes="Board assembled from publication-grade single figures only.",
-                note_lines=self._dwh_deterministic_lines("2010-05-21_to_2010-05-23"),
+                note_lines=self._dwh_deterministic_note_lines(
+                    self._dwh_deterministic_score_line("2010-05-21", "21 May"),
+                    self._dwh_deterministic_score_line("2010-05-22", "22 May"),
+                    self._dwh_deterministic_score_line("2010-05-23", "23 May"),
+                ),
                 panels=[
                     {"panel_title": "21 May", "source_spec_id": "dwh_2010_05_21_overlay"},
                     {"panel_title": "22 May", "source_spec_id": "dwh_2010_05_22_overlay"},
@@ -2632,7 +3386,11 @@ class FigurePackagePublicationService:
                 subtitle="Deepwater Horizon | 21-23 May 2010 | deterministic, p50, and p90 side by side",
                 interpretation="This board is ready for panel use because it makes the deterministic-versus-ensemble footprint differences easy to see.",
                 notes="Board assembled from publication-grade single figures only.",
-                note_lines=self._dwh_deterministic_lines("2010-05-21_to_2010-05-23"),
+                note_lines=self._dwh_deterministic_note_lines(
+                    self._dwh_event_score_line("deterministic", "Deterministic"),
+                    self._dwh_event_score_line("p50", "Ensemble p50"),
+                    self._dwh_event_score_line("p90", "Ensemble p90"),
+                ),
                 panels=[
                     {"panel_title": "Deterministic", "source_spec_id": "dwh_event_deterministic"},
                     {"panel_title": "Ensemble p50", "source_spec_id": "dwh_event_p50"},
@@ -2653,7 +3411,11 @@ class FigurePackagePublicationService:
                 subtitle="Deepwater Horizon | 21-23 May 2010 | observation, official products, and PyGNOME comparator",
                 interpretation="This board is ready for panel use because it makes the OpenDrift-versus-PyGNOME comparison explicit in the richer DWH case.",
                 notes="Board assembled from publication-grade single figures only.",
-                note_lines=lines_event,
+                note_lines=self._dwh_model_note_lines(
+                    self._dwh_event_score_line("deterministic", "OpenDrift deterministic"),
+                    self._dwh_event_score_line("p50", "OpenDrift ensemble p50"),
+                    self._dwh_event_score_line("pygnome", "PyGNOME comparator"),
+                ),
                 panels=[
                     {"panel_title": "Observed corridor", "source_spec_id": "dwh_event_observation"},
                     {"panel_title": "OpenDrift deterministic", "source_spec_id": "dwh_event_deterministic"},
@@ -2675,7 +3437,7 @@ class FigurePackagePublicationService:
                 subtitle="Deepwater Horizon | 20-23 May 2010 | deterministic, ensemble, and PyGNOME trajectories",
                 interpretation="This board gives the panel a clean transport-path view of the DWH case before or after the footprint-comparison boards.",
                 notes="Board assembled from publication-grade trajectory figures only.",
-                note_lines=lines_event,
+                note_lines=note_lines_dwh_tracks,
                 panels=[
                     {"panel_title": "Deterministic path", "source_spec_id": "dwh_track_deterministic"},
                     {"panel_title": "Sampled ensemble", "source_spec_id": "dwh_track_ensemble"},
@@ -2686,10 +3448,104 @@ class FigurePackagePublicationService:
         ]
         return singles, boards
 
+    def _prototype_support_publication_specs(self) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        registry_path = self.prototype_similarity_registry_path
+        prototype_dir = self.prototype_similarity_dir
+        if self.prototype_similarity_figure_registry.empty:
+            if prototype_dir.exists() and not registry_path.exists():
+                self._record_missing(registry_path, "Prototype similarity package exists but the figure registry is missing.")
+            return [], []
+
+        is_preferred_2021 = prototype_dir.name == PREFERRED_PROTOTYPE_SIMILARITY_DIR.name
+        subtitle = (
+            "Prototype 2021 | accepted-segment deterministic transport comparator | support-only publication copy"
+            if is_preferred_2021
+            else "Prototype 2016 legacy | deterministic transport comparator | support-only publication copy"
+        )
+        notes = (
+            "Support-only publication copy of the preferred accepted-segment debug OpenDrift-versus-PyGNOME comparator figure."
+            if is_preferred_2021
+            else "Support-only publication copy of the legacy prototype deterministic OpenDrift-versus-PyGNOME comparator figure."
+        )
+
+        specs: list[dict[str, Any]] = []
+        registry = self.prototype_similarity_figure_registry.copy()
+        required_columns = {"figure_id", "case_id", "relative_path", "view_type", "model_name", "date_token"}
+        if not required_columns.issubset(set(registry.columns)):
+            self._record_missing(registry_path, "Prototype similarity figure registry is missing required columns for publication family K.")
+            return [], []
+
+        registry = registry.sort_values(["case_id", "view_type", "hour", "model_name", "figure_id"]).reset_index(drop=True)
+        for _, row in registry.iterrows():
+            relative_path = str(row.get("relative_path") or "").strip()
+            if not relative_path:
+                continue
+            source_path = self._resolve(relative_path)
+            if not source_path.exists():
+                self._record_missing(source_path, "Prototype support figure listed in the similarity registry is missing.")
+                continue
+
+            view_type = str(row.get("view_type") or "single").strip() or "single"
+            is_board = view_type == "board"
+            model_name = str(row.get("model_name") or "opendrift_vs_pygnome").strip() or "opendrift_vs_pygnome"
+            hour_text = str(row.get("hour") or "").strip()
+            default_title = source_path.stem.replace("_", " ")
+            title = str(row.get("figure_title") or default_title)
+            interpretation = str(row.get("short_plain_language_interpretation") or "").strip()
+            if not interpretation:
+                if is_board:
+                    interpretation = (
+                        f"Legacy prototype support board for {row['case_id']} showing the paired 24 h, 48 h, and 72 h "
+                        "deterministic OpenDrift and PyGNOME footprints on the same benchmark grid."
+                    )
+                else:
+                    interpretation = (
+                        f"Legacy prototype support figure for {row['case_id']} showing the "
+                        f"{model_name.replace('_', ' ')} deterministic footprint at {hour_text or 'paired'} h."
+                    )
+            if "PyGNOME" not in interpretation:
+                interpretation += " PyGNOME remains comparator-only, not truth."
+            if "final Chapter 3 evidence" not in interpretation:
+                interpretation += " This is not final Chapter 3 evidence."
+
+            source_paths: list[str] = [relative_path]
+            raw_source_paths = str(row.get("source_paths") or "").strip()
+            if raw_source_paths:
+                source_paths.extend(part.strip() for part in raw_source_paths.split("|") if part.strip())
+
+            specs.append(
+                self._image_spec(
+                    spec_id=f"prototype_support_{_safe_token(row.get('figure_id') or source_path.stem)}",
+                    figure_family_code="K",
+                    case_id=str(row["case_id"]),
+                    phase_or_track="prototype_pygnome_similarity_summary",
+                    date_token=str(row.get("date_token") or ("24_48_72h" if is_board else "legacy_support")),
+                    model_names=model_name,
+                    run_type="comparison_board" if is_board else "single_forecast",
+                    view_type=view_type,
+                    variant="slide" if is_board else "paper",
+                    figure_slug=_safe_token(row.get("figure_id") or source_path.stem),
+                    figure_title=title,
+                    subtitle=subtitle,
+                    interpretation=interpretation,
+                    notes=notes,
+                    source_image_path=relative_path,
+                    source_paths=source_paths,
+                    recommended_for_main_defense=False,
+                    recommended_for_paper=not is_board,
+                )
+            )
+        return specs, []
+
     def _build_specs(self) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
         single_specs: list[dict[str, Any]] = []
         board_specs: list[dict[str, Any]] = []
-        for builder in (self._mindoro_publication_specs, self._phase4_publication_specs, self._dwh_publication_specs):
+        for builder in (
+            self._mindoro_publication_specs,
+            self._phase4_publication_specs,
+            self._dwh_publication_specs,
+            self._prototype_support_publication_specs,
+        ):
             singles, boards = builder()
             single_specs.extend(singles)
             board_specs.extend(boards)
@@ -2714,6 +3570,8 @@ class FigurePackagePublicationService:
                 "variant",
                 "relative_path",
                 "file_path",
+                "pixel_width",
+                "pixel_height",
                 "short_plain_language_interpretation",
                 "recommended_for_main_defense",
                 "recommended_for_paper",
@@ -2747,6 +3605,7 @@ class FigurePackagePublicationService:
         recommended = [record for record in self.figure_records if record.recommended_for_main_defense]
         paper_ready = [record for record in self.figure_records if record.recommended_for_paper and record.variant == "paper"]
         supporting_honesty = [record for record in self.figure_records if record.figure_family_code == "F"]
+        prototype_support = [record for record in self.figure_records if record.figure_family_code == "K"]
         lines = [
             "# Publication Figure Talking Points",
             "",
@@ -2774,6 +3633,18 @@ class FigurePackagePublicationService:
             )
             for record in sorted(supporting_honesty, key=lambda item: item.figure_id):
                 lines.append(f"- `{record.figure_id}`: use this figure when the panel asks why Phase 4 OpenDrift-versus-PyGNOME comparison is not shown.")
+        if prototype_support:
+            lines.extend(
+                [
+                    "",
+                    "## Prototype Support Figures",
+                    "",
+                ]
+            )
+            for record in sorted(prototype_support, key=lambda item: item.figure_id):
+                lines.append(
+                    f"- `{record.figure_id}`: legacy prototype comparator only; deterministic OpenDrift control versus deterministic PyGNOME, with PyGNOME shown as a comparator rather than truth."
+                )
         if self.missing_optional_artifacts:
             lines.extend(["", "## Missing Optional Inputs", ""])
             for item in self.missing_optional_artifacts:
@@ -2803,6 +3674,7 @@ class FigurePackagePublicationService:
             "visual_semantics": {
                 "observed_mask": self._legend_labels().get("observed_mask", ""),
                 "deterministic_opendrift": self._legend_labels().get("deterministic_opendrift", ""),
+                "ensemble_consolidated": self._legend_labels().get("ensemble_consolidated", ""),
                 "ensemble_p50": self._legend_labels().get("ensemble_p50", ""),
                 "ensemble_p90": self._legend_labels().get("ensemble_p90", ""),
                 "pygnome": self._legend_labels().get("pygnome", ""),

@@ -5,15 +5,19 @@
 region: [115.0, 122.0, 6.0, 14.5]
 
 # Workflow mode:
+# - prototype_2021       preferred accepted-segment debug/demo workflow
 # - prototype_2016       keeps the original multi-date debugging workflow
 # - mindoro_retro_2023   runs the fixed official thesis-aligned case
 # - dwh_retro_2010       runs the external Deepwater Horizon setup/scaffold workflow
-workflow_mode: prototype_2016
+# - phase1_regional_2016_2022 runs the dedicated full regional Phase 1 production rerun
+workflow_mode: prototype_2021
 
-# Official workflow case file mappings
+# Workflow case file mappings
 workflow_case_files:
+  prototype_2021: config/prototype_2021_cases.yaml
   mindoro_retro_2023: config/case_mindoro_retro_2023.yaml
   dwh_retro_2010: config/case_dwh_retro_2010_72h.yaml
+  phase1_regional_2016_2022: config/phase1_regional_2016_2022.yaml
 
 # Frozen Phase 1 baseline selection artifact for official spill-case workflows.
 phase1_baseline_selection_path: config/phase1_baseline_selection.yaml
@@ -22,6 +26,11 @@ phase1_baseline_selection_path: config/phase1_baseline_selection.yaml
 # You can provide a single date string like "2016-09-17" 
 # or a list of dates to scan: ["2020-03-05", "2021-06-10", "2022-09-15"]
 phase_1_start_date: ["2016-09-01", "2016-09-06", "2016-09-17"]
+
+# Prototype-only forcing halo (hours) applied symmetrically around the
+# nominal 72 h case window so the preserved +/- 3 h ensemble jitter does not
+# fall outside the prepared forcing coverage.
+prototype_forcing_halo_hours: 3.0
 
 # Standard Grid Resolution for Phase 2/3 (Degrees)
 grid_resolution: 0.05

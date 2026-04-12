@@ -6,15 +6,16 @@ This package synchronizes launcher/menu behavior, documentation, and reproducibi
 
 - PowerShell entrypoint: `./start.ps1 -List -NoPause`
 - Source-of-truth launcher matrix: `config/launcher_matrix.json`
-- Safe read-only launcher IDs: `phase1_audit`, `phase2_audit`, `final_validation_package`, `phase5_sync`, `trajectory_gallery`, `trajectory_gallery_panel`, `figure_package_publication`
+- Safe read-only launcher IDs: `mindoro_march6_recovery_sensitivity`, `phase1_audit`, `phase2_audit`, `final_validation_package`, `phase5_sync`, `trajectory_gallery`, `trajectory_gallery_panel`, `figure_package_publication`
 
 ## Phase Status Highlights
 
 - `phase1` / `phase1_regional_baseline`: Architecture audited; the final 2016-2022 production rerun is still needed.
 - `phase2` / `phase2_machine_readable_forecast`: Scientifically usable as implemented, but not yet frozen.
-- `phase3a` / `A`: Mindoro Phase 3A remains scientifically informative as a comparator benchmark. 
-- `phase3b` / `B1`: Mindoro strict March 6 is a hard sparse stress test and should not be treated as broad-support validation. fss_1km=0.0000, fss_3km=0.0000, fss_5km=0.0000, fss_10km=0.0000
-- `phase3b` / `B2`: Mindoro broader public-support remains scientifically informative support material, not a replacement for B1. fss_1km=0.1722, fss_3km=0.2004, fss_5km=0.2166, fss_10km=0.2438
+- `phase3a` / `A`: Mindoro March 13 -> March 14 cross-model comparison remains scientifically informative as a comparator benchmark. fss_1km=0.0000, fss_3km=0.0441, fss_5km=0.1371, fss_10km=0.2490
+- `phase3b` / `B1`: Mindoro March 13 -> March 14 is the promoted primary validation, reported with the explicit March 12 imagery caveat. fss_1km=0.0000, fss_3km=0.0441, fss_5km=0.1371, fss_10km=0.2490
+- `phase3b` / `B2`: Mindoro March 6 remains a legacy sparse reference and should not be silently discarded. fss_1km=0.0000, fss_3km=0.0000, fss_5km=0.0000, fss_10km=0.0000
+- `phase3b` / `B3`: Mindoro March 3-6 broader-support remains scientifically informative legacy context, not a replacement for B1. fss_1km=0.1722, fss_3km=0.2004, fss_5km=0.2166, fss_10km=0.2438
 - `phase3c` / `C1`: DWH deterministic transfer validation is a reportable external-case success. fss_1km=0.5033, fss_3km=0.5523, fss_5km=0.5700, fss_10km=0.6018
 - `phase3c` / `C2`: DWH ensemble p50 is reportable and leads the overall mean FSS comparison under the current case definition. fss_1km=0.4997, fss_3km=0.5299, fss_5km=0.5467, fss_10km=0.5790
 - `phase3c` / `C3`: DWH PyGNOME remains reportable as a comparator, not as truth. fss_1km=0.3197, fss_3km=0.3495, fss_5km=0.3689, fss_10km=0.4068

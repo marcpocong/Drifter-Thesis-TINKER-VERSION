@@ -1,0 +1,44 @@
+workflow_mode: prototype_2021
+mode_label: Preferred 2021 accepted-segment debug workflow
+description: Preferred debug/demo workflow frozen from the latest accepted 2021 strict-gate drifter segments.
+region: [119.5, 124.5, 11.5, 16.5]
+notes:
+  - Accepted-segment debug support only.
+  - Deterministic OpenDrift versus deterministic PyGNOME comparator only.
+  - Not the final Chapter 3 evidence base.
+drifter:
+  required: true
+  mode: fixed_drifter_segment_window
+recipe_family: official_phase1
+support_context_mode: neutral_case_local
+similarity_output_root: output/prototype_2021_pygnome_similarity
+publication_family_label: Prototype 2021 OpenDrift vs PyGNOME support package
+cases:
+  - case_id: CASE_20210305T180000Z
+    run_name: CASE_20210305T180000Z
+    description: Accepted 2021 Phase 1 drifter segment beginning 2021-03-05 18:00 UTC.
+    drifter_id: "300534060352020"
+    release_start_utc: "2021-03-05T18:00:00Z"
+    release_end_utc: "2021-03-05T18:00:00Z"
+    simulation_start_utc: "2021-03-05T18:00:00Z"
+    simulation_end_utc: "2021-03-08T18:00:00Z"
+    forcing_start_utc: "2021-03-05T18:00:00Z"
+    forcing_end_utc: "2021-03-08T18:00:00Z"
+    start_lat: 14.422
+    start_lon: 124.486
+    end_lat: 15.300
+    end_lon: 123.416
+  - case_id: CASE_20210309T000000Z
+    run_name: CASE_20210309T000000Z
+    description: Accepted 2021 Phase 1 drifter segment beginning 2021-03-09 00:00 UTC.
+    drifter_id: "300534060352020"
+    release_start_utc: "2021-03-09T00:00:00Z"
+    release_end_utc: "2021-03-09T00:00:00Z"
+    simulation_start_utc: "2021-03-09T00:00:00Z"
+    simulation_end_utc: "2021-03-12T00:00:00Z"
+    forcing_start_utc: "2021-03-09T00:00:00Z"
+    forcing_end_utc: "2021-03-12T00:00:00Z"
+    start_lat: 15.365
+    start_lon: 123.321
+    end_lat: 16.047
+    end_lon: 122.297

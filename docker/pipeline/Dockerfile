@@ -7,6 +7,7 @@ LABEL description="Phase 1: Ingestion & Validation"
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     git \
+    libeccodes-dev \
     libnetcdf-dev \
     libhdf5-dev \
     libproj-dev \

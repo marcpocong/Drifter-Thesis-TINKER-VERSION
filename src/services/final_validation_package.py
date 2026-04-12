@@ -19,7 +19,14 @@ DWH_CASE_ID = "CASE_DWH_RETRO_2010_72H"
 MINDORO_DIR = Path("output") / MINDORO_CASE_ID
 DWH_DIR = Path("output") / DWH_CASE_ID
 
-TRACK_SEQUENCE = {"A": 1, "B1": 2, "B2": 3, "C1": 4, "C2": 5, "C3": 6}
+MINDORO_REINIT_DIR = MINDORO_DIR / "phase3b_extended_public_scored_march13_14_reinit"
+MINDORO_REINIT_CROSSMODEL_DIR = MINDORO_DIR / "phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison"
+MINDORO_EXTENDED_PUBLIC_DIR = MINDORO_DIR / "phase3b_extended_public"
+
+MINDORO_MARCH13_SOURCE_KEY = "8f8e3944748c4772910efc9829497e20"
+MINDORO_MARCH14_SOURCE_KEY = "10b37c42a9754363a5f7b14199b077e6"
+
+TRACK_SEQUENCE = {"A": 1, "B1": 2, "B2": 3, "B3": 4, "C1": 5, "C2": 6, "C3": 7}
 FSS_WINDOWS_KM = (1, 3, 5, 10)
 DWH_TRACK_LABELS = {
     "opendrift_control": "OpenDrift deterministic control",
@@ -78,12 +85,12 @@ def mean_fss(record: pd.Series | dict[str, Any]) -> float:
 
 def decide_final_structure() -> str:
     return (
-        "Main text should emphasize Mindoro B1 as the sparse Philippine stress test and DWH Phase 3C as the "
-        "rich-data transfer-validation success; comparative discussion should emphasize that PyGNOME leads the "
-        "Mindoro March 4-6 comparator benchmark while OpenDrift deterministic and ensemble lead the DWH external "
-        "case with mixed deterministic-vs-ensemble leadership; appendix and sensitivity sections should retain the "
-        "Mindoro broader-support appendix, recipe/init/source-history sensitivities, and any future DWH threshold "
-        "or harmonization extensions."
+        "Main text should emphasize Mindoro B1 as the March 13 -> March 14 NOAA reinit validation with an explicit "
+        "caveat that both NOAA products cite March 12 WorldView-3 imagery, while DWH Phase 3C remains the rich-data "
+        "transfer-validation success; comparative discussion should emphasize the March 13 -> March 14 Mindoro "
+        "cross-model comparator and the DWH deterministic-vs-ensemble-vs-PyGNOME comparison; legacy/reference and "
+        "appendix sections should retain the Mindoro March 6 sparse reference, the March 3-6 broader-support "
+        "reference, recipe/init/source-history sensitivities, and any future DWH threshold or harmonization extensions."
     )
 
 
@@ -94,12 +101,13 @@ class FinalValidationPackageService:
             MINDORO_DIR / "phase3b" / "phase3b_summary.csv",
             MINDORO_DIR / "phase3b" / "phase3b_pairing_manifest.csv",
             MINDORO_DIR / "public_obs_appendix" / "public_obs_inventory.csv",
-            MINDORO_DIR / "public_obs_appendix" / "appendix_perdate_summary.csv",
-            MINDORO_DIR / "public_obs_appendix" / "appendix_eventcorridor_fss_by_window.csv",
             MINDORO_DIR / "public_obs_appendix" / "appendix_eventcorridor_diagnostics.csv",
-            MINDORO_DIR / "pygnome_public_comparison" / "pygnome_public_comparison_summary.csv",
-            MINDORO_DIR / "pygnome_public_comparison" / "pygnome_public_comparison_eventcorridor_summary.csv",
-            MINDORO_DIR / "pygnome_public_comparison" / "pygnome_public_comparison_model_ranking.csv",
+            MINDORO_REINIT_DIR / "march13_14_reinit_summary.csv",
+            MINDORO_REINIT_DIR / "march13_14_reinit_branch_pairing_manifest.csv",
+            MINDORO_REINIT_DIR / "march13_14_reinit_run_manifest.json",
+            MINDORO_REINIT_CROSSMODEL_DIR / "march13_14_reinit_crossmodel_summary.csv",
+            MINDORO_REINIT_CROSSMODEL_DIR / "march13_14_reinit_crossmodel_run_manifest.json",
+            MINDORO_EXTENDED_PUBLIC_DIR / "extended_public_obs_acceptance_registry.csv",
             MINDORO_DIR / "recipe_sensitivity_r1_multibranch" / "recipe_sensitivity_r1_multibranch_ranking.csv",
             MINDORO_DIR / "recipe_sensitivity_r1_multibranch" / "recipe_sensitivity_r1_multibranch_run_manifest.json",
             MINDORO_DIR / "init_mode_sensitivity_r1" / "init_mode_sensitivity_r1_run_manifest.json",
@@ -128,21 +136,22 @@ class FinalValidationPackageService:
         self.phase3b_summary = _read_csv(MINDORO_DIR / "phase3b" / "phase3b_summary.csv")
         self.phase3b_pairing = _read_csv(MINDORO_DIR / "phase3b" / "phase3b_pairing_manifest.csv")
         self.public_obs_inventory = _read_csv(MINDORO_DIR / "public_obs_appendix" / "public_obs_inventory.csv")
-        self.appendix_perdate_summary = _read_csv(MINDORO_DIR / "public_obs_appendix" / "appendix_perdate_summary.csv")
-        self.appendix_eventcorridor_fss = _read_csv(
-            MINDORO_DIR / "public_obs_appendix" / "appendix_eventcorridor_fss_by_window.csv"
-        )
         self.appendix_eventcorridor_diag = _read_csv(
             MINDORO_DIR / "public_obs_appendix" / "appendix_eventcorridor_diagnostics.csv"
         )
-        self.mindoro_pygnome_summary = _read_csv(
-            MINDORO_DIR / "pygnome_public_comparison" / "pygnome_public_comparison_summary.csv"
+        self.mindoro_reinit_summary = _read_csv(MINDORO_REINIT_DIR / "march13_14_reinit_summary.csv")
+        self.mindoro_reinit_pairing = _read_csv(
+            MINDORO_REINIT_DIR / "march13_14_reinit_branch_pairing_manifest.csv"
         )
-        self.mindoro_pygnome_event = _read_csv(
-            MINDORO_DIR / "pygnome_public_comparison" / "pygnome_public_comparison_eventcorridor_summary.csv"
+        self.mindoro_reinit_manifest = _read_json(MINDORO_REINIT_DIR / "march13_14_reinit_run_manifest.json")
+        self.mindoro_reinit_crossmodel_summary = _read_csv(
+            MINDORO_REINIT_CROSSMODEL_DIR / "march13_14_reinit_crossmodel_summary.csv"
         )
-        self.mindoro_pygnome_ranking = _read_csv(
-            MINDORO_DIR / "pygnome_public_comparison" / "pygnome_public_comparison_model_ranking.csv"
+        self.mindoro_reinit_crossmodel_manifest = _read_json(
+            MINDORO_REINIT_CROSSMODEL_DIR / "march13_14_reinit_crossmodel_run_manifest.json"
+        )
+        self.extended_public_registry = _read_csv(
+            MINDORO_EXTENDED_PUBLIC_DIR / "extended_public_obs_acceptance_registry.csv"
         )
         self.recipe_ranking = _read_csv(
             MINDORO_DIR / "recipe_sensitivity_r1_multibranch" / "recipe_sensitivity_r1_multibranch_ranking.csv"
@@ -210,6 +219,9 @@ class FinalValidationPackageService:
         explicit = str(row.get("validation_dates", "") or "").strip()
         if explicit:
             return explicit
+        validation_dates_used = str(row.get("validation_dates_used", "") or "").strip()
+        if validation_dates_used:
+            return validation_dates_used
         obs_date = str(row.get("obs_date", "") or "").strip()
         if obs_date:
             return obs_date
@@ -224,6 +236,70 @@ class FinalValidationPackageService:
         if "2023-03-03_to_2023-03-06" in pair_id:
             return "2023-03-03_to_2023-03-06"
         return ""
+
+    def _mindoro_primary_reinit_row(self) -> pd.Series:
+        summary = self.mindoro_reinit_summary.copy()
+        if "branch_id" in summary.columns:
+            summary = summary[summary["branch_id"].astype(str) == "R1_previous"]
+        if summary.empty:
+            raise ValueError("Mindoro March 13 -> March 14 reinit summary is missing the R1_previous primary row.")
+        return summary.iloc[0]
+
+    def _mindoro_primary_reinit_pairing_row(self) -> pd.Series:
+        pairing = self.mindoro_reinit_pairing.copy()
+        if "branch_id" in pairing.columns:
+            pairing = pairing[pairing["branch_id"].astype(str) == "R1_previous"]
+        if pairing.empty:
+            raise ValueError("Mindoro March 13 -> March 14 reinit pairing manifest is missing the R1_previous row.")
+        return pairing.iloc[0]
+
+    def _mindoro_legacy_strict_row(self) -> pd.Series:
+        summary = self.phase3b_summary[self.phase3b_summary["pair_id"].astype(str) == "official_primary_march6"]
+        if summary.empty:
+            raise ValueError("Mindoro Phase 3B summary is missing the official_primary_march6 row.")
+        return summary.iloc[0]
+
+    def _mindoro_legacy_strict_pairing_row(self) -> pd.Series:
+        pairing = self.phase3b_pairing[self.phase3b_pairing["pair_id"].astype(str) == "official_primary_march6"]
+        if pairing.empty:
+            raise ValueError("Mindoro Phase 3B pairing manifest is missing the official_primary_march6 row.")
+        return pairing.iloc[0]
+
+    def _mindoro_legacy_support_row(self) -> pd.Series:
+        if self.appendix_eventcorridor_diag.empty:
+            raise ValueError("Mindoro appendix event-corridor diagnostics are missing.")
+        return self.appendix_eventcorridor_diag.iloc[0]
+
+    def _mindoro_crossmodel_rows(self) -> pd.DataFrame:
+        summary = self.mindoro_reinit_crossmodel_summary.copy()
+        if summary.empty:
+            raise ValueError("Mindoro March 13 -> March 14 cross-model summary is missing.")
+        if "mean_fss" not in summary.columns:
+            summary["mean_fss"] = summary.apply(mean_fss, axis=1)
+        if "track_tie_break_order" not in summary.columns:
+            summary["track_tie_break_order"] = range(len(summary))
+        return summary
+
+    def _mindoro_crossmodel_top_row(self) -> pd.Series:
+        rows = self._mindoro_crossmodel_rows().copy()
+        if "fss_1km" not in rows.columns:
+            rows["fss_1km"] = 0.0
+        if "iou" not in rows.columns:
+            rows["iou"] = 0.0
+        if "nearest_distance_to_obs_m" not in rows.columns:
+            rows["nearest_distance_to_obs_m"] = np.nan
+        rows.sort_values(
+            ["mean_fss", "fss_1km", "iou", "nearest_distance_to_obs_m", "track_tie_break_order"],
+            ascending=[False, False, False, True, True],
+            inplace=True,
+        )
+        return rows.iloc[0]
+
+    def _extended_obs_row(self, source_key: str) -> pd.Series:
+        rows = self.extended_public_registry[self.extended_public_registry["source_key"].astype(str) == source_key]
+        if rows.empty:
+            raise ValueError(f"Extended public registry is missing source_key={source_key}.")
+        return rows.iloc[0]
 
     def _build_dwh_main_row(self, row: pd.Series, track_id: str) -> dict[str, Any]:
         track_name = str(row.get("track_id", ""))
@@ -284,16 +360,51 @@ class FinalValidationPackageService:
     def _build_main_table(self) -> pd.DataFrame:
         rows: list[dict[str, Any]] = []
 
-        strict_row = self.phase3b_summary[self.phase3b_summary["pair_id"].astype(str) == "official_primary_march6"].iloc[0]
-        strict_pairing = self.phase3b_pairing[self.phase3b_pairing["pair_id"].astype(str) == "official_primary_march6"].iloc[0]
+        primary_row = self._mindoro_primary_reinit_row()
+        primary_pairing = self._mindoro_primary_reinit_pairing_row()
         rows.append(
             {
                 "case_id": MINDORO_CASE_ID,
                 "track_id": "B1",
-                "track_label": "Mindoro strict March 6 single-date stress test",
+                "track_label": "Mindoro March 13 -> March 14 NOAA reinit primary validation",
+                "model_comparator": "OpenDrift R1 previous reinit p50",
+                "validation_dates": "2023-03-14",
+                "result_scope": "primary_nextday_reinit_validation",
+                "fss_1km": float(primary_row["fss_1km"]),
+                "fss_3km": float(primary_row["fss_3km"]),
+                "fss_5km": float(primary_row["fss_5km"]),
+                "fss_10km": float(primary_row["fss_10km"]),
+                "mean_fss": mean_fss(primary_row),
+                "iou": float(primary_row["iou"]),
+                "dice": float(primary_row["dice"]),
+                "centroid_distance_m": self._coerce_value(primary_row["centroid_distance_m"]),
+                "forecast_nonzero_cells": int(primary_row["forecast_nonzero_cells"]),
+                "obs_nonzero_cells": int(primary_row["obs_nonzero_cells"]),
+                "transport_model": "oceandrift",
+                "provisional_transport_model": True,
+                "shoreline_mask_status": "canonical_mindoro_scoring_grid_ocean_mask_applied",
+                "notes": (
+                    "Primary Mindoro validation now uses the March 13 NOAA polygon as the reinitialization geometry "
+                    "and scores the March 14 NOAA target against the completed OpenDrift R1 previous p50 branch. "
+                    "Both NOAA/NESDIS products cite March 12 WorldView-3 imagery, so this is reported with an "
+                    "explicit same-imagery caveat rather than as a fully independent day-to-day pair."
+                ),
+                "source_summary_path": str(MINDORO_REINIT_DIR / "march13_14_reinit_summary.csv"),
+                "source_pairing_path": str(MINDORO_REINIT_DIR / "march13_14_reinit_branch_pairing_manifest.csv"),
+                "forecast_product_type": str(primary_pairing["forecast_product"]),
+            }
+        )
+
+        strict_row = self._mindoro_legacy_strict_row()
+        strict_pairing = self._mindoro_legacy_strict_pairing_row()
+        rows.append(
+            {
+                "case_id": MINDORO_CASE_ID,
+                "track_id": "B2",
+                "track_label": "Mindoro legacy March 6 sparse strict reference",
                 "model_comparator": "OpenDrift ensemble p50 official primary",
                 "validation_dates": "2023-03-06",
-                "result_scope": "strict_single_date",
+                "result_scope": "legacy_sparse_single_date_reference",
                 "fss_1km": float(strict_row["fss_1km"]),
                 "fss_3km": float(strict_row["fss_3km"]),
                 "fss_5km": float(strict_row["fss_5km"]),
@@ -305,11 +416,12 @@ class FinalValidationPackageService:
                 "forecast_nonzero_cells": int(strict_row["forecast_nonzero_cells"]),
                 "obs_nonzero_cells": int(strict_row["obs_nonzero_cells"]),
                 "transport_model": "oceandrift",
-                "provisional_transport_model": bool(strict_row["provisional_transport_model"]),
+                "provisional_transport_model": True,
                 "shoreline_mask_status": "canonical_mindoro_scoring_grid_ocean_mask_applied",
                 "notes": (
-                    "Sparse hard stress test using the accepted WWF March 6 validation polygon; official primary "
-                    "track is the p50 date-composite mask and remains provisional."
+                    "Legacy sparse-reference row preserved for methodology honesty. The accepted WWF March 6 "
+                    "validation mask rasterized to only two observed ocean cells, so this remains valuable context "
+                    "but no longer serves as the canonical Mindoro validation row."
                 ),
                 "source_summary_path": str(MINDORO_DIR / "phase3b" / "phase3b_summary.csv"),
                 "source_pairing_path": str(MINDORO_DIR / "phase3b" / "phase3b_pairing_manifest.csv"),
@@ -317,15 +429,15 @@ class FinalValidationPackageService:
             }
         )
 
-        appendix_row = self.appendix_eventcorridor_diag.iloc[0]
+        appendix_row = self._mindoro_legacy_support_row()
         rows.append(
             {
                 "case_id": MINDORO_CASE_ID,
-                "track_id": "B2",
-                "track_label": "Mindoro broader public-observation / event-corridor support",
+                "track_id": "B3",
+                "track_label": "Mindoro legacy March 3-6 broader-support reference",
                 "model_comparator": "OpenDrift ensemble p50 appendix support union",
                 "validation_dates": "2023-03-03_to_2023-03-06",
-                "result_scope": "event_corridor_support",
+                "result_scope": "legacy_broader_support_reference",
                 "fss_1km": float(appendix_row["fss_1km"]),
                 "fss_3km": float(appendix_row["fss_3km"]),
                 "fss_5km": float(appendix_row["fss_5km"]),
@@ -340,8 +452,9 @@ class FinalValidationPackageService:
                 "provisional_transport_model": True,
                 "shoreline_mask_status": "canonical_mindoro_scoring_grid_ocean_mask_applied",
                 "notes": (
-                    "Secondary appendix-only within-horizon public observation union. This supports broader spatial "
-                    "context and should not be confused with the strict March 6 single-date test."
+                    "Legacy broader-support reference preserved for narrative context. This March 3-6 public "
+                    "observation union remains informative, but it should not be confused with the promoted "
+                    "March 13 -> March 14 primary validation track."
                 ),
                 "source_summary_path": str(MINDORO_DIR / "public_obs_appendix" / "appendix_eventcorridor_diagnostics.csv"),
                 "source_pairing_path": str(MINDORO_DIR / "public_obs_appendix" / "appendix_eventcorridor_pairing_manifest.csv"),
@@ -349,15 +462,15 @@ class FinalValidationPackageService:
             }
         )
 
-        for _, row in self.mindoro_pygnome_event.iterrows():
+        for _, row in self._mindoro_crossmodel_rows().iterrows():
             rows.append(
                 {
                     "case_id": MINDORO_CASE_ID,
                     "track_id": "A",
-                    "track_label": "Mindoro Phase 3A benchmark comparator",
+                    "track_label": "Mindoro March 13 -> March 14 cross-model comparator",
                     "model_comparator": str(row["model_name"]),
-                    "validation_dates": self._format_validation_dates(row),
-                    "result_scope": "event_corridor_benchmark",
+                    "validation_dates": "2023-03-14",
+                    "result_scope": "primary_cross_model_reinit_compare",
                     "fss_1km": float(row["fss_1km"]),
                     "fss_3km": float(row["fss_3km"]),
                     "fss_5km": float(row["fss_5km"]),
@@ -372,11 +485,15 @@ class FinalValidationPackageService:
                     "provisional_transport_model": bool(row["provisional_transport_model"]),
                     "shoreline_mask_status": "canonical_mindoro_scoring_grid_ocean_mask_applied",
                     "notes": (
-                        "Comparator track only; accepted public observation-derived event-corridor masks remain truth. "
+                        "Comparator track only; the accepted March 14 NOAA observation mask remains truth. "
                         + str(row.get("structural_limitations", "") or "")
                     ).strip(),
-                    "source_summary_path": str(MINDORO_DIR / "pygnome_public_comparison" / "pygnome_public_comparison_eventcorridor_summary.csv"),
-                    "source_pairing_path": str(MINDORO_DIR / "pygnome_public_comparison" / "pygnome_public_comparison_pairing_manifest.csv"),
+                    "source_summary_path": str(
+                        MINDORO_REINIT_CROSSMODEL_DIR / "march13_14_reinit_crossmodel_summary.csv"
+                    ),
+                    "source_pairing_path": str(
+                        MINDORO_REINIT_CROSSMODEL_DIR / "march13_14_reinit_crossmodel_pairing_manifest.csv"
+                    ),
                     "forecast_product_type": str(row["forecast_product"]),
                 }
             )
@@ -405,35 +522,52 @@ class FinalValidationPackageService:
             {
                 "case_id": MINDORO_CASE_ID,
                 "track_id": "A",
-                "track_label": "Mindoro Phase 3A benchmark comparator",
+                "track_label": "Mindoro March 13 -> March 14 cross-model comparator",
                 "status": "complete",
-                "truth_source": "accepted public observation-derived event-corridor masks",
-                "primary_output_dir": str(MINDORO_DIR / "pygnome_public_comparison"),
+                "truth_source": "accepted March 14 NOAA/NESDIS observation mask",
+                "primary_output_dir": str(MINDORO_REINIT_CROSSMODEL_DIR),
                 "reporting_role": "comparative discussion",
-                "main_text_priority": "secondary",
-                "notes": "Comparator role only. PyGNOME is not truth.",
+                "main_text_priority": "primary",
+                "notes": (
+                    "Comparator role only. PyGNOME is not truth, and the March 13/14 comparator must be reported "
+                    "with the explicit caveat that both NOAA products cite March 12 WorldView-3 imagery."
+                ),
             },
             {
                 "case_id": MINDORO_CASE_ID,
                 "track_id": "B1",
-                "track_label": "Mindoro strict March 6 single-date stress test",
+                "track_label": "Mindoro March 13 -> March 14 NOAA reinit primary validation",
                 "status": "complete",
-                "truth_source": "accepted WWF March 6 validation mask",
-                "primary_output_dir": str(MINDORO_DIR / "phase3b"),
-                "reporting_role": "main-text stress test",
+                "truth_source": "accepted March 14 NOAA/NESDIS observation mask with March 13 NOAA seed polygon",
+                "primary_output_dir": str(MINDORO_REINIT_DIR),
+                "reporting_role": "main-text primary validation",
                 "main_text_priority": "primary",
-                "notes": "Sparse hard stress test with only two ocean cells in the accepted March 6 observation mask.",
+                "notes": (
+                    "Promoted primary Mindoro row sourced from the completed R1_previous reinit branch. Both NOAA "
+                    "products cite March 12 WorldView-3 imagery, so the main text must retain that caveat explicitly."
+                ),
             },
             {
                 "case_id": MINDORO_CASE_ID,
                 "track_id": "B2",
-                "track_label": "Mindoro broader public-observation / event-corridor support",
+                "track_label": "Mindoro legacy March 6 sparse strict reference",
+                "status": "complete",
+                "truth_source": "accepted WWF March 6 validation mask",
+                "primary_output_dir": str(MINDORO_DIR / "phase3b"),
+                "reporting_role": "legacy reference",
+                "main_text_priority": "secondary",
+                "notes": "Legacy sparse reference preserved because the processed strict March 6 target is extremely small.",
+            },
+            {
+                "case_id": MINDORO_CASE_ID,
+                "track_id": "B3",
+                "track_label": "Mindoro legacy March 3-6 broader-support reference",
                 "status": "complete",
                 "truth_source": "accepted within-horizon public observation union",
                 "primary_output_dir": str(MINDORO_DIR / "public_obs_appendix"),
-                "reporting_role": "supporting interpretation",
+                "reporting_role": "legacy reference",
                 "main_text_priority": "secondary",
-                "notes": "Broader support track only; do not confuse with the strict March 6 test.",
+                "notes": "Legacy broader-support reference only; keep it visible, but do not present it as the replacement primary row.",
             },
             {
                 "case_id": DWH_CASE_ID,
@@ -490,21 +624,31 @@ class FinalValidationPackageService:
 
     def _build_benchmark_table(self) -> pd.DataFrame:
         rows: list[dict[str, Any]] = []
-        for _, row in self.mindoro_pygnome_ranking.iterrows():
+        primary_mean_fss = mean_fss(self._mindoro_primary_reinit_row())
+        legacy_sparse_mean_fss = mean_fss(self._mindoro_legacy_strict_row())
+        legacy_support_mean_fss = mean_fss(self._mindoro_legacy_support_row())
+        mindoro_ranking = self._mindoro_crossmodel_rows().copy()
+        mindoro_ranking.sort_values(
+            ["mean_fss", "fss_1km", "iou", "nearest_distance_to_obs_m", "track_tie_break_order"],
+            ascending=[False, False, False, True, True],
+            inplace=True,
+        )
+        for rank, (_, row) in enumerate(mindoro_ranking.iterrows(), start=1):
             rows.append(
                 {
                     "case_id": MINDORO_CASE_ID,
-                    "benchmark_context": "Mindoro Phase 3A event-corridor comparator benchmark",
+                    "benchmark_context": "Mindoro March 13 -> March 14 cross-model comparator",
                     "track_id": "A",
                     "model_comparator": str(row["model_name"]),
-                    "eventcorridor_mean_fss": float(row["eventcorridor_mean_fss"]),
-                    "eventcorridor_iou": float(row["eventcorridor_iou"]),
-                    "eventcorridor_dice": float(row["eventcorridor_dice"]),
-                    "eventcorridor_rank": int(row["eventcorridor_rank"]),
-                    "strict_march6_mean_fss": float(row["strict_march6_mean_fss"]),
-                    "multidate_mean_fss": float(row["multidate_mean_fss"]),
-                    "truth_source": "accepted public observation-derived event-corridor masks",
-                    "notes": str(row["structural_limitations"]),
+                    "benchmark_mean_fss": float(row["mean_fss"]),
+                    "benchmark_iou": float(row["iou"]),
+                    "benchmark_dice": float(row["dice"]),
+                    "benchmark_rank": int(rank),
+                    "primary_validation_mean_fss": float(primary_mean_fss),
+                    "legacy_sparse_reference_mean_fss": float(legacy_sparse_mean_fss),
+                    "legacy_support_reference_mean_fss": float(legacy_support_mean_fss),
+                    "truth_source": "accepted March 14 NOAA/NESDIS observation mask",
+                    "notes": str(row.get("structural_limitations", "") or ""),
                 }
             )
 
@@ -521,9 +665,9 @@ class FinalValidationPackageService:
                     "benchmark_context": "DWH Phase 3C cross-model validation benchmark",
                     "track_id": "C1/C2/C3",
                     "model_comparator": DWH_TRACK_LABELS.get(str(track_id), str(track_id)),
-                    "eventcorridor_mean_fss": event_mean,
-                    "eventcorridor_iou": float(event_row["iou"]),
-                    "eventcorridor_dice": float(event_row["dice"]),
+                    "benchmark_mean_fss": event_mean,
+                    "benchmark_iou": float(event_row["iou"]),
+                    "benchmark_dice": float(event_row["dice"]),
                     "overall_mean_fss": overall_mean,
                     "truth_source": "DWH daily public observation-derived masks",
                     "notes": "Comparator only." if str(track_id) == "pygnome_deterministic" else "Scientific OpenDrift track.",
@@ -534,7 +678,7 @@ class FinalValidationPackageService:
         table["rank_by_context"] = 0
         for case_id in (MINDORO_CASE_ID, DWH_CASE_ID):
             ordered_index = table[table["case_id"].astype(str) == case_id].sort_values(
-                "eventcorridor_mean_fss", ascending=False
+                "benchmark_mean_fss", ascending=False
             ).index
             for rank, row_index in enumerate(ordered_index, start=1):
                 table.at[row_index, "rank_by_context"] = rank
@@ -543,6 +687,42 @@ class FinalValidationPackageService:
 
     def _build_observation_table(self) -> pd.DataFrame:
         rows: list[dict[str, Any]] = []
+
+        for source_key, usage, truth_status in (
+            (
+                MINDORO_MARCH13_SOURCE_KEY,
+                "primary_reinit_seed_polygon",
+                "primary_seed_reference",
+            ),
+            (
+                MINDORO_MARCH14_SOURCE_KEY,
+                "primary_nextday_validation",
+                "primary_truth",
+            ),
+        ):
+            row = self._extended_obs_row(source_key)
+            rows.append(
+                {
+                    "case_id": MINDORO_CASE_ID,
+                    "track_id": "B1",
+                    "observation_date": str(row["obs_date"]),
+                    "source_name": str(row["source_name"]),
+                    "provider": str(row["provider"]),
+                    "source_type": str(row["source_type"]),
+                    "truth_status": truth_status,
+                    "observation_usage": usage,
+                    "machine_readable": bool(row["machine_readable"]),
+                    "observation_derived": bool(row["observation_derived"]),
+                    "within_current_72h_horizon": bool(row["within_current_72h_horizon"]),
+                    "source_url": str(row["source_url"]),
+                    "service_url": str(row["service_url"]),
+                    "notes": (
+                        str(row.get("notes", "") or "")
+                        + " | Primary package caveat: both March 13 and March 14 NOAA products cite March 12 WorldView-3 imagery."
+                    ).strip(" |"),
+                }
+            )
+
         mindoro_inventory = self.public_obs_inventory.copy()
         mindoro_inventory["obs_date"] = mindoro_inventory["obs_date"].astype(str)
         within_horizon = mindoro_inventory[
@@ -550,28 +730,26 @@ class FinalValidationPackageService:
         ]
         for _, row in within_horizon.iterrows():
             quantitative = bool(row.get("accept_for_appendix_quantitative", False))
+            obs_date = str(row["obs_date"])
+            if not quantitative:
+                truth_status = "context_only"
+                observation_usage = "qualitative_context"
+            elif obs_date == "2023-03-06":
+                truth_status = "legacy_sparse_reference"
+                observation_usage = "legacy_sparse_reference"
+            else:
+                truth_status = "legacy_support_reference"
+                observation_usage = "legacy_support_reference"
             rows.append(
                 {
                     "case_id": MINDORO_CASE_ID,
-                    "track_id": "B1" if str(row["obs_date"]) == "2023-03-06" else "B2",
-                    "observation_date": str(row["obs_date"]),
+                    "track_id": "B2" if obs_date == "2023-03-06" else "B3",
+                    "observation_date": obs_date,
                     "source_name": str(row["source_name"]),
                     "provider": str(row["provider"]),
                     "source_type": str(row["source_type"]),
-                    "truth_status": (
-                        "strict_truth"
-                        if str(row["obs_date"]) == "2023-03-06" and quantitative
-                        else "broader_support_truth_candidate"
-                        if quantitative
-                        else "context_only"
-                    ),
-                    "observation_usage": (
-                        "strict_single_date_validation"
-                        if str(row["obs_date"]) == "2023-03-06" and quantitative
-                        else "broader_public_support"
-                        if quantitative
-                        else "qualitative_context"
-                    ),
+                    "truth_status": truth_status,
+                    "observation_usage": observation_usage,
                     "machine_readable": bool(row["machine_readable"]),
                     "observation_derived": bool(row["observation_derived"]),
                     "within_current_72h_horizon": bool(row["within_current_72h_horizon"]),
@@ -637,31 +815,43 @@ class FinalValidationPackageService:
                 "limitation_id": "M1",
                 "case_id": MINDORO_CASE_ID,
                 "track_id": "B1",
-                "category": "observation_sparsity",
-                "statement": "Mindoro strict March 6 is a sparse hard stress test with only two observed ocean cells.",
-                "implication": "Do not overgeneralize zero-overlap March 6 scores to the broader public-observation story.",
-                "source_artifact": str(MINDORO_DIR / "phase3b" / "phase3b_summary.csv"),
+                "category": "shared_imagery_caveat",
+                "statement": str(self.mindoro_reinit_manifest["limitations"]["noaa_source_limitation_note"]),
+                "implication": (
+                    "Present March 13 -> March 14 as the canonical Mindoro validation track, but state clearly that "
+                    "it is a reinitialization stress test with shared March 12 imagery provenance."
+                ),
+                "source_artifact": str(MINDORO_REINIT_DIR / "march13_14_reinit_run_manifest.json"),
             },
             {
                 "limitation_id": "M2",
                 "case_id": MINDORO_CASE_ID,
                 "track_id": "B2",
-                "category": "track_separation",
-                "statement": "The broader public-observation support union is not the same test as the strict March 6 single-date validation.",
-                "implication": "Keep B2 as supporting context rather than a replacement for B1.",
-                "source_artifact": str(MINDORO_DIR / "public_obs_appendix" / "appendix_eventcorridor_diagnostics.csv"),
+                "category": "legacy_sparse_reference",
+                "statement": "Mindoro March 6 remains a legacy sparse strict reference with only two observed ocean cells after processing.",
+                "implication": "Retain March 6 in methods and limitations discussion, but do not present it as the primary Mindoro validation row.",
+                "source_artifact": str(MINDORO_DIR / "phase3b" / "phase3b_summary.csv"),
             },
             {
                 "limitation_id": "M3",
                 "case_id": MINDORO_CASE_ID,
-                "track_id": "A",
-                "category": "comparator_role",
-                "statement": "PyGNOME is a comparator in Mindoro Phase 3A and is not the truth source.",
-                "implication": "Benchmark interpretations must remain model-vs-observation, not model-vs-model truth claims.",
-                "source_artifact": str(MINDORO_DIR / "pygnome_public_comparison" / "pygnome_public_comparison_eventcorridor_summary.csv"),
+                "track_id": "B3",
+                "category": "legacy_support_reference",
+                "statement": "The broader March 3-6 public-support union remains informative legacy context, but it is not the same claim as the promoted March 13 -> March 14 reinit validation.",
+                "implication": "Keep B3 visible in the package as reference material rather than silently overwriting or deleting it.",
+                "source_artifact": str(MINDORO_DIR / "public_obs_appendix" / "appendix_eventcorridor_diagnostics.csv"),
             },
             {
                 "limitation_id": "M4",
+                "case_id": MINDORO_CASE_ID,
+                "track_id": "A",
+                "category": "comparator_role",
+                "statement": "PyGNOME remains comparator-only in the promoted March 13 -> March 14 cross-model lane and does not reproduce the exact OpenDrift gridded current/wave/Stokes stack.",
+                "implication": "Cross-model discussion must remain model-vs-observation honest and should not present PyGNOME as a forcing-identical twin.",
+                "source_artifact": str(MINDORO_REINIT_CROSSMODEL_DIR / "march13_14_reinit_crossmodel_summary.csv"),
+            },
+            {
+                "limitation_id": "M5",
                 "case_id": MINDORO_CASE_ID,
                 "track_id": "appendix_sensitivity",
                 "category": "recipe_sensitivity",
@@ -674,7 +864,7 @@ class FinalValidationPackageService:
                 "source_artifact": str(MINDORO_DIR / "recipe_sensitivity_r1_multibranch" / "recipe_sensitivity_r1_multibranch_ranking.csv"),
             },
             {
-                "limitation_id": "M5",
+                "limitation_id": "M6",
                 "case_id": MINDORO_CASE_ID,
                 "track_id": "appendix_sensitivity",
                 "category": "source_history_reconstruction",
@@ -686,7 +876,7 @@ class FinalValidationPackageService:
                 "source_artifact": str(MINDORO_DIR / "source_history_reconstruction_r1" / "source_history_reconstruction_r1_run_manifest.json"),
             },
             {
-                "limitation_id": "M6",
+                "limitation_id": "M7",
                 "case_id": MINDORO_CASE_ID,
                 "track_id": "appendix_sensitivity",
                 "category": "initialization_sensitivity",
@@ -695,12 +885,16 @@ class FinalValidationPackageService:
                 "source_artifact": str(MINDORO_DIR / "init_mode_sensitivity_r1" / "init_mode_sensitivity_r1_run_manifest.json"),
             },
             {
-                "limitation_id": "M7",
+                "limitation_id": "M8",
                 "case_id": MINDORO_CASE_ID,
                 "track_id": "appendix_sensitivity",
                 "category": "extended_horizon",
-                "statement": str(extended_row["reason"]),
-                "implication": "Extended-horizon public observation support remains appendix-only until forcing windows are expanded.",
+                "statement": (
+                    "Beyond-horizon public observations outside the promoted March 13 -> March 14 pair still require "
+                    "dedicated rerun-specific support; the generic extended-horizon lane remains blocked under the "
+                    f"current forcing window ({extended_row['reason']})."
+                ),
+                "implication": "Do not generalize the promoted March 13 -> March 14 packaging change to all later public dates.",
                 "source_artifact": str(MINDORO_DIR / "phase3b_extended_public" / "phase3b_extended_summary.csv"),
             },
             {
@@ -745,13 +939,14 @@ class FinalValidationPackageService:
             return subset.iloc[0]
 
         return {
-            "mindoro_strict": _row_for("B1").to_dict(),
-            "mindoro_broader_support": _row_for("B2").to_dict(),
+            "mindoro_primary_reinit": _row_for("B1").to_dict(),
+            "mindoro_legacy_march6": _row_for("B2").to_dict(),
+            "mindoro_legacy_broader_support": _row_for("B3").to_dict(),
             "dwh_deterministic_event": _row_for("C1", "OpenDrift deterministic", "2010-05-21_to_2010-05-23").to_dict(),
             "dwh_ensemble_p50_event": _row_for("C2", "ensemble p50", "2010-05-21_to_2010-05-23").to_dict(),
             "dwh_ensemble_p90_event": _row_for("C2", "ensemble p90", "2010-05-21_to_2010-05-23").to_dict(),
             "dwh_pygnome_event": _row_for("C3", "PyGNOME", "2010-05-21_to_2010-05-23").to_dict(),
-            "mindoro_benchmark_top": self.mindoro_pygnome_ranking.sort_values("eventcorridor_rank").iloc[0].to_dict(),
+            "mindoro_crossmodel_top": self._mindoro_crossmodel_top_row().to_dict(),
             "dwh_eventcorridor_top": self.dwh_cross_model_event.assign(mean_fss=self.dwh_cross_model_event.apply(mean_fss, axis=1))
             .sort_values("mean_fss", ascending=False)
             .iloc[0]
@@ -773,15 +968,15 @@ class FinalValidationPackageService:
         lines = [
             "# Final Validation Claims Guardrails",
             "",
-            "- Mindoro strict March 6 is a sparse hard stress test and should be described that way in the thesis.",
-            "- Mindoro broader public-observation support should not be confused with the strict March 6 single-date test.",
-            "- PyGNOME is a comparator, not truth, in both the Mindoro benchmark and the DWH cross-model comparison.",
+            "- Mindoro B1 is now the March 13 -> March 14 NOAA reinit validation and should be described with the explicit March 12 WorldView-3 caveat.",
+            "- Mindoro B2 and B3 remain legacy/reference rows and should not be silently rewritten as if they never existed.",
+            "- PyGNOME is a comparator, not truth, in both the promoted Mindoro cross-model lane and the DWH cross-model comparison.",
             "- DWH observed masks are truth for Phase 3C.",
             "- DWH currently demonstrates workflow transferability and meaningful spatial skill under real historical forcing.",
             "- On DWH, OpenDrift outperforms PyGNOME under the current case definition.",
             "- On DWH, ensemble p50 improves overall mean FSS while deterministic remains strongest on the May 21-23 event corridor.",
             "- DWH Phase 3C is scientifically reportable even if some optional future extensions remain.",
-            "- Do not relabel appendix-only broader-support or sensitivity products as replacements for the strict Mindoro stress test.",
+            "- Do not relabel legacy/reference or sensitivity products as if they were the new promoted primary validation row.",
         ]
         _write_text(path, "\n".join(lines))
         return path
@@ -795,19 +990,21 @@ class FinalValidationPackageService:
             "",
             "1. Phase 1 = Transport Validation and Baseline Configuration Selection",
             "2. Phase 2 = Standardized Machine-Readable Forecast Product Generation",
-            "3. Phase 3A = Mindoro Cross-Model Spatial Benchmarking with PyGNOME",
-            "4. Phase 3B1 = Mindoro Strict Single-Date Observation Stress Test (March 6)",
-            "5. Phase 3B2 = Mindoro Broader Public-Observation / Event-Corridor Support",
-            "6. Phase 3C = External Rich-Data Spill Transfer Validation (Deepwater Horizon 2010)",
-            "7. Phase 4 = Oil-Type Fate and Shoreline Impact Analysis",
-            "8. Phase 5 = Reproducibility, Packaging, and Deliverables",
+            "3. Phase 3A = Mindoro March 13 -> March 14 Cross-Model Comparator",
+            "4. Phase 3B1 = Mindoro March 13 -> March 14 NOAA Reinit Primary Validation",
+            "5. Phase 3B2 = Mindoro Legacy March 6 Sparse Strict Reference",
+            "6. Phase 3B3 = Mindoro Legacy March 3-6 Broader-Support Reference",
+            "7. Phase 3C = External Rich-Data Spill Transfer Validation (Deepwater Horizon 2010)",
+            "8. Phase 4 = Oil-Type Fate and Shoreline Impact Analysis",
+            "9. Phase 5 = Reproducibility, Packaging, and Deliverables",
             "",
             "Packaging guidance:",
             "",
             "- Keep Mindoro as the main Philippine case.",
             "- Keep DWH as the rich-data external transfer-validation branch.",
             "- Present Phase 3A as comparator-only benchmarking, not as a truth-source replacement.",
-            "- Keep the broader-support appendix separate from the strict March 6 stress test.",
+            "- Present March 13 -> March 14 as the canonical Mindoro validation with the shared-imagery caveat stated explicitly.",
+            "- Keep March 6 and March 3-6 visible as legacy/reference material rather than deleting or hiding them.",
         ]
         _write_text(path, "\n".join(lines))
         return path
@@ -819,15 +1016,16 @@ class FinalValidationPackageService:
             "",
             "Key scientific takeaway:",
             "",
-            "- Mindoro is the hard sparse-data Philippine stress test.",
+            "- Mindoro primary validation is now the March 13 -> March 14 NOAA reinit track.",
             "- DWH is the rich-data external transfer-validation success.",
             "- Ensemble benefit is case-dependent, not universal.",
             "",
             "Interpretation notes:",
             "",
-            "- The Mindoro strict March 6 result should be interpreted as a difficult sparse-data edge case rather than as the whole validation story.",
-            "- The Mindoro broader-support appendix shows that some spatial support exists in a broader public-observation framing, but it is not the same claim as the strict single-date test.",
-            "- The Mindoro comparator benchmark shows PyGNOME leading the March 4-6 event-corridor comparison under the current case definition.",
+            "- The promoted Mindoro row is a March 13 -> March 14 reinitialization test and must carry the caveat that both NOAA products cite March 12 WorldView-3 imagery.",
+            "- The legacy March 6 row should still be interpreted as a difficult sparse-data edge case rather than erased from the methods story.",
+            "- The legacy March 3-6 broader-support row remains helpful context, but it is not the same claim as the promoted B1 reinit validation.",
+            "- The promoted Mindoro comparator lane shows OpenDrift R1 previous reinit p50 leading the March 13 -> March 14 cross-model comparison under the current case definition.",
             "- The DWH external case shows that the workflow transfers to a richer observation setting with meaningful spatial skill.",
             "- On DWH, ensemble p50 improves overall mean FSS, while deterministic retains the strongest event-corridor result.",
         ]
@@ -844,16 +1042,28 @@ class FinalValidationPackageService:
             "## Headline Results",
             "",
             (
-                f"- Mindoro strict March 6 (B1): FSS(1/3/5/10 km) = "
-                f"{headlines['mindoro_strict']['fss_1km']:.4f}, {headlines['mindoro_strict']['fss_3km']:.4f}, "
-                f"{headlines['mindoro_strict']['fss_5km']:.4f}, {headlines['mindoro_strict']['fss_10km']:.4f}; "
-                f"IoU={headlines['mindoro_strict']['iou']:.4f}; Dice={headlines['mindoro_strict']['dice']:.4f}."
+                f"- Mindoro March 13 -> March 14 primary validation (B1): FSS(1/3/5/10 km) = "
+                f"{headlines['mindoro_primary_reinit']['fss_1km']:.4f}, {headlines['mindoro_primary_reinit']['fss_3km']:.4f}, "
+                f"{headlines['mindoro_primary_reinit']['fss_5km']:.4f}, {headlines['mindoro_primary_reinit']['fss_10km']:.4f}; "
+                f"IoU={headlines['mindoro_primary_reinit']['iou']:.4f}; Dice={headlines['mindoro_primary_reinit']['dice']:.4f}."
             ),
             (
-                f"- Mindoro broader-support appendix (B2): FSS(1/3/5/10 km) = "
-                f"{headlines['mindoro_broader_support']['fss_1km']:.4f}, {headlines['mindoro_broader_support']['fss_3km']:.4f}, "
-                f"{headlines['mindoro_broader_support']['fss_5km']:.4f}, {headlines['mindoro_broader_support']['fss_10km']:.4f}; "
-                f"IoU={headlines['mindoro_broader_support']['iou']:.4f}; Dice={headlines['mindoro_broader_support']['dice']:.4f}."
+                f"- Mindoro promoted cross-model top track (A): {headlines['mindoro_crossmodel_top']['model_name']} "
+                f"with FSS(1/3/5/10 km) = {headlines['mindoro_crossmodel_top']['fss_1km']:.4f}, "
+                f"{headlines['mindoro_crossmodel_top']['fss_3km']:.4f}, {headlines['mindoro_crossmodel_top']['fss_5km']:.4f}, "
+                f"{headlines['mindoro_crossmodel_top']['fss_10km']:.4f}."
+            ),
+            (
+                f"- Mindoro legacy March 6 sparse reference (B2): FSS(1/3/5/10 km) = "
+                f"{headlines['mindoro_legacy_march6']['fss_1km']:.4f}, {headlines['mindoro_legacy_march6']['fss_3km']:.4f}, "
+                f"{headlines['mindoro_legacy_march6']['fss_5km']:.4f}, {headlines['mindoro_legacy_march6']['fss_10km']:.4f}; "
+                f"IoU={headlines['mindoro_legacy_march6']['iou']:.4f}; Dice={headlines['mindoro_legacy_march6']['dice']:.4f}."
+            ),
+            (
+                f"- Mindoro legacy March 3-6 broader-support reference (B3): FSS(1/3/5/10 km) = "
+                f"{headlines['mindoro_legacy_broader_support']['fss_1km']:.4f}, {headlines['mindoro_legacy_broader_support']['fss_3km']:.4f}, "
+                f"{headlines['mindoro_legacy_broader_support']['fss_5km']:.4f}, {headlines['mindoro_legacy_broader_support']['fss_10km']:.4f}; "
+                f"IoU={headlines['mindoro_legacy_broader_support']['iou']:.4f}; Dice={headlines['mindoro_legacy_broader_support']['dice']:.4f}."
             ),
             (
                 f"- DWH deterministic event corridor (C1): FSS(1/3/5/10 km) = "
@@ -877,9 +1087,9 @@ class FinalValidationPackageService:
             "",
             "## Recommended Final Structure",
             "",
-            "- Main text: Mindoro B1 as the sparse Philippine stress test plus DWH Phase 3C as the rich-data transfer-validation success.",
-            "- Comparative discussion: Mindoro Phase 3A comparator benchmark and DWH deterministic-vs-ensemble-vs-PyGNOME comparison.",
-            "- Appendix and sensitivities: broader-support appendix, recipe/init/source-history sensitivities, and optional future DWH extensions.",
+            "- Main text: Mindoro B1 as the March 13 -> March 14 primary validation with the shared-imagery caveat plus DWH Phase 3C as the rich-data transfer-validation success.",
+            "- Comparative discussion: Mindoro A cross-model comparator and DWH deterministic-vs-ensemble-vs-PyGNOME comparison.",
+            "- Legacy/reference and sensitivities: Mindoro B2/B3 legacy rows, recipe/init/source-history sensitivities, and optional future DWH extensions.",
             "",
             "## Final Recommendation",
             "",
@@ -938,9 +1148,10 @@ class FinalValidationPackageService:
             "recommended_final_chapter_structure": [
                 "Phase 1 = Transport Validation and Baseline Configuration Selection",
                 "Phase 2 = Standardized Machine-Readable Forecast Product Generation",
-                "Phase 3A = Mindoro Cross-Model Spatial Benchmarking with PyGNOME",
-                "Phase 3B1 = Mindoro Strict Single-Date Observation Stress Test (March 6)",
-                "Phase 3B2 = Mindoro Broader Public-Observation / Event-Corridor Support",
+                "Phase 3A = Mindoro March 13 -> March 14 Cross-Model Comparator",
+                "Phase 3B1 = Mindoro March 13 -> March 14 NOAA Reinit Primary Validation",
+                "Phase 3B2 = Mindoro Legacy March 6 Sparse Strict Reference",
+                "Phase 3B3 = Mindoro Legacy March 3-6 Broader-Support Reference",
                 "Phase 3C = External Rich-Data Spill Transfer Validation (Deepwater Horizon 2010)",
                 "Phase 4 = Oil-Type Fate and Shoreline Impact Analysis",
                 "Phase 5 = Reproducibility, Packaging, and Deliverables",

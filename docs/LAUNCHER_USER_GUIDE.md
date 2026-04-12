@@ -29,7 +29,7 @@ These commands are the safest starting point because they do not trigger full sc
 The local dashboard is implemented, but it is intentionally kept outside the launcher entry catalog in this first version. Launch it directly:
 
 ```bash
-docker-compose exec pipeline streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
+docker-compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
 ```
 
 This keeps the launcher honest: it remains a matrix-driven workflow launcher, while the UI remains a separate read-only exploration surface over the packaged outputs.
@@ -55,9 +55,12 @@ Read-only utilities:
 
 Intentional scientific reruns:
 
+- `phase1_production_rerun`
 - `mindoro_reportable_core`
 - `mindoro_phase4_only`
 - `dwh_reportable_bundle`
+
+`phase1_production_rerun` is intentionally expensive and stages `output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml` only. It does not auto-overwrite `config/phase1_baseline_selection.yaml`.
 
 Appendix and sensitivity:
 
@@ -65,14 +68,30 @@ Appendix and sensitivity:
 
 Legacy/debug:
 
+- `prototype_2021_bundle`
 - `prototype_legacy_bundle`
+
+`prototype_2021_bundle` is now the preferred debug/demo lane. It is frozen from the two accepted 2021 strict-gate drifter segments, uses only the official four-recipe Phase 1 family, and stops at the transport-core bundle: `prep -> 1_2 -> benchmark -> prototype_pygnome_similarity_summary`.
+
+`prototype_legacy_bundle` remains available for backward-compatible regression work. It still attempts the modern GFS-backed prototype recipes as a best-effort legacy extension, and `3` / `3b` remain there only as legacy appendix/smoke follow-ons.
+
+The preferred similarity package now writes to `output/prototype_2021_pygnome_similarity/`. The older `output/prototype_2016_pygnome_similarity/` package is preserved as a legacy artifact.
+
+If you only need to rebuild that consolidated summary from existing benchmark outputs, run it directly:
+
+```bash
+docker-compose exec -T -e WORKFLOW_MODE=prototype_2021 -e PIPELINE_PHASE=prototype_pygnome_similarity_summary pipeline python -m src
+```
 
 ## Current Guardrails
 
-- Phase 1 is architecture-audited, but the full 2016-2022 production rerun is still needed.
+- Phase 1 now has a dedicated `phase1_production_rerun` entry that stages the 2016-2022 regional rerun outputs and a candidate baseline artifact without auto-overwriting `config/phase1_baseline_selection.yaml`.
 - Phase 2 is scientifically usable, but not scientifically frozen.
 - Phase 4 is scientifically reportable now for Mindoro, but inherited-provisional from the upstream Phase 1/2 state.
-- Prototype mode remains backward-compatible, but it is not the final Phase 1 study.
+- `prototype_2021` is the preferred accepted-segment debug lane, but it is still not the final Phase 1 study.
+- `prototype_2016` remains backward-compatible and keeps the preserved `+/- 3 h` ensemble jitter by padding its prep window.
+- `Phase 3A` is the deterministic OpenDrift-vs-PyGNOME transport benchmark, `Phase 3B` is observation-based scoring, and `Phase 4` is Oil-Type Fate and Shoreline Impact Analysis. Do not describe the prototype/debug lanes as if they prove Phase 4.
+- The prototype similarity summary is comparator-only: deterministic OpenDrift control versus deterministic PyGNOME transport footprints and densities, plus support-only forecast figures built from those stored benchmark rasters. It is not a truth lane and not final Chapter 3 evidence.
 
 ## Not Implemented Yet
 

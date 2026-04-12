@@ -36,6 +36,47 @@ SOURCE_TAXONOMY_MODELED = "modeled_forecast_exclude_from_truth"
 SOURCE_TAXONOMY_QUALITATIVE = "qualitative_context_only"
 
 
+def load_phase3b_multidate_validation_dates(
+    case_output_dir: Path,
+    fallback_dates: list[str] | None = None,
+) -> list[str]:
+    manifest_path = case_output_dir / MULTIDATE_DIR_NAME / "phase3b_multidate_run_manifest.json"
+    if manifest_path.exists():
+        with open(manifest_path, "r", encoding="utf-8") as handle:
+            manifest = json.load(handle) or {}
+        accepted_dates = [
+            str(value).strip()
+            for value in manifest.get("accepted_validation_dates_used_for_forecast_skill") or []
+            if str(value).strip()
+        ]
+        if accepted_dates:
+            return list(dict.fromkeys(accepted_dates))
+
+    summary_path = case_output_dir / MULTIDATE_DIR_NAME / "phase3b_multidate_summary.csv"
+    if summary_path.exists():
+        summary = pd.read_csv(summary_path)
+        if {"pair_role", "obs_date"}.issubset(summary.columns):
+            accepted_dates = [
+                str(value).strip()
+                for value in summary.loc[summary["pair_role"].astype(str) == "per_date_union", "obs_date"].tolist()
+                if str(value).strip()
+            ]
+            if accepted_dates:
+                return list(dict.fromkeys(accepted_dates))
+
+    defaults = fallback_dates or [VALIDATION_START_DATE, VALIDATION_END_DATE]
+    return [str(value).strip() for value in defaults if str(value).strip()]
+
+
+def format_phase3b_multidate_eventcorridor_label(validation_dates: list[str]) -> str:
+    cleaned = [str(value).strip() for value in validation_dates if str(value).strip()]
+    if not cleaned:
+        return f"{VALIDATION_START_DATE}_to_{VALIDATION_END_DATE}"
+    if len(cleaned) == 1:
+        return cleaned[0]
+    return f"{cleaned[0]}_to_{cleaned[-1]}"
+
+
 def _write_json(path: Path, payload: dict | list) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as handle:
@@ -148,6 +189,7 @@ class Phase3BMultidatePublicService:
         accepted_skill = taxonomy[taxonomy["accepted_for_multidate_quantitative"]].copy()
         init_qa = taxonomy[taxonomy["role_in_phase3b"] == "initialization_consistency_qa"].copy()
         accepted_dates = sorted(accepted_skill["obs_date"].dropna().astype(str).unique().tolist())
+        self._prune_stale_outputs(accepted_dates, include_context_date=not init_qa.empty)
 
         forecast_datecomposites = self._prepare_forecast_datecomposites(accepted_dates, include_context_date=not init_qa.empty)
         source_pairs = self._build_source_pairs(accepted_skill, forecast_datecomposites)
@@ -239,6 +281,21 @@ class Phase3BMultidatePublicService:
             "march3_excluded": True,
             "strict_files_unchanged": strict_files_unchanged,
         }
+
+    def _prune_stale_outputs(self, accepted_dates: list[str], include_context_date: bool) -> None:
+        allowed_forecast_dates = set(accepted_dates)
+        if include_context_date:
+            allowed_forecast_dates.add(INIT_DATE)
+
+        allowed_forecast_files = {f"mask_p50_{date}_datecomposite.tif" for date in allowed_forecast_dates}
+        for path in self.forecast_date_dir.glob("mask_p50_*_datecomposite.tif"):
+            if path.name not in allowed_forecast_files:
+                path.unlink(missing_ok=True)
+
+        allowed_union_files = {f"obs_union_{date}.tif" for date in accepted_dates}
+        for path in self.obs_union_dir.glob("obs_union_*.tif"):
+            if path.name not in allowed_union_files:
+                path.unlink(missing_ok=True)
 
     def _load_inventory(self) -> pd.DataFrame:
         inventory_path = self.appendix_dir / "public_obs_inventory.csv"

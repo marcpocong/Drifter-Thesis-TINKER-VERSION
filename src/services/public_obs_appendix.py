@@ -20,6 +20,7 @@ import shutil
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -76,6 +77,9 @@ ARCGIS_RELATED_QUERY = "MindoroOilSpill owner:jrsales@wwf.org.ph_panda"
 ARCGIS_SHARING_BASE = "https://www.arcgis.com/sharing/rest/content/items"
 ARCGIS_SEARCH_URL = "https://www.arcgis.com/sharing/rest/search"
 REQUEST_TIMEOUT = 60
+BUFFERED_MARCH6_SOURCE_KEY = "wwf_main_layer1_validation_mar6"
+BUFFERED_MARCH6_SUPPORT_BUFFER_M = 1000.0
+BUFFERED_MARCH6_SUPPORT_PREFIX = "appendix_buffered_march6_1000m"
 
 OFFICIAL_LOCKED_PHASE3B_FILES = [
     Path("output/CASE_MINDORO_RETRO_2023/phase3b/phase3b_pairing_manifest.csv"),
@@ -284,6 +288,98 @@ def classify_inventory_acceptance(
     if not within_current_72h_horizon:
         return False, True, "beyond current official 72 h horizon; extended-horizon rerun required"
     return True, True, ""
+
+
+def buffered_march6_support_notice(buffer_m: float = BUFFERED_MARCH6_SUPPORT_BUFFER_M) -> str:
+    return (
+        "Buffered March 6 support is appendix-only and keeps the official main March 6 score unchanged; "
+        f"it uses a {float(buffer_m):.1f} m buffer around the accepted WWF March 6 geometry."
+    )
+
+
+def build_buffered_support_gdf(source_gdf, *, target_crs: str, buffer_m: float = BUFFERED_MARCH6_SUPPORT_BUFFER_M):
+    if gpd is None:
+        raise ImportError("geopandas is required to build buffered March 6 appendix support geometries.")
+    if source_gdf is None or source_gdf.empty:
+        raise RuntimeError("Buffered March 6 support requires a non-empty source geometry.")
+    if source_gdf.crs is None:
+        raise RuntimeError("Buffered March 6 support requires a source geometry with a defined CRS.")
+
+    working = source_gdf.to_crs(target_crs) if str(source_gdf.crs) != str(target_crs) else source_gdf.copy()
+    valid = working.dropna(subset=["geometry"]).copy()
+    valid = valid[~valid.geometry.is_empty]
+    if valid.empty:
+        raise RuntimeError("Buffered March 6 support requires at least one valid non-empty geometry.")
+
+    buffered = valid.geometry.buffer(float(buffer_m))
+    dissolved = buffered.union_all() if hasattr(buffered, "union_all") else buffered.unary_union
+    repaired = dissolved.buffer(0)
+    if repaired.is_empty:
+        raise RuntimeError("Buffered March 6 support geometry became empty after buffering/repair.")
+    return gpd.GeoDataFrame(geometry=[repaired], crs=working.crs)
+
+
+def build_buffered_support_mask(
+    source_gdf,
+    *,
+    grid: GridBuilder,
+    sea_mask: np.ndarray | None,
+    buffer_m: float = BUFFERED_MARCH6_SUPPORT_BUFFER_M,
+):
+    buffered_gdf = build_buffered_support_gdf(source_gdf, target_crs=grid.crs, buffer_m=buffer_m)
+    mask_data = rasterize_observation_layer(buffered_gdf, grid)
+    mask_data = apply_ocean_mask(mask_data, sea_mask=sea_mask, fill_value=0.0)
+    if int(np.count_nonzero(mask_data > 0)) == 0:
+        raise RuntimeError("Buffered March 6 support mask rasterized to zero ocean cells after ocean masking.")
+    return buffered_gdf, mask_data.astype(np.float32)
+
+
+def build_buffered_march6_support_manifest(
+    *,
+    buffer_m: float,
+    source_processed_vector: Path,
+    buffered_vector_path: Path,
+    buffered_mask_path: Path,
+    forecast_path: Path,
+    pairing_manifest_path: Path,
+    fss_by_window_path: Path,
+    diagnostics_path: Path,
+    summary_md_path: Path,
+    qa_overlay_path: Path,
+    summary_row: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "role": "appendix_only_support_sensitivity",
+        "buffer_m": float(buffer_m),
+        "official_strict_march6_unchanged": True,
+        "comparison_rule": "official March 6 p50 vs buffered March 6 observation support mask",
+        "note": buffered_march6_support_notice(buffer_m),
+        "source_processed_vector": str(source_processed_vector),
+        "artifacts": {
+            "buffered_vector": str(buffered_vector_path),
+            "buffered_mask": str(buffered_mask_path),
+            "forecast_path": str(forecast_path),
+            "pairing_manifest": str(pairing_manifest_path),
+            "fss_by_window": str(fss_by_window_path),
+            "diagnostics": str(diagnostics_path),
+            "summary_md": str(summary_md_path),
+            "qa_overlay": str(qa_overlay_path),
+        },
+        "summary": {
+            "pair_id": str(summary_row.get("pair_id", "")),
+            "pair_role": str(summary_row.get("pair_role", "")),
+            "obs_date": str(summary_row.get("obs_date", "")),
+            "fss_1km": float(summary_row.get("fss_1km", np.nan)),
+            "fss_3km": float(summary_row.get("fss_3km", np.nan)),
+            "fss_5km": float(summary_row.get("fss_5km", np.nan)),
+            "fss_10km": float(summary_row.get("fss_10km", np.nan)),
+            "iou": float(summary_row.get("iou", np.nan)),
+            "dice": float(summary_row.get("dice", np.nan)),
+            "centroid_distance_m": float(summary_row.get("centroid_distance_m", np.nan)),
+            "forecast_nonzero_cells": int(summary_row.get("forecast_nonzero_cells", 0)),
+            "obs_nonzero_cells": int(summary_row.get("obs_nonzero_cells", 0)),
+        },
+    }
 
 
 class PublicObservationAppendixService:
@@ -1162,6 +1258,104 @@ class PublicObservationAppendixService:
         fig.savefig(out_path, dpi=150, bbox_inches="tight")
         plt.close(fig)
 
+    def _write_buffered_march6_overlay(self, out_path: Path, forecast_path: Path, observation_path: Path) -> None:
+        fig, ax = plt.subplots(figsize=(8, 8))
+        forecast = self.phase3b_helper._load_binary_score_mask(forecast_path)
+        obs = self.phase3b_helper._load_binary_score_mask(observation_path)
+        self._render_overlay(ax, forecast, obs, "Appendix buffered March 6 support")
+        fig.tight_layout()
+        fig.savefig(out_path, dpi=150, bbox_inches="tight")
+        plt.close(fig)
+
+    def _write_buffered_march6_support(
+        self,
+        accepted_rows: list[InventoryRow],
+        forecast_datecomposites: dict[str, dict[str, Path]],
+    ) -> dict[str, Any]:
+        march6_row = next((row for row in accepted_rows if row.source_key == BUFFERED_MARCH6_SOURCE_KEY), None)
+        if march6_row is None or not str(march6_row.processed_vector).strip():
+            raise RuntimeError("Buffered March 6 support requires the accepted WWF March 6 processed vector.")
+
+        source_processed_vector = Path(str(march6_row.processed_vector))
+        if not source_processed_vector.exists():
+            raise FileNotFoundError(f"Buffered March 6 source vector is missing: {source_processed_vector}")
+        if self.validation_date not in forecast_datecomposites:
+            raise RuntimeError(
+                f"Buffered March 6 support requires the official {self.validation_date} date composite in appendix outputs."
+            )
+
+        source_gdf = gpd.read_file(source_processed_vector)
+        buffered_gdf, buffered_mask = build_buffered_support_mask(
+            source_gdf,
+            grid=self.grid,
+            sea_mask=self.sea_mask,
+            buffer_m=BUFFERED_MARCH6_SUPPORT_BUFFER_M,
+        )
+
+        buffered_vector_path = self.processed_dir / f"{BUFFERED_MARCH6_SUPPORT_PREFIX}_vector.gpkg"
+        buffered_mask_path = self.accepted_masks_dir / f"{BUFFERED_MARCH6_SUPPORT_PREFIX}_obs_mask.tif"
+        buffered_to_write = _sanitize_vector_columns_for_gpkg(buffered_gdf)
+        buffered_to_write.to_file(buffered_vector_path, driver="GPKG")
+        save_raster(self.grid, buffered_mask.astype(np.float32), buffered_mask_path)
+
+        forecast_path = forecast_datecomposites[self.validation_date]["mask_p50"]
+        pairing_row, fss_rows, summary_row = self._score_binary_pair(
+            pair_id=BUFFERED_MARCH6_SUPPORT_PREFIX,
+            pair_role="buffered_march6_support",
+            source_name="Buffered March 6 WWF validation support mask",
+            provider="Appendix secondary",
+            obs_date=self.validation_date,
+            forecast_path=forecast_path,
+            observation_path=buffered_mask_path,
+            source_semantics="appendix_only_buffered_march6_observation_support_1000m",
+            score_group="appendix_buffered_march6_support",
+        )
+
+        pairing_path = self.appendix_dir / f"{BUFFERED_MARCH6_SUPPORT_PREFIX}_pairing_manifest.csv"
+        fss_path = self.appendix_dir / f"{BUFFERED_MARCH6_SUPPORT_PREFIX}_fss_by_window.csv"
+        diagnostics_path = self.appendix_dir / f"{BUFFERED_MARCH6_SUPPORT_PREFIX}_diagnostics.csv"
+        summary_md_path = self.appendix_dir / f"{BUFFERED_MARCH6_SUPPORT_PREFIX}_summary.md"
+        qa_overlay_path = self.appendix_dir / f"qa_{BUFFERED_MARCH6_SUPPORT_PREFIX}_overlay.png"
+
+        _write_csv(pairing_path, pd.DataFrame([pairing_row]))
+        _write_csv(fss_path, pd.DataFrame(fss_rows))
+        _write_csv(diagnostics_path, pd.DataFrame([summary_row]))
+
+        summary_lines = [
+            "# Appendix Buffered March 6 Support",
+            "",
+            "- Official main quantitative Phase 3B remains unchanged.",
+            "- Role: appendix-only support/sensitivity.",
+            f"- Buffer rule: accepted WWF March 6 geometry buffered by `{BUFFERED_MARCH6_SUPPORT_BUFFER_M:.1f} m` before rasterization.",
+            "- Forecast side remains frozen at the official March 6 p50 date-composite mask.",
+            f"- Forecast mask: `{forecast_path.name}`",
+            f"- Buffered observation mask: `{buffered_mask_path.name}`",
+            (
+                "- FSS(1/3/5/10 km): "
+                f"{summary_row['fss_1km']:.4f}, {summary_row['fss_3km']:.4f}, "
+                f"{summary_row['fss_5km']:.4f}, {summary_row['fss_10km']:.4f}"
+            ),
+            f"- Observed nonzero cells after buffering/ocean mask: {int(summary_row['obs_nonzero_cells'])}",
+        ]
+        _write_text(summary_md_path, "\n".join(summary_lines) + "\n")
+
+        if plt is not None:
+            self._write_buffered_march6_overlay(qa_overlay_path, forecast_path, buffered_mask_path)
+
+        return build_buffered_march6_support_manifest(
+            buffer_m=BUFFERED_MARCH6_SUPPORT_BUFFER_M,
+            source_processed_vector=source_processed_vector,
+            buffered_vector_path=buffered_vector_path,
+            buffered_mask_path=buffered_mask_path,
+            forecast_path=forecast_path,
+            pairing_manifest_path=pairing_path,
+            fss_by_window_path=fss_path,
+            diagnostics_path=diagnostics_path,
+            summary_md_path=summary_md_path,
+            qa_overlay_path=qa_overlay_path,
+            summary_row=summary_row,
+        )
+
     def _write_qualitative_outputs(
         self,
         inventory_rows: list[InventoryRow],
@@ -1230,7 +1424,12 @@ class PublicObservationAppendixService:
             "eventcorridor_overlay": eventcorridor_overlay,
         }
 
-    def _write_validation_wording(self, accepted_rows: list[InventoryRow], beyond_horizon_path: Path) -> Path:
+    def _write_validation_wording(
+        self,
+        accepted_rows: list[InventoryRow],
+        beyond_horizon_path: Path,
+        buffered_march6_support: dict[str, Any] | None = None,
+    ) -> Path:
         wording_path = self.appendix_dir / "appendix_validation_wording.md"
         dates = sorted({row.obs_date for row in accepted_rows})
         lines = [
@@ -1246,6 +1445,11 @@ class PublicObservationAppendixService:
             f"- Accepted quantitative within-horizon appendix dates: {', '.join(dates)}.",
             f"- Beyond-horizon candidates are listed separately in `{beyond_horizon_path.name}` and are not mixed into the 72 h score tables.",
         ]
+        if buffered_march6_support:
+            lines.append(
+                "- "
+                + buffered_march6_support_notice(float(buffered_march6_support.get("buffer_m", BUFFERED_MARCH6_SUPPORT_BUFFER_M)))
+            )
         _write_text(wording_path, "\n".join(lines) + "\n")
         return wording_path
 
@@ -1254,6 +1458,7 @@ class PublicObservationAppendixService:
         inventory_rows: list[InventoryRow],
         accepted_rows: list[InventoryRow],
         beyond_horizon_path: Path,
+        buffered_march6_support: dict[str, Any] | None = None,
     ) -> Path:
         recommendation_path = self.appendix_dir / "appendix_public_obs_recommendation.md"
         accepted_dates = sorted({row.obs_date for row in accepted_rows})
@@ -1291,6 +1496,13 @@ class PublicObservationAppendixService:
                 "even though beyond-horizon dated public polygon candidates exist."
             ),
         ]
+        if buffered_march6_support:
+            lines.append(
+                "Buffered March 6 support should remain appendix-only: "
+                + buffered_march6_support_notice(
+                    float(buffered_march6_support.get("buffer_m", BUFFERED_MARCH6_SUPPORT_BUFFER_M))
+                )
+            )
         if not beyond_df.empty:
             next_date = beyond_df.sort_values(by=["obs_date"]).iloc[0]["obs_date"]
             lines.append(f"Closest beyond-horizon quantitative public date currently inventoried: `{next_date}`.")
@@ -1313,6 +1525,7 @@ class PublicObservationAppendixService:
         forecast_datecomposites = self._build_forecast_date_composites(accepted_rows)
         perdate_outputs = self._write_perdate_scores(accepted_rows, forecast_datecomposites)
         eventcorridor_outputs = self._write_event_corridor_outputs(accepted_rows, forecast_datecomposites)
+        buffered_march6_support = self._write_buffered_march6_support(accepted_rows, forecast_datecomposites)
         beyond_horizon_path = self._build_beyond_horizon_candidates(updated_inventory)
         qualitative_outputs = self._write_qualitative_outputs(
             updated_inventory,
@@ -1320,8 +1533,17 @@ class PublicObservationAppendixService:
             forecast_datecomposites,
             eventcorridor_outputs,
         )
-        wording_path = self._write_validation_wording(accepted_rows, beyond_horizon_path)
-        recommendation_path = self._write_recommendation(updated_inventory, accepted_rows, beyond_horizon_path)
+        wording_path = self._write_validation_wording(
+            accepted_rows,
+            beyond_horizon_path,
+            buffered_march6_support=buffered_march6_support,
+        )
+        recommendation_path = self._write_recommendation(
+            updated_inventory,
+            accepted_rows,
+            beyond_horizon_path,
+            buffered_march6_support=buffered_march6_support,
+        )
 
         self._verify_locked_phase3b_files_unchanged()
 
@@ -1333,6 +1555,7 @@ class PublicObservationAppendixService:
             "forecast_datecomposites": {key: {k: str(v) for k, v in value.items()} for key, value in forecast_datecomposites.items()},
             "perdate_outputs": {key: str(value) for key, value in perdate_outputs.items()},
             "eventcorridor_outputs": {key: str(value) for key, value in eventcorridor_outputs.items()},
+            "buffered_march6_support": buffered_march6_support,
             "qualitative_outputs": {key: str(value) for key, value in qualitative_outputs.items()},
             "beyond_horizon_candidates": str(beyond_horizon_path),
             "validation_wording": str(wording_path),

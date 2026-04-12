@@ -17,6 +17,10 @@ from src.core.case_context import get_case_context
 from src.helpers.raster import project_points_to_grid, rasterize_particles, save_raster
 from src.helpers.scoring import apply_ocean_mask
 from src.services.ensemble import normalize_time_index, run_official_spill_forecast
+from src.services.phase3b_multidate_public import (
+    format_phase3b_multidate_eventcorridor_label,
+    load_phase3b_multidate_validation_dates,
+)
 from src.services.official_rerun_r1 import OFFICIAL_RERUN_R1_DIR_NAME, load_official_retention_config
 from src.services.scoring import OFFICIAL_PHASE3B_WINDOWS_KM
 from src.services.transport_retention_fix import (
@@ -172,6 +176,11 @@ class InitModeSensitivityR1Service:
         self.output_dir = self.case_output / INIT_MODE_SENSITIVITY_DIR_NAME
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.force_rerun = _truthy(os.environ.get(FORCE_RERUN_ENV, ""))
+        self.validation_dates = load_phase3b_multidate_validation_dates(
+            self.case_output,
+            fallback_dates=VALIDATION_DATES,
+        )
+        self.eventcorridor_label = format_phase3b_multidate_eventcorridor_label(self.validation_dates)
         self.retention_config = load_official_retention_config()
         if self.retention_config["selected_mode"] != "R1":
             raise RuntimeError("init_mode_sensitivity_r1 requires official_retention.selected_mode=R1.")
@@ -307,7 +316,7 @@ class InitModeSensitivityR1Service:
             simulation_start_utc=self.case.simulation_start_utc,
             simulation_end_utc=self.case.simulation_end_utc,
             snapshot_hours=[24, 48, duration_hours],
-            date_composite_dates=list(VALIDATION_DATES),
+            date_composite_dates=list(self.validation_dates),
             transport_overrides={
                 "coastline_action": self.retention_scenario.coastline_action,
                 "coastline_approximation_precision": self.retention_scenario.coastline_approximation_precision,
@@ -347,7 +356,7 @@ class InitModeSensitivityR1Service:
         member_paths = sorted((model_dir / "ensemble").glob("member_*.nc"))
         if not member_paths:
             raise FileNotFoundError(f"No ensemble members found for {branch.branch_id}: {model_dir / 'ensemble'}")
-        for date in VALIDATION_DATES:
+        for date in self.validation_dates:
             probability = self._date_composite_probability(member_paths, date)
             probability = apply_ocean_mask(probability, sea_mask=self.retention.sea_mask, fill_value=0.0)
             p50 = apply_ocean_mask((probability >= 0.5).astype(np.float32), sea_mask=self.retention.sea_mask, fill_value=0.0)
@@ -398,7 +407,7 @@ class InitModeSensitivityR1Service:
 
         union_dir = self.case_output / "phase3b_multidate_public" / "date_union_obs_masks"
         missing_dates: list[str] = []
-        for date in VALIDATION_DATES:
+        for date in self.validation_dates:
             obs_path = union_dir / f"obs_union_{date}.tif"
             if not obs_path.exists():
                 missing_dates.append(date)
@@ -415,14 +424,18 @@ class InitModeSensitivityR1Service:
                 )
             )
 
-        event_obs = self.case_output / "phase3b_multidate_public" / "eventcorridor_obs_union_2023-03-04_to_2023-03-06.tif"
+        event_obs = (
+            self.case_output
+            / "phase3b_multidate_public"
+            / f"eventcorridor_obs_union_{self.eventcorridor_label}.tif"
+        )
         event_model = self._build_eventcorridor_model_union(branch, composite_dir)
         pairings.append(
             self._pair(
                 branch=branch,
                 pair_role="eventcorridor_march4_6",
-                pair_id=f"{branch.branch_id}_eventcorridor_2023-03-04_to_2023-03-06",
-                obs_date="2023-03-04_to_2023-03-06",
+                pair_id=f"{branch.branch_id}_eventcorridor_{self.eventcorridor_label}",
+                obs_date=self.eventcorridor_label,
                 forecast_path=event_model,
                 observation_path=event_obs,
                 source_semantics="eventcorridor_public_observation_derived_union_excluding_initialization_date",
@@ -470,13 +483,13 @@ class InitModeSensitivityR1Service:
 
     def _build_eventcorridor_model_union(self, branch: InitBranch, composite_dir: Path) -> Path:
         union = np.zeros((self.retention.grid.height, self.retention.grid.width), dtype=np.float32)
-        for date in VALIDATION_DATES:
+        for date in self.validation_dates:
             mask_path = composite_dir / f"mask_p50_{date}_datecomposite.tif"
             if mask_path.exists():
                 mask = self.retention._read_raster(mask_path)
                 union = np.maximum(union, (mask > 0).astype(np.float32))
         union = apply_ocean_mask(union, sea_mask=self.retention.sea_mask, fill_value=0.0)
-        path = self.output_dir / branch.output_slug / "eventcorridor_model_union_2023-03-04_to_2023-03-06.tif"
+        path = self.output_dir / branch.output_slug / f"eventcorridor_model_union_{self.eventcorridor_label}.tif"
         save_raster(self.retention.grid, union.astype(np.float32), path)
         return path
 
@@ -626,6 +639,7 @@ class InitModeSensitivityR1Service:
                 "end": self.case.simulation_end_utc,
             },
             "forcing_paths": forcing_paths,
+            "validation_dates_used_for_forecast_skill": self.validation_dates,
             "branches": [branch.__dict__ for branch in BRANCHES],
             "guardrails": {
                 "strict_march6_pairing_unchanged": True,
@@ -671,7 +685,7 @@ class InitModeSensitivityR1Service:
             "",
         ]
         lines.extend(self._markdown_table(strict[self._summary_columns()]))
-        lines.extend(["", "## March 4-6 Event Corridor", ""])
+        lines.extend(["", f"## {self.eventcorridor_label} Event Corridor", ""])
         lines.extend(self._markdown_table(event[self._summary_columns()]))
         lines.extend(["", "Artifacts:"])
         for label, artifact in paths.items():

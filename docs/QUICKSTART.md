@@ -51,7 +51,7 @@ These write to `output/trajectory_gallery/`, `output/trajectory_gallery_panel/`,
 ## 6. Launch The Read-Only Local Dashboard
 
 ```bash
-docker-compose exec pipeline streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
+docker-compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
 ```
 
 Then open `http://localhost:8501`.

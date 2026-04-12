@@ -950,6 +950,10 @@ class DWHPhase3CExternalCaseRunService:
             "",
             "The DWH run uses date-composite logic because the public daily layers do not support defensible exact sub-daily acquisition times.",
             "",
+            "The DWH forcing family is chosen by scientific-readiness gating rather than by a Phase 1 drifter recipe ranking. This branch freezes the first complete real historical current+wind+wave stack that is not smoke-only, spans the required DWH window, exposes the required variables with usable metadata, opens in the OpenDrift reader, and passes the reader-check forecast.",
+            "",
+            "In the current stored run, that frozen stack is HYCOM GOFS 3.1 currents plus ERA5 winds plus CMEMS wave/Stokes.",
+            "",
             f"PyGNOME comparator run status: {pygnome['success']}. Any PyGNOME output remains a comparator, not truth.",
         ]
         path.write_text("\n".join(lines) + "\n", encoding="utf-8")

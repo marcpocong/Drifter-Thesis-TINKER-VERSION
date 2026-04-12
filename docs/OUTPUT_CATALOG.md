@@ -57,6 +57,75 @@ Interpretation:
 - do not infer a valid Phase 4 cross-model comparison just from the existence of Phase 3 spatial PyGNOME comparator outputs
 - `output/phase4_crossmodel_comparison/` should only appear later if the audit finds one or more quantities honestly comparable
 
+## Phase 1 Production Rerun Outputs
+
+### `output/phase1_production_rerun/`
+
+Purpose:
+Dedicated 2016-2022 historical/regional Phase 1 scientific rerun outputs built from the strict drogued-only non-overlapping 72 h segment policy.
+
+Expected files:
+
+- `phase1_drifter_registry.csv`
+- `phase1_accepted_segment_registry.csv`
+- `phase1_rejected_segment_registry.csv`
+- `phase1_loading_audit.csv`
+- `phase1_segment_metrics.csv`
+- `phase1_recipe_summary.csv`
+- `phase1_recipe_ranking.csv`
+- `phase1_production_manifest.json`
+- `phase1_baseline_selection_candidate.yaml`
+
+Interpretation:
+
+- `phase1_drifter_registry.csv` is the consolidated candidate-segment registry and includes accepted/rejected status, reject reason, drifter ID, time window, drogue status fields, non-overlap status, and regional-box status
+- the official recipe family for this lane is only `cmems_era5`, `cmems_gfs`, `hycom_era5`, and `hycom_gfs`
+- this directory is the scientific evidence bundle for the completed regional rerun and is separate from Mindoro or DWH spill-case outputs
+- `phase1_baseline_selection_candidate.yaml` is staged only; it does not overwrite `config/phase1_baseline_selection.yaml`
+- downstream trial runs may point `BASELINE_SELECTION_PATH` at the staged candidate artifact explicitly
+
+## Prototype PyGNOME Similarity Outputs
+
+### `output/prototype_2021_pygnome_similarity/`
+
+Purpose:
+Read-only consolidated preferred accepted-segment debug transport benchmark summary for the fixed 2021 deterministic OpenDrift-vs-deterministic PyGNOME cases.
+
+Expected files:
+
+- `prototype_pygnome_case_registry.csv`
+- `prototype_pygnome_similarity_by_case.csv`
+- `prototype_pygnome_fss_by_case_window.csv`
+- `prototype_pygnome_kl_by_case_hour.csv`
+- `prototype_pygnome_figure_registry.csv`
+- `prototype_pygnome_figure_captions.md`
+- `prototype_pygnome_similarity_manifest.json`
+- `prototype_pygnome_similarity_summary.md`
+- `qa_prototype_pygnome_fss_by_case_window.png`
+- `qa_prototype_pygnome_kl_by_case_hour.png`
+- `qa_prototype_pygnome_scorecard.png`
+- `figures/*.png`
+
+Interpretation:
+
+- this directory is comparator-only and accepted-segment debug support only
+- it consolidates existing deterministic benchmark artifacts from the fixed `prototype_2021` cases rather than inventing a new cross-model method
+- it now also materializes actual `24/48/72 h` deterministic OpenDrift and deterministic PyGNOME forecast figures plus one side-by-side board per case, all built from the stored benchmark rasters only and shown with neutral/case-local context rather than reusing the old Mindoro-specific prototype framing
+- when the stored prototype case assets expose a defensible provenance point, these figures also include a provenance source-point star
+- PyGNOME is a comparator, not truth
+- the ranking is relative within the prototype set only and uses higher mean `FSS @ 5 km` followed by lower mean `KL`
+- do not treat this package as final Chapter 3 evidence or as a substitute for the dedicated 2016-2022 Phase 1 regional production rerun
+
+### `output/prototype_2016_pygnome_similarity/`
+
+Purpose:
+Read-only legacy/debug transport benchmark summary preserved from the original 2016 prototype cases.
+
+Interpretation:
+
+- keep this package for historical reproducibility and regression checking
+- it is no longer the preferred support family for launcher/docs/publication work
+
 ## Phase 4 Outputs
 
 ### `output/phase4/CASE_MINDORO_RETRO_2023/`
@@ -140,6 +209,9 @@ Expected files:
 - `CASE_MINDORO_RETRO_2023__...__slide__*.png`
 - `CASE_DWH_RETRO_2010_72H__...__paper__*.png`
 - `CASE_DWH_RETRO_2010_72H__...__slide__*.png`
+- `CASE_2016_09_01__...*.png`
+- `CASE_2016_09_06__...*.png`
+- `CASE_2016_09_17__...*.png`
 
 Interpretation:
 
@@ -149,6 +221,7 @@ Interpretation:
 - recommended-for-defense and recommended-for-paper flags are recorded in the publication registry and manifest
 - Phase 3 OpenDrift-versus-PyGNOME comparison figures are included where those comparator products exist now
 - Mindoro Phase 4 is shown as OpenDrift-only; the package includes a deferred-comparison note figure instead of a fake Phase 4 OpenDrift-versus-PyGNOME board
+- publication family `K` republishes the preferred accepted-segment 2021 deterministic OpenDrift-vs-PyGNOME forecast figures as support-only material rather than main-defense evidence, while the 2016 prototype package remains preserved as legacy output
 - Mindoro publication figures remain inherited-provisional from the unfinished Phase 1/2 freeze story, while DWH figures remain transfer-validation/support visuals
 
 ## Frozen Thesis Validation Package

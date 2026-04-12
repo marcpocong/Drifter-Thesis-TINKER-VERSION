@@ -20,19 +20,19 @@ This gallery is built from existing outputs, manifests, rasters, and NetCDFs onl
 - `case_mindoro_retro_2023__phase2_phase3b__opendrift__corridor_hull_view__2023_03_06__p50_p90_hull_overlay.png`: case=`CASE_MINDORO_RETRO_2023`, model=`opendrift`, run_type=`corridor_hull_view`, date=`2023-03-06`, scenario=`n/a`, panel_ready=`true`.
   Note: Generated from the stored Mindoro p50 date-composite mask, p90 72 h mask, and sampled member centroid/final-position geometry.
 
-## D. Mindoro forecast-vs-observation overlays
+## D. Mindoro March 13 -> March 14 primary-validation overlays
 
-- `case_mindoro_retro_2023__phase3b_strict__opendrift__forecast_vs_observation_overlay__2023_03_03_to_2023_03_06__source_init_validation_overlay.png`: case=`CASE_MINDORO_RETRO_2023`, model=`opendrift`, run_type=`forecast_vs_observation_overlay`, date=`2023-03-03_to_2023-03-06`, scenario=`n/a`, panel_ready=`true`.
-  Note: Existing Mindoro validation overlay reused from the stored Phase 3B QA bundle.
-- `case_mindoro_retro_2023__phase3b_strict__opendrift__forecast_vs_observation_overlay__2023_03_06__obsmask_vs_p50.png`: case=`CASE_MINDORO_RETRO_2023`, model=`opendrift`, run_type=`forecast_vs_observation_overlay`, date=`2023-03-06`, scenario=`n/a`, panel_ready=`true`.
-  Note: Existing strict March 6 overlay reused as a panel-ready gallery figure.
+- `case_mindoro_retro_2023__phase3b_reinit_primary__observation__forecast_vs_observation_overlay__2023_03_13_to_2023_03_14__seed_vs_target.png`: case=`CASE_MINDORO_RETRO_2023`, model=`observation`, run_type=`forecast_vs_observation_overlay`, date=`2023-03-13_to_2023-03-14`, scenario=`n/a`, panel_ready=`true`.
+  Note: Promoted March 13 seed-versus-March 14 target figure reused as a panel-ready gallery figure.
+- `case_mindoro_retro_2023__phase3b_reinit_primary__opendrift__forecast_vs_observation_overlay__2023_03_14__r1_previous_overlay.png`: case=`CASE_MINDORO_RETRO_2023`, model=`opendrift`, run_type=`forecast_vs_observation_overlay`, date=`2023-03-14`, scenario=`n/a`, panel_ready=`true`.
+  Note: Promoted March 14 R1 previous reinit overlay reused from the completed reinit QA bundle.
 
-## E. Mindoro OpenDrift vs PyGNOME comparison maps
+## E. Mindoro March 13 -> March 14 cross-model comparison maps
 
-- `case_mindoro_retro_2023__phase3a_benchmark__opendrift_vs_pygnome__comparison_overlay__2023_03_04_to_2023_03_06__eventcorridor_overlay.png`: case=`CASE_MINDORO_RETRO_2023`, model=`opendrift_vs_pygnome`, run_type=`comparison_overlay`, date=`2023-03-04_to_2023-03-06`, scenario=`n/a`, panel_ready=`true`.
-  Note: Existing Mindoro event-corridor comparison map reused from the stored benchmark bundle.
-- `case_mindoro_retro_2023__phase3a_benchmark__opendrift_vs_pygnome__comparison_overlay__2023_03_04_to_2023_03_06__public_obs_overlays.png`: case=`CASE_MINDORO_RETRO_2023`, model=`opendrift_vs_pygnome`, run_type=`comparison_overlay`, date=`2023-03-04_to_2023-03-06`, scenario=`n/a`, panel_ready=`true`.
-  Note: Existing Mindoro OpenDrift vs PyGNOME overlay reused from the benchmark comparison outputs.
+- `case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift_vs_pygnome__comparison_overlay__2023_03_14__pygnome_crossmodel_overlay.png`: case=`CASE_MINDORO_RETRO_2023`, model=`opendrift_vs_pygnome`, run_type=`comparison_overlay`, date=`2023-03-14`, scenario=`n/a`, panel_ready=`true`.
+  Note: Promoted March 14 PyGNOME comparator overlay reused from the stored comparator bundle.
+- `case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift_vs_pygnome__comparison_overlay__2023_03_14__r1_previous_crossmodel_overlay.png`: case=`CASE_MINDORO_RETRO_2023`, model=`opendrift_vs_pygnome`, run_type=`comparison_overlay`, date=`2023-03-14`, scenario=`n/a`, panel_ready=`true`.
+  Note: Promoted March 14 R1 previous reinit cross-model overlay reused from the stored comparator outputs.
 
 ## F. DWH deterministic track/path visuals
 

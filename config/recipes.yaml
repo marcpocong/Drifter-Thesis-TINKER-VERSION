@@ -15,6 +15,14 @@ recipes:
     duration_hours: 72
     time_step_minutes: 60
 
+  hycom_gfs:
+    description: "HYCOM currents + GFS winds"
+    currents_file: "hycom_curr.nc"
+    wind_file: "gfs_wind.nc"
+    wave_file: "cmems_wave.nc"
+    duration_hours: 72
+    time_step_minutes: 60
+
   cmems_ncep:
     description: "CMEMS currents + NCEP winds"
     currents_file: "cmems_curr.nc"
@@ -31,7 +39,22 @@ recipes:
     duration_hours: 72
     time_step_minutes: 60
 
+  cmems_gfs:
+    description: "CMEMS currents + GFS winds"
+    currents_file: "cmems_curr.nc"
+    wind_file: "gfs_wind.nc"
+    wave_file: "cmems_wave.nc"
+    duration_hours: 72
+    time_step_minutes: 60
+
 phase1_recipe_architecture:
+  prototype_debug_recipe_family:
+    - cmems_ncep
+    - cmems_era5
+    - cmems_gfs
+    - hycom_ncep
+    - hycom_era5
+    - hycom_gfs
   official_recipe_family:
     - cmems_era5
     - cmems_gfs

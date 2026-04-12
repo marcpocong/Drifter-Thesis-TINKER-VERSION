@@ -7,11 +7,12 @@ import math
 import os
 from dataclasses import dataclass
 from datetime import datetime
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any
 
 import numpy as np
 import pandas as pd
+import yaml
 
 from src.core.case_context import get_case_context
 from src.helpers.metrics import calculate_fss
@@ -19,8 +20,13 @@ from src.helpers.raster import GridBuilder, rasterize_particles, save_raster
 from src.helpers.scoring import apply_ocean_mask, load_sea_mask_array, precheck_same_grid
 from src.services.ensemble import normalize_time_index, run_official_spill_forecast
 from src.services.official_rerun_r1 import load_official_retention_config
+from src.services.phase3b_multidate_public import (
+    format_phase3b_multidate_eventcorridor_label,
+    load_phase3b_multidate_validation_dates,
+)
 from src.services.pygnome_public_comparison import PYGNOME_PUBLIC_COMPARISON_DIR_NAME
 from src.services.scoring import OFFICIAL_PHASE3B_WINDOWS_KM, Phase3BScoringService
+from src.utils.gfs_wind import GFSWindDownloader
 from src.utils.io import RecipeSelection, get_case_output_dir, resolve_recipe_selection, resolve_spill_origin
 
 try:
@@ -177,8 +183,66 @@ def _rank_rows(rows: pd.DataFrame) -> pd.DataFrame:
     ).reset_index(drop=True)
 
 
+def select_promotable_opendrift_recipe(summary_df: pd.DataFrame) -> dict:
+    """Choose the spill-case forcing recipe candidate from OpenDrift branch B only."""
+    if summary_df.empty:
+        return {
+            "track_id": "",
+            "recipe_id": "",
+            "branch_id": "",
+            "product_kind": "",
+            "mean_fss": np.nan,
+            "iou": np.nan,
+            "dice": np.nan,
+            "forecast_nonzero_cells": np.nan,
+            "nearest_distance_to_obs_m": np.nan,
+            "selection_basis": (
+                "No event-corridor rows were available, so no OpenDrift branch-B promotion candidate could be selected."
+            ),
+        }
+
+    candidates = summary_df[
+        (summary_df["pair_role"] == "eventcorridor_march4_6")
+        & (summary_df["model_family"] == "OpenDrift")
+        & (summary_df["branch_id"] == "B")
+    ].copy()
+    if candidates.empty:
+        return {
+            "track_id": "",
+            "recipe_id": "",
+            "branch_id": "",
+            "product_kind": "",
+            "mean_fss": np.nan,
+            "iou": np.nan,
+            "dice": np.nan,
+            "forecast_nonzero_cells": np.nan,
+            "nearest_distance_to_obs_m": np.nan,
+            "selection_basis": (
+                "PyGNOME and non-branch-B OpenDrift rows were excluded, leaving no promotable OpenDrift branch-B candidate."
+            ),
+        }
+
+    winner = _rank_rows(candidates).iloc[0]
+    return {
+        "track_id": str(winner.get("track_id", "")),
+        "recipe_id": str(winner.get("recipe_id", "")),
+        "branch_id": str(winner.get("branch_id", "")),
+        "product_kind": str(winner.get("product_kind", "")),
+        "mean_fss": _mean_fss(winner),
+        "iou": winner.get("iou", np.nan),
+        "dice": winner.get("dice", np.nan),
+        "forecast_nonzero_cells": winner.get("forecast_nonzero_cells", np.nan),
+        "nearest_distance_to_obs_m": winner.get("nearest_distance_to_obs_m", np.nan),
+        "selection_basis": (
+            "Selected from OpenDrift branch-B March 4-6 event-corridor rows only; "
+            "PyGNOME and branch A1 were excluded from spill-case forcing promotion."
+        ),
+    }
+
+
 def recommend_recipe_branch(summary_df: pd.DataFrame) -> dict:
     """Choose exactly one recommendation for the phase."""
+    promotion_candidate = select_promotable_opendrift_recipe(summary_df)
     if summary_df.empty:
         return {
             "recommendation": "conclude that recipe choice is not enough to beat PyGNOME",
@@ -186,6 +250,12 @@ def recommend_recipe_branch(summary_df: pd.DataFrame) -> dict:
             "best_strict_track_id": "",
             "best_eventcorridor_track_id": "",
             "any_opendrift_branch_beats_pygnome": False,
+            "promotable_track_id": promotion_candidate["track_id"],
+            "promotable_recipe_id": promotion_candidate["recipe_id"],
+            "promotable_branch_id": promotion_candidate["branch_id"],
+            "promotable_product_kind": promotion_candidate["product_kind"],
+            "promotable_mean_fss": promotion_candidate["mean_fss"],
+            "promotion_selection_basis": promotion_candidate["selection_basis"],
             "reason": "No scored rows were available.",
         }
 
@@ -220,12 +290,26 @@ def recommend_recipe_branch(summary_df: pd.DataFrame) -> dict:
         "pygnome_eventcorridor_mean_fss": None if not np.isfinite(py_best) else py_best,
         "best_opendrift_eventcorridor_mean_fss": None if not np.isfinite(od_best) else od_best,
         "any_opendrift_branch_beats_pygnome": od_beats,
+        "promotable_track_id": promotion_candidate["track_id"],
+        "promotable_recipe_id": promotion_candidate["recipe_id"],
+        "promotable_branch_id": promotion_candidate["branch_id"],
+        "promotable_product_kind": promotion_candidate["product_kind"],
+        "promotable_mean_fss": promotion_candidate["mean_fss"],
+        "promotion_selection_basis": promotion_candidate["selection_basis"],
         "reason": reason,
     }
 
 
 class RecipeSensitivityR1MultibranchService:
-    def __init__(self):
+    def __init__(
+        self,
+        *,
+        output_slug: str = RECIPE_SENSITIVITY_R1_MULTIBRANCH_DIR_NAME,
+        forcing_dir: str | Path | None = None,
+        prepare_missing_gfs: bool = False,
+        gfs_prepare_strict: bool = False,
+        force_rerun: bool | None = None,
+    ):
         self.case = get_case_context()
         if not self.case.is_official:
             raise RuntimeError("recipe_sensitivity_r1_multibranch is only supported for official Mindoro workflows.")
@@ -235,7 +319,8 @@ class RecipeSensitivityR1MultibranchService:
             raise ImportError("rasterio is required for recipe_sensitivity_r1_multibranch.")
 
         self.case_output = get_case_output_dir(self.case.run_name)
-        self.output_dir = self.case_output / RECIPE_SENSITIVITY_R1_MULTIBRANCH_DIR_NAME
+        self.output_slug = str(PurePosixPath(output_slug))
+        self.output_dir = self.case_output / Path(self.output_slug)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.products_dir = self.output_dir / "products"
         self.obs_dir = self.output_dir / "observations"
@@ -244,7 +329,12 @@ class RecipeSensitivityR1MultibranchService:
         for path in (self.products_dir, self.obs_dir, self.precheck_dir, self.qa_dir):
             path.mkdir(parents=True, exist_ok=True)
 
-        self.force_rerun = _truthy(os.environ.get(FORCE_RERUN_ENV, ""))
+        self.force_rerun = _truthy(os.environ.get(FORCE_RERUN_ENV, "")) if force_rerun is None else bool(force_rerun)
+        self.validation_dates = load_phase3b_multidate_validation_dates(
+            self.case_output,
+            fallback_dates=VALIDATION_DATES,
+        )
+        self.eventcorridor_label = format_phase3b_multidate_eventcorridor_label(self.validation_dates)
         self.grid = GridBuilder()
         self.sea_mask = load_sea_mask_array(self.grid.spec)
         self.valid_mask = self.sea_mask > 0.5 if self.sea_mask is not None else None
@@ -257,10 +347,19 @@ class RecipeSensitivityR1MultibranchService:
 
         self.frozen_selection = resolve_recipe_selection()
         self.threshold_context = self._load_selected_threshold_context()
-        self.forcing_dir = Path("data") / "forcing" / self.case.run_name
+        self.forcing_dir = Path(forcing_dir) if forcing_dir is not None else Path("data") / "forcing" / self.case.run_name
+        self.prepare_missing_gfs = bool(prepare_missing_gfs)
+        self.gfs_prepare_strict = bool(gfs_prepare_strict)
+        self.forcing_preparation = {
+            "gfs_requested": self.prepare_missing_gfs,
+            "gfs_status": "not_requested",
+            "gfs_path": str(self.forcing_dir / "gfs_wind.nc"),
+            "gfs_error": "",
+        }
 
     def run(self) -> dict:
         observations = self._prepare_observations()
+        self.forcing_preparation = self._prepare_missing_gfs_wind()
         recipes = self._evaluate_recipe_matrix()
         tracks: list[dict] = []
         run_records: list[dict] = []
@@ -289,7 +388,16 @@ class RecipeSensitivityR1MultibranchService:
         recommendation = recommend_recipe_branch(summary_df)
         qa_paths = self._write_qa(summary_df)
         paths = self._write_outputs(scored_pairings, fss_df, diagnostics_df, summary_df, ranking_df)
-        report_path = self._write_report(summary_df, ranking_df, recommendation, recipes, run_records, paths, qa_paths)
+        report_path = self._write_report(
+            summary_df,
+            ranking_df,
+            recommendation,
+            recipes,
+            run_records,
+            paths,
+            qa_paths,
+            self.forcing_preparation,
+        )
         manifest_path = self._write_manifest(
             recipes=recipes,
             run_records=run_records,
@@ -299,18 +407,23 @@ class RecipeSensitivityR1MultibranchService:
             paths=paths,
             qa_paths=qa_paths,
             report_path=report_path,
+            forcing_preparation=self.forcing_preparation,
         )
         return {
             "output_dir": self.output_dir,
             "summary": summary_df,
             "ranking": ranking_df,
             "summary_csv": paths["summary"],
+            "ranking_csv": paths["ranking"],
             "diagnostics_csv": paths["diagnostics"],
             "pairing_manifest_csv": paths["pairing"],
             "fss_by_window_csv": paths["fss_by_window"],
             "run_manifest": manifest_path,
             "report_md": report_path,
             "recommendation": recommendation,
+            "recipes": recipes,
+            "run_records": run_records,
+            "forcing_preparation": self.forcing_preparation,
         }
 
     def _load_selected_threshold_context(self) -> dict:
@@ -358,13 +471,86 @@ class RecipeSensitivityR1MultibranchService:
             )
         return rows
 
+    def _load_case_config(self) -> dict[str, Any]:
+        case_definition_path = getattr(self.case, "case_definition_path", None)
+        if not case_definition_path:
+            return {}
+        path = Path(case_definition_path)
+        if not path.exists():
+            return {}
+        with open(path, "r", encoding="utf-8") as handle:
+            return yaml.safe_load(handle) or {}
+
+    def _official_forcing_bbox(self) -> list[float]:
+        case_config = self._load_case_config()
+        halo = float(case_config.get("forcing_bbox_halo_degrees", 0.5))
+        display_bounds = None
+        try:
+            from src.helpers.scoring import get_scoring_grid_spec
+
+            spec = get_scoring_grid_spec()
+            display_bounds = list(spec.display_bounds_wgs84 or [])
+        except Exception:
+            display_bounds = None
+
+        if not display_bounds:
+            return [float(value) for value in self.case.region]
+
+        min_lon, max_lon, min_lat, max_lat = [float(value) for value in display_bounds]
+        return [
+            min_lon - halo,
+            max_lon + halo,
+            min_lat - halo,
+            max_lat + halo,
+        ]
+
+    def _prepare_missing_gfs_wind(self) -> dict[str, Any]:
+        gfs_path = self.forcing_dir / "gfs_wind.nc"
+        status = {
+            "gfs_requested": self.prepare_missing_gfs,
+            "gfs_status": "not_requested",
+            "gfs_path": str(gfs_path),
+            "gfs_error": "",
+        }
+        if gfs_path.exists():
+            status["gfs_status"] = "already_present"
+            return status
+        if not self.prepare_missing_gfs:
+            return status
+
+        self.forcing_dir.mkdir(parents=True, exist_ok=True)
+        downloader = GFSWindDownloader(
+            forcing_box=self._official_forcing_bbox(),
+            expected_delta=pd.Timedelta(hours=6),
+        )
+        try:
+            download_status = downloader.download(
+                start_time=self.case.forcing_start_utc,
+                end_time=self.case.forcing_end_utc,
+                output_path=gfs_path,
+                scratch_dir=self.forcing_dir,
+            )
+        except Exception as exc:
+            status["gfs_status"] = "failed"
+            status["gfs_error"] = f"{type(exc).__name__}: {exc}"
+            if self.gfs_prepare_strict:
+                raise RuntimeError(
+                    "Failed to prepare required GFS wind forcing for recipe_sensitivity_r1_multibranch: "
+                    f"{type(exc).__name__}: {exc}"
+                ) from exc
+            return status
+
+        status["gfs_status"] = str(download_status.get("status") or "downloaded")
+        status["gfs_path"] = str(gfs_path)
+        return status
+
     def _prepare_observations(self) -> dict[str, Any]:
         strict = Path("data") / "arcgis" / self.case.run_name / "obs_mask_2023-03-06.tif"
         if not strict.exists():
             raise FileNotFoundError(f"Strict March 6 observed mask is missing: {strict}")
         date_union_dir = self.case_output / "phase3b_multidate_public" / "date_union_obs_masks"
         date_unions: dict[str, Path] = {}
-        for date in VALIDATION_DATES:
+        for date in self.validation_dates:
             path = date_union_dir / f"obs_union_{date}.tif"
             if not path.exists():
                 raise FileNotFoundError(f"Accepted date-union observation mask missing: {path}")
@@ -374,21 +560,45 @@ class RecipeSensitivityR1MultibranchService:
 
     def _build_eventcorridor_obs_union(self, date_unions: dict[str, Path]) -> Path:
         union = np.zeros((self.grid.height, self.grid.width), dtype=np.float32)
-        for date in VALIDATION_DATES:
+        for date in self.validation_dates:
             union = np.maximum(union, self.helper._load_binary_score_mask(date_unions[date]))
         union = apply_ocean_mask(union, sea_mask=self.sea_mask, fill_value=0.0)
-        path = self.obs_dir / "eventcorridor_obs_union_2023-03-04_to_2023-03-06.tif"
+        path = self.obs_dir / f"eventcorridor_obs_union_{self.eventcorridor_label}.tif"
         save_raster(self.grid, union.astype(np.float32), path)
         return path
 
     def _run_or_reuse_model(self, recipe: dict, branch: BranchSpec) -> dict:
         model_run_name = (
-            f"{self.case.run_name}/{RECIPE_SENSITIVITY_R1_MULTIBRANCH_DIR_NAME}/"
+            f"{self.case.run_name}/{self.output_slug}/"
             f"{recipe['recipe_id']}/{branch.branch_id}/model_run"
         )
         model_dir = get_case_output_dir(model_run_name)
         if self._model_dir_complete(model_dir) and not self.force_rerun:
-            return {**recipe, "branch_id": branch.branch_id, "initialization_mode": branch.initialization_mode, "status": "reused_existing_model", "run_name": model_run_name, "model_dir": str(model_dir)}
+            return {
+                **recipe,
+                "branch_id": branch.branch_id,
+                "initialization_mode": branch.initialization_mode,
+                "status": "reused_existing_model",
+                "run_name": model_run_name,
+                "model_dir": str(model_dir),
+                "reused_from_output_slug": self.output_slug,
+            }
+        if not self.force_rerun and self.output_slug != RECIPE_SENSITIVITY_R1_MULTIBRANCH_DIR_NAME:
+            canonical_run_name = (
+                f"{self.case.run_name}/{RECIPE_SENSITIVITY_R1_MULTIBRANCH_DIR_NAME}/"
+                f"{recipe['recipe_id']}/{branch.branch_id}/model_run"
+            )
+            canonical_dir = get_case_output_dir(canonical_run_name)
+            if self._model_dir_complete(canonical_dir):
+                return {
+                    **recipe,
+                    "branch_id": branch.branch_id,
+                    "initialization_mode": branch.initialization_mode,
+                    "status": "reused_existing_model",
+                    "run_name": canonical_run_name,
+                    "model_dir": str(canonical_dir),
+                    "reused_from_output_slug": RECIPE_SENSITIVITY_R1_MULTIBRANCH_DIR_NAME,
+                }
 
         start_lat, start_lon, start_time = resolve_spill_origin()
         start = _normalize_utc(self.case.simulation_start_utc)
@@ -405,7 +615,7 @@ class RecipeSensitivityR1MultibranchService:
                 simulation_start_utc=self.case.simulation_start_utc,
                 simulation_end_utc=self.case.simulation_end_utc,
                 snapshot_hours=[24, 48, duration_hours],
-                date_composite_dates=list(VALIDATION_DATES),
+                date_composite_dates=list(self.validation_dates),
                 transport_overrides={
                     "coastline_action": self.retention_config["coastline_action"],
                     "coastline_approximation_precision": self.retention_config["coastline_approximation_precision"],
@@ -466,7 +676,7 @@ class RecipeSensitivityR1MultibranchService:
                 date_products=deterministic_products,
                 event_path=self._build_model_eventcorridor_union(
                     deterministic_products,
-                    track_base / "deterministic_eventcorridor_model_union_2023-03-04_to_2023-03-06.tif",
+                    track_base / f"deterministic_eventcorridor_model_union_{self.eventcorridor_label}.tif",
                 ),
                 model_dir=model_dir,
                 run_record=run_record,
@@ -485,7 +695,7 @@ class RecipeSensitivityR1MultibranchService:
                 date_products=p50_products,
                 event_path=self._build_model_eventcorridor_union(
                     p50_products,
-                    track_base / "ensemble_p50_eventcorridor_model_union_2023-03-04_to_2023-03-06.tif",
+                    track_base / f"ensemble_p50_eventcorridor_model_union_{self.eventcorridor_label}.tif",
                 ),
                 model_dir=model_dir,
                 run_record=run_record,
@@ -507,7 +717,7 @@ class RecipeSensitivityR1MultibranchService:
                     date_products=lower_products,
                     event_path=self._build_model_eventcorridor_union(
                         lower_products,
-                        track_base / f"ensemble_{label}_eventcorridor_model_union_2023-03-04_to_2023-03-06.tif",
+                        track_base / f"ensemble_{label}_eventcorridor_model_union_{self.eventcorridor_label}.tif",
                     ),
                     model_dir=model_dir,
                     run_record=run_record,
@@ -521,7 +731,7 @@ class RecipeSensitivityR1MultibranchService:
         if nc_path is None:
             raise FileNotFoundError(f"Missing deterministic OpenDrift NetCDF under {model_dir / 'forecast'}")
         products = {}
-        for date in VALIDATION_DATES:
+        for date in self.validation_dates:
             out_path = out_dir / f"deterministic_footprint_mask_{date}_datecomposite.tif"
             composite = np.zeros((self.grid.height, self.grid.width), dtype=np.float32)
             with xr.open_dataset(nc_path) as ds:
@@ -549,7 +759,7 @@ class RecipeSensitivityR1MultibranchService:
 
     def _prepare_ensemble_threshold_products(self, model_dir: Path, out_dir: Path, *, threshold: float, label: str) -> dict[str, Path]:
         products = {}
-        for date in VALIDATION_DATES:
+        for date in self.validation_dates:
             out_path = out_dir / f"mask_{label}_{date}_datecomposite.tif"
             if abs(threshold - 0.5) < 1e-9:
                 source = model_dir / "ensemble" / f"mask_p50_{date}_datecomposite.tif"
@@ -568,7 +778,7 @@ class RecipeSensitivityR1MultibranchService:
 
     def _build_model_eventcorridor_union(self, date_products: dict[str, Path], out_path: Path) -> Path:
         union = np.zeros((self.grid.height, self.grid.width), dtype=np.float32)
-        for date in VALIDATION_DATES:
+        for date in self.validation_dates:
             union = np.maximum(union, self.helper._load_binary_score_mask(date_products[date]))
         union = apply_ocean_mask(union, sea_mask=self.sea_mask, fill_value=0.0)
         save_raster(self.grid, union.astype(np.float32), out_path)
@@ -626,8 +836,11 @@ class RecipeSensitivityR1MultibranchService:
         products_dir = self.case_output / PYGNOME_PUBLIC_COMPARISON_DIR_NAME / "products" / "C3_pygnome_deterministic"
         if not products_dir.exists():
             return None
-        date_products = {date: products_dir / f"pygnome_footprint_mask_{date}_datecomposite.tif" for date in VALIDATION_DATES}
-        event = products_dir / "pygnome_eventcorridor_model_union_2023-03-04_to_2023-03-06.tif"
+        date_products = {
+            date: products_dir / f"pygnome_footprint_mask_{date}_datecomposite.tif"
+            for date in self.validation_dates
+        }
+        event = products_dir / f"pygnome_eventcorridor_model_union_{self.eventcorridor_label}.tif"
         if not event.exists() or any(not path.exists() for path in date_products.values()):
             return None
         metadata_path = products_dir / "pygnome_benchmark_metadata.json"
@@ -671,7 +884,7 @@ class RecipeSensitivityR1MultibranchService:
                     source_semantics="strict_single_date_stress_test_march6_public_obs",
                 )
             )
-            for date in VALIDATION_DATES:
+            for date in self.validation_dates:
                 rows.append(
                     self._pair_record(
                         track,
@@ -686,7 +899,7 @@ class RecipeSensitivityR1MultibranchService:
                 self._pair_record(
                     track,
                     pair_role="eventcorridor_march4_6",
-                    obs_date=EVENT_CORRIDOR_LABEL,
+                    obs_date=self.eventcorridor_label,
                     forecast_path=track["eventcorridor_forecast"],
                     observation_path=observations["eventcorridor_march4_6"],
                     source_semantics="eventcorridor_public_observation_union_excluding_march3",
@@ -874,7 +1087,7 @@ class RecipeSensitivityR1MultibranchService:
         colors = ["#234f1e" if family == "OpenDrift" else "#8c510a" for family in event["model_family"]]
         ax.barh(event["track_id"].astype(str), event["mean_fss"], color=colors)
         ax.set_xlabel("Mean FSS across 1/3/5/10 km")
-        ax.set_title("March 4-6 Event-Corridor FSS by Recipe/Branch")
+        ax.set_title(f"{self.eventcorridor_label} Event-Corridor FSS by Recipe/Branch")
         ax.grid(axis="x", alpha=0.25)
         fig.tight_layout()
         fig.savefig(path, dpi=160)
@@ -890,6 +1103,7 @@ class RecipeSensitivityR1MultibranchService:
         run_records: list[dict],
         paths: dict[str, Path],
         qa_paths: dict[str, Path],
+        forcing_preparation: dict[str, Any],
     ) -> Path:
         path = self.output_dir / "recipe_sensitivity_r1_multibranch_report.md"
         working = summary_df.copy()
@@ -909,7 +1123,10 @@ class RecipeSensitivityR1MultibranchService:
             f"- Recommendation: `{recommendation['recommendation']}`",
             f"- Next branch: `{recommendation['recommended_next_branch']}`",
             f"- Any OpenDrift branch beats PyGNOME: `{recommendation['any_opendrift_branch_beats_pygnome']}`",
+            f"- Promotable OpenDrift branch-B recipe: `{recommendation['promotable_recipe_id'] or 'none'}`",
+            f"- Promotion track: `{recommendation['promotable_track_id'] or 'none'}`",
             f"- Reason: {recommendation['reason']}",
+            f"- Promotion basis: {recommendation['promotion_selection_basis']}",
             "",
             "## Best Strict March 6 Rows",
             "",
@@ -929,7 +1146,7 @@ class RecipeSensitivityR1MultibranchService:
                 ].head(8)
             ),
             "",
-            "## Best March 4-6 Event-Corridor Rows",
+            f"## Best {self.eventcorridor_label} Event-Corridor Rows",
             "",
             _csv_block(
                 event[
@@ -957,6 +1174,21 @@ class RecipeSensitivityR1MultibranchService:
             )
         else:
             lines.append("- None.")
+        gfs_available = [row["recipe_id"] for row in recipes if row["recipe_id"].endswith("_gfs") and row["available"]]
+        gfs_skipped = [row["recipe_id"] for row in recipes if row["recipe_id"].endswith("_gfs") and not row["available"]]
+        lines.extend(
+            [
+                "",
+                "## Forcing Preparation",
+                "",
+                f"- GFS preparation requested: `{forcing_preparation.get('gfs_requested', False)}`",
+                f"- GFS preparation status: `{forcing_preparation.get('gfs_status', 'unknown')}`",
+                f"- GFS wind path: `{forcing_preparation.get('gfs_path', '')}`",
+                f"- GFS preparation error: `{forcing_preparation.get('gfs_error', '') or 'none'}`",
+                f"- GFS recipes included: `{', '.join(gfs_available) if gfs_available else 'none'}`",
+                f"- GFS recipes skipped: `{', '.join(gfs_skipped) if gfs_skipped else 'none'}`",
+            ]
+        )
         lines.extend(["", "## Failed Runs", ""])
         if failed:
             lines.extend(f"- `{row.get('recipe_id')}` `{row.get('branch_id')}` failed: {row.get('failure_reason')}" for row in failed)
@@ -990,6 +1222,7 @@ class RecipeSensitivityR1MultibranchService:
         paths: dict[str, Path],
         qa_paths: dict[str, Path],
         report_path: Path,
+        forcing_preparation: dict[str, Any],
     ) -> Path:
         path = self.output_dir / "recipe_sensitivity_r1_multibranch_run_manifest.json"
         track_records = []
@@ -1001,6 +1234,7 @@ class RecipeSensitivityR1MultibranchService:
             "phase": RECIPE_SENSITIVITY_R1_MULTIBRANCH_DIR_NAME,
             "run_name": self.case.run_name,
             "created_utc": datetime.utcnow().isoformat(timespec="seconds") + "Z",
+            "output_slug": self.output_slug,
             "controls": {
                 "retention": "R1",
                 "coastline_action": self.retention_config["coastline_action"],
@@ -1008,12 +1242,15 @@ class RecipeSensitivityR1MultibranchService:
                 "time_step_minutes": self.retention_config["time_step_minutes"],
                 "simulation_start_utc": self.case.simulation_start_utc,
                 "simulation_end_utc": self.case.simulation_end_utc,
-                "validation_dates": VALIDATION_DATES,
+                "validation_dates": self.validation_dates,
                 "strict_march6_pairing_unchanged": True,
                 "public_observation_masks_unchanged": True,
                 "pygnome_used_as_truth": False,
             },
             "threshold_context": self.threshold_context,
+            "forcing_preparation": forcing_preparation,
+            "gfs_recipes_included": [row["recipe_id"] for row in recipes if row["recipe_id"].endswith("_gfs") and row["available"]],
+            "gfs_recipes_skipped": [row["recipe_id"] for row in recipes if row["recipe_id"].endswith("_gfs") and not row["available"]],
             "recipe_matrix": recipes,
             "branches": [branch.__dict__ for branch in BRANCHES],
             "run_records": run_records,
@@ -1024,6 +1261,9 @@ class RecipeSensitivityR1MultibranchService:
                 "eventcorridor_march4_6": str(observations["eventcorridor_march4_6"]),
             },
             "recommendation": recommendation,
+            "promotion_candidate": select_promotable_opendrift_recipe(
+                pd.read_csv(paths["summary"]) if paths["summary"].exists() else pd.DataFrame()
+            ),
             "paths": {key: str(value) for key, value in paths.items()},
             "qa_paths": {key: str(value) for key, value in qa_paths.items()},
             "report": str(report_path),

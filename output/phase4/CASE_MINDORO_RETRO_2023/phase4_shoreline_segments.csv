@@ -1,34 +1,33 @@
 scenario_id,oil_label,segment_id,total_beached_kg,n_particles,first_arrival_h,arrival_p25_h,arrival_p75_h,mean_assignment_distance_m,max_assignment_distance_m,beached_lat_mean,beached_lon_mean,first_arrival_utc,segment_length_m,segment_midpoint_lon,segment_midpoint_lat,segment_assignment_method
-lighter_oil,Light oil,shoreline_00326,1060.843,6604,4.0,5.0,6.0,125.272,368.114,12.685,121.539,2023-03-03T13:59:00Z,1000.0,121.541,12.685,canonical_shoreline_segments_gpkg
-lighter_oil,Light oil,shoreline_00327,785.775,4666,4.0,4.0,5.0,197.123,452.995,12.677,121.544,2023-03-03T13:59:00Z,1000.0,121.542,12.676,canonical_shoreline_segments_gpkg
-lighter_oil,Light oil,shoreline_00328,369.547,2364,4.0,5.0,5.0,421.942,538.671,12.668,121.548,2023-03-03T13:59:00Z,1000.0,121.544,12.667,canonical_shoreline_segments_gpkg
-lighter_oil,Light oil,shoreline_00325,1329.501,18954,5.0,8.0,22.0,111.012,462.187,12.695,121.537,2023-03-03T14:59:00Z,1000.0,121.539,12.694,canonical_shoreline_segments_gpkg
-lighter_oil,Light oil,shoreline_00329,124.708,803,5.0,5.0,5.0,263.034,508.334,12.658,121.548,2023-03-03T14:59:00Z,1000.0,121.546,12.658,canonical_shoreline_segments_gpkg
-lighter_oil,Light oil,shoreline_00330,80.688,615,5.0,5.0,5.0,60.312,188.322,12.65,121.547,2023-03-03T14:59:00Z,1000.0,121.548,12.649,canonical_shoreline_segments_gpkg
-lighter_oil,Light oil,shoreline_00331,0.141,1,5.0,5.0,5.0,41.003,41.003,12.645,121.548,2023-03-03T14:59:00Z,1000.0,121.549,12.64,canonical_shoreline_segments_gpkg
-lighter_oil,Light oil,shoreline_00324,914.342,30371,7.0,19.0,23.0,48.689,320.035,12.701,121.535,2023-03-03T16:59:00Z,1000.0,121.535,12.701,canonical_shoreline_segments_gpkg
-lighter_oil,Light oil,shoreline_00322,273.005,14738,19.0,20.0,22.0,211.324,326.449,12.716,121.525,2023-03-04T04:59:00Z,1000.0,121.523,12.715,canonical_shoreline_segments_gpkg
-lighter_oil,Light oil,shoreline_00323,345.23,20157,19.0,20.0,26.0,148.361,275.69,12.709,121.53,2023-03-04T04:59:00Z,1000.0,121.529,12.708,canonical_shoreline_segments_gpkg
-lighter_oil,Light oil,shoreline_00321,7.974,727,20.0,21.0,22.0,227.172,303.637,12.721,121.521,2023-03-04T05:59:00Z,1000.0,121.517,12.722,canonical_shoreline_segments_gpkg
-fixed_base_medium_heavy_proxy,Fixed base medium-heavy proxy,shoreline_00326,2531.858,6566,4.0,5.0,6.0,126.743,370.226,12.685,121.539,2023-03-03T13:59:00Z,1000.0,121.541,12.685,canonical_shoreline_segments_gpkg
-fixed_base_medium_heavy_proxy,Fixed base medium-heavy proxy,shoreline_00327,1749.985,4553,4.0,4.0,5.0,198.478,454.386,12.677,121.544,2023-03-03T13:59:00Z,1000.0,121.542,12.676,canonical_shoreline_segments_gpkg
-fixed_base_medium_heavy_proxy,Fixed base medium-heavy proxy,shoreline_00328,892.548,2353,4.0,5.0,5.0,421.044,540.589,12.668,121.548,2023-03-03T13:59:00Z,1000.0,121.544,12.667,canonical_shoreline_segments_gpkg
-fixed_base_medium_heavy_proxy,Fixed base medium-heavy proxy,shoreline_00325,6782.63,19081,5.0,8.0,22.0,110.713,463.398,12.695,121.537,2023-03-03T14:59:00Z,1000.0,121.539,12.694,canonical_shoreline_segments_gpkg
-fixed_base_medium_heavy_proxy,Fixed base medium-heavy proxy,shoreline_00329,310.89,824,5.0,5.0,5.0,247.167,508.84,12.658,121.548,2023-03-03T14:59:00Z,1000.0,121.546,12.658,canonical_shoreline_segments_gpkg
-fixed_base_medium_heavy_proxy,Fixed base medium-heavy proxy,shoreline_00330,250.514,675,5.0,5.0,5.0,59.81,186.82,12.651,121.547,2023-03-03T14:59:00Z,1000.0,121.548,12.649,canonical_shoreline_segments_gpkg
-fixed_base_medium_heavy_proxy,Fixed base medium-heavy proxy,shoreline_00331,0.745,2,5.0,5.0,5.0,36.209,36.733,12.645,121.548,2023-03-03T14:59:00Z,1000.0,121.549,12.64,canonical_shoreline_segments_gpkg
-fixed_base_medium_heavy_proxy,Fixed base medium-heavy proxy,shoreline_00324,10438.108,30579,7.0,19.0,23.0,48.946,331.966,12.701,121.535,2023-03-03T16:59:00Z,1000.0,121.535,12.701,canonical_shoreline_segments_gpkg
-fixed_base_medium_heavy_proxy,Fixed base medium-heavy proxy,shoreline_00322,4855.52,14385,19.0,20.0,22.0,211.571,326.248,12.716,121.525,2023-03-04T04:59:00Z,1000.0,121.523,12.715,canonical_shoreline_segments_gpkg
-fixed_base_medium_heavy_proxy,Fixed base medium-heavy proxy,shoreline_00323,6800.819,20221,19.0,20.0,26.0,149.181,275.871,12.709,121.53,2023-03-04T04:59:00Z,1000.0,121.529,12.708,canonical_shoreline_segments_gpkg
-fixed_base_medium_heavy_proxy,Fixed base medium-heavy proxy,shoreline_00321,255.055,761,20.0,21.0,22.0,227.384,302.997,12.721,121.521,2023-03-04T05:59:00Z,1000.0,121.517,12.722,canonical_shoreline_segments_gpkg
-heavier_oil,Heavier oil,shoreline_00326,2656.085,6589,4.0,5.0,6.0,122.707,369.054,12.685,121.539,2023-03-03T13:59:00Z,1000.0,121.541,12.685,canonical_shoreline_segments_gpkg
-heavier_oil,Heavier oil,shoreline_00327,1801.261,4481,4.0,4.0,5.0,201.713,456.334,12.676,121.544,2023-03-03T13:59:00Z,1000.0,121.542,12.676,canonical_shoreline_segments_gpkg
-heavier_oil,Heavier oil,shoreline_00328,898.298,2259,4.0,5.0,5.0,419.731,538.308,12.668,121.548,2023-03-03T13:59:00Z,1000.0,121.544,12.667,canonical_shoreline_segments_gpkg
-heavier_oil,Heavier oil,shoreline_00325,7157.923,18874,5.0,8.0,22.0,111.006,466.947,12.695,121.537,2023-03-03T14:59:00Z,1000.0,121.539,12.694,canonical_shoreline_segments_gpkg
-heavier_oil,Heavier oil,shoreline_00329,334.958,845,5.0,5.0,5.0,259.992,506.682,12.658,121.548,2023-03-03T14:59:00Z,1000.0,121.546,12.658,canonical_shoreline_segments_gpkg
-heavier_oil,Heavier oil,shoreline_00330,252.531,646,5.0,5.0,5.0,61.928,189.709,12.65,121.547,2023-03-03T14:59:00Z,1000.0,121.548,12.649,canonical_shoreline_segments_gpkg
-heavier_oil,Heavier oil,shoreline_00331,1.542,4,5.0,5.0,5.0,41.472,46.034,12.645,121.548,2023-03-03T14:59:00Z,1000.0,121.549,12.64,canonical_shoreline_segments_gpkg
-heavier_oil,Heavier oil,shoreline_00324,11315.054,30748,7.0,19.0,23.0,48.786,326.909,12.701,121.535,2023-03-03T16:59:00Z,1000.0,121.535,12.701,canonical_shoreline_segments_gpkg
-heavier_oil,Heavier oil,shoreline_00322,5284.105,14471,19.0,20.0,22.0,210.979,325.224,12.716,121.525,2023-03-04T04:59:00Z,1000.0,121.523,12.715,canonical_shoreline_segments_gpkg
-heavier_oil,Heavier oil,shoreline_00323,7391.166,20311,19.0,20.0,26.0,148.915,275.756,12.709,121.53,2023-03-04T04:59:00Z,1000.0,121.529,12.708,canonical_shoreline_segments_gpkg
-heavier_oil,Heavier oil,shoreline_00321,280.283,772,20.0,21.0,22.0,224.565,301.786,12.721,121.521,2023-03-04T05:59:00Z,1000.0,121.517,12.722,canonical_shoreline_segments_gpkg
+lighter_oil,Light oil,shoreline_00326,1059.435,6587,4.0,5.0,6.0,125.22,370.644,12.685,121.539,2023-03-03T13:59:00Z,1000.0,121.541,12.685,canonical_shoreline_segments_gpkg
+lighter_oil,Light oil,shoreline_00327,753.719,4527,4.0,4.0,5.0,200.612,459.034,12.677,121.544,2023-03-03T13:59:00Z,1000.0,121.542,12.676,canonical_shoreline_segments_gpkg
+lighter_oil,Light oil,shoreline_00328,355.444,2301,4.0,5.0,5.0,420.694,538.687,12.668,121.548,2023-03-03T13:59:00Z,1000.0,121.544,12.667,canonical_shoreline_segments_gpkg
+lighter_oil,Light oil,shoreline_00325,1326.308,18950,5.0,8.0,22.0,111.053,459.711,12.695,121.537,2023-03-03T14:59:00Z,1000.0,121.539,12.694,canonical_shoreline_segments_gpkg
+lighter_oil,Light oil,shoreline_00329,125.99,812,5.0,5.0,5.0,261.977,507.454,12.658,121.548,2023-03-03T14:59:00Z,1000.0,121.546,12.658,canonical_shoreline_segments_gpkg
+lighter_oil,Light oil,shoreline_00330,84.88,638,5.0,5.0,5.0,60.352,196.1,12.651,121.547,2023-03-03T14:59:00Z,1000.0,121.548,12.649,canonical_shoreline_segments_gpkg
+lighter_oil,Light oil,shoreline_00331,0.127,1,5.0,5.0,5.0,44.95,44.95,12.644,121.548,2023-03-03T14:59:00Z,1000.0,121.549,12.64,canonical_shoreline_segments_gpkg
+lighter_oil,Light oil,shoreline_00324,919.888,30519,7.0,19.0,23.0,49.185,330.618,12.701,121.535,2023-03-03T16:59:00Z,1000.0,121.535,12.701,canonical_shoreline_segments_gpkg
+lighter_oil,Light oil,shoreline_00322,262.292,14580,19.0,20.0,22.0,211.267,326.621,12.716,121.525,2023-03-04T04:59:00Z,1000.0,121.523,12.715,canonical_shoreline_segments_gpkg
+lighter_oil,Light oil,shoreline_00323,362.775,20332,19.0,20.0,26.0,148.225,275.25,12.709,121.53,2023-03-04T04:59:00Z,1000.0,121.529,12.708,canonical_shoreline_segments_gpkg
+lighter_oil,Light oil,shoreline_00321,10.334,753,20.0,21.0,22.0,225.812,304.172,12.721,121.521,2023-03-04T05:59:00Z,1000.0,121.517,12.722,canonical_shoreline_segments_gpkg
+fixed_base_medium_heavy_proxy,Fixed base medium-heavy proxy,shoreline_00326,2528.038,6559,4.0,5.0,6.0,124.187,364.776,12.685,121.539,2023-03-03T13:59:00Z,1000.0,121.541,12.685,canonical_shoreline_segments_gpkg
+fixed_base_medium_heavy_proxy,Fixed base medium-heavy proxy,shoreline_00327,1768.616,4600,4.0,4.0,5.0,199.193,457.469,12.677,121.544,2023-03-03T13:59:00Z,1000.0,121.542,12.676,canonical_shoreline_segments_gpkg
+fixed_base_medium_heavy_proxy,Fixed base medium-heavy proxy,shoreline_00328,876.308,2313,4.0,5.0,5.0,419.58,539.648,12.668,121.548,2023-03-03T13:59:00Z,1000.0,121.544,12.667,canonical_shoreline_segments_gpkg
+fixed_base_medium_heavy_proxy,Fixed base medium-heavy proxy,shoreline_00325,6707.415,18862,5.0,8.0,22.0,110.915,465.412,12.695,121.537,2023-03-03T14:59:00Z,1000.0,121.539,12.694,canonical_shoreline_segments_gpkg
+fixed_base_medium_heavy_proxy,Fixed base medium-heavy proxy,shoreline_00329,295.621,784,5.0,5.0,5.0,264.624,500.971,12.658,121.548,2023-03-03T14:59:00Z,1000.0,121.546,12.658,canonical_shoreline_segments_gpkg
+fixed_base_medium_heavy_proxy,Fixed base medium-heavy proxy,shoreline_00330,243.311,657,5.0,5.0,5.0,63.298,194.663,12.65,121.547,2023-03-03T14:59:00Z,1000.0,121.548,12.649,canonical_shoreline_segments_gpkg
+fixed_base_medium_heavy_proxy,Fixed base medium-heavy proxy,shoreline_00324,10367.888,30408,7.0,19.0,23.0,49.469,329.691,12.701,121.535,2023-03-03T16:59:00Z,1000.0,121.535,12.701,canonical_shoreline_segments_gpkg
+fixed_base_medium_heavy_proxy,Fixed base medium-heavy proxy,shoreline_00322,5013.595,14817,19.0,20.0,22.0,210.912,327.069,12.716,121.525,2023-03-04T04:59:00Z,1000.0,121.523,12.715,canonical_shoreline_segments_gpkg
+fixed_base_medium_heavy_proxy,Fixed base medium-heavy proxy,shoreline_00323,6779.433,20155,19.0,20.0,26.0,148.585,276.291,12.709,121.53,2023-03-04T04:59:00Z,1000.0,121.529,12.708,canonical_shoreline_segments_gpkg
+fixed_base_medium_heavy_proxy,Fixed base medium-heavy proxy,shoreline_00321,284.664,845,20.0,21.0,22.0,226.146,304.784,12.721,121.521,2023-03-04T05:59:00Z,1000.0,121.517,12.722,canonical_shoreline_segments_gpkg
+heavier_oil,Heavier oil,shoreline_00326,2706.284,6710,4.0,5.0,6.0,122.556,367.306,12.685,121.539,2023-03-03T13:59:00Z,1000.0,121.541,12.685,canonical_shoreline_segments_gpkg
+heavier_oil,Heavier oil,shoreline_00327,1845.571,4588,4.0,4.0,5.0,199.101,453.787,12.677,121.544,2023-03-03T13:59:00Z,1000.0,121.542,12.676,canonical_shoreline_segments_gpkg
+heavier_oil,Heavier oil,shoreline_00328,943.325,2370,4.0,5.0,5.0,421.081,537.731,12.668,121.548,2023-03-03T13:59:00Z,1000.0,121.544,12.667,canonical_shoreline_segments_gpkg
+heavier_oil,Heavier oil,shoreline_00325,7198.41,18975,5.0,8.0,22.0,110.738,459.788,12.695,121.537,2023-03-03T14:59:00Z,1000.0,121.539,12.694,canonical_shoreline_segments_gpkg
+heavier_oil,Heavier oil,shoreline_00329,333.75,841,5.0,5.0,5.0,253.311,506.401,12.658,121.548,2023-03-03T14:59:00Z,1000.0,121.546,12.658,canonical_shoreline_segments_gpkg
+heavier_oil,Heavier oil,shoreline_00330,269.133,687,5.0,5.0,5.0,59.696,185.899,12.65,121.547,2023-03-03T14:59:00Z,1000.0,121.548,12.649,canonical_shoreline_segments_gpkg
+heavier_oil,Heavier oil,shoreline_00331,0.781,2,5.0,5.0,5.0,38.817,44.971,12.645,121.548,2023-03-03T14:59:00Z,1000.0,121.549,12.64,canonical_shoreline_segments_gpkg
+heavier_oil,Heavier oil,shoreline_00324,11112.293,30208,7.0,19.0,23.0,48.43,320.79,12.701,121.535,2023-03-03T16:59:00Z,1000.0,121.535,12.701,canonical_shoreline_segments_gpkg
+heavier_oil,Heavier oil,shoreline_00322,5316.262,14560,19.0,20.0,22.0,210.909,326.076,12.716,121.525,2023-03-04T04:59:00Z,1000.0,121.523,12.715,canonical_shoreline_segments_gpkg
+heavier_oil,Heavier oil,shoreline_00323,7397.929,20316,19.0,20.0,26.0,148.466,275.488,12.709,121.53,2023-03-04T04:59:00Z,1000.0,121.529,12.708,canonical_shoreline_segments_gpkg
+heavier_oil,Heavier oil,shoreline_00321,269.878,743,20.0,21.0,22.0,222.596,303.141,12.721,121.521,2023-03-04T05:59:00Z,1000.0,121.517,12.722,canonical_shoreline_segments_gpkg

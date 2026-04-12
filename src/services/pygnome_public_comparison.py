@@ -22,8 +22,11 @@ from src.helpers.raster import GridBuilder, extract_particles_at_time, rasterize
 from src.helpers.scoring import apply_ocean_mask, load_sea_mask_array, precheck_same_grid
 from src.services.gnome_comparison import GNOME_AVAILABLE, GnomeComparisonService
 from src.services.official_rerun_r1 import OFFICIAL_RERUN_R1_DIR_NAME, _read_json
+from src.services.phase3b_multidate_public import (
+    format_phase3b_multidate_eventcorridor_label,
+)
 from src.services.scoring import OFFICIAL_PHASE3B_WINDOWS_KM, Phase3BScoringService
-from src.utils.io import get_case_output_dir, resolve_recipe_selection, resolve_spill_origin
+from src.utils.io import get_case_output_dir, get_forcing_files, resolve_recipe_selection, resolve_spill_origin
 
 try:
     import matplotlib.pyplot as plt
@@ -51,6 +54,8 @@ STRICT_VALIDATION_DATE = "2023-03-06"
 STRICT_VALIDATION_TIME_UTC = "2023-03-06T09:59:00Z"
 FORECAST_VALIDATION_DATES = ["2023-03-04", "2023-03-05", "2023-03-06"]
 EVENT_CORRIDOR_LABEL = "2023-03-04_to_2023-03-06"
+PUBLIC_COMPARISON_TRUTH_SOURCE = "mindoro_public_comparison_march5_inclusive_truth"
+EVENT_CORRIDOR_SOURCE_SEMANTICS = "eventcorridor_public_comparison_truth_union_march4_5_6"
 
 
 def _json_default(value: Any) -> Any:
@@ -113,6 +118,18 @@ def _mean_fss(row: pd.Series | dict) -> float:
     return float(np.mean(values)) if values else 0.0
 
 
+def _resolve_opendrift_forcing_labels(recipe: str, run_name: str) -> dict[str, str]:
+    forcing = get_forcing_files(recipe, run_name=run_name)
+    current_source = str(forcing.get("current_source") or "Currents")
+    wind_source = str(forcing.get("wind_source") or "Wind")
+    wave_source = str(forcing.get("wave_source") or "Wave/Stokes")
+    return {
+        "current_source": f"{current_source} recipe currents",
+        "wind_source": f"{wind_source} recipe winds",
+        "wave_source": wave_source,
+    }
+
+
 def recommend_public_comparison(summary_df: pd.DataFrame) -> dict:
     """Return the single thesis-facing recommendation requested by the phase."""
     if summary_df.empty:
@@ -153,13 +170,17 @@ def recommend_public_comparison(summary_df: pd.DataFrame) -> dict:
         "best_eventcorridor_mean_fss": best_event_score,
         "best_strict_march6_mean_fss": best_strict_score,
         "reason": (
-            "Model ranking prioritizes the March 4-6 event-corridor public-observation comparison, "
-            "then strict March 6 as a sparse stress-test tie-breaker."
+            "Model ranking prioritizes the March 4-6 event-corridor comparison scored against the "
+            "March 4-5-6 public-comparison truth union, then strict March 6 as a sparse stress-test tie-breaker."
         ),
     }
 
 
 class PyGnomePublicComparisonService:
+    @staticmethod
+    def _public_comparison_validation_dates() -> list[str]:
+        return list(FORECAST_VALIDATION_DATES)
+
     def __init__(self):
         self.case = get_case_context()
         if not self.case.is_official:
@@ -183,6 +204,8 @@ class PyGnomePublicComparisonService:
         self.sea_mask = load_sea_mask_array(self.grid.spec)
         self.valid_mask = self.sea_mask > 0.5 if self.sea_mask is not None else None
         self.helper = Phase3BScoringService(output_dir=self.output_dir / "_scratch_helper")
+        self.validation_dates = self._public_comparison_validation_dates()
+        self.eventcorridor_label = format_phase3b_multidate_eventcorridor_label(self.validation_dates)
 
     def run(self) -> dict:
         upstream = self._load_upstream_context()
@@ -192,6 +215,8 @@ class PyGnomePublicComparisonService:
         scored_pairings, fss_df, diagnostics_df = self._score_pairings(pairing_df)
         summary_df = self._summarize(scored_pairings, fss_df, diagnostics_df)
         ranking_df = self._rank_models(summary_df)
+        if not ranking_df.empty:
+            ranking_df["eventcorridor_validation_dates_used"] = ",".join(self.validation_dates)
         recommendation = recommend_public_comparison(summary_df)
         qa_paths = self._write_qa(summary_df)
         paths = self._write_outputs(scored_pairings, fss_df, diagnostics_df, summary_df, ranking_df, tracks)
@@ -251,7 +276,7 @@ class PyGnomePublicComparisonService:
 
         date_union_dir = self.case_output / "phase3b_multidate_public" / "date_union_obs_masks"
         date_unions: dict[str, Path] = {}
-        for date in FORECAST_VALIDATION_DATES:
+        for date in self.validation_dates:
             path = date_union_dir / f"obs_union_{date}.tif"
             if not path.exists():
                 raise FileNotFoundError(f"Required accepted date-union observation mask missing: {path}")
@@ -266,10 +291,10 @@ class PyGnomePublicComparisonService:
 
     def _build_eventcorridor_obs_union(self, date_unions: dict[str, Path]) -> Path:
         union = np.zeros((self.grid.height, self.grid.width), dtype=np.float32)
-        for date in FORECAST_VALIDATION_DATES:
+        for date in self.validation_dates:
             union = np.maximum(union, self.helper._load_binary_score_mask(date_unions[date]))
         union = apply_ocean_mask(union, sea_mask=self.sea_mask, fill_value=0.0)
-        path = self.obs_dir / "eventcorridor_obs_union_2023-03-04_to_2023-03-06.tif"
+        path = self.obs_dir / f"eventcorridor_obs_union_{self.eventcorridor_label}.tif"
         save_raster(self.grid, union.astype(np.float32), path)
         return path
 
@@ -288,28 +313,32 @@ class PyGnomePublicComparisonService:
         nc_path = next(iter(sorted((model_dir / "forecast").glob("deterministic_control_*.nc"))), None)
         if nc_path is None:
             raise FileNotFoundError(f"Missing OpenDrift deterministic NetCDF under {model_dir / 'forecast'}")
+        forcing_labels = _resolve_opendrift_forcing_labels(recipe, self.case.run_name)
 
         date_products = {
             date: self._build_opendrift_date_composite(nc_path, date, track_dir, "od_control")
-            for date in FORECAST_VALIDATION_DATES
+            for date in self.validation_dates
         }
         event = self._build_model_eventcorridor_union(
             date_products,
-            track_dir / "od_control_eventcorridor_model_union_2023-03-04_to_2023-03-06.tif",
+            track_dir / f"od_control_eventcorridor_model_union_{self.eventcorridor_label}.tif",
         )
         return {
             "track_id": "C1",
             "track_name": "od_deterministic_vs_public",
             "model_name": "OpenDrift deterministic control",
             "model_family": "OpenDrift",
+            "supports_strict_march6": True,
             "initialization_mode": "B_observation_initialized_polygon",
             "retention_coastline_action": "previous",
             "transport_model": "oceandrift",
             "provisional_transport_model": True,
             "recipe_used": recipe,
-            "current_source": "cmems_era5 recipe currents",
-            "wind_source": "cmems_era5 recipe winds",
-            "wave_stokes_status": "same OpenDrift R1 forcing stack as official_rerun_r1",
+            "current_source": forcing_labels["current_source"],
+            "wind_source": forcing_labels["wind_source"],
+            "wave_stokes_status": (
+                f"{forcing_labels['wave_source']} required; same OpenDrift R1 forcing stack as official_rerun_r1"
+            ),
             "forcing_manifest_paths": f"{upstream['forecast_manifest_path']};{upstream['ensemble_manifest_path']}",
             "structural_limitations": "OpenDrift deterministic control has no ensemble probability thresholding.",
             "strict_march6_forecast": date_products[STRICT_VALIDATION_DATE],
@@ -321,45 +350,110 @@ class PyGnomePublicComparisonService:
         }
 
     def _prepare_opendrift_ensemble_track(self, model_dir: Path, upstream: dict) -> dict:
-        track_dir = self.products_dir / "C2_od_ensemble_p50"
+        track_dir = self.products_dir / "C2_od_ensemble_consolidated"
         track_dir.mkdir(parents=True, exist_ok=True)
-        date_products = {}
-        for date in FORECAST_VALIDATION_DATES:
-            source = model_dir / "ensemble" / f"mask_p50_{date}_datecomposite.tif"
-            if not source.exists():
-                raise FileNotFoundError(f"Missing OpenDrift ensemble p50 date-composite: {source}")
-            dest = track_dir / source.name
-            shutil.copyfile(source, dest)
-            masked = apply_ocean_mask(_read_raster(dest), sea_mask=self.sea_mask, fill_value=0.0)
-            save_raster(self.grid, masked.astype(np.float32), dest)
-            date_products[date] = dest
+        ensemble_manifest_path, member_paths = self._load_opendrift_ensemble_member_paths(model_dir / "ensemble")
+        date_products = {
+            date: self._build_opendrift_ensemble_union_date_composite(
+                member_paths,
+                date,
+                track_dir,
+                "od_ensemble_consolidated",
+            )
+            for date in self.validation_dates
+        }
         event = self._build_model_eventcorridor_union(
             date_products,
-            track_dir / "od_ensemble_p50_eventcorridor_model_union_2023-03-04_to_2023-03-06.tif",
+            track_dir / f"od_ensemble_consolidated_eventcorridor_model_union_{self.eventcorridor_label}.tif",
         )
         provenance = upstream.get("provenance") or {}
+        recipe_used = str(provenance.get("recipe_used") or resolve_recipe_selection().recipe)
+        forcing_labels = _resolve_opendrift_forcing_labels(recipe_used, self.case.run_name)
         return {
             "track_id": "C2",
-            "track_name": "od_ensemble_p50_vs_public",
-            "model_name": "OpenDrift ensemble p50",
+            "track_name": "od_ensemble_consolidated_vs_public",
+            "model_name": "OpenDrift consolidated ensemble trajectory",
             "model_family": "OpenDrift",
+            "supports_strict_march6": False,
             "initialization_mode": "B_observation_initialized_polygon",
             "retention_coastline_action": "previous",
             "transport_model": str(provenance.get("transport_model", "oceandrift")),
             "provisional_transport_model": bool(provenance.get("provisional_transport_model", True)),
-            "recipe_used": str(provenance.get("recipe_used", resolve_recipe_selection().recipe)),
-            "current_source": "cmems_era5 recipe currents",
-            "wind_source": "cmems_era5 recipe winds",
-            "wave_stokes_status": "wave/Stokes required and inherited from official_rerun_r1",
+            "recipe_used": recipe_used,
+            "current_source": forcing_labels["current_source"],
+            "wind_source": forcing_labels["wind_source"],
+            "wave_stokes_status": f"{forcing_labels['wave_source']} required and inherited from official_rerun_r1",
             "forcing_manifest_paths": f"{upstream['forecast_manifest_path']};{upstream['ensemble_manifest_path']}",
-            "structural_limitations": "p50 is a thresholded ensemble probability product and may be sparse by construction.",
+            "structural_limitations": (
+                "All stored ensemble member trajectories are unioned into one support mask, "
+                "so this product is broad by construction and should not be interpreted as a probability threshold."
+            ),
             "strict_march6_forecast": date_products[STRICT_VALIDATION_DATE],
             "date_forecasts": date_products,
             "eventcorridor_forecast": event,
             "products_dir": str(track_dir),
-            "source_nc": "",
+            "source_nc": str(ensemble_manifest_path),
             "pygnome_benchmark_metadata": {},
         }
+
+    def _load_opendrift_ensemble_member_paths(self, ensemble_dir: Path) -> tuple[Path, list[Path]]:
+        manifest_path = ensemble_dir / "ensemble_manifest.json"
+        member_paths: list[Path] = []
+        if manifest_path.exists():
+            manifest = _read_json(manifest_path)
+            member_runs = manifest.get("member_runs") or []
+            model_dir = ensemble_dir.parent
+            for member in member_runs:
+                relative_path = str(member.get("relative_path") or "").strip()
+                if not relative_path:
+                    continue
+                candidate = model_dir / relative_path
+                if not candidate.exists():
+                    fallback = ensemble_dir / Path(relative_path).name
+                    if fallback.exists():
+                        candidate = fallback
+                if not candidate.exists():
+                    raise FileNotFoundError(f"Missing OpenDrift ensemble member NetCDF: {candidate}")
+                member_paths.append(candidate)
+        if not member_paths:
+            member_paths = sorted(ensemble_dir.glob("member_*.nc"))
+        if not member_paths:
+            raise FileNotFoundError(f"Missing OpenDrift ensemble member NetCDFs under {ensemble_dir}")
+        return manifest_path, member_paths
+
+    def _build_opendrift_ensemble_union_date_composite(
+        self,
+        member_paths: list[Path],
+        target_date: str,
+        out_dir: Path,
+        prefix: str,
+    ) -> Path:
+        out_path = out_dir / f"{prefix}_{target_date}_datecomposite.tif"
+        composite = np.zeros((self.grid.height, self.grid.width), dtype=np.float32)
+        for nc_path in member_paths:
+            with xr.open_dataset(nc_path) as ds:
+                times = pd.DatetimeIndex(pd.to_datetime(ds["time"].values))
+                if times.tz is not None:
+                    times = times.tz_convert("UTC").tz_localize(None)
+                for index, timestamp in enumerate(times):
+                    if pd.Timestamp(timestamp).date().isoformat() != target_date:
+                        continue
+                    lon = np.asarray(ds["lon"].isel(time=index).values).reshape(-1)
+                    lat = np.asarray(ds["lat"].isel(time=index).values).reshape(-1)
+                    status = np.asarray(ds["status"].isel(time=index).values).reshape(-1)
+                    valid = np.isfinite(lon) & np.isfinite(lat) & (status == 0)
+                    if not np.any(valid):
+                        continue
+                    hits, _ = rasterize_particles(
+                        self.grid,
+                        lon[valid],
+                        lat[valid],
+                        np.ones(int(np.count_nonzero(valid)), dtype=np.float32),
+                    )
+                    composite = np.maximum(composite, hits.astype(np.float32))
+        composite = apply_ocean_mask(composite, sea_mask=self.sea_mask, fill_value=0.0)
+        save_raster(self.grid, composite.astype(np.float32), out_path)
+        return out_path
 
     def _prepare_pygnome_track(self, recipe: str, upstream: dict) -> dict:
         track_dir = self.products_dir / "C3_pygnome_deterministic"
@@ -386,18 +480,19 @@ class PyGnomePublicComparisonService:
 
         date_products = {
             date: self._build_pygnome_date_composite(nc_path, date, track_dir)
-            for date in FORECAST_VALIDATION_DATES
+            for date in self.validation_dates
         }
         self._build_pygnome_strict_snapshot_products(nc_path, track_dir)
         event = self._build_model_eventcorridor_union(
             date_products,
-            track_dir / "pygnome_eventcorridor_model_union_2023-03-04_to_2023-03-06.tif",
+            track_dir / f"pygnome_eventcorridor_model_union_{self.eventcorridor_label}.tif",
         )
         return {
             "track_id": "C3",
             "track_name": "pygnome_deterministic_vs_public",
             "model_name": "PyGNOME deterministic benchmark",
             "model_family": "PyGNOME",
+            "supports_strict_march6": True,
             "initialization_mode": "B_observation_initialized_polygon_surrogate_clustered_point_spills",
             "retention_coastline_action": "PyGNOME default benchmark behavior",
             "transport_model": "pygnome",
@@ -509,7 +604,7 @@ class PyGnomePublicComparisonService:
 
     def _build_model_eventcorridor_union(self, date_products: dict[str, Path], out_path: Path) -> Path:
         union = np.zeros((self.grid.height, self.grid.width), dtype=np.float32)
-        for date in FORECAST_VALIDATION_DATES:
+        for date in self.validation_dates:
             union = np.maximum(union, self.helper._load_binary_score_mask(date_products[date]))
         union = apply_ocean_mask(union, sea_mask=self.sea_mask, fill_value=0.0)
         save_raster(self.grid, union.astype(np.float32), out_path)
@@ -517,18 +612,22 @@ class PyGnomePublicComparisonService:
 
     def _build_pairings(self, tracks: list[dict], observations: dict[str, Any]) -> pd.DataFrame:
         rows: list[dict] = []
+        event_validation_dates = ",".join(self.validation_dates)
         for track in tracks:
-            rows.append(
-                self._pair_record(
-                    track,
-                    pair_role="strict_march6",
-                    obs_date=STRICT_VALIDATION_DATE,
-                    forecast_path=track["strict_march6_forecast"],
-                    observation_path=observations["strict_march6"],
-                    source_semantics="strict_single_date_stress_test_march6_public_obs",
+            if bool(track.get("supports_strict_march6", True)):
+                rows.append(
+                    self._pair_record(
+                        track,
+                        pair_role="strict_march6",
+                        obs_date=STRICT_VALIDATION_DATE,
+                        forecast_path=track["strict_march6_forecast"],
+                        observation_path=observations["strict_march6"],
+                        source_semantics="strict_single_date_stress_test_march6_public_obs",
+                        validation_dates_used=STRICT_VALIDATION_DATE,
+                        truth_source="accepted_public_observation_derived_mask",
+                    )
                 )
-            )
-            for date in FORECAST_VALIDATION_DATES:
+            for date in self.validation_dates:
                 rows.append(
                     self._pair_record(
                         track,
@@ -536,17 +635,21 @@ class PyGnomePublicComparisonService:
                         obs_date=date,
                         forecast_path=track["date_forecasts"][date],
                         observation_path=observations["date_unions"][date],
-                        source_semantics=f"per_date_union_{date}_public_observation_vs_model",
+                        source_semantics=f"per_date_union_{date}_public_comparison_truth_vs_model",
+                        validation_dates_used=date,
+                        truth_source=PUBLIC_COMPARISON_TRUTH_SOURCE,
                     )
                 )
             rows.append(
                 self._pair_record(
                     track,
                     pair_role="eventcorridor_march4_6",
-                    obs_date=EVENT_CORRIDOR_LABEL,
+                    obs_date=self.eventcorridor_label,
                     forecast_path=track["eventcorridor_forecast"],
                     observation_path=observations["eventcorridor_march4_6"],
-                    source_semantics="eventcorridor_public_observation_union_excluding_march3",
+                    source_semantics=EVENT_CORRIDOR_SOURCE_SEMANTICS,
+                    validation_dates_used=event_validation_dates,
+                    truth_source=PUBLIC_COMPARISON_TRUTH_SOURCE,
                 )
             )
         return pd.DataFrame(rows)
@@ -560,6 +663,8 @@ class PyGnomePublicComparisonService:
         forecast_path: Path,
         observation_path: Path,
         source_semantics: str,
+        validation_dates_used: str,
+        truth_source: str,
     ) -> dict:
         return {
             "track_id": track["track_id"],
@@ -569,6 +674,7 @@ class PyGnomePublicComparisonService:
             "pair_id": f"{track['track_id']}_{pair_role}_{obs_date}".replace(":", "-"),
             "pair_role": pair_role,
             "obs_date": obs_date,
+            "validation_dates_used": validation_dates_used,
             "forecast_product": Path(forecast_path).name,
             "forecast_path": str(forecast_path),
             "observation_product": Path(observation_path).name,
@@ -576,7 +682,7 @@ class PyGnomePublicComparisonService:
             "metric": "FSS",
             "windows_km": ",".join(str(window) for window in OFFICIAL_PHASE3B_WINDOWS_KM),
             "source_semantics": source_semantics,
-            "truth_source": "accepted_public_observation_derived_mask",
+            "truth_source": truth_source,
             "pygnome_used_as_truth": False,
             "initialization_mode": track["initialization_mode"],
             "retention_coastline_action": track["retention_coastline_action"],
@@ -755,18 +861,24 @@ class PyGnomePublicComparisonService:
             "workflow_mode": self.case.workflow_mode,
             "run_name": self.case.run_name,
             "phase": PYGNOME_PUBLIC_COMPARISON_DIR_NAME,
-            "purpose": "comparative model benchmark against accepted public observation-derived Mindoro masks",
+            "purpose": "comparative model benchmark against the March 4-5-6 Mindoro public-comparison truth lane",
             "guardrails": {
-                "public_observed_masks_are_truth": True,
+                "public_comparison_truth_lane_overrides_upstream_phase3b": True,
+                "march5_public_support_promoted_to_truth_in_this_lane": True,
                 "pygnome_used_as_truth": False,
                 "strict_march6_files_unchanged": True,
-                "observation_acceptance_rules_unchanged": True,
+                "upstream_phase3b_multidate_truth_unchanged": True,
                 "no_new_public_sources_added": True,
                 "medium_tier_not_run": True,
                 "march3_not_counted_as_forecast_skill": True,
             },
-            "dates_scored": FORECAST_VALIDATION_DATES,
+            "dates_scored": self.validation_dates,
             "strict_validation_time_utc": STRICT_VALIDATION_TIME_UTC,
+            "truth_definition": {
+                "strict_march6_truth_source": "accepted_public_observation_derived_mask",
+                "public_comparison_truth_source": PUBLIC_COMPARISON_TRUTH_SOURCE,
+                "eventcorridor_validation_dates_used": self.validation_dates,
+            },
             "observations": {
                 "strict_march6": str(observations["strict_march6"]),
                 "date_unions": {date: str(path) for date, path in observations["date_unions"].items()},
@@ -801,15 +913,16 @@ class PyGnomePublicComparisonService:
         lines = [
             "# Chapter 3 PyGNOME Public-Observation Comparison Memo",
             "",
-            "This branch is a comparative observation benchmark. PyGNOME is not used as truth; accepted public observation-derived masks remain the truth source.",
+            "This branch is a comparative benchmark. PyGNOME is not used as truth, and the comparison lane promotes the March 5 public-support mask into its March 4-5-6 scored truth union.",
             "",
-            "The strict March 6 result remains the hardest single-date stress test. The March 4-6 multi-date and event-corridor comparisons provide the broader event-scale model comparison.",
+            "The strict March 6 result remains the hardest single-date stress test. The March 4-6 multi-date and event-corridor comparisons in this lane are scored against the March 4-5-6 public-comparison truth union.",
             "",
             "## Important Limitations",
             "",
             "- OpenDrift R1 products use the selected `general:coastline_action=previous` retention configuration.",
             "- The PyGNOME deterministic product is generated with the repository's current PyGNOME benchmark transport pathway.",
             "- Current PyGNOME products approximate the March 3 polygon with clustered point spills and do not reproduce official gridded Stokes forcing identically.",
+            "- This comparison lane intentionally differs from upstream `phase3b_multidate_public`: March 5 is promoted locally for scoring here, while the upstream truth lane remains unchanged.",
             "- These limitations are manifest-recorded and should be discussed rather than hidden.",
             "",
             "## Recommendation",
@@ -850,7 +963,17 @@ class PyGnomePublicComparisonService:
                 ax = axes_array[row_index, col_index]
                 match = selected[(selected["pair_role"] == role) & (selected["track_id"] == track_id)]
                 if match.empty:
-                    ax.axis("off")
+                    ax.text(
+                        0.5,
+                        0.5,
+                        "Not scored for this scope",
+                        ha="center",
+                        va="center",
+                        fontsize=11,
+                        color="#475569",
+                    )
+                    ax.set_title(f"{track_id} {role}")
+                    ax.set_axis_off()
                     continue
                 item = match.iloc[0]
                 forecast = self.helper._load_binary_score_mask(Path(item["forecast_path"]))

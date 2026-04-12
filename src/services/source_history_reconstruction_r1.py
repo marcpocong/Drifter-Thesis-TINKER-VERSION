@@ -23,6 +23,10 @@ from src.services.ingestion import DataIngestionService
 from src.services.init_mode_sensitivity_r1 import INIT_MODE_SENSITIVITY_DIR_NAME
 from src.services.official_rerun_r1 import OFFICIAL_RERUN_R1_DIR_NAME, load_official_retention_config
 from src.services.phase3b_extended_public_scored import _forcing_time_and_vars
+from src.services.phase3b_multidate_public import (
+    format_phase3b_multidate_eventcorridor_label,
+    load_phase3b_multidate_validation_dates,
+)
 from src.services.scoring import OFFICIAL_PHASE3B_WINDOWS_KM, Phase3BScoringService
 from src.services.transport_retention_fix import (
     STRICT_VALIDATION_TIME_UTC,
@@ -247,6 +251,12 @@ class SourceHistoryReconstructionR1Service:
         self.output_dir = self.case_output / SOURCE_HISTORY_RECONSTRUCTION_DIR_NAME
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.force_rerun = _truthy(os.environ.get(FORCE_RERUN_ENV, ""))
+        self.validation_dates = load_phase3b_multidate_validation_dates(
+            self.case_output,
+            fallback_dates=FORECAST_SKILL_DATES,
+        )
+        self.date_composite_dates = list(dict.fromkeys(["2023-03-03", *self.validation_dates]))
+        self.eventcorridor_label = format_phase3b_multidate_eventcorridor_label(self.validation_dates)
         self.retention_config = load_official_retention_config()
         if self.retention_config["selected_mode"] != "R1":
             raise RuntimeError("source_history_reconstruction_r1 requires official_retention.selected_mode=R1.")
@@ -568,7 +578,7 @@ class SourceHistoryReconstructionR1Service:
             simulation_start_utc=window["simulation_start_utc"],
             simulation_end_utc=window["simulation_end_utc"],
             snapshot_hours=snapshot_hours,
-            date_composite_dates=list(DATE_COMPOSITE_DATES),
+            date_composite_dates=list(self.date_composite_dates),
             transport_overrides={
                 "coastline_action": self.retention_scenario.coastline_action,
                 "coastline_approximation_precision": self.retention_scenario.coastline_approximation_precision,
@@ -610,7 +620,7 @@ class SourceHistoryReconstructionR1Service:
         member_paths = sorted((model_dir / "ensemble").glob("member_*.nc"))
         if not member_paths:
             raise FileNotFoundError(f"No ensemble members found for {scenario.scenario_id}: {model_dir / 'ensemble'}")
-        for date in DATE_COMPOSITE_DATES:
+        for date in self.date_composite_dates:
             probability = self._date_composite_probability(member_paths, date)
             probability = apply_ocean_mask(probability, sea_mask=self.sea_mask, fill_value=0.0)
             p50 = apply_ocean_mask((probability >= 0.5).astype(np.float32), sea_mask=self.sea_mask, fill_value=0.0)
@@ -648,6 +658,10 @@ class SourceHistoryReconstructionR1Service:
     def _materialize_missing_march5_union_if_available(self) -> str:
         union_dir = self.case_output / "phase3b_multidate_public" / "date_union_obs_masks"
         union_path = union_dir / "obs_union_2023-03-05.tif"
+        if "2023-03-05" not in self.validation_dates:
+            if union_path.exists():
+                union_path.unlink()
+            return ""
         if union_path.exists():
             return str(union_path)
         accepted = self._accepted_public_obs_for_dates(["2023-03-05"])
@@ -703,7 +717,7 @@ class SourceHistoryReconstructionR1Service:
                 source_semantics="strict_single_date_stress_test_march6_p50_vs_arcgis_obsmask",
             ),
         ]
-        for date in FORECAST_SKILL_DATES:
+        for date in self.validation_dates:
             obs_path = self._date_union_obs_path(date)
             if not obs_path.exists():
                 continue
@@ -722,8 +736,8 @@ class SourceHistoryReconstructionR1Service:
             self._pair(
                 scenario=scenario,
                 pair_role="eventcorridor_march4_6",
-                pair_id=f"{scenario.scenario_id}_eventcorridor_2023-03-04_to_2023-03-06",
-                obs_date="2023-03-04_to_2023-03-06",
+                pair_id=f"{scenario.scenario_id}_eventcorridor_{self.eventcorridor_label}",
+                obs_date=self.eventcorridor_label,
                 forecast_path=self._build_eventcorridor_model_union(scenario, composite_dir),
                 observation_path=self._build_eventcorridor_obs_union(),
                 source_semantics="eventcorridor_public_observation_derived_union_excluding_march3_initialization",
@@ -789,28 +803,30 @@ class SourceHistoryReconstructionR1Service:
         return path
 
     def _build_eventcorridor_obs_union(self) -> Path:
-        path = self.output_dir / "eventcorridor_obs_union_2023-03-04_to_2023-03-06.tif"
+        path = self.output_dir / f"eventcorridor_obs_union_{self.eventcorridor_label}.tif"
         union = np.zeros((self.grid.height, self.grid.width), dtype=np.float32)
         used = 0
-        for date in FORECAST_SKILL_DATES:
+        for date in self.validation_dates:
             obs_path = self._date_union_obs_path(date)
             if obs_path.exists():
                 union = np.maximum(union, self.helper._load_binary_score_mask(obs_path))
                 used += 1
         if used == 0:
-            raise FileNotFoundError("No March 4-6 date-union observation masks are available.")
+            raise FileNotFoundError(
+                f"No accepted date-union observation masks are available for {self.eventcorridor_label}."
+            )
         union = apply_ocean_mask(union, sea_mask=self.sea_mask, fill_value=0.0)
         save_raster(self.grid, union.astype(np.float32), path)
         return path
 
     def _build_eventcorridor_model_union(self, scenario: SourceHistoryScenario, composite_dir: Path) -> Path:
         union = np.zeros((self.grid.height, self.grid.width), dtype=np.float32)
-        for date in FORECAST_SKILL_DATES:
+        for date in self.validation_dates:
             mask_path = composite_dir / f"mask_p50_{date}_datecomposite.tif"
             if mask_path.exists():
                 union = np.maximum(union, self.helper._load_binary_score_mask(mask_path))
         union = apply_ocean_mask(union, sea_mask=self.sea_mask, fill_value=0.0)
-        path = self.output_dir / scenario.output_slug / "eventcorridor_model_union_2023-03-04_to_2023-03-06.tif"
+        path = self.output_dir / scenario.output_slug / f"eventcorridor_model_union_{self.eventcorridor_label}.tif"
         save_raster(self.grid, union.astype(np.float32), path)
         return path
 
@@ -1064,6 +1080,8 @@ class SourceHistoryReconstructionR1Service:
                 "official_rerun_r1_manifest": str(self.case_output / OFFICIAL_RERUN_R1_DIR_NAME / "official_rerun_r1_run_manifest.json"),
                 "r3_diagnostic_only": True,
             },
+            "validation_dates_used_for_forecast_skill": self.validation_dates,
+            "date_composite_dates_materialized": self.date_composite_dates,
             "scenario_matrix": [asdict(scenario) | scenario.release_window() for scenario in A2_SCENARIOS],
             "forcing_manifest": forcing_manifest,
             "scenario_results": scenario_results,
@@ -1115,7 +1133,7 @@ class SourceHistoryReconstructionR1Service:
             f"- Recommendation: `{recommendation['recommendation']}`",
             f"- March 3 checkpoint improved: `{recommendation['march3_checkpoint_improved']}`",
             f"- Strict March 6 materially improved: `{recommendation['strict_march6_materially_improved']}`",
-            f"- March 4-6 event corridor materially improved: `{recommendation['eventcorridor_materially_improved']}`",
+            f"- {self.eventcorridor_label} event corridor materially improved: `{recommendation['eventcorridor_materially_improved']}`",
             f"- Convergence should be next: `{recommendation['convergence_should_be_next']}`",
             f"- Reason: {recommendation['reason']}",
             "",
@@ -1127,7 +1145,7 @@ class SourceHistoryReconstructionR1Service:
         lines.extend(self._markdown_table(checkpoint[self._summary_columns()]))
         lines.extend(["", "## Strict March 6", ""])
         lines.extend(self._markdown_table(strict[self._summary_columns()]))
-        lines.extend(["", "## March 4-6 Event Corridor", ""])
+        lines.extend(["", f"## {self.eventcorridor_label} Event Corridor", ""])
         lines.extend(self._markdown_table(event[self._summary_columns()]))
         lines.extend(["", "Artifacts:"])
         for label, artifact in paths.items():

@@ -2,14 +2,15 @@
 
 Key scientific takeaway:
 
-- Mindoro is the hard sparse-data Philippine stress test.
+- Mindoro primary validation is now the March 13 -> March 14 NOAA reinit track.
 - DWH is the rich-data external transfer-validation success.
 - Ensemble benefit is case-dependent, not universal.
 
 Interpretation notes:
 
-- The Mindoro strict March 6 result should be interpreted as a difficult sparse-data edge case rather than as the whole validation story.
-- The Mindoro broader-support appendix shows that some spatial support exists in a broader public-observation framing, but it is not the same claim as the strict single-date test.
-- The Mindoro comparator benchmark shows PyGNOME leading the March 4-6 event-corridor comparison under the current case definition.
+- The promoted Mindoro row is a March 13 -> March 14 reinitialization test and must carry the caveat that both NOAA products cite March 12 WorldView-3 imagery.
+- The legacy March 6 row should still be interpreted as a difficult sparse-data edge case rather than erased from the methods story.
+- The legacy March 3-6 broader-support row remains helpful context, but it is not the same claim as the promoted B1 reinit validation.
+- The promoted Mindoro comparator lane shows OpenDrift R1 previous reinit p50 leading the March 13 -> March 14 cross-model comparison under the current case definition.
 - The DWH external case shows that the workflow transfers to a richer observation setting with meaningful spatial skill.
 - On DWH, ensemble p50 improves overall mean FSS, while deterministic retains the strongest event-corridor result.

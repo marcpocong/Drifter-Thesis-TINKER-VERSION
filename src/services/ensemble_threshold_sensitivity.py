@@ -20,6 +20,10 @@ from src.helpers.metrics import calculate_fss
 from src.helpers.raster import GridBuilder, rasterize_particles, save_raster
 from src.helpers.scoring import apply_ocean_mask, load_sea_mask_array, precheck_same_grid
 from src.services.official_rerun_r1 import OFFICIAL_RERUN_R1_DIR_NAME, _read_json
+from src.services.phase3b_multidate_public import (
+    format_phase3b_multidate_eventcorridor_label,
+    load_phase3b_multidate_validation_dates,
+)
 from src.services.scoring import OFFICIAL_PHASE3B_WINDOWS_KM, Phase3BScoringService
 from src.utils.io import get_case_output_dir, resolve_recipe_selection
 
@@ -96,11 +100,15 @@ def _mean_fss(row: pd.Series | dict) -> float:
     return float(np.mean(values)) if values else 0.0
 
 
-def select_threshold_from_calibration(summary_df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
-    """Select threshold using March 4-5 only; March 6 remains holdout."""
+def select_threshold_from_calibration(
+    summary_df: pd.DataFrame,
+    calibration_dates: list[str] | None = None,
+) -> tuple[pd.DataFrame, dict]:
+    """Select threshold from the accepted non-holdout per-date unions."""
+    effective_dates = list(calibration_dates or CALIBRATION_DATES)
     calibration = summary_df[
         (summary_df["pair_role"] == "per_date_union")
-        & (summary_df["obs_date"].astype(str).isin(CALIBRATION_DATES))
+        & (summary_df["obs_date"].astype(str).isin(effective_dates))
     ].copy()
     rows = []
     for threshold, group in calibration.groupby("threshold"):
@@ -113,7 +121,7 @@ def select_threshold_from_calibration(summary_df: pd.DataFrame) -> tuple[pd.Data
             {
                 "threshold": float(threshold),
                 "threshold_label": _threshold_label(float(threshold)),
-                "calibration_dates": ",".join(CALIBRATION_DATES),
+                "calibration_dates": ",".join(effective_dates),
                 "calibration_mean_fss": float(np.nanmean(fss_values)) if fss_values else 0.0,
                 "calibration_mean_centroid_distance_m": float(centroid.mean()) if centroid.notna().any() else np.inf,
                 "calibration_mean_area_ratio_error": float(area_error.mean()) if area_error.notna().any() else np.inf,
@@ -121,7 +129,7 @@ def select_threshold_from_calibration(summary_df: pd.DataFrame) -> tuple[pd.Data
         )
     ranking = pd.DataFrame(rows)
     if ranking.empty:
-        raise RuntimeError("No March 4-5 calibration rows were available for threshold selection.")
+        raise RuntimeError("No accepted non-holdout calibration rows were available for threshold selection.")
     ranking = ranking.sort_values(
         ["calibration_mean_fss", "calibration_mean_centroid_distance_m", "calibration_mean_area_ratio_error"],
         ascending=[False, True, True],
@@ -189,6 +197,12 @@ class EnsembleThresholdSensitivityService:
         self.sea_mask = load_sea_mask_array(self.grid.spec)
         self.valid_mask = self.sea_mask > 0.5 if self.sea_mask is not None else None
         self.helper = Phase3BScoringService(output_dir=self.output_dir / "_scratch_helper")
+        self.validation_dates = load_phase3b_multidate_validation_dates(
+            self.case_output,
+            fallback_dates=FORECAST_SKILL_DATES,
+        )
+        self.calibration_dates = [date for date in self.validation_dates if date != HOLDOUT_DATE]
+        self.eventcorridor_label = format_phase3b_multidate_eventcorridor_label(self.validation_dates)
 
     def run(self) -> dict:
         upstream = self._load_upstream_context()
@@ -198,7 +212,10 @@ class EnsembleThresholdSensitivityService:
         pairings = self._build_pairings(threshold_products, observations)
         scored_pairings, fss_df, diagnostics_df = self._score_pairings(pairings)
         summary_df = self._summarize(scored_pairings, fss_df, diagnostics_df)
-        calibration_ranking, selected = select_threshold_from_calibration(summary_df)
+        calibration_ranking, selected = select_threshold_from_calibration(
+            summary_df,
+            calibration_dates=self.calibration_dates,
+        )
         comparator = self._load_comparator_eventcorridor_scores()
         recommendation = self._build_recommendation(summary_df, selected, comparator)
         qa_paths = self._write_qa(summary_df, selected)
@@ -254,7 +271,7 @@ class EnsembleThresholdSensitivityService:
             raise FileNotFoundError(f"Strict March 6 observed mask missing: {strict}")
         date_union_dir = self.case_output / "phase3b_multidate_public" / "date_union_obs_masks"
         date_unions = {}
-        for date in FORECAST_SKILL_DATES:
+        for date in self.validation_dates:
             path = date_union_dir / f"obs_union_{date}.tif"
             if not path.exists():
                 raise FileNotFoundError(f"Accepted date-union observed mask missing: {path}")
@@ -264,17 +281,17 @@ class EnsembleThresholdSensitivityService:
 
     def _build_eventcorridor_obs_union(self, date_unions: dict[str, Path]) -> Path:
         union = np.zeros((self.grid.height, self.grid.width), dtype=np.float32)
-        for date in FORECAST_SKILL_DATES:
+        for date in self.validation_dates:
             union = np.maximum(union, self.helper._load_binary_score_mask(date_unions[date]))
         union = apply_ocean_mask(union, sea_mask=self.sea_mask, fill_value=0.0)
-        path = self.obs_dir / "eventcorridor_obs_union_2023-03-04_to_2023-03-06.tif"
+        path = self.obs_dir / f"eventcorridor_obs_union_{self.eventcorridor_label}.tif"
         save_raster(self.grid, union.astype(np.float32), path)
         return path
 
     def _prepare_probability_products(self, model_dir: Path) -> dict[str, Path]:
         ensemble_dir = model_dir / "ensemble"
         products: dict[str, Path] = {}
-        for date in FORECAST_SKILL_DATES:
+        for date in self.validation_dates:
             source = ensemble_dir / f"prob_presence_{date}_datecomposite.tif"
             dest = self.products_dir / f"prob_presence_{date}_datecomposite.tif"
             if source.exists():
@@ -332,13 +349,16 @@ class EnsembleThresholdSensitivityService:
                 out_path = threshold_dir / f"mask_{label}_{date}_datecomposite.tif"
                 save_raster(self.grid, mask.astype(np.float32), out_path)
                 date_masks[date] = out_path
-            event_path = self._build_eventcorridor_model_union(date_masks, threshold_dir / f"eventcorridor_model_union_{label}_2023-03-04_to_2023-03-06.tif")
+            event_path = self._build_eventcorridor_model_union(
+                date_masks,
+                threshold_dir / f"eventcorridor_model_union_{label}_{self.eventcorridor_label}.tif",
+            )
             products[threshold] = {"threshold_label": label, "date_masks": date_masks, "eventcorridor": event_path}
         return products
 
     def _build_eventcorridor_model_union(self, date_masks: dict[str, Path], out_path: Path) -> Path:
         union = np.zeros((self.grid.height, self.grid.width), dtype=np.float32)
-        for date in FORECAST_SKILL_DATES:
+        for date in self.validation_dates:
             union = np.maximum(union, self.helper._load_binary_score_mask(date_masks[date]))
         union = apply_ocean_mask(union, sea_mask=self.sea_mask, fill_value=0.0)
         save_raster(self.grid, union.astype(np.float32), out_path)
@@ -359,7 +379,7 @@ class EnsembleThresholdSensitivityService:
                     source_semantics=f"strict_march6_mask_{label}_vs_fixed_obsmask",
                 )
             )
-            for date in FORECAST_SKILL_DATES:
+            for date in self.validation_dates:
                 rows.append(
                     self._pair_record(
                         threshold=threshold,
@@ -376,7 +396,7 @@ class EnsembleThresholdSensitivityService:
                     threshold=threshold,
                     threshold_label=label,
                     pair_role="eventcorridor_march4_6",
-                    obs_date=EVENT_CORRIDOR_LABEL,
+                    obs_date=self.eventcorridor_label,
                     forecast_path=products["eventcorridor"],
                     observation_path=observations["eventcorridor_march4_6"],
                     source_semantics=f"eventcorridor_mask_{label}_vs_public_obs_union_excluding_march3",
@@ -539,7 +559,7 @@ class EnsembleThresholdSensitivityService:
                 "opendrift_deterministic_eventcorridor_mean_fss": deterministic,
                 "pygnome_eventcorridor_mean_fss": pygnome,
                 "strict_march6_not_used_for_selection": True,
-                "calibration_dates": CALIBRATION_DATES,
+                "calibration_dates": self.calibration_dates,
                 "holdout_date": HOLDOUT_DATE,
             }
         )
@@ -589,8 +609,8 @@ class EnsembleThresholdSensitivityService:
             "",
             "This study derives thresholded ensemble footprints from existing R1 probability products. It does not overwrite or relabel canonical `mask_p50` products.",
             "",
-            f"- Selected threshold from March 4-5 calibration: `{selected['threshold_label']}` ({selected_threshold:.2f})",
-            "- Selection rule: maximize mean FSS over March 4 and March 5 across 1/3/5/10 km; tie-break by centroid distance, then area-ratio closeness to 1.",
+            f"- Selected threshold from accepted non-holdout calibration dates `{', '.join(self.calibration_dates)}`: `{selected['threshold_label']}` ({selected_threshold:.2f})",
+            f"- Selection rule: maximize mean FSS over `{', '.join(self.calibration_dates)}` across 1/3/5/10 km; tie-break by centroid distance, then area-ratio closeness to 1.",
             "- Strict March 6 was not used for threshold selection.",
             f"- Recommendation: {recommendation['recommendation']}",
             f"- Next branch: {recommendation['recommended_next_branch']}",
@@ -604,7 +624,7 @@ class EnsembleThresholdSensitivityService:
             lines.extend(self._markdown_table(strict[self._summary_columns()]))
         else:
             lines.append("No selected-threshold strict March 6 row was available.")
-        lines.extend(["", "## March 4-6 Event Corridor by Threshold", ""])
+        lines.extend(["", f"## {self.eventcorridor_label} Event Corridor by Threshold", ""])
         lines.extend(self._markdown_table(event[self._summary_columns()]))
         lines.extend(
             [
@@ -695,9 +715,9 @@ class EnsembleThresholdSensitivityService:
             "thresholds": THRESHOLDS,
             "threshold_labels": [_threshold_label(value) for value in THRESHOLDS],
             "calibration_rule": {
-                "calibration_dates": CALIBRATION_DATES,
+                "calibration_dates": self.calibration_dates,
                 "holdout_date": HOLDOUT_DATE,
-                "primary_objective": "maximize mean FSS over March 4 and March 5 across 1/3/5/10 km",
+                "primary_objective": f"maximize mean FSS over {', '.join(self.calibration_dates)} across 1/3/5/10 km",
                 "tie_breaker_1": "smaller mean centroid distance",
                 "tie_breaker_2": "area-ratio closeness to 1.0",
                 "strict_march6_used_for_selection": False,

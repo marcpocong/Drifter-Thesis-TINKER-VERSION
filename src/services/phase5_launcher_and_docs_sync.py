@@ -46,12 +46,26 @@ OPTIONAL_MANIFEST_PATHS = [
         "description": "Optional DWH Phase 4 appendix pilot manifest.",
     }
 ]
+PROTOTYPE_OUTPUT_DIRS = [
+    (
+        Path("output") / "prototype_2021_pygnome_similarity",
+        "prototype_pygnome_similarity_summary",
+        "prototype_2021_pygnome_similarity",
+        "Preferred accepted-segment OpenDrift-vs-PyGNOME support package built from the fixed 2021 debug lane.",
+    ),
+    (
+        Path("output") / "prototype_2016_pygnome_similarity",
+        "prototype_legacy_pygnome_similarity_summary",
+        "prototype_2016_pygnome_similarity",
+        "Legacy/debug transport-only PyGNOME similarity artifact preserved from the original 2016 prototype cases.",
+    ),
+]
 
 
 def _read_json(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {}
-    with open(path, "r", encoding="utf-8") as handle:
+    with open(path, "r", encoding="utf-8-sig") as handle:
         return json.load(handle) or {}
 
 
@@ -227,15 +241,26 @@ class Phase5LauncherAndDocsSyncService:
     def _collect_case_registry(self) -> list[dict[str, Any]]:
         rows: list[dict[str, Any]] = [
             {
+                "case_id": "prototype_2021",
+                "workflow_mode": "prototype_2021",
+                "mode_label": "Preferred accepted-segment debug workflow",
+                "description": "Preferred debug/demo lane frozen from the latest accepted 2021 Phase 1 drifter segments.",
+                "config_path": "config/prototype_2021_cases.yaml",
+                "primary_output_root": "output/CASE_202103*",
+                "reportable_track_ids": "",
+                "appendix_or_support_track_ids": "prototype_pygnome_similarity_summary",
+                "notes": "Preferred debug/demo lane only; not the final Phase 1 study.",
+            },
+            {
                 "case_id": "prototype_2016",
                 "workflow_mode": "prototype_2016",
-                "mode_label": "Legacy prototype workflow",
+                "mode_label": "Legacy 2016 prototype workflow",
                 "description": "Backward-compatible prototype drifter-validation workflow kept for debugging and regression.",
                 "config_path": "config/settings.yaml",
                 "primary_output_root": "output/CASE_2016-*",
                 "reportable_track_ids": "",
-                "appendix_or_support_track_ids": "",
-                "notes": "Not the final Phase 1 study.",
+                "appendix_or_support_track_ids": "prototype_legacy_pygnome_similarity_summary",
+                "notes": "Preserved for legacy reproducibility only; not the preferred debug lane and not the final Phase 1 study.",
             }
         ]
         for config_rel_path in (
@@ -342,6 +367,10 @@ class Phase5LauncherAndDocsSyncService:
             return "phase5", "trajectory_gallery_panel", "Trajectory gallery panel pack"
         if "figure_package_publication" in rel_lower:
             return "phase5", "figure_package_publication", "Publication-grade figure package"
+        if "prototype_2021_pygnome_similarity" in rel_lower:
+            return "prototype", "prototype_pygnome_similarity_summary", "Prototype 2021 PyGNOME similarity summary"
+        if "prototype_2016_pygnome_similarity" in rel_lower:
+            return "prototype", "prototype_legacy_pygnome_similarity_summary", "Prototype 2016 legacy PyGNOME similarity summary"
         if "trajectory_gallery" in rel_lower:
             return "phase5", "trajectory_gallery", "Trajectory gallery"
         if "final_reproducibility_package" in rel_lower:
@@ -352,12 +381,16 @@ class Phase5LauncherAndDocsSyncService:
             return "phase3c", "C2", "DWH ensemble external transfer validation"
         if "phase3c_dwh_pygnome_comparator" in rel_lower:
             return "phase3c", "C3", "DWH PyGNOME comparator"
-        if "pygnome_public_comparison" in rel_lower:
-            return "phase3a", "A", "Mindoro Phase 3A benchmark comparator"
+        if "phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison" in rel_lower:
+            return "phase3a", "A", "Mindoro March 13 -> March 14 cross-model comparator"
+        if "phase3b_extended_public_scored_march13_14_reinit" in rel_lower:
+            return "phase3b", "B1", "Mindoro March 13 -> March 14 NOAA reinit primary validation"
         if "phase3b" in rel_lower and "extended" not in rel_lower and "multidate" not in rel_lower:
-            return "phase3b", "B1", "Mindoro strict March 6 stress test"
-        if "public_obs_appendix" in rel_lower or "multidate_public" in rel_lower or "extended_public" in rel_lower:
-            return "phase3b", "B2", "Mindoro broader public-support track"
+            return "phase3b", "B2", "Mindoro legacy March 6 sparse strict reference"
+        if "public_obs_appendix" in rel_lower or "multidate_public" in rel_lower:
+            return "phase3b", "B3", "Mindoro legacy March 3-6 broader-support reference"
+        if "phase3b_extended_public" in rel_lower:
+            return "phase3b", "B1", "Mindoro March 13 -> March 14 NOAA reinit primary validation"
         return "", "", ""
 
     def _collect_manifest_index(self) -> list[dict[str, Any]]:
@@ -520,51 +553,68 @@ class Phase5LauncherAndDocsSyncService:
             {
                 "phase_id": "phase3a",
                 "track_id": "A",
-                "track_label": "Mindoro Phase 3A benchmark comparator",
+                "track_label": "Mindoro March 13 -> March 14 cross-model comparator",
                 "readiness_status": "scientifically_informative_comparator",
                 "scientifically_reportable": True,
                 "scientifically_frozen": False,
                 "inherited_provisional": True,
-                "main_blocker": "Comparator-only track; upstream Mindoro transport baseline is still not frozen.",
+                "main_blocker": "Comparator-only track with a shared-imagery caveat; upstream Mindoro transport baseline is still not frozen.",
                 "reportable_now": True,
                 "reportability_scope": "comparative_benchmark_discussion",
                 "summary": _headline_note(
-                    "mindoro_benchmark_top",
-                    "Mindoro Phase 3A remains scientifically informative as a comparator benchmark.",
+                    "mindoro_crossmodel_top",
+                    "Mindoro March 13 -> March 14 cross-model comparison remains scientifically informative as a comparator benchmark.",
                 ),
                 "evidence_path": _relative_to_repo(self.repo_root, self.repo_root / FINAL_VALIDATION_MANIFEST_JSON),
             },
             {
                 "phase_id": "phase3b",
                 "track_id": "B1",
-                "track_label": "Mindoro strict March 6 stress test",
-                "readiness_status": "scientifically_informative_sparse_stress_test",
+                "track_label": "Mindoro March 13 -> March 14 NOAA reinit primary validation",
+                "readiness_status": "scientifically_reportable_primary_validation",
                 "scientifically_reportable": True,
                 "scientifically_frozen": False,
                 "inherited_provisional": True,
-                "main_blocker": upstream_blocker or "Sparse hard stress test; upstream transport baseline still not frozen.",
+                "main_blocker": upstream_blocker or "Primary validation remains inherited-provisional from upstream transport state and carries a shared-imagery caveat.",
                 "reportable_now": True,
-                "reportability_scope": "main_text_sparse_stress_test",
+                "reportability_scope": "main_text_primary_validation",
                 "summary": _headline_note(
-                    "mindoro_strict",
-                    "Mindoro strict March 6 is a hard sparse stress test and should not be treated as broad-support validation.",
+                    "mindoro_primary_reinit",
+                    "Mindoro March 13 -> March 14 is the promoted primary validation, reported with the explicit March 12 imagery caveat.",
                 ),
                 "evidence_path": _relative_to_repo(self.repo_root, self.repo_root / FINAL_VALIDATION_MANIFEST_JSON),
             },
             {
                 "phase_id": "phase3b",
                 "track_id": "B2",
-                "track_label": "Mindoro broader public-support track",
-                "readiness_status": "scientifically_reportable_support_track",
+                "track_label": "Mindoro legacy March 6 sparse strict reference",
+                "readiness_status": "scientifically_reportable_legacy_reference",
                 "scientifically_reportable": True,
                 "scientifically_frozen": False,
                 "inherited_provisional": True,
-                "main_blocker": upstream_blocker or "Supporting appendix/public-corridor track; upstream transport baseline still not frozen.",
+                "main_blocker": upstream_blocker or "Legacy sparse reference; upstream transport baseline still not frozen.",
                 "reportable_now": True,
-                "reportability_scope": "supporting_public_observation_context",
+                "reportability_scope": "legacy_sparse_reference",
                 "summary": _headline_note(
-                    "mindoro_broader_support",
-                    "Mindoro broader public-support remains scientifically informative support material, not a replacement for B1.",
+                    "mindoro_legacy_march6",
+                    "Mindoro March 6 remains a legacy sparse reference and should not be silently discarded.",
+                ),
+                "evidence_path": _relative_to_repo(self.repo_root, self.repo_root / FINAL_VALIDATION_MANIFEST_JSON),
+            },
+            {
+                "phase_id": "phase3b",
+                "track_id": "B3",
+                "track_label": "Mindoro legacy March 3-6 broader-support reference",
+                "readiness_status": "scientifically_reportable_legacy_reference",
+                "scientifically_reportable": True,
+                "scientifically_frozen": False,
+                "inherited_provisional": True,
+                "main_blocker": upstream_blocker or "Legacy broader-support reference; upstream transport baseline still not frozen.",
+                "reportable_now": True,
+                "reportability_scope": "legacy_broader_support_reference",
+                "summary": _headline_note(
+                    "mindoro_legacy_broader_support",
+                    "Mindoro March 3-6 broader-support remains scientifically informative legacy context, not a replacement for B1.",
                 ),
                 "evidence_path": _relative_to_repo(self.repo_root, self.repo_root / FINAL_VALIDATION_MANIFEST_JSON),
             },
@@ -742,6 +792,20 @@ class Phase5LauncherAndDocsSyncService:
                     output_path,
                     "Read-only publication-grade figure package artifact built from existing outputs for canonical defense and paper presentation.",
                 )
+        for prototype_dir_rel, track_id, artifact_group, description in PROTOTYPE_OUTPUT_DIRS:
+            prototype_similarity_dir = self.repo_root / prototype_dir_rel
+            if prototype_similarity_dir.exists():
+                for output_path in sorted(prototype_similarity_dir.rglob("*")):
+                    if output_path.is_dir():
+                        continue
+                    add_row(
+                        "prototype",
+                        track_id,
+                        artifact_group,
+                        output_path.name,
+                        output_path,
+                        description,
+                    )
 
         for artifact_type, path in sorted(phase5_artifacts.items()):
             if artifact_type == "final_output_catalog":

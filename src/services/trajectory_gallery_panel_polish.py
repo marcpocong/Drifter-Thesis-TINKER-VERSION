@@ -29,7 +29,15 @@ DWH_LABELS_PATH = Path("config") / "panel_map_labels_dwh.csv"
 
 MINDORO_FORECAST_MANIFEST = Path("output") / "CASE_MINDORO_RETRO_2023" / "forecast" / "forecast_manifest.json"
 MINDORO_PHASE3B_SUMMARY = Path("output") / "CASE_MINDORO_RETRO_2023" / "phase3b" / "phase3b_summary.csv"
-MINDORO_PYGNOME_RANKING = Path("output") / "CASE_MINDORO_RETRO_2023" / "pygnome_public_comparison" / "pygnome_public_comparison_model_ranking.csv"
+MINDORO_REINIT_SUMMARY = (
+    Path("output") / "CASE_MINDORO_RETRO_2023" / "phase3b_extended_public_scored_march13_14_reinit" / "march13_14_reinit_summary.csv"
+)
+MINDORO_REINIT_CROSSMODEL_SUMMARY = (
+    Path("output")
+    / "CASE_MINDORO_RETRO_2023"
+    / "phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison"
+    / "march13_14_reinit_crossmodel_summary.csv"
+)
 MINDORO_PHASE4_MANIFEST = Path("output") / "phase4" / "CASE_MINDORO_RETRO_2023" / "phase4_run_manifest.json"
 MINDORO_PHASE4_SUMMARY = Path("output") / "phase4" / "CASE_MINDORO_RETRO_2023" / "phase4_oil_budget_summary.csv"
 MINDORO_PHASE4_SHORELINE_ARRIVAL = Path("output") / "phase4" / "CASE_MINDORO_RETRO_2023" / "phase4_shoreline_arrival.csv"
@@ -41,9 +49,9 @@ DWH_ENSEMBLE_SUMMARY = Path("output") / "CASE_DWH_RETRO_2010_72H" / "phase3c_ext
 DWH_ALL_RESULTS = Path("output") / "CASE_DWH_RETRO_2010_72H" / "phase3c_dwh_pygnome_comparator" / "phase3c_dwh_all_results_table.csv"
 
 BOARD_FAMILIES: dict[str, str] = {
-    "A": "Mindoro strict March 6 forecast-vs-observation board",
-    "B": "Mindoro March 4-6 event-corridor board",
-    "C": "Mindoro OpenDrift vs PyGNOME comparison board",
+    "A": "Mindoro March 13 -> March 14 primary validation board",
+    "B": "Mindoro March 13 -> March 14 cross-model comparator board",
+    "C": "Mindoro legacy March 6 honesty / limitations board",
     "D": "Mindoro trajectory board",
     "E": "Mindoro Phase 4 oil-budget board",
     "F": "Mindoro Phase 4 shoreline-arrival / shoreline-impact board",
@@ -671,6 +679,24 @@ class TrajectoryGalleryPanelPolishService:
         plt.close(fig)
         return destination
 
+    def _mindoro_primary_metrics(self) -> list[str]:
+        summary = _read_csv(self.repo_root / MINDORO_REINIT_SUMMARY)
+        if summary.empty:
+            return [
+                "March 13 -> March 14 reinit summary CSV was not available.",
+                "Interpret this board visually and keep the March 12 shared-imagery caveat explicit.",
+            ]
+        row = summary.iloc[0]
+        return [
+            "March 13 -> March 14 is now the promoted Mindoro validation pair, using the March 13 NOAA polygon as the seed geometry and the March 14 NOAA product as the target.",
+            (
+                f"Promoted OpenDrift R1 previous reinit p50 reaches FSS 0.000/{float(row.get('fss_3km', 0.0)):.3f}/"
+                f"{float(row.get('fss_5km', 0.0)):.3f}/{float(row.get('fss_10km', 0.0)):.3f} with "
+                f"{int(row.get('forecast_nonzero_cells', 0))} forecast cells against {int(row.get('obs_nonzero_cells', 0))} observed cells."
+            ),
+            "Both NOAA/NESDIS products cite WorldView-3 imagery acquired on March 12, 2023, so this board must be narrated with that same-imagery caveat.",
+        ]
+
     def _mindoro_strict_metrics(self) -> list[str]:
         summary = _read_csv(self.repo_root / MINDORO_PHASE3B_SUMMARY)
         if summary.empty:
@@ -685,17 +711,26 @@ class TrajectoryGalleryPanelPolishService:
             "Use this board to explain why the panel should read March 6 as a demanding boundary case.",
         ]
 
-    def _mindoro_pygnome_metrics(self) -> list[str]:
-        ranking = _read_csv(self.repo_root / MINDORO_PYGNOME_RANKING)
+    def _mindoro_crossmodel_metrics(self) -> list[str]:
+        ranking = _read_csv(self.repo_root / MINDORO_REINIT_CROSSMODEL_SUMMARY)
         if ranking.empty:
-            return ["Mindoro benchmark ranking CSV was not available."]
-        top = ranking.sort_values("eventcorridor_rank").iloc[0]
-        control = ranking.loc[ranking["track_id"] == "C1"].iloc[0] if (ranking["track_id"] == "C1").any() else None
-        p50 = ranking.loc[ranking["track_id"] == "C2"].iloc[0] if (ranking["track_id"] == "C2").any() else None
+            return ["Mindoro March 13 -> March 14 cross-model summary CSV was not available."]
+        ranking = ranking.sort_values("mean_fss", ascending=False).reset_index(drop=True)
+        top = ranking.iloc[0]
+        r1 = ranking.loc[ranking["track_id"].astype(str) == "R1_previous_reinit_p50"]
+        pygnome = ranking.loc[ranking["track_id"].astype(str) == "pygnome_reinit_deterministic"]
         return [
-            f"Across the broader March 4-6 event corridor, {top['model_name']} ranks first with mean FSS {float(top['eventcorridor_mean_fss']):.3f}.",
-            f"OpenDrift deterministic event-corridor mean FSS: {float(control['eventcorridor_mean_fss']):.3f}." if control is not None else "",
-            f"OpenDrift ensemble p50 event-corridor mean FSS: {float(p50['eventcorridor_mean_fss']):.3f}." if p50 is not None else "",
+            f"Across the promoted March 14 cross-model bundle, {top['model_name']} ranks first with mean FSS {float(top['mean_fss']):.3f}.",
+            (
+                f"OpenDrift R1 previous reinit p50 mean FSS: {float(r1.iloc[0]['mean_fss']):.3f}."
+                if not r1.empty
+                else ""
+            ),
+            (
+                f"PyGNOME comparator mean FSS: {float(pygnome.iloc[0]['mean_fss']):.3f}."
+                if not pygnome.empty
+                else ""
+            ),
         ]
 
     def _dwh_event_metrics(self) -> dict[str, float]:
@@ -798,76 +833,76 @@ class TrajectoryGalleryPanelPolishService:
     def _build_mindoro_strict_board(self) -> PanelFigureRecord | None:
         return self._compose_board(
             board_family_code="A",
-            board_title="Mindoro strict March 6 forecast vs observation",
-            subtitle="Mindoro | 6 March 2023 | strict sparse stress test | OpenDrift official products",
+            board_title="Mindoro March 13 -> March 14 primary validation",
+            subtitle="Mindoro | 13-14 March 2023 | promoted NOAA reinit validation | explicit March 12 imagery caveat",
             case_id="CASE_MINDORO_RETRO_2023",
-            phase_or_track="phase3b_strict",
-            date_token="2023-03-06",
+            phase_or_track="phase3b_reinit_primary",
+            date_token="2023-03-13_to_2023-03-14",
             model_names="opendrift",
             run_type="panel_board",
-            figure_slug="mindoro_strict_march6_board",
+            figure_slug="mindoro_primary_reinit_board",
             panels=[
-                self._image_slot("Observation vs ensemble p50", "output/CASE_MINDORO_RETRO_2023/phase3b/qa_phase3b_obsmask_vs_p50.png"),
-                self._image_slot("Source, initialization, validation context", "output/CASE_MINDORO_RETRO_2023/phase3b/qa_phase3b_source_init_validation_overlay.png"),
-                self._image_slot("Deterministic path context", "output/trajectory_gallery/case_mindoro_retro_2023__phase2_official__opendrift__deterministic_track_map__2023_03_03_to_2023_03_06__sampled_particle_paths.png"),
-                self._text_slot("Why this board matters", "This is intentionally the hardest Mindoro validation slice. Sparse overlap here does not invalidate the broader workflow; it shows how the official products behave under the most demanding single-day public-observation target."),
+                self._image_slot("March 13 seed mask on grid", "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/qa_march13_seed_mask_on_grid.png"),
+                self._image_slot("March 13 seed vs March 14 target", "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/qa_march13_seed_vs_march14_target.png"),
+                self._image_slot("Promoted R1 previous reinit overlay", "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/qa_march14_reinit_R1_previous_overlay.png"),
+                self._text_slot("Why this board matters", "This is now the canonical Mindoro validation board. It keeps the seed polygon, next-day target, and best-performing OpenDrift reinit overlay together while staying transparent about the shared March 12 imagery caveat."),
             ],
-            legend_keys=["observed_mask", "ensemble_p50", "source_point", "initialization_polygon", "validation_polygon", "deterministic_opendrift"],
-            metric_lines=self._mindoro_strict_metrics(),
-            interpretation="The strict March 6 board is presentation-ready as an honesty board: it shows a hard sparse case where the official products are intentionally stressed and should not be oversold.",
-            caption="Use this board early in the defense to explain the strict March 6 test. It is the most demanding public-observation slice, so the panel should read it as a stress test rather than as a summary of overall Mindoro performance.",
-            notes="Built from stored Mindoro strict Phase 3B QA figures and the existing raw deterministic track panel.",
+            legend_keys=["observed_mask", "ensemble_p50", "initialization_polygon", "validation_polygon"],
+            metric_lines=self._mindoro_primary_metrics(),
+            interpretation="The promoted March 13 -> March 14 board is presentation-ready as the main Mindoro validation board, provided the shared-imagery caveat is stated honestly.",
+            caption="Use this board as the main Mindoro validation slide. It shows the March 13 NOAA seed geometry, the March 14 NOAA target, and the promoted OpenDrift R1 previous reinit result in one place.",
+            notes="Built from stored March 13 -> March 14 reinit QA figures only.",
             recommended=True,
         )
 
     def _build_mindoro_eventcorridor_board(self) -> PanelFigureRecord | None:
         return self._compose_board(
             board_family_code="B",
-            board_title="Mindoro March 4-6 event corridor",
-            subtitle="Mindoro | 4-6 March 2023 | broader public-support context",
+            board_title="Mindoro March 13 -> March 14 cross-model comparator",
+            subtitle="Mindoro | 13-14 March 2023 | OpenDrift reinit branches versus PyGNOME comparator",
             case_id="CASE_MINDORO_RETRO_2023",
-            phase_or_track="phase3b_support",
-            date_token="2023-03-04_to_2023-03-06",
+            phase_or_track="phase3a_reinit_crossmodel",
+            date_token="2023-03-14",
             model_names="opendrift_vs_pygnome",
             run_type="panel_board",
-            figure_slug="mindoro_eventcorridor_board",
+            figure_slug="mindoro_crossmodel_reinit_board",
             panels=[
-                self._image_slot("Daily public-observation comparison", "output/CASE_MINDORO_RETRO_2023/pygnome_public_comparison/qa_pygnome_public_comparison_overlays.png"),
-                self._image_slot("March 4-6 event-corridor union", "output/CASE_MINDORO_RETRO_2023/pygnome_public_comparison/qa_pygnome_public_comparison_eventcorridor_overlay.png"),
-                self._image_slot("Corridor and hull context", "output/trajectory_gallery/case_mindoro_retro_2023__phase2_phase3b__opendrift__corridor_hull_view__2023_03_06__p50_p90_hull_overlay.png"),
-                self._text_slot("How to read this board", "The top row shows the broader public-observation framing that complements the strict March 6 test. The lower-left panel connects that support track back to the ensemble corridor geometry used in the transport story."),
+                self._image_slot("OpenDrift R1 previous reinit p50", "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/qa/qa_march14_crossmodel_R1_previous_reinit_p50_overlay.png"),
+                self._image_slot("OpenDrift R0 reinit p50", "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/qa/qa_march14_crossmodel_R0_reinit_p50_overlay.png"),
+                self._image_slot("PyGNOME deterministic comparator", "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/qa/qa_march14_crossmodel_pygnome_reinit_deterministic_overlay.png"),
+                self._text_slot("How to read this board", "Read this board as a comparator lane for the promoted March 14 target. The NOAA mask remains truth, OpenDrift R1 previous reinit p50 is the top-ranked model, and PyGNOME remains comparator-only."),
             ],
-            legend_keys=["observed_mask", "deterministic_opendrift", "ensemble_p50", "pygnome", "corridor_hull"],
-            metric_lines=self._mindoro_pygnome_metrics(),
-            interpretation="The Mindoro event-corridor board gives the panel a broader visual context than the strict March 6 board alone and shows why the support track is still scientifically informative.",
-            caption="This board broadens the story from the strict March 6 snapshot to the full March 4-6 public-observation corridor. It helps the panel see where support-track agreement exists even though the single-day March 6 board is intentionally sparse.",
-            notes="Built from stored Mindoro PyGNOME comparison QA figures and the raw corridor/hull gallery panel.",
-            recommended=False,
+            legend_keys=["observed_mask", "deterministic_opendrift", "ensemble_p50", "pygnome"],
+            metric_lines=self._mindoro_crossmodel_metrics(),
+            interpretation="The promoted March 14 cross-model board gives a clean side-by-side answer to the model-comparison question while keeping PyGNOME in a comparator-only role.",
+            caption="Use this board when the panel asks which model performed better on the promoted March 14 target. It keeps both OpenDrift reinit branches and the deterministic PyGNOME comparator visible together.",
+            notes="Built from stored March 13 -> March 14 cross-model QA figures only.",
+            recommended=True,
         )
 
     def _build_mindoro_model_comparison_board(self) -> PanelFigureRecord | None:
         return self._compose_board(
             board_family_code="C",
-            board_title="Mindoro OpenDrift vs PyGNOME comparison",
-            subtitle="Mindoro | 4-6 March 2023 | comparator framing, not truth replacement",
+            board_title="Mindoro legacy March 6 honesty / limitations",
+            subtitle="Mindoro | 6 March 2023 | legacy sparse-reference stress test retained for methods honesty",
             case_id="CASE_MINDORO_RETRO_2023",
-            phase_or_track="phase3a_benchmark",
-            date_token="2023-03-04_to_2023-03-06",
-            model_names="opendrift_vs_pygnome",
+            phase_or_track="phase3b_legacy_strict",
+            date_token="2023-03-06",
+            model_names="opendrift",
             run_type="panel_board",
-            figure_slug="mindoro_model_comparison_board",
+            figure_slug="mindoro_legacy_march6_board",
             panels=[
-                self._image_slot("Observation | deterministic | p50 | PyGNOME", "output/CASE_MINDORO_RETRO_2023/pygnome_public_comparison/qa_pygnome_public_comparison_overlays.png"),
-                self._image_slot("Event-corridor comparison", "output/CASE_MINDORO_RETRO_2023/pygnome_public_comparison/qa_pygnome_public_comparison_eventcorridor_overlay.png"),
-                self._image_slot("Strict March 6 context", "output/CASE_MINDORO_RETRO_2023/phase3b/qa_phase3b_obsmask_vs_p50.png"),
-                self._text_slot("Comparator interpretation", "PyGNOME is included as a cross-model comparator, not as truth. In the broader March 4-6 event corridor, PyGNOME ranks first within this local comparator bundle, while the official OpenDrift products remain the reportable transport path."),
+                self._image_slot("Legacy strict overlay", "output/CASE_MINDORO_RETRO_2023/phase3b/qa_phase3b_obsmask_vs_p50.png"),
+                self._image_slot("Legacy source/init/validation context", "output/CASE_MINDORO_RETRO_2023/phase3b/qa_phase3b_source_init_validation_overlay.png"),
+                self._image_slot("Promoted March 14 context", "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/qa_march13_seed_vs_march14_target.png"),
+                self._text_slot("Why this board still stays", "March 6 is not deleted or hidden. It remains in the methods and limitations record because the processed strict target is extremely small, so this board functions as an honesty board rather than the main Mindoro result."),
             ],
-            legend_keys=["observed_mask", "deterministic_opendrift", "ensemble_p50", "pygnome"],
-            metric_lines=self._mindoro_pygnome_metrics(),
-            interpretation="This board is ready for panel presentation because it makes the comparator role of PyGNOME explicit while preserving the official OpenDrift framing.",
-            caption="Use this board when the panel asks how OpenDrift compares with PyGNOME on the same public-observation corridor. It is a comparator discussion board, not a model-truth board.",
-            notes="Built from stored Mindoro public-comparison QA figures and the strict March 6 overlay.",
-            recommended=True,
+            legend_keys=["observed_mask", "ensemble_p50", "initialization_polygon", "validation_polygon"],
+            metric_lines=self._mindoro_strict_metrics(),
+            interpretation="This board keeps the legacy March 6 sparse-reference result visible for transparency, but it should be framed as an honesty and limitations board rather than the main validation board.",
+            caption="Use this board when the panel asks why March 6 is no longer the main Mindoro result. It shows the preserved sparse-reference evidence without pretending it is the best summary of overall performance.",
+            notes="Built from stored March 6 strict QA figures plus one promoted March 13 -> March 14 context panel.",
+            recommended=False,
         )
 
     def _build_mindoro_trajectory_board(self) -> PanelFigureRecord | None:

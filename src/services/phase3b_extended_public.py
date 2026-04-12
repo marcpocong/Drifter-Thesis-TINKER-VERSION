@@ -51,6 +51,12 @@ CURRENT_HORIZON_END_DATE = "2023-03-06"
 INIT_DATE = "2023-03-03"
 DEFAULT_EXTENDED_MAX_DATE = "2023-03-31"
 REQUEST_TIMEOUT = 60
+MARCH23_NOAA_MSI_SOURCE_KEY = "659af48ef2f243e89409ce5e73dd0b66"
+MARCH23_NOAA_MSI_SOURCE_DATE = "2023-03-23"
+MARCH23_NOAA_MSI_WHITELIST_REASON = (
+    "accepted only in the beyond-horizon public-observation lane because its metadata cites an external "
+    "NOAA/NESDIS satellite surveillance report rather than an MSI trajectory forecast product"
+)
 
 
 def _json_default(value: Any) -> Any:
@@ -72,6 +78,21 @@ def _write_json(path: Path, payload: dict | list) -> None:
         handle.write("\n")
 
 
+def _extended_public_source_key(row: pd.Series | dict) -> str:
+    for key in ("source_key", "item_or_layer_id", "item_id or layer_id"):
+        value = str(row.get(key, "") or "").split(":")[0].strip()
+        if value:
+            return value
+    return ""
+
+
+def _is_march23_noaa_msi_whitelist_row(row: pd.Series | dict) -> bool:
+    return (
+        _extended_public_source_key(row) == MARCH23_NOAA_MSI_SOURCE_KEY
+        and str(row.get("obs_date", "") or "").strip() == MARCH23_NOAA_MSI_SOURCE_DATE
+    )
+
+
 def classify_extended_public_source(row: pd.Series | dict, max_date: str = DEFAULT_EXTENDED_MAX_DATE) -> tuple[str, str, bool]:
     """Classify and decide source-based extended quantitative acceptance."""
     obs_date = str(row.get("obs_date", "") or "").strip()
@@ -82,9 +103,8 @@ def classify_extended_public_source(row: pd.Series | dict, max_date: str = DEFAU
     geometry_type = str(row.get("geometry_type", "") or "").lower()
     service_url = str(row.get("service_url", "") or "")
     layer_id_value = row.get("layer_id", "")
+    whitelisted_march23_source = _is_march23_noaa_msi_whitelist_row(row)
 
-    if _is_modeled_forecast_row(row):
-        return SOURCE_TAXONOMY_MODELED, "modeled forecast / trajectory source excluded from truth", False
     if not obs_date:
         return SOURCE_TAXONOMY_QUALITATIVE, "source is not explicitly dated", False
     if obs_date <= CURRENT_HORIZON_END_DATE:
@@ -92,12 +112,21 @@ def classify_extended_public_source(row: pd.Series | dict, max_date: str = DEFAU
         return SOURCE_TAXONOMY_QUALITATIVE, f"{role}; handled by existing Phase 3B tracks", False
     if obs_date > max_date:
         return SOURCE_TAXONOMY_QUALITATIVE, f"outside configured extended March pilot window ending {max_date}", False
+    if _is_modeled_forecast_row(row) and not whitelisted_march23_source:
+        return SOURCE_TAXONOMY_MODELED, "modeled forecast / trajectory source excluded from truth", False
     if not (machine and public and obs_derived and reproducible):
         return SOURCE_TAXONOMY_QUALITATIVE, "does not satisfy public/machine-readable/observation-derived/reproducible requirements", False
     if geometry_type not in {"polygon", "multipolygon"}:
         return SOURCE_TAXONOMY_QUALITATIVE, "not a polygonal spill-extent layer", False
     if not service_url or _coerce_layer_id(layer_id_value) is None:
         return SOURCE_TAXONOMY_QUALITATIVE, "missing reproducible service URL or layer id", False
+    if whitelisted_march23_source:
+        return (
+            SOURCE_TAXONOMY_OBS,
+            "accepted beyond-horizon dated observation-derived polygon layer via one-off March 23 NOAA/NESDIS whitelist; "
+            f"{MARCH23_NOAA_MSI_WHITELIST_REASON}",
+            True,
+        )
     return SOURCE_TAXONOMY_OBS, "accepted beyond-horizon dated observation-derived polygon layer", True
 
 
@@ -205,12 +234,15 @@ class Phase3BExtendedPublicService:
         rows: list[dict] = []
         for _, row in inventory.iterrows():
             taxonomy, reason, accepted = classify_extended_public_source(row)
+            whitelist_applied = _is_march23_noaa_msi_whitelist_row(row)
             rows.append(
                 {
                     **row.to_dict(),
                     "source_taxonomy": taxonomy,
                     "extended_acceptance_reason": reason,
                     "accepted_for_extended_quantitative": bool(accepted),
+                    "extended_truth_exception_applied": bool(whitelist_applied),
+                    "extended_truth_exception_note": MARCH23_NOAA_MSI_WHITELIST_REASON if whitelist_applied else "",
                     "mask_exists": False,
                     "extended_raw_geojson": "",
                     "extended_item_metadata": "",
@@ -218,6 +250,8 @@ class Phase3BExtendedPublicService:
                     "extended_processed_vector": "",
                     "extended_obs_mask": "",
                     "raster_nonzero_cells": "",
+                    "scoreable_after_rasterization": False,
+                    "scoreability_note": "",
                     "processing_status": "pending" if accepted else "not_accepted",
                     "processing_error": "",
                 }
@@ -281,6 +315,13 @@ class Phase3BExtendedPublicService:
                 mask_path = self.mask_dir / f"{source_key}.tif"
                 save_raster(self.grid, mask.astype(np.float32), mask_path)
 
+                raster_nonzero_cells = int(np.count_nonzero(mask > 0))
+                scoreable_after_rasterization = raster_nonzero_cells > 0
+                scoreability_note = (
+                    ""
+                    if scoreable_after_rasterization
+                    else "source not scoreable after rasterization: zero ocean cells remained after applying the canonical ocean mask"
+                )
                 notes = "; ".join(inferred_notes + rescue_notes)
                 qa_notes = "; ".join(f"{key}={value}" for key, value in qa.items())
                 record.update(
@@ -295,11 +336,13 @@ class Phase3BExtendedPublicService:
                         "processed_feature_count": int(len(cleaned_gdf)),
                         "raw_crs": inferred_crs,
                         "processed_crs": self.grid.crs,
-                        "raster_nonzero_cells": int(np.count_nonzero(mask > 0)),
+                        "raster_nonzero_cells": raster_nonzero_cells,
+                        "scoreable_after_rasterization": bool(scoreable_after_rasterization),
+                        "scoreability_note": scoreability_note,
                         "mask_exists": bool(mask_path.exists()),
                         "processing_status": "processed",
                         "processing_error": "",
-                        "processing_notes": " | ".join(part for part in (notes, qa_notes) if part),
+                        "processing_notes": " | ".join(part for part in (notes, qa_notes, scoreability_note) if part),
                     }
                 )
             except Exception as exc:
@@ -308,6 +351,8 @@ class Phase3BExtendedPublicService:
                         "source_key": source_key,
                         "mask_exists": False,
                         "raster_nonzero_cells": 0,
+                        "scoreable_after_rasterization": False,
+                        "scoreability_note": "",
                         "processing_status": "failed",
                         "processing_error": str(exc),
                     }
@@ -657,6 +702,12 @@ class Phase3BExtendedPublicService:
                 "observation_derived_quantitative": "public, machine-readable, explicitly dated, observation-derived, reproducibly ingestible, rasterizable",
                 "modeled_forecast_exclude_from_truth": "modeled forecasts, trajectory bulletins, and model-generated predictions are excluded from truth",
                 "qualitative_context_only": "app/webmap/screenshot/visualization-only sources are context only",
+                "extended_one_off_whitelist": {
+                    "source_key": MARCH23_NOAA_MSI_SOURCE_KEY,
+                    "obs_date": MARCH23_NOAA_MSI_SOURCE_DATE,
+                    "applies_only_within_extended_lane": True,
+                    "reason": MARCH23_NOAA_MSI_WHITELIST_REASON,
+                },
             },
             "strict_march6_files_unchanged": strict_unchanged,
             "within_horizon_multidate_files_unchanged": multidate_unchanged,

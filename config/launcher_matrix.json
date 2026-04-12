@@ -64,6 +64,25 @@
       ]
     },
     {
+      "entry_id": "phase1_production_rerun",
+      "menu_order": 15,
+      "category_id": "scientific_reportable_tracks",
+      "workflow_mode": "phase1_regional_2016_2022",
+      "label": "Phase 1 regional production rerun",
+      "description": "Dedicated 2016-2022 historical/regional drifter rerun that stages the missing drogued-only non-overlapping 72 h registry and a candidate baseline artifact.",
+      "service_profile": "pipeline_only",
+      "rerun_cost": "expensive",
+      "safe_default": false,
+      "notes": "Scientific rerun only. This does not overwrite config/phase1_baseline_selection.yaml and does not auto-run phase1_audit or phase5_sync.",
+      "steps": [
+        {
+          "phase": "phase1_production_rerun",
+          "service": "pipeline",
+          "description": "Full 2016-2022 historical/regional Phase 1 production rerun with candidate-baseline staging only"
+        }
+      ]
+    },
+    {
       "entry_id": "mindoro_phase4_only",
       "menu_order": 20,
       "category_id": "scientific_reportable_tracks",
@@ -149,6 +168,21 @@
           "description": "Short extended public-observation scoring"
         },
         {
+          "phase": "phase3b_extended_public_scored_march23",
+          "service": "pipeline",
+          "description": "March 23 extended public branch stress test"
+        },
+        {
+          "phase": "phase3b_extended_public_scored_march13_14_reinit",
+          "service": "pipeline",
+          "description": "March 13 -> March 14 NOAA reinit branch stress test"
+        },
+        {
+          "phase": "phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison",
+          "service": "gnome",
+          "description": "March 13 -> March 14 NOAA reinit cross-model comparator"
+        },
+        {
           "phase": "horizon_survival_audit",
           "service": "pipeline",
           "description": "Horizon survival diagnosis"
@@ -187,6 +221,78 @@
           "phase": "recipe_sensitivity_r1_multibranch",
           "service": "pipeline",
           "description": "Recipe / branch sensitivity matrix"
+        }
+      ]
+    },
+    {
+      "entry_id": "mindoro_march6_recovery_sensitivity",
+      "menu_order": 45,
+      "category_id": "sensitivity_appendix_tracks",
+      "workflow_mode": "mindoro_retro_2023",
+      "label": "Mindoro March 6 recovery sensitivity",
+      "description": "Appendix-only March 6 threshold, observation-support, and branch recovery matrix over R1 and selected A2 candidates.",
+      "service_profile": "pipeline_only",
+      "rerun_cost": "moderate",
+      "safe_default": true,
+      "notes": "Appendix-only. This does not replace or relabel the frozen strict March 6 official result.",
+      "steps": [
+        {
+          "phase": "march6_recovery_sensitivity",
+          "service": "pipeline",
+          "description": "Appendix-only March 6 recovery matrix"
+        }
+      ]
+    },
+    {
+      "entry_id": "mindoro_march23_extended_public_stress_test",
+      "menu_order": 46,
+      "category_id": "sensitivity_appendix_tracks",
+      "workflow_mode": "mindoro_retro_2023",
+      "label": "Mindoro March 23 extended public stress test",
+      "description": "Appendix-only exact-date March 23 NOAA/MSI public polygon stress test comparing the R0 and R1_previous branches.",
+      "service_profile": "pipeline_only",
+      "rerun_cost": "expensive",
+      "safe_default": false,
+      "notes": "Appendix-only. This does not replace the frozen strict March 6 official result or the final validation package.",
+      "steps": [
+        {
+          "phase": "phase3b_extended_public",
+          "service": "pipeline",
+          "description": "Extended-horizon guardrail inventory and March 23 source ingestion"
+        },
+        {
+          "phase": "phase3b_extended_public_scored_march23",
+          "service": "pipeline",
+          "description": "March 23 exact-date branch comparison"
+        }
+      ]
+    },
+    {
+      "entry_id": "mindoro_march13_14_noaa_reinit_stress_test",
+      "menu_order": 47,
+      "category_id": "sensitivity_appendix_tracks",
+      "workflow_mode": "mindoro_retro_2023",
+      "label": "Mindoro March 13-14 NOAA reinit stress test",
+      "description": "Appendix-only March 13 NOAA polygon reinitialization scored against the March 14 NOAA polygon over the R0 and R1_previous branches.",
+      "service_profile": "mixed_pipeline_and_gnome",
+      "rerun_cost": "expensive",
+      "safe_default": false,
+      "notes": "Appendix-only. This does not replace the frozen strict March 6 official result or the final validation package.",
+      "steps": [
+        {
+          "phase": "phase3b_extended_public",
+          "service": "pipeline",
+          "description": "Extended-horizon guardrail inventory and NOAA source ingestion"
+        },
+        {
+          "phase": "phase3b_extended_public_scored_march13_14_reinit",
+          "service": "pipeline",
+          "description": "March 13 -> March 14 NOAA polygon reinit branch comparison"
+        },
+        {
+          "phase": "phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison",
+          "service": "gnome",
+          "description": "March 13 -> March 14 NOAA reinit cross-model comparator"
         }
       ]
     },
@@ -324,16 +430,50 @@
       ]
     },
     {
+      "entry_id": "prototype_2021_bundle",
+      "menu_order": 89,
+      "category_id": "legacy_prototype_tracks",
+      "workflow_mode": "prototype_2021",
+      "label": "Prototype 2021 preferred debug bundle",
+      "description": "Preferred accepted-segment debug/demo path: prep, Phase 1/2, deterministic PyGNOME benchmark, and support-only similarity package.",
+      "service_profile": "mixed_pipeline_and_gnome",
+      "rerun_cost": "moderate",
+      "safe_default": false,
+      "notes": "Preferred debug/demo lane only. Built from the two accepted 2021 strict-gate drifter segments, uses the official four-recipe Phase 1 family, and stops at the transport-core bundle. Phase 3B and Phase 4 are separate and are not part of this proof path.",
+      "steps": [
+        {
+          "phase": "prep",
+          "service": "pipeline",
+          "description": "Prototype 2021 prep"
+        },
+        {
+          "phase": "1_2",
+          "service": "pipeline",
+          "description": "Prototype 2021 Phase 1/2 workflow"
+        },
+        {
+          "phase": "benchmark",
+          "service": "gnome",
+          "description": "Prototype 2021 benchmark"
+        },
+        {
+          "phase": "prototype_pygnome_similarity_summary",
+          "service": "pipeline",
+          "description": "Prototype 2021 cross-case PyGNOME similarity summary and forecast figure package"
+        }
+      ]
+    },
+    {
       "entry_id": "prototype_legacy_bundle",
       "menu_order": 90,
       "category_id": "legacy_prototype_tracks",
       "workflow_mode": "prototype_2016",
       "label": "Prototype 2016 legacy bundle",
-      "description": "Legacy prep, Phase 1/2, benchmark, Phase 3 weathering, and Phase 3B scoring.",
+      "description": "Historical legacy-only prep, Phase 1/2, deterministic PyGNOME benchmark, similarity summary, and appendix/smoke follow-on steps.",
       "service_profile": "mixed_pipeline_and_gnome",
       "rerun_cost": "moderate",
       "safe_default": false,
-      "notes": "Backward-compatible debug/regression path only. Not the final Chapter 3 Phase 1 study.",
+      "notes": "Backward-compatible legacy debug/regression path only. Not the preferred debug lane and not the final Chapter 3 Phase 1 study. Prototype prep now attempts GFS too, but missing GFS remains best-effort and does not collapse the legacy bundle. The PyGNOME similarity step is transport-only, comparator-only, and now writes actual 24/48/72 h forecast singles plus one side-by-side board per case. Phases 3 and 3B remain legacy appendix/smoke checks here.",
       "steps": [
         {
           "phase": "prep",
@@ -349,6 +489,11 @@
           "phase": "benchmark",
           "service": "gnome",
           "description": "Prototype benchmark"
+        },
+        {
+          "phase": "prototype_pygnome_similarity_summary",
+          "service": "pipeline",
+          "description": "Prototype cross-case PyGNOME similarity summary and forecast figure package"
         },
         {
           "phase": "3",

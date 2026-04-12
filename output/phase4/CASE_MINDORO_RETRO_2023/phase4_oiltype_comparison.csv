@@ -1,4 +1,4 @@
 scenario_id,oil_label,comparison_anchor_scenario_id,delta_surface_pct_vs_anchor,delta_evaporated_pct_vs_anchor,delta_dispersed_pct_vs_anchor,delta_beached_pct_vs_anchor,delta_first_shoreline_arrival_h_vs_anchor,provisional_inherited_from_transport
-lighter_oil,Light oil,fixed_base_medium_heavy_proxy,0.0,0.54,0.0,-0.55,0.0,True
+lighter_oil,Light oil,fixed_base_medium_heavy_proxy,0.0,0.55,0.04,-0.59,0.0,True
 fixed_base_medium_heavy_proxy,Fixed base medium-heavy proxy,fixed_base_medium_heavy_proxy,0.0,0.0,0.0,0.0,0.0,True
-heavier_oil,Heavier oil,fixed_base_medium_heavy_proxy,0.0,-0.07,-0.01,0.07,0.0,True
+heavier_oil,Heavier oil,fixed_base_medium_heavy_proxy,0.0,-0.08,0.07,0.02,0.0,True

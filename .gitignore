@@ -71,6 +71,15 @@ output/figure_package_publication/*
 !output/figure_package_publication/*.json
 !output/figure_package_publication/*.md
 !output/figure_package_publication/*.png
+!output/prototype_2016_pygnome_similarity/
+output/prototype_2016_pygnome_similarity/*
+!output/prototype_2016_pygnome_similarity/*.csv
+!output/prototype_2016_pygnome_similarity/*.json
+!output/prototype_2016_pygnome_similarity/*.md
+!output/prototype_2016_pygnome_similarity/*.png
+!output/prototype_2016_pygnome_similarity/figures/
+output/prototype_2016_pygnome_similarity/figures/*
+!output/prototype_2016_pygnome_similarity/figures/*.png
 
 # Python testing
 .pytest_cache/

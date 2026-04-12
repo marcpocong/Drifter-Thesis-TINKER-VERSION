@@ -32,6 +32,7 @@ Equivalent direct command:
 docker-compose exec -T -e PIPELINE_PHASE=trajectory_gallery_build pipeline python -m src
 docker-compose exec -T -e PIPELINE_PHASE=trajectory_gallery_panel_polish pipeline python -m src
 docker-compose exec -T -e PIPELINE_PHASE=figure_package_publication pipeline python -m src
+docker-compose exec -T -e WORKFLOW_MODE=prototype_2016 -e PIPELINE_PHASE=prototype_pygnome_similarity_summary pipeline python -m src
 ```
 
 ## Raw Technical Gallery Outputs
@@ -62,8 +63,8 @@ docker-compose exec -T -e PIPELINE_PHASE=figure_package_publication pipeline pyt
 - A. Mindoro deterministic track/path visuals
 - B. Mindoro ensemble sampled-member trajectories
 - C. Mindoro centroid/corridor/hull views
-- D. Mindoro forecast-vs-observation overlays
-- E. Mindoro OpenDrift vs PyGNOME comparison maps
+- D. Mindoro March 13 -> March 14 primary-validation overlays
+- E. Mindoro March 13 -> March 14 cross-model comparison maps
 - F. DWH deterministic track/path visuals
 - G. DWH ensemble p50/p90 overlays
 - H. DWH OpenDrift vs PyGNOME comparison maps
@@ -72,8 +73,9 @@ docker-compose exec -T -e PIPELINE_PHASE=figure_package_publication pipeline pyt
 
 ## Recommended First-Look Defense Figures
 
-- A. Mindoro strict March 6 forecast-vs-observation board
-- C. Mindoro OpenDrift vs PyGNOME comparison board
+- A. Mindoro March 13 -> March 14 primary validation board
+- B. Mindoro March 13 -> March 14 cross-model comparator board
+- C. Mindoro legacy March 6 honesty / limitations board
 - D. Mindoro trajectory board
 - E. Mindoro Phase 4 oil-budget board
 - F. Mindoro Phase 4 shoreline-arrival / shoreline-impact board
@@ -86,9 +88,9 @@ These are the clearest figures for a main defense presentation. Use the publicat
 
 ## Panel-Ready Board Families
 
-- A. Mindoro strict March 6 forecast-vs-observation board
-- B. Mindoro March 4-6 event-corridor board
-- C. Mindoro OpenDrift vs PyGNOME comparison board
+- A. Mindoro March 13 -> March 14 primary validation board
+- B. Mindoro March 13 -> March 14 cross-model comparator board
+- C. Mindoro legacy March 6 honesty / limitations board
 - D. Mindoro trajectory board
 - E. Mindoro Phase 4 oil-budget board
 - F. Mindoro Phase 4 shoreline-arrival / shoreline-impact board
@@ -107,9 +109,9 @@ The polished board layer adds:
 
 ## Publication Package Families
 
-- A. Mindoro strict March 6 singles plus board, including locator, zoom, and forced close-up variants
-- B. Mindoro March 4-6 event-corridor singles plus board, including locator and close-up variants
-- C. Mindoro OpenDrift vs PyGNOME publication singles plus comparison board
+- A. Mindoro March 13 -> March 14 promoted primary-validation singles plus board
+- B. Mindoro March 13 -> March 14 cross-model comparison singles plus board
+- C. Mindoro legacy March 6 honesty / limitations singles plus board
 - D. Mindoro trajectory singles plus trajectory board
 - E. Mindoro Phase 4 OpenDrift-only oil-budget and shoreline-impact singles plus boards
 - F. Mindoro Phase 4 deferred-comparison note figure built from the cross-model audit bundle
@@ -117,15 +119,36 @@ The polished board layer adds:
 - H. DWH deterministic vs ensemble singles plus board
 - I. DWH OpenDrift vs PyGNOME singles plus comparison board
 - J. DWH trajectory singles plus trajectory board
+- K. Prototype 2021 accepted-segment support-only OpenDrift vs PyGNOME singles plus per-case side-by-side boards
 
 The publication package adds:
 
 - separate paper-ready single-image figures
 - explicit side-by-side comparison boards
 - plain-language captions and defense talking points
-- forced close-up crops where the observed target would otherwise be unreadable
+- a promoted March 13 -> March 14 Mindoro presentation lane with the shared March 12 imagery caveat kept explicit
 - an explicit publication-grade note figure explaining why Phase 4 OpenDrift-versus-PyGNOME comparison is still deferred
+- support-only prototype family `K`, which now republishes the preferred accepted-segment 2021 deterministic OpenDrift-vs-PyGNOME forecast figures without elevating them into the default main-defense list
 - the canonical presentation layer for defense and manuscript use
+
+## Prototype Forecast Support Figures
+
+The preferred prototype similarity phase now writes actual forecast figures under `output/prototype_2021_pygnome_similarity/figures/`:
+
+- `2` fixed accepted-segment cases
+- `24/48/72 h` deterministic OpenDrift singles
+- `24/48/72 h` deterministic PyGNOME singles
+- `1` side-by-side board per case with `24/48/72 h` rows and `OpenDrift | PyGNOME` columns
+- a clean map-first layout with higher-density core and broader support envelopes derived from the stored deterministic normalized density rasters
+- neutral/case-local context and a small locator inset on the support figures
+- a provenance source-point star when the stored prototype case assets expose one defensibly
+
+These figures remain:
+
+- accepted-segment debug support only
+- deterministic OpenDrift control versus deterministic PyGNOME only
+- comparator-only, not truth
+- support material rather than main thesis evidence
 
 ## Honesty Guardrails
 

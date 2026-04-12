@@ -101,6 +101,80 @@ class ForecastLoadingTests(unittest.TestCase):
             self.assertTrue(service.provisional_transport_model)
             self.assertEqual(service.audit_json_path.name, "phase2_loading_audit.json")
 
+    def test_official_polygon_seeding_uses_custom_override_path_when_provided(self):
+        class DummyModel:
+            def __init__(self):
+                self.calls = []
+
+            def seed_elements(self, **kwargs):
+                self.calls.append(kwargs)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            dummy = Path(tmpdir) / "dummy.nc"
+            xr.Dataset().to_netcdf(dummy)
+
+            with mock.patch.dict(os.environ, {"WORKFLOW_MODE": "mindoro_retro_2023"}, clear=False):
+                get_case_context.cache_clear()
+                service = EnsembleForecastService(str(dummy), str(dummy), wave_file=str(dummy))
+
+            service.seed_overrides = {
+                "polygon_vector_path": str(Path(tmpdir) / "custom_seed_polygon.gpkg"),
+                "source_geometry_label": "accepted_march13_noaa_processed_polygon",
+            }
+            model = DummyModel()
+            audit = {}
+            with mock.patch(
+                "src.utils.io.resolve_polygon_seeding",
+                return_value=([121.5], [13.3], "2023-03-12T16:00:00Z"),
+            ) as mocked:
+                seed_record = service._seed_official_release(
+                    model,
+                    "2023-03-12T16:00:00Z",
+                    num_elements=1,
+                    random_seed=123,
+                    audit=audit,
+                )
+
+        self.assertEqual(mocked.call_args.kwargs["polygon_path"], str(Path(tmpdir) / "custom_seed_polygon.gpkg"))
+        self.assertEqual(seed_record["source_geometry_path"], str(Path(tmpdir) / "custom_seed_polygon.gpkg"))
+        self.assertEqual(seed_record["release_geometry"], "accepted_march13_noaa_processed_polygon")
+        self.assertTrue(seed_record["custom_polygon_override_used"])
+        self.assertEqual(len(model.calls), 1)
+
+    def test_official_polygon_seeding_falls_back_to_default_when_no_override_is_present(self):
+        class DummyModel:
+            def __init__(self):
+                self.calls = []
+
+            def seed_elements(self, **kwargs):
+                self.calls.append(kwargs)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            dummy = Path(tmpdir) / "dummy.nc"
+            xr.Dataset().to_netcdf(dummy)
+
+            with mock.patch.dict(os.environ, {"WORKFLOW_MODE": "mindoro_retro_2023"}, clear=False):
+                get_case_context.cache_clear()
+                service = EnsembleForecastService(str(dummy), str(dummy), wave_file=str(dummy))
+
+            service.seed_overrides = {}
+            model = DummyModel()
+            with mock.patch(
+                "src.utils.io.resolve_polygon_seeding",
+                return_value=([121.5], [13.3], "2023-03-03T09:59:00Z"),
+            ) as mocked:
+                seed_record = service._seed_official_release(
+                    model,
+                    "2023-03-03T09:59:00Z",
+                    num_elements=1,
+                    random_seed=123,
+                )
+
+        self.assertIsNone(mocked.call_args.kwargs["polygon_path"])
+        self.assertEqual(seed_record["release_geometry"], "processed_march3_initialization_polygon")
+        self.assertFalse(seed_record["custom_polygon_override_used"])
+        self.assertEqual(len(model.calls), 1)
+
     def test_official_service_can_target_nested_recipe_sensitivity_output(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             dummy = Path(tmpdir) / "dummy.nc"

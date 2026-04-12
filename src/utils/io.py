@@ -110,6 +110,42 @@ def get_runtime_recipe_ids(config_path: str | Path = "config/recipes.yaml") -> l
     return [str(key) for key in (config.get("recipes") or {}).keys()]
 
 
+def get_prototype_debug_recipe_family(config_path: str | Path = "config/recipes.yaml") -> list[str]:
+    """Return the explicit prototype debug/regression recipe family."""
+    architecture = get_phase1_recipe_architecture(config_path)
+    configured_family = [
+        str(value).strip()
+        for value in architecture.get("prototype_debug_recipe_family") or []
+        if str(value).strip()
+    ]
+    fallback_family = [
+        "cmems_ncep",
+        "cmems_era5",
+        "cmems_gfs",
+        "hycom_ncep",
+        "hycom_era5",
+        "hycom_gfs",
+    ]
+    runtime_recipe_ids = set(get_runtime_recipe_ids(config_path))
+    family = configured_family or fallback_family
+    return [recipe_id for recipe_id in family if recipe_id in runtime_recipe_ids]
+
+
+def get_transport_recipe_family_for_workflow(
+    workflow_mode: str | None = None,
+    config_path: str | Path = "config/recipes.yaml",
+) -> list[str]:
+    """Return the intended transport recipe family for the active workflow lane."""
+    mode = str(workflow_mode or get_case_context().workflow_mode)
+    if mode == "prototype_2021":
+        return get_official_phase1_recipe_family(config_path)
+    if mode == "prototype_2016":
+        return get_prototype_debug_recipe_family(config_path)
+    if mode == "phase1_regional_2016_2022":
+        return get_official_phase1_recipe_family(config_path)
+    return get_runtime_recipe_ids(config_path)
+
+
 def get_phase1_baseline_audit_status(selection_path: str | Path | None = None) -> dict[str, Any]:
     """Return Phase 1 finalization-audit status metadata from the frozen baseline artifact."""
     try:
@@ -457,14 +493,23 @@ def load_drifter_data(path: str | Path) -> pd.DataFrame:
     return df[cols_to_keep].sort_values("time").reset_index(drop=True)
 
 
-def get_forcing_files(recipe_name: str, config_path: str = "config/recipes.yaml") -> Dict[str, Any]:
+def get_forcing_files(
+    recipe_name: str,
+    config_path: str = "config/recipes.yaml",
+    *,
+    run_name: str | None = None,
+    forcing_dir: str | Path | None = None,
+) -> Dict[str, Any]:
     """
     Read recipes.yaml and return the canonical forcing files for a given recipe.
     """
     recipe = get_recipe_definition(recipe_name, config_path)
-    from src.core.constants import RUN_NAME
+    if forcing_dir is not None:
+        data_dir = Path(forcing_dir)
+    else:
+        from src.core.constants import RUN_NAME
 
-    data_dir = Path("data/forcing") / RUN_NAME
+        data_dir = Path("data/forcing") / str(run_name or RUN_NAME)
     wave_file = recipe.get("wave_file")
 
     return {
@@ -510,6 +555,7 @@ def get_prepared_input_specs(
                 "label": label,
                 "path": str(path),
                 "source": source,
+                "required": True,
             }
         )
 
@@ -631,9 +677,17 @@ def get_prepared_input_specs(
     if include_all_transport_forcing:
         recipe_config = _load_recipes_config()
         recipes = recipe_config.get("recipes") or {}
+        recipe_ids_to_include = (
+            [str(recipe_name)]
+            if recipe_name
+            else get_transport_recipe_family_for_workflow(case.workflow_mode, config_path="config/recipes.yaml")
+        )
         forcing_entries: dict[tuple[str, str], dict[str, str]] = {}
         forcing_dir = Path("data") / "forcing" / active_run_name
-        for recipe in recipes.values():
+        for recipe_id in recipe_ids_to_include:
+            recipe = dict(recipes.get(str(recipe_id)) or {})
+            if not recipe:
+                continue
             currents_file = recipe.get("currents_file")
             wind_file = recipe.get("wind_file")
             wave_file = recipe.get("wave_file")
@@ -653,6 +707,11 @@ def get_prepared_input_specs(
                         "label": f"forcing_wind_{Path(wind_file).name}",
                         "path": str(forcing_dir / wind_file),
                         "source": recipe.get("wind_source") or _infer_source_name(wind_file) or "Wind forcing",
+                        "required": not (
+                            case.is_prototype
+                            and recipe_name is None
+                            and Path(wind_file).name == "gfs_wind.nc"
+                        ),
                     },
                 )
             if wave_file:
@@ -1043,7 +1102,7 @@ def resolve_spill_origin(
     if provenance_point is not None:
         lat, lon = provenance_point
         logger.info(f"Loaded prototype spill origin from Layer 0: ({lat:.4f}, {lon:.4f})")
-        return lat, lon, case.phase_1_start_date_value
+        return lat, lon, case.release_start_utc
 
     if drifter_csv is None:
         drifter_csv = Path(f"data/drifters/{RUN_NAME}/drifters_noaa.csv")
@@ -1065,15 +1124,20 @@ def resolve_spill_origin(
 def resolve_polygon_seeding(
     num_elements: int,
     random_seed: int | None = None,
+    polygon_path: str | Path | None = None,
+    seed_time_override: str | None = None,
 ) -> tuple[list[float], list[float], str]:
     """
-    Uniformly scatters points inside the authoritative Layer 3 initialization polygon.
+    Uniformly scatters points inside the authoritative initialization polygon.
     Returns (lons, lats, time_str) for models to ingest during seeding.
+
+    When polygon_path is provided, it overrides the default official March 3
+    initialization polygon for appendix/sensitivity reinitialization runs.
     """
     case = get_case_context()
     import geopandas as gpd
 
-    seed_path = resolve_initialization_polygon_path()
+    seed_path = Path(polygon_path) if polygon_path else resolve_initialization_polygon_path()
     if not seed_path.exists():
         raise FileNotFoundError(f"Missing initialization polygon: {seed_path}")
 
@@ -1091,7 +1155,11 @@ def resolve_polygon_seeding(
         lons = pts.x.tolist()
         lats = pts.y.tolist()
 
-    seed_time = case.release_start_utc if case.is_official else str(case.phase_1_start_date_value)
+    seed_time = (
+        str(seed_time_override)
+        if seed_time_override is not None
+        else case.release_start_utc
+    )
     return lons, lats, seed_time
 
 

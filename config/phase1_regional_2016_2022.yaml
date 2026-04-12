@@ -1,0 +1,56 @@
+workflow_mode: phase1_regional_2016_2022
+workflow_track: historical_regional_validation
+case_id: phase1_production_rerun
+description: "Dedicated full scientific Phase 1 regional drifter-validation rerun for 2016-2022"
+mode_label: "Historical/regional Phase 1 production rerun"
+region: [119.5, 124.5, 11.5, 16.5]
+forcing_bbox_halo_degrees: 0.5
+drifter_acquisition_halo_degrees: 3.0
+output_root: output/phase1_production_rerun
+
+historical_window:
+  start_utc: "2016-01-01T00:00:00Z"
+  end_utc: "2022-12-31T23:59:59Z"
+  monthly_chunking: true
+
+segment_policy:
+  horizon_hours: 72
+  timestep_hours: 6
+  overlap_rule: non_overlapping
+  drogue_policy: drogued_only_strict
+  reject_missing_drogue_status: true
+  require_full_duration: true
+  require_continuous_coverage: true
+  require_all_points_inside_validation_box: true
+
+transport_settings:
+  direct_wind_drift_factor: 0.02
+  enable_stokes_drift: true
+  horizontal_diffusivity_m2s: 0.0
+  weathering_enabled: false
+  current_uncertainty: 0.0
+  require_wave_stokes_reader: true
+
+drifter:
+  required: true
+  mode: phase1_regional_monthly_chunks
+  dataset_id: drifter_6hour_qc
+  server: https://osmc.noaa.gov/erddap
+  required_fields:
+    - time
+    - latitude
+    - longitude
+    - ID
+    - ve
+    - vn
+    - drogue_lost_date
+    - deploy_date
+    - DrogueType
+    - DrogueLength
+    - DrogueDetectSensor
+
+phase1_recipe_family:
+  - cmems_era5
+  - cmems_gfs
+  - hycom_era5
+  - hycom_gfs

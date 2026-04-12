@@ -2,6 +2,21 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
+try:
+    from ui.bootstrap import ensure_repo_root_on_path
+except ModuleNotFoundError:
+    import sys
+
+    _UI_DIR = Path(__file__).resolve().parents[1]
+    _UI_DIR_TEXT = str(_UI_DIR)
+    if _UI_DIR_TEXT not in sys.path:
+        sys.path.insert(0, _UI_DIR_TEXT)
+    from bootstrap import ensure_repo_root_on_path
+
+ensure_repo_root_on_path(__file__)
+
 import streamlit as st
 
 from ui.pages.common import preview_artifact, render_markdown_block, render_page_intro, render_table

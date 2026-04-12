@@ -15,7 +15,7 @@ docker-compose up -d pipeline
 Then launch the UI:
 
 ```bash
-docker-compose exec pipeline streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
+docker-compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
 ```
 
 Open:
