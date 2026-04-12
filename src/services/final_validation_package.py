@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import json
+from shutil import copy2
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pandas as pd
+import yaml
 
 from src.services.mindoro_primary_validation_metadata import (
     MINDORO_BASE_CASE_CONFIG_PATH,
@@ -15,10 +17,16 @@ from src.services.mindoro_primary_validation_metadata import (
     MINDORO_LEGACY_MARCH6_TRACK_LABEL,
     MINDORO_LEGACY_SUPPORT_TRACK_ID,
     MINDORO_LEGACY_SUPPORT_TRACK_LABEL,
+    MINDORO_PHASE1_CONFIRMATION_CANDIDATE_BASELINE_PATH,
+    MINDORO_PHASE1_CONFIRMATION_INTERPRETATION_TEMPLATE,
+    MINDORO_PHASE1_CONFIRMATION_WORKFLOW_MODE,
     MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH,
+    MINDORO_PRIMARY_VALIDATION_FINAL_OUTPUT_DIR,
     MINDORO_PRIMARY_VALIDATION_LAUNCHER_ALIAS_ENTRY_ID,
     MINDORO_PRIMARY_VALIDATION_LAUNCHER_ENTRY_ID,
     MINDORO_PRIMARY_VALIDATION_MIGRATION_NOTE_PATH,
+    MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE,
+    MINDORO_PRIMARY_VALIDATION_THESIS_SUBTITLE,
     MINDORO_PRIMARY_VALIDATION_TRACK_ID,
     MINDORO_PRIMARY_VALIDATION_TRACK_LABEL,
     MINDORO_SHARED_IMAGERY_CAVEAT,
@@ -37,6 +45,30 @@ DWH_DIR = Path("output") / DWH_CASE_ID
 MINDORO_REINIT_DIR = MINDORO_DIR / "phase3b_extended_public_scored_march13_14_reinit"
 MINDORO_REINIT_CROSSMODEL_DIR = MINDORO_DIR / "phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison"
 MINDORO_EXTENDED_PUBLIC_DIR = MINDORO_DIR / "phase3b_extended_public"
+MINDORO_B1_FINAL_OUTPUT_DIR = MINDORO_PRIMARY_VALIDATION_FINAL_OUTPUT_DIR
+MINDORO_B1_PUBLICATION_EXPORTS = {
+    "march13_seed_mask_on_grid.png": Path("output")
+    / "figure_package_publication"
+    / "case_mindoro_retro_2023__phase3b_reinit_primary__observation__single_seed_observation__2023_03_13__single__paper__march13_seed_mask_on_grid.png",
+    "march13_seed_vs_march14_target.png": Path("output")
+    / "figure_package_publication"
+    / "case_mindoro_retro_2023__phase3b_reinit_primary__observation__single_seed_target_compare__2023_03_13_to_2023_03_14__single__paper__march13_seed_vs_march14_target.png",
+    "march14_r0_overlay.png": Path("output")
+    / "figure_package_publication"
+    / "case_mindoro_retro_2023__phase3b_reinit_primary__opendrift__single_primary_overlay__2023_03_14__single__paper__march14_r0_overlay.png",
+    "march14_r1_previous_overlay.png": Path("output")
+    / "figure_package_publication"
+    / "case_mindoro_retro_2023__phase3b_reinit_primary__opendrift__single_primary_overlay__2023_03_14__single__paper__march14_r1_previous_overlay.png",
+    "mindoro_primary_validation_board.png": Path("output")
+    / "figure_package_publication"
+    / "case_mindoro_retro_2023__phase3b_reinit_primary__opendrift__comparison_board__2023_03_13_to_2023_03_14__board__slide__mindoro_primary_validation_board.png",
+}
+MINDORO_B1_SCIENTIFIC_SOURCE_EXPORTS = {
+    "qa_march13_seed_mask_on_grid.png": MINDORO_REINIT_DIR / "qa_march13_seed_mask_on_grid.png",
+    "qa_march13_seed_vs_march14_target.png": MINDORO_REINIT_DIR / "qa_march13_seed_vs_march14_target.png",
+    "qa_march14_reinit_R0_overlay.png": MINDORO_REINIT_DIR / "qa_march14_reinit_R0_overlay.png",
+    "qa_march14_reinit_R1_previous_overlay.png": MINDORO_REINIT_DIR / "qa_march14_reinit_R1_previous_overlay.png",
+}
 
 MINDORO_MARCH13_SOURCE_KEY = "8f8e3944748c4772910efc9829497e20"
 MINDORO_MARCH14_SOURCE_KEY = "10b37c42a9754363a5f7b14199b077e6"
@@ -74,6 +106,13 @@ def _read_json(path: Path) -> dict[str, Any]:
         return json.load(handle)
 
 
+def _read_yaml(path: Path) -> dict[str, Any]:
+    if not path.exists():
+        raise FileNotFoundError(f"Required artifact is missing: {path}")
+    with open(path, "r", encoding="utf-8") as handle:
+        return yaml.safe_load(handle) or {}
+
+
 def _write_json(path: Path, payload: dict | list) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as handle:
@@ -84,6 +123,13 @@ def _write_json(path: Path, payload: dict | list) -> None:
 def _write_text(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text.rstrip() + "\n", encoding="utf-8")
+
+
+def _relative_to_repo(repo_root: Path, path: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(repo_root.resolve()))
+    except Exception:
+        return str(path)
 
 
 def mean_fss(record: pd.Series | dict[str, Any]) -> float:
@@ -111,6 +157,7 @@ def decide_final_structure() -> str:
 
 class FinalValidationPackageService:
     def __init__(self):
+        self.repo_root = Path(".").resolve()
         self.output_dir = OUTPUT_DIR
         self.required_paths = [
             MINDORO_DIR / "phase3b" / "phase3b_summary.csv",
@@ -120,6 +167,7 @@ class FinalValidationPackageService:
             MINDORO_REINIT_DIR / "march13_14_reinit_summary.csv",
             MINDORO_REINIT_DIR / "march13_14_reinit_branch_pairing_manifest.csv",
             MINDORO_REINIT_DIR / "march13_14_reinit_run_manifest.json",
+            MINDORO_PHASE1_CONFIRMATION_CANDIDATE_BASELINE_PATH,
             MINDORO_REINIT_CROSSMODEL_DIR / "march13_14_reinit_crossmodel_summary.csv",
             MINDORO_REINIT_CROSSMODEL_DIR / "march13_14_reinit_crossmodel_run_manifest.json",
             MINDORO_EXTENDED_PUBLIC_DIR / "extended_public_obs_acceptance_registry.csv",
@@ -140,6 +188,8 @@ class FinalValidationPackageService:
             DWH_DIR / "phase3c_dwh_pygnome_comparator" / "phase3c_dwh_pygnome_summary.csv",
             DWH_DIR / "phase3c_dwh_pygnome_comparator" / "phase3c_dwh_pygnome_eventcorridor_summary.csv",
             DWH_DIR / "phase3c_dwh_pygnome_comparator" / "phase3c_dwh_pygnome_run_manifest.json",
+            *MINDORO_B1_PUBLICATION_EXPORTS.values(),
+            *MINDORO_B1_SCIENTIFIC_SOURCE_EXPORTS.values(),
         ]
 
     def _assert_required_artifacts(self) -> None:
@@ -159,6 +209,7 @@ class FinalValidationPackageService:
             MINDORO_REINIT_DIR / "march13_14_reinit_branch_pairing_manifest.csv"
         )
         self.mindoro_reinit_manifest = _read_json(MINDORO_REINIT_DIR / "march13_14_reinit_run_manifest.json")
+        self.mindoro_phase1_confirmation_candidate = _read_yaml(MINDORO_PHASE1_CONFIRMATION_CANDIDATE_BASELINE_PATH)
         self.mindoro_reinit_crossmodel_summary = _read_csv(
             MINDORO_REINIT_CROSSMODEL_DIR / "march13_14_reinit_crossmodel_summary.csv"
         )
@@ -310,6 +361,139 @@ class FinalValidationPackageService:
         )
         return rows.iloc[0]
 
+    def _mindoro_dual_provenance_confirmation(self) -> dict[str, Any]:
+        stored_recipe = str(self.mindoro_reinit_manifest.get("recipe", {}).get("recipe", "") or "")
+        stored_recipe_source_path = str(self.mindoro_reinit_manifest.get("recipe", {}).get("source_path", "") or "")
+        confirmation_recipe = str(self.mindoro_phase1_confirmation_candidate.get("selected_recipe", "") or "")
+        matches = bool(stored_recipe and confirmation_recipe and stored_recipe == confirmation_recipe)
+        return {
+            "stored_run_recipe_source_path": stored_recipe_source_path,
+            "stored_run_selected_recipe": stored_recipe,
+            "posthoc_phase1_confirmation_workflow_mode": MINDORO_PHASE1_CONFIRMATION_WORKFLOW_MODE,
+            "posthoc_phase1_confirmation_candidate_baseline_path": str(MINDORO_PHASE1_CONFIRMATION_CANDIDATE_BASELINE_PATH),
+            "posthoc_phase1_confirmation_selected_recipe": confirmation_recipe,
+            "matches_stored_b1_recipe": matches,
+            "confirmation_interpretation": MINDORO_PHASE1_CONFIRMATION_INTERPRETATION_TEMPLATE.format(
+                workflow_mode=MINDORO_PHASE1_CONFIRMATION_WORKFLOW_MODE,
+                recipe=confirmation_recipe or stored_recipe or "unknown_recipe",
+            ),
+            "thesis_phase_title": MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE,
+            "thesis_phase_subtitle": MINDORO_PRIMARY_VALIDATION_THESIS_SUBTITLE,
+        }
+
+    def _mindoro_final_output_readme(self, confirmation: dict[str, Any]) -> str:
+        matches_text = "Yes" if confirmation["matches_stored_b1_recipe"] else "No"
+        return "\n".join(
+            [
+                "# Phase 3B March13-14 Final Output",
+                "",
+                f"Thesis-facing title: {MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE}",
+                "",
+                "This is a read-only curated export of the promoted Mindoro B1 family.",
+                "It does not replace the canonical scientific directory under `output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/`.",
+                "",
+                "What is primary here:",
+                "- B1 = Mindoro March 13 -> March 14 NOAA reinit primary validation.",
+                "- The primary success statement is that the promoted OpenDrift row achieves non-zero FSS against the March 14 observed spill mask.",
+                "- PyGNOME remains comparator-only; OpenDrift outperforming PyGNOME is supportive context, not truth replacement.",
+                "",
+                "What remains secondary:",
+                "- March 6 remains a preserved legacy honesty/reference row and is not renamed as primary.",
+                "- The separate March 13 -> March 14 cross-model comparator family is not exported here as the main result.",
+                "",
+                "Recipe-confirmation provenance:",
+                f"- Stored B1 run recipe source path: `{confirmation['stored_run_recipe_source_path']}`",
+                f"- Stored B1 run selected recipe: `{confirmation['stored_run_selected_recipe']}`",
+                f"- Later drifter-confirmation workflow: `{confirmation['posthoc_phase1_confirmation_workflow_mode']}`",
+                f"- Later drifter-confirmation candidate baseline: `{confirmation['posthoc_phase1_confirmation_candidate_baseline_path']}`",
+                f"- Later drifter-confirmation selected recipe: `{confirmation['posthoc_phase1_confirmation_selected_recipe']}`",
+                f"- Same recipe confirmed: `{matches_text}`",
+                f"- Interpretation: {confirmation['confirmation_interpretation']}",
+                "",
+                "Shared-imagery caveat:",
+                f"- {MINDORO_SHARED_IMAGERY_CAVEAT}",
+            ]
+        )
+
+    def _build_mindoro_final_output_export(self, confirmation: dict[str, Any]) -> dict[str, Any]:
+        export_dir = self.repo_root / MINDORO_B1_FINAL_OUTPUT_DIR
+        publication_dir = export_dir / "publication"
+        scientific_dir = export_dir / "scientific_source_pngs"
+        summary_dir = export_dir / "summary"
+        copied_files: list[dict[str, Any]] = []
+
+        for destination_name, relative_source in MINDORO_B1_PUBLICATION_EXPORTS.items():
+            source = self.repo_root / relative_source
+            destination = publication_dir / destination_name
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            copy2(source, destination)
+            copied_files.append(
+                {
+                    "group": "publication",
+                    "file_name": destination_name,
+                    "relative_path": _relative_to_repo(self.repo_root, destination),
+                    "source_path": _relative_to_repo(self.repo_root, source),
+                }
+            )
+
+        for destination_name, relative_source in MINDORO_B1_SCIENTIFIC_SOURCE_EXPORTS.items():
+            source = self.repo_root / relative_source
+            destination = scientific_dir / destination_name
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            copy2(source, destination)
+            copied_files.append(
+                {
+                    "group": "scientific_source_pngs",
+                    "file_name": destination_name,
+                    "relative_path": _relative_to_repo(self.repo_root, destination),
+                    "source_path": _relative_to_repo(self.repo_root, source),
+                }
+            )
+
+        summary_sources = {
+            "march13_14_reinit_summary.csv": MINDORO_REINIT_DIR / "march13_14_reinit_summary.csv",
+            "march13_14_reinit_decision_note.md": MINDORO_REINIT_DIR / "march13_14_reinit_decision_note.md",
+            "march13_14_reinit_run_manifest.json": MINDORO_REINIT_DIR / "march13_14_reinit_run_manifest.json",
+        }
+        for destination_name, relative_source in summary_sources.items():
+            source = self.repo_root / relative_source
+            destination = summary_dir / destination_name
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            copy2(source, destination)
+            copied_files.append(
+                {
+                    "group": "summary",
+                    "file_name": destination_name,
+                    "relative_path": _relative_to_repo(self.repo_root, destination),
+                    "source_path": _relative_to_repo(self.repo_root, source),
+                }
+            )
+
+        readme_path = export_dir / "README.md"
+        _write_text(readme_path, self._mindoro_final_output_readme(confirmation))
+
+        manifest_path = export_dir / "final_output_manifest.json"
+        _write_json(
+            manifest_path,
+            {
+                "title": MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE,
+                "subtitle": MINDORO_PRIMARY_VALIDATION_THESIS_SUBTITLE,
+                "output_dir": _relative_to_repo(self.repo_root, export_dir),
+                "canonical_scientific_output_dir": _relative_to_repo(self.repo_root, self.repo_root / MINDORO_REINIT_DIR),
+                "read_only_export": True,
+                "shared_imagery_caveat": MINDORO_SHARED_IMAGERY_CAVEAT,
+                "dual_provenance_confirmation": confirmation,
+                "exported_files": copied_files,
+            },
+        )
+
+        return {
+            "output_dir": _relative_to_repo(self.repo_root, export_dir),
+            "readme_path": _relative_to_repo(self.repo_root, readme_path),
+            "manifest_path": _relative_to_repo(self.repo_root, manifest_path),
+            "copied_files": copied_files,
+        }
+
     def _extended_obs_row(self, source_key: str) -> pd.Series:
         rows = self.extended_public_registry[self.extended_public_registry["source_key"].astype(str) == source_key]
         if rows.empty:
@@ -379,6 +563,7 @@ class FinalValidationPackageService:
 
     def _build_main_table(self) -> pd.DataFrame:
         rows: list[dict[str, Any]] = []
+        confirmation = self._mindoro_dual_provenance_confirmation()
 
         primary_row = self._mindoro_primary_reinit_row()
         primary_pairing = self._mindoro_primary_reinit_pairing_row()
@@ -408,11 +593,16 @@ class FinalValidationPackageService:
                 "base_case_definition_preserved": True,
                 "row_role": "primary_public_validation",
                 "shared_imagery_caveat": MINDORO_SHARED_IMAGERY_CAVEAT,
+                "thesis_phase_title": MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE,
+                "thesis_phase_subtitle": MINDORO_PRIMARY_VALIDATION_THESIS_SUBTITLE,
+                **confirmation,
                 "notes": (
-                    "Primary Mindoro validation now uses the March 13 NOAA polygon as the reinitialization geometry "
-                    "and scores the March 14 NOAA target against the completed OpenDrift R1 previous p50 branch. "
-                    "The base March 3 -> March 6 case definition remains frozen in config, and this promoted row is "
-                    "authorized by a separate Phase 3B amendment with an explicit same-imagery caveat."
+                    "Phase 3B observation-based spatial validation using public Mindoro spill extents now foregrounds "
+                    "the March 13 NOAA seed polygon and March 14 NOAA target through the completed OpenDrift R1 "
+                    "previous p50 branch. The base March 3 -> March 6 case definition remains frozen in config, this "
+                    "promoted row is authorized by a separate Phase 3B amendment, and the later 2016-2023 "
+                    "Mindoro-focused drifter rerun confirmed the same cmems_era5 recipe without rewriting the stored "
+                    "run provenance."
                 ),
                 "source_summary_path": str(MINDORO_REINIT_DIR / "march13_14_reinit_summary.csv"),
                 "source_pairing_path": str(MINDORO_REINIT_DIR / "march13_14_reinit_branch_pairing_manifest.csv"),
@@ -558,6 +748,7 @@ class FinalValidationPackageService:
         return table
 
     def _build_case_registry(self) -> pd.DataFrame:
+        confirmation = self._mindoro_dual_provenance_confirmation()
         rows = [
             {
                 "case_id": MINDORO_CASE_ID,
@@ -592,10 +783,14 @@ class FinalValidationPackageService:
                 "row_role": "primary_public_validation",
                 "reporting_role": "main-text primary validation",
                 "main_text_priority": "primary",
+                "thesis_phase_title": MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE,
+                "thesis_phase_subtitle": MINDORO_PRIMARY_VALIDATION_THESIS_SUBTITLE,
+                **confirmation,
                 "notes": (
-                    "Promoted primary Mindoro row sourced from the completed R1_previous reinit branch. The frozen "
-                    "March 3 -> March 6 case definition remains untouched in config, and the promotion is recorded in "
-                    "a separate amendment file with the shared-imagery caveat stated explicitly."
+                    "Promoted primary Mindoro row for Phase 3B observation-based spatial validation using public "
+                    "Mindoro spill extents. The stored B1 run remains sourced from the completed R1_previous reinit "
+                    "branch under the frozen baseline file, while the later 2016-2023 Mindoro-focused drifter rerun "
+                    "confirmed the same cmems_era5 recipe without rewriting B1 provenance."
                 ),
             },
             {
@@ -1050,7 +1245,8 @@ class FinalValidationPackageService:
         lines = [
             "# Final Validation Claims Guardrails",
             "",
-            "- Mindoro B1 is now the March 13 -> March 14 NOAA reinit validation and should be described with the explicit March 12 WorldView-3 caveat.",
+            f"- {MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE} is represented by Mindoro B1, the March 13 -> March 14 NOAA reinit validation, and it should be described with the explicit March 12 WorldView-3 caveat.",
+            "- The later 2016-2023 Mindoro-focused drifter rerun confirmed the same cmems_era5 recipe used by the stored B1 run, but it does not replace the original B1 raw provenance.",
             "- Mindoro B2 and B3 remain legacy/reference rows, with B2 framed as honesty-only, and they should not be silently rewritten as if they never existed.",
             "- PyGNOME is a comparator, not truth, in both the promoted Mindoro cross-model lane and the DWH cross-model comparison.",
             "- DWH observed masks are truth for Phase 3C.",
@@ -1067,6 +1263,8 @@ class FinalValidationPackageService:
         path = self.output_dir / "final_validation_chapter_sync_memo.md"
         lines = [
             "# Final Validation Chapter 3 Sync Memo",
+            "",
+            f"Thesis-facing title: {MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE}",
             "",
             "Recommended revised structure:",
             "",
@@ -1087,6 +1285,7 @@ class FinalValidationPackageService:
             "- Present Phase 3A as comparator-only benchmarking, not as a truth-source replacement.",
             "- Preserve `config/case_mindoro_retro_2023.yaml` as the frozen March 3 -> March 6 case definition and carry the Phase 3B promotion through the amendment file instead.",
             "- Present March 13 -> March 14 as the canonical Mindoro validation with the shared-imagery caveat stated explicitly.",
+            "- State that the later 2016-2023 Mindoro-focused drifter rerun confirmed the same cmems_era5 recipe used by the stored B1 run without rewriting the original run provenance.",
             "- Keep March 6 and March 3-6 visible as legacy/reference material rather than deleting or hiding them.",
         ]
         _write_text(path, "\n".join(lines))
@@ -1099,7 +1298,8 @@ class FinalValidationPackageService:
             "",
             "Key scientific takeaway:",
             "",
-            "- Mindoro primary validation is now the March 13 -> March 14 NOAA reinit track.",
+            f"- {MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE} is now carried by the Mindoro March 13 -> March 14 NOAA reinit track.",
+            "- The later 2016-2023 Mindoro-focused drifter rerun confirmed the same cmems_era5 recipe used by the stored B1 run.",
             "- DWH is the rich-data external transfer-validation success.",
             "- Ensemble benefit is case-dependent, not universal.",
             "",
@@ -1122,6 +1322,8 @@ class FinalValidationPackageService:
             "",
             "This package is read-only with respect to completed scientific outputs. No Mindoro or DWH scientific result files were overwritten.",
             "",
+            f"Thesis-facing Phase 3B title: {MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE}",
+            "",
             "## Headline Results",
             "",
             (
@@ -1130,6 +1332,7 @@ class FinalValidationPackageService:
                 f"{headlines['mindoro_primary_reinit']['fss_5km']:.4f}, {headlines['mindoro_primary_reinit']['fss_10km']:.4f}; "
                 f"IoU={headlines['mindoro_primary_reinit']['iou']:.4f}; Dice={headlines['mindoro_primary_reinit']['dice']:.4f}."
             ),
+            "- The later 2016-2023 Mindoro-focused drifter rerun independently confirmed the same cmems_era5 recipe used by the stored B1 run, so the promoted B1 story is now both artifact-preserving and drifter-confirmed.",
             (
                 f"- Mindoro promoted cross-model top track (A): {headlines['mindoro_crossmodel_top']['model_name']} "
                 f"with FSS(1/3/5/10 km) = {headlines['mindoro_crossmodel_top']['fss_1km']:.4f}, "
@@ -1171,7 +1374,7 @@ class FinalValidationPackageService:
             "## Recommended Final Structure",
             "",
             f"- Base-case provenance: keep `{MINDORO_BASE_CASE_CONFIG_PATH}` frozen for March 3 -> March 6 and carry the B1 promotion through `{MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH}`.",
-            "- Main text: Mindoro B1 as the March 13 -> March 14 primary validation with the shared-imagery caveat plus DWH Phase 3C as the rich-data transfer-validation success.",
+            f"- Main text: {MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE} should foreground Mindoro B1 as the March 13 -> March 14 primary validation with the shared-imagery caveat and the later drifter-confirmation note, plus DWH Phase 3C as the rich-data transfer-validation success.",
             "- Comparative discussion: Mindoro A cross-model comparator and DWH deterministic-vs-ensemble-vs-PyGNOME comparison.",
             "- Legacy/reference and sensitivities: Mindoro B2/B3 legacy rows, recipe/init/source-history sensitivities, and optional future DWH extensions.",
             "",
@@ -1194,6 +1397,7 @@ class FinalValidationPackageService:
         limitations_table = self._build_limitations_table()
         headlines = self._build_headlines(main_table)
         recommendation = decide_final_structure()
+        confirmation = self._mindoro_dual_provenance_confirmation()
 
         main_table_path = self.output_dir / "final_validation_main_table.csv"
         case_registry_path = self.output_dir / "final_validation_case_registry.csv"
@@ -1211,6 +1415,7 @@ class FinalValidationPackageService:
         chapter_sync_path = self._write_chapter_sync_memo()
         interpretation_path = self._write_interpretation_memo()
         summary_path = self._write_summary(headlines, recommendation)
+        final_output_export = self._build_mindoro_final_output_export(confirmation)
 
         manifest = {
             "phase": PHASE,
@@ -1226,6 +1431,8 @@ class FinalValidationPackageService:
                 "final_validation_chapter_sync_memo": str(chapter_sync_path),
                 "final_validation_interpretation_memo": str(interpretation_path),
                 "final_validation_summary": str(summary_path),
+                "phase3b_march13_14_final_output_readme": final_output_export["readme_path"],
+                "phase3b_march13_14_final_output_manifest": final_output_export["manifest_path"],
             },
             "headlines": headlines,
             "final_recommendation": recommendation,
@@ -1235,9 +1442,13 @@ class FinalValidationPackageService:
                 "migration_note_path": str(MINDORO_PRIMARY_VALIDATION_MIGRATION_NOTE_PATH),
                 "primary_track_id": MINDORO_PRIMARY_VALIDATION_TRACK_ID,
                 "primary_track_label": MINDORO_PRIMARY_VALIDATION_TRACK_LABEL,
+                "thesis_phase_title": MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE,
+                "thesis_phase_subtitle": MINDORO_PRIMARY_VALIDATION_THESIS_SUBTITLE,
                 "legacy_honesty_track_id": MINDORO_LEGACY_MARCH6_TRACK_ID,
                 "legacy_support_track_id": MINDORO_LEGACY_SUPPORT_TRACK_ID,
                 "shared_imagery_caveat": MINDORO_SHARED_IMAGERY_CAVEAT,
+                "dual_provenance_confirmation": confirmation,
+                "final_output_export_dir": final_output_export["output_dir"],
             },
             "recommended_final_chapter_structure": [
                 "Phase 1 = Transport Validation and Baseline Configuration Selection",
@@ -1250,6 +1461,7 @@ class FinalValidationPackageService:
                 "Phase 4 = Oil-Type Fate and Shoreline Impact Analysis",
                 "Phase 5 = Reproducibility, Packaging, and Deliverables",
             ],
+            "phase3b_march13_14_final_output": final_output_export,
         }
         _write_json(self.output_dir / "final_validation_manifest.json", manifest)
         return manifest

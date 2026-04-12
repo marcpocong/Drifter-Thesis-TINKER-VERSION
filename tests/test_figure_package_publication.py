@@ -5,7 +5,9 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import rasterio
 from matplotlib import pyplot as plt
+from rasterio.transform import from_origin
 
 from src.services.figure_package_publication import (
     FigurePackagePublicationService,
@@ -43,6 +45,25 @@ def _write_png(path: Path, width: int = 320, height: int = 180) -> None:
     image[:, :, 1] = 0.9
     image[:, :, 2] = 0.98
     plt.imsave(path, image)
+
+
+def _write_tif(path: Path, value: int = 1, width: int = 8, height: int = 8) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    data = np.zeros((height, width), dtype=np.uint8)
+    data[2:6, 2:6] = value
+    transform = from_origin(120.9, 13.8, 0.02, 0.02)
+    with rasterio.open(
+        path,
+        "w",
+        driver="GTiff",
+        height=height,
+        width=width,
+        count=1,
+        dtype=data.dtype,
+        crs="EPSG:4326",
+        transform=transform,
+    ) as dataset:
+        dataset.write(data, 1)
 
 
 STYLE_YAML = """
@@ -114,15 +135,15 @@ MINDORO_PHASE3B_SUMMARY_CSV = """pair_id,obs_nonzero_cells,forecast_nonzero_cell
 official_primary_march6,2,3,0.111,0.222,0.333,0.444
 """
 
-MINDORO_REINIT_SUMMARY_CSV = """branch_id,model_name,validation_dates_used,fss_1km,fss_3km,fss_5km,fss_10km,mean_fss,forecast_nonzero_cells,obs_nonzero_cells
-R1_previous,OpenDrift R1 previous reinit p50,2023-03-14,0.000,0.044,0.137,0.249,0.1075,5,22
-R0,OpenDrift R0 reinit p50,2023-03-14,0.000,0.000,0.000,0.000,0.0000,0,22
+MINDORO_REINIT_SUMMARY_CSV = """branch_id,model_name,validation_dates_used,fss_1km,fss_3km,fss_5km,fss_10km,mean_fss,forecast_nonzero_cells,obs_nonzero_cells,forecast_path
+R1_previous,OpenDrift R1 previous reinit p50,2023-03-14,0.000,0.044,0.137,0.249,0.1075,5,22,output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/r1_previous_mask.tif
+R0,OpenDrift R0 reinit p50,2023-03-14,0.000,0.000,0.000,0.000,0.0000,0,22,output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/r0_mask.tif
 """
 
-MINDORO_REINIT_CROSSMODEL_SUMMARY_CSV = """track_id,model_name,validation_dates_used,fss_1km,fss_3km,fss_5km,fss_10km,mean_fss,iou,dice,nearest_distance_to_obs_m
-R1_previous_reinit_p50,OpenDrift R1 previous reinit p50,2023-03-14,0.000,0.044,0.137,0.249,0.1075,0.000,0.000,1414.2
-R0_reinit_p50,OpenDrift R0 reinit p50,2023-03-14,0.000,0.000,0.000,0.000,0.0000,0.000,0.000,9999.0
-pygnome_reinit_deterministic,PyGNOME deterministic March 13 reinit comparator,2023-03-14,0.000,0.000,0.000,0.024,0.0061,0.000,0.000,6082.8
+MINDORO_REINIT_CROSSMODEL_SUMMARY_CSV = """track_id,model_name,validation_dates_used,fss_1km,fss_3km,fss_5km,fss_10km,mean_fss,iou,dice,nearest_distance_to_obs_m,forecast_path
+R1_previous_reinit_p50,OpenDrift R1 previous reinit p50,2023-03-14,0.000,0.044,0.137,0.249,0.1075,0.000,0.000,1414.2,output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/r1_crossmodel_mask.tif
+R0_reinit_p50,OpenDrift R0 reinit p50,2023-03-14,0.000,0.000,0.000,0.000,0.0000,0.000,0.000,9999.0,output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/r0_crossmodel_mask.tif
+pygnome_reinit_deterministic,PyGNOME deterministic March 13 reinit comparator,2023-03-14,0.000,0.000,0.000,0.024,0.0061,0.000,0.000,6082.8,output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/pygnome_crossmodel_mask.tif
 """
 
 DWH_SUMMARY_CSV = """pair_role,pairing_date_utc,fss_1km,fss_3km,fss_5km,fss_10km
@@ -171,6 +192,20 @@ class FigurePackagePublicationTests(unittest.TestCase):
             root / "output" / "CASE_MINDORO_RETRO_2023" / "phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison" / "march13_14_reinit_crossmodel_summary.csv",
             MINDORO_REINIT_CROSSMODEL_SUMMARY_CSV,
         )
+        _write_text(
+            root / "output" / "phase1_mindoro_focus_pre_spill_2016_2023" / "phase1_baseline_selection_candidate.yaml",
+            "selected_recipe: cmems_era5\n",
+        )
+        for rel_path, value in (
+            ("output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_seed_mask_on_grid.tif", 1),
+            ("output/CASE_MINDORO_RETRO_2023/phase3b_extended_public/accepted_obs_masks/10b37c42a9754363a5f7b14199b077e6.tif", 1),
+            ("output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/r1_previous_mask.tif", 1),
+            ("output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/r0_mask.tif", 1),
+            ("output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/r1_crossmodel_mask.tif", 1),
+            ("output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/r0_crossmodel_mask.tif", 1),
+            ("output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/pygnome_crossmodel_mask.tif", 1),
+        ):
+            _write_tif(root / rel_path, value=value)
         for rel_path in (
             "output/CASE_MINDORO_RETRO_2023/phase3b/qa_phase3b_obsmask_vs_p50.png",
             "output/CASE_MINDORO_RETRO_2023/phase3b/qa_phase3b_source_init_validation_overlay.png",
@@ -260,6 +295,10 @@ class FigurePackagePublicationTests(unittest.TestCase):
                 specs["mindoro_primary_board"]["note_lines"],
             )
             self.assertIn(
+                "The later 2016-2023 Mindoro-focused drifter rerun confirmed the same cmems_era5 recipe used by the stored B1 run.",
+                specs["mindoro_primary_board"]["note_lines"],
+            )
+            self.assertIn(
                 "OpenDrift R1 previous reinit p50 FSS(1/3/5/10 km): 0.000/0.044/0.137/0.249; mean: 0.108.",
                 specs["mindoro_crossmodel_board"]["note_lines"],
             )
@@ -272,6 +311,10 @@ class FigurePackagePublicationTests(unittest.TestCase):
                 specs["mindoro_legacy_board"]["note_lines"],
             )
             self.assertIn("March 13 -> March 14", specs["mindoro_primary_board"]["figure_title"])
+            self.assertIn(
+                "Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents",
+                specs["mindoro_primary_seed_mask"]["subtitle"],
+            )
             self.assertIn("sparse-reference", specs["mindoro_legacy_board"]["short_plain_language_interpretation"])
 
     def test_dwh_publication_specs_use_exact_model_specific_fss_rows(self):

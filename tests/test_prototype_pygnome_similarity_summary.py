@@ -15,6 +15,7 @@ from shapely.geometry import LineString
 
 import src.__main__ as entrypoint
 from src.services.prototype_pygnome_similarity_summary import (
+    CASE_LOCAL_SUPPORT_CONTEXT_MODE,
     PrototypePygnomeSimilaritySummaryService,
 )
 
@@ -143,9 +144,17 @@ def _write_case(
     include_metadata: bool = True,
     mask_shape: tuple[int, int] = (6, 6),
     legacy_deterministic_only: bool = False,
+    grid_bounds: tuple[float, float, float, float] = (120.9, 121.9, 7.8, 9.2),
 ) -> None:
     benchmark_dir = root / "output" / case_id / "benchmark"
     benchmark_dir.mkdir(parents=True, exist_ok=True)
+    _write_json(
+        benchmark_dir / "grid" / "grid.json",
+        {
+            "display_bounds_wgs84": list(grid_bounds),
+            "extent": list(grid_bounds),
+        },
+    )
 
     hours = (24, 48, 72)
     track_rows = {
@@ -396,13 +405,14 @@ class PrototypePygnomeSimilaritySummaryTests(unittest.TestCase):
             self.assertIn("PyGNOME is a comparator, not truth", summary_text)
             self.assertIn("Rank 1: `CASE_2016-09-06`", summary_text)
             self.assertIn("OpenDrift p50 threshold", summary_text)
-            self.assertIn("footprint-first rendering", summary_text)
+            self.assertIn("exact stored raster cells and exact footprint outlines", summary_text)
             captions_text = Path(results["figure_captions_md"]).read_text(encoding="utf-8")
             self.assertIn("CASE_2016-09-01", captions_text)
             self.assertIn("board", captions_text)
-            self.assertIn("footprint-first rendering", captions_text)
+            self.assertIn("exact stored raster cells", captions_text)
             self.assertIn("OpenDrift p50 threshold", captions_text)
             self.assertIn("OpenDrift p90 threshold", captions_text)
+            self.assertNotIn("canonical Mindoro", captions_text)
 
             figure_registry_df = pd.read_csv(results["figure_registry_csv"])
             self.assertEqual(len(figure_registry_df), 39)
@@ -413,15 +423,22 @@ class PrototypePygnomeSimilaritySummaryTests(unittest.TestCase):
                 sorted(figure_registry_df["model_name"].unique().tolist()),
                 ["opendrift", "opendrift_p50", "opendrift_p90", "opendrift_vs_pygnome", "pygnome"],
             )
-            self.assertTrue(figure_registry_df["notes"].str.contains("footprint-first rendering", regex=False).any())
+            self.assertTrue((figure_registry_df["geometry_render_mode"] == "exact_stored_raster").all())
+            self.assertTrue(figure_registry_df["density_render_mode"].astype(str).str.len().gt(0).all())
+            self.assertTrue(figure_registry_df["stored_geometry_status"].astype(str).str.len().gt(0).all())
             self.assertTrue((figure_registry_df["comparison_track_id"].notna()).all())
             self.assertIn("status_key", figure_registry_df.columns)
             self.assertIn("status_label", figure_registry_df.columns)
             self.assertTrue((figure_registry_df["status_key"] == "prototype_2016_support").all())
+            self.assertFalse(figure_registry_df["notes"].astype(str).str.contains("Mindoro", regex=False).any())
 
             manifest = json.loads(Path(results["manifest_json"]).read_text(encoding="utf-8"))
             self.assertTrue(manifest["legacy_debug_only"])
             self.assertEqual(manifest["pygnome_role"], "comparator_only")
+            self.assertEqual(manifest["support_context_mode"], CASE_LOCAL_SUPPORT_CONTEXT_MODE)
+            self.assertEqual(manifest["rendering_profile"], "prototype_2016_case_local_projected_v1")
+            self.assertEqual(manifest["map_projection"], "local_azimuthal_equidistant")
+            self.assertIn("CASE_2016-09-01", manifest["case_rendering"])
             self.assertEqual(manifest["headline"]["top_ranked_case_id"], "CASE_2016-09-06")
             self.assertEqual(manifest["headline"]["top_ranked_comparison_track_id"], "deterministic")
             self.assertEqual(manifest["figure_counts"]["single_forecast_figures"], 36)
@@ -449,17 +466,20 @@ class PrototypePygnomeSimilaritySummaryTests(unittest.TestCase):
 
             service = PrototypePygnomeSimilaritySummaryService(repo_root=root)
             context = service._load_prototype_map_context()
-            self.assertTrue(Path(context["land_mask_path"]).exists())
-            self.assertTrue(Path(context["shoreline_path"]).exists())
-            self.assertFalse(context["labels_df"].empty)
+            self.assertIsNone(context["land_mask_path"])
+            self.assertIsNone(context["shoreline_path"])
+            self.assertTrue(context["labels_df"].empty)
             self.assertEqual(len(context["full_bounds_wgs84"]), 4)
             case_artifacts = service._load_case_artifacts("CASE_2016-09-01")
+            self.assertEqual(case_artifacts["display_bounds"], (120.9, 121.9, 7.8, 9.2))
             crop_bounds = case_artifacts["crop_bounds"]
-            self.assertLess(crop_bounds[1] - crop_bounds[0], 0.45)
-            self.assertLessEqual(crop_bounds[3] - crop_bounds[2], 0.75)
+            self.assertLess(crop_bounds[1] - crop_bounds[0], case_artifacts["display_bounds"][1] - case_artifacts["display_bounds"][0])
+            self.assertLess(crop_bounds[3] - crop_bounds[2], case_artifacts["display_bounds"][3] - case_artifacts["display_bounds"][2])
 
             results = service.run()
             registry_df = pd.read_csv(results["figure_registry_csv"])
+            self.assertTrue((registry_df["extent_mode"] == "dynamic_forecast_extent").all())
+            self.assertTrue(registry_df["plot_bounds_wgs84"].astype(str).str.len().gt(0).all())
             row = registry_df[
                 (registry_df["case_id"] == "CASE_2016-09-01")
                 & (registry_df["hour"] == 24)
@@ -469,10 +489,6 @@ class PrototypePygnomeSimilaritySummaryTests(unittest.TestCase):
             self.assertGreater(
                 _count_palette_pixels(rendered_path, ("#165ba8", "#4f88c5", "#9fc1e6")),
                 3000,
-            )
-            self.assertGreater(
-                _count_palette_pixels(rendered_path, ("#d0d0d0",)),
-                1500,
             )
             self.assertGreater(
                 _count_palette_pixels(rendered_path, ("#1d9b1d",)),
@@ -587,6 +603,13 @@ class PrototypePygnomeSimilaritySummaryTests(unittest.TestCase):
 
         mock_phase.assert_called_once_with()
 
+    def test_main_dispatches_legacy_final_figure_phase(self):
+        with mock.patch.dict(os.environ, {"PIPELINE_PHASE": "prototype_legacy_final_figures"}, clear=False):
+            with mock.patch.object(entrypoint, "run_prototype_legacy_final_figures_phase") as mock_phase:
+                entrypoint.main()
+
+        mock_phase.assert_called_once_with()
+
     def test_launcher_matrix_includes_similarity_step_after_benchmark(self):
         repo_root = Path(__file__).resolve().parents[1]
         launcher_matrix = json.loads((repo_root / "config" / "launcher_matrix.json").read_text(encoding="utf-8"))
@@ -596,6 +619,7 @@ class PrototypePygnomeSimilaritySummaryTests(unittest.TestCase):
         self.assertIn("prototype_pygnome_similarity_summary", phases)
         self.assertLess(phases.index("benchmark"), phases.index("prototype_pygnome_similarity_summary"))
         self.assertLess(phases.index("prototype_pygnome_similarity_summary"), phases.index("prototype_legacy_phase4_weathering"))
+        self.assertLess(phases.index("prototype_legacy_phase4_weathering"), phases.index("prototype_legacy_final_figures"))
         self.assertNotIn("3b", phases)
 
 

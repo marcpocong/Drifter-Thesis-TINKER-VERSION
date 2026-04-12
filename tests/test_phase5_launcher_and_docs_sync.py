@@ -286,6 +286,14 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
             ):
                 (final_validation_dir / artifact_name).write_text(f"{artifact_name}\n", encoding="utf-8")
 
+            final_output_dir = root / "output" / "Phase 3B March13-14 Final Output"
+            (final_output_dir / "publication").mkdir(parents=True, exist_ok=True)
+            (final_output_dir / "scientific_source_pngs").mkdir(parents=True, exist_ok=True)
+            (final_output_dir / "summary").mkdir(parents=True, exist_ok=True)
+            (final_output_dir / "README.md").write_text("final output readme\n", encoding="utf-8")
+            (final_output_dir / "final_output_manifest.json").write_text("{}\n", encoding="utf-8")
+            (final_output_dir / "publication" / "mindoro_primary_validation_board.png").write_text("png\n", encoding="utf-8")
+
             _write_json(
                 final_validation_dir / "final_validation_manifest.json",
                 {
@@ -293,6 +301,8 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
                     "artifacts": {
                         "final_validation_summary": "output/final_validation_package/final_validation_summary.md",
                         "final_validation_main_table": "output/final_validation_package/final_validation_main_table.csv",
+                        "phase3b_march13_14_final_output_readme": "output/Phase 3B March13-14 Final Output/README.md",
+                        "phase3b_march13_14_final_output_manifest": "output/Phase 3B March13-14 Final Output/final_output_manifest.json",
                     },
                     "inputs_preserved": [
                         "output/CASE_MINDORO_RETRO_2023/phase3b/phase3b_summary.csv",
@@ -306,6 +316,20 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
                         "dwh_ensemble_p50_event": {"fss_1km": 0.49, "fss_3km": 0.53, "fss_5km": 0.55, "fss_10km": 0.58},
                         "dwh_pygnome_event": {"fss_1km": 0.32, "fss_3km": 0.35, "fss_5km": 0.37, "fss_10km": 0.41},
                         "mindoro_crossmodel_top": {"mean_fss": 0.108},
+                    },
+                    "mindoro_primary_validation_promotion": {
+                        "thesis_phase_title": "Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents",
+                        "thesis_phase_subtitle": "Mindoro March 13 -> March 14 public spill-extent reinitialization validation",
+                        "shared_imagery_caveat": "Both NOAA products cite 2023-03-12 imagery.",
+                        "dual_provenance_confirmation": {
+                            "stored_run_selected_recipe": "cmems_era5",
+                            "posthoc_phase1_confirmation_selected_recipe": "cmems_era5",
+                            "matches_stored_b1_recipe": True,
+                        },
+                        "final_output_export_dir": "output/Phase 3B March13-14 Final Output",
+                    },
+                    "phase3b_march13_14_final_output": {
+                        "output_dir": "output/Phase 3B March13-14 Final Output",
                     },
                 },
             )
@@ -494,6 +518,20 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
             )
             self.assertTrue(
                 (
+                    (output_catalog_df["track_id"] == "B1")
+                    & (output_catalog_df["artifact_group"] == "phase3b_march13_14_final_output")
+                    & (output_catalog_df["relative_path"] == "output/Phase 3B March13-14 Final Output/final_output_manifest.json")
+                ).any()
+            )
+            self.assertTrue(
+                (
+                    (output_catalog_df["track_id"] == "B1")
+                    & (output_catalog_df["artifact_group"] == "phase3b_march13_14_final_output")
+                    & (output_catalog_df["relative_path"] == "output/Phase 3B March13-14 Final Output/publication/mindoro_primary_validation_board.png")
+                ).any()
+            )
+            self.assertTrue(
+                (
                     (output_catalog_df["track_id"] == "prototype_legacy_phase3a")
                     & (output_catalog_df["artifact_type"] == "prototype_pygnome_similarity_manifest.json")
                 ).any()
@@ -522,6 +560,13 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
             self.assertTrue(final_manifest["phase5_verdict"]["phase5_reportable_now"])
             self.assertTrue(final_manifest["phase5_verdict"]["launcher_menu_honest_and_current"])
             self.assertTrue(final_manifest["phase5_verdict"]["legacy_recipe_drift_leaks_into_official_mode"])
+            self.assertEqual(
+                final_manifest["mindoro_primary_validation_promotion"]["final_output_export_dir"],
+                "output/Phase 3B March13-14 Final Output",
+            )
+            self.assertTrue(
+                final_manifest["mindoro_primary_validation_promotion"]["dual_provenance_confirmation"]["matches_stored_b1_recipe"]
+            )
             self.assertIn(
                 "output/phase4/CASE_DWH_RETRO_2010_72H/phase4_run_manifest.json",
                 final_manifest["phase5_verdict"]["missing_optional_artifacts"],

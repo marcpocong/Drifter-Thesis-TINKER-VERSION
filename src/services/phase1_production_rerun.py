@@ -38,7 +38,10 @@ from src.utils.forcing_outage_policy import (
     FORCING_OUTAGE_POLICY_CONTINUE_DEGRADED,
     forcing_factor_id_for_source,
     is_remote_outage_error,
+    run_budgeted_forcing_provider_call,
     resolve_forcing_outage_policy,
+    resolve_forcing_source_budget_seconds,
+    source_id_for_recipe_component,
 )
 from src.utils.gfs_wind import (
     GFSWindDownloader,
@@ -46,6 +49,7 @@ from src.utils.gfs_wind import (
     wind_cache_has_reader_metadata as _wind_cache_has_reader_metadata,
 )
 from src.utils.io import get_official_phase1_recipe_family
+from src.utils.startup_prompt_policy import input_cache_policy_force_refresh_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -101,6 +105,57 @@ class SegmentWindow:
     start_time: pd.Timestamp
     end_time: pd.Timestamp
     month_key: str
+
+
+def _budgeted_phase1_forcing_download(
+    *,
+    repo_root: str,
+    config_path: str,
+    source_id: str,
+    start_time_utc: str,
+    end_time_utc: str,
+    forcing_dir: str,
+) -> dict[str, Any]:
+    service = Phase1ProductionRerunService(repo_root=repo_root, config_path=config_path)
+    start_time = pd.Timestamp(start_time_utc)
+    end_time = pd.Timestamp(end_time_utc)
+    target_dir = Path(forcing_dir)
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    try:
+        if source_id == "hycom":
+            result = service._download_hycom_currents(start_time, end_time, target_dir)
+        elif source_id == "cmems":
+            result = service._download_cmems_currents(start_time, end_time, target_dir)
+        elif source_id == "cmems_wave":
+            result = service._download_cmems_wave(start_time, end_time, target_dir)
+        elif source_id == "era5":
+            result = service._download_era5_winds(start_time, end_time, target_dir)
+        elif source_id == "gfs":
+            result = service._download_gfs_winds(
+                start_time,
+                end_time,
+                target_dir,
+                budget_seconds=resolve_forcing_source_budget_seconds(),
+            )
+        else:
+            raise KeyError(f"Unsupported forcing source id: {source_id}")
+    except Exception as exc:
+        outage = is_remote_outage_error(exc)
+        return {
+            "status": "failed_remote_outage" if outage else "failed",
+            "source_id": str(source_id),
+            "forcing_factor": forcing_factor_id_for_source(source_id),
+            "path": str(target_dir / forcing_factor_id_for_source(source_id)),
+            "upstream_outage_detected": outage,
+            "failure_stage": str(getattr(exc, "failure_stage", "provider_call") or "provider_call"),
+            "error": str(exc),
+        }
+
+    record = dict(result or {})
+    record.setdefault("status", "downloaded")
+    record.setdefault("path", str(target_dir / forcing_factor_id_for_source(source_id)))
+    return record
 
 
 class Phase1ProductionRerunService(BaseService):
@@ -189,6 +244,7 @@ class Phase1ProductionRerunService(BaseService):
         configured_family = list(self.config.get("phase1_recipe_family") or [])
         official_family = get_official_phase1_recipe_family(self.recipes_path)
         self.official_recipe_family = configured_family or official_family
+        self.required_forcing_source_ids = self._required_forcing_source_ids()
         self.forcing_outage_policy = resolve_forcing_outage_policy(
             workflow_mode=self.case.workflow_mode,
             phase=self.pipeline_phase,
@@ -230,6 +286,9 @@ class Phase1ProductionRerunService(BaseService):
             "manifest": self.output_root / "phase1_production_manifest.json",
             "baseline_candidate": self.output_root / "phase1_baseline_selection_candidate.yaml",
         }
+
+    def _force_refresh_enabled(self) -> bool:
+        return input_cache_policy_force_refresh_enabled()
 
     def _load_distance_audit_source_point(self) -> dict[str, Any] | None:
         path_text = str(self.distance_audit_config.get("path") or "").strip()
@@ -508,6 +567,7 @@ class Phase1ProductionRerunService(BaseService):
             "winning_recipe": winning_recipe,
             "gfs_capable_recipes_ran": gfs_capable_recipes_ran,
             "forcing_outage_policy": self.forcing_outage_policy,
+            "forcing_source_budget_seconds": resolve_forcing_source_budget_seconds(),
             "degraded_continue_used": self.degraded_continue_used,
             "upstream_outage_detected": self.upstream_outage_detected,
             "missing_forcing_factors": sorted(self.missing_forcing_factors),
@@ -589,7 +649,7 @@ class Phase1ProductionRerunService(BaseService):
         next_month = month_start + pd.offsets.MonthBegin(1)
         month_end = min(self.window_end, next_month - pd.Timedelta(seconds=1))
 
-        if cache_path.exists():
+        if cache_path.exists() and not self._force_refresh_enabled():
             cached = pd.read_csv(cache_path)
             normalized = self._normalize_drifter_frame(cached)
             return normalized, {
@@ -807,6 +867,33 @@ class Phase1ProductionRerunService(BaseService):
             required.add(wave_file)
         return required
 
+    def _required_forcing_source_ids(self) -> list[str]:
+        recipes = (self.recipes_config.get("recipes") or {})
+        required_source_ids: set[str] = set()
+        for recipe_name in self.official_recipe_family:
+            recipe = recipes.get(recipe_name) or {}
+            currents_file = str(recipe.get("currents_file") or "").strip()
+            wind_file = str(recipe.get("wind_file") or "").strip()
+            wave_file = str(recipe.get("wave_file") or "").strip()
+            if currents_file:
+                required_source_ids.add(
+                    source_id_for_recipe_component(forcing_kind="current", filename=currents_file)
+                )
+            if wind_file:
+                required_source_ids.add(
+                    source_id_for_recipe_component(forcing_kind="wind", filename=wind_file)
+                )
+            if wave_file:
+                required_source_ids.add(
+                    source_id_for_recipe_component(forcing_kind="wave", filename=wave_file)
+                )
+        ordered_source_ids = [
+            source_id
+            for source_id in ("hycom", "cmems", "cmems_wave", "era5", "gfs", "ncep")
+            if source_id in required_source_ids
+        ]
+        return ordered_source_ids
+
     def _download_forcing_source_with_policy(
         self,
         *,
@@ -817,34 +904,35 @@ class Phase1ProductionRerunService(BaseService):
     ) -> dict[str, Any]:
         source_id = str(source_id)
         factor_id = forcing_factor_id_for_source(source_id)
-        downloaders = {
-            "hycom": self._download_hycom_currents,
-            "cmems": self._download_cmems_currents,
-            "cmems_wave": self._download_cmems_wave,
-            "era5": self._download_era5_winds,
-            "gfs": self._download_gfs_winds,
-        }
-        try:
-            record = dict(downloaders[source_id](start_time, end_time, forcing_dir))
-        except Exception as exc:
-            outage = is_remote_outage_error(exc)
-            self.upstream_outage_detected = bool(self.upstream_outage_detected or outage)
+        record = run_budgeted_forcing_provider_call(
+            callable_path="src.services.phase1_production_rerun._budgeted_phase1_forcing_download",
+            kwargs={
+                "repo_root": str(self.repo_root),
+                "config_path": str(self.config_path),
+                "source_id": source_id,
+                "start_time_utc": start_time.isoformat(),
+                "end_time_utc": end_time.isoformat(),
+                "forcing_dir": str(forcing_dir),
+            },
+            source_id=source_id,
+            forcing_factor=factor_id,
+            failure_path=str(forcing_dir / factor_id),
+        )
+        outage = bool(record.get("upstream_outage_detected", False))
+        self.upstream_outage_detected = bool(self.upstream_outage_detected or outage)
+        if record.get("status") in {"failed", "failed_remote_outage"}:
             if outage and self._continue_degraded_enabled():
                 self.degraded_continue_used = True
                 self.missing_forcing_factors.add(factor_id)
-                return {
-                    "status": "skipped_outage_continue_degraded",
-                    "source_id": source_id,
-                    "forcing_factor": factor_id,
-                    "upstream_outage_detected": True,
-                    "error": str(exc),
-                }
-            raise
+                degraded = dict(record)
+                degraded["status"] = "skipped_outage_continue_degraded"
+                return degraded
+            raise RuntimeError(str(record.get("error") or f"{source_id} forcing acquisition failed."))
 
         record.setdefault("status", "downloaded")
         record["source_id"] = source_id
         record["forcing_factor"] = factor_id
-        record["upstream_outage_detected"] = False
+        record["upstream_outage_detected"] = bool(record.get("upstream_outage_detected", False))
         return record
 
     def _download_cmems_currents(
@@ -861,7 +949,7 @@ class Phase1ProductionRerunService(BaseService):
             raise RuntimeError("CMEMS_USERNAME and CMEMS_PASSWORD are required for the Phase 1 production rerun.")
 
         output_path = forcing_dir / "cmems_curr.nc"
-        if output_path.exists():
+        if output_path.exists() and not self._force_refresh_enabled():
             return {"status": "cached", "path": _relative(self.repo_root, output_path)}
 
         dataset_id, _ = self._cmems_dataset_ids(start_time)
@@ -903,7 +991,7 @@ class Phase1ProductionRerunService(BaseService):
             raise RuntimeError("CMEMS_USERNAME and CMEMS_PASSWORD are required for the Phase 1 production rerun.")
 
         output_path = forcing_dir / "cmems_wave.nc"
-        if output_path.exists():
+        if output_path.exists() and not self._force_refresh_enabled():
             return {"status": "cached", "path": _relative(self.repo_root, output_path)}
 
         _, dataset_id = self._cmems_dataset_ids(start_time)
@@ -947,7 +1035,7 @@ class Phase1ProductionRerunService(BaseService):
             raise RuntimeError("CDS_URL and CDS_KEY are required for the Phase 1 production rerun.")
 
         output_path = forcing_dir / "era5_wind.nc"
-        if output_path.exists():
+        if output_path.exists() and not self._force_refresh_enabled():
             self._ensure_wind_cache_reader_metadata(output_path)
             return {"status": "cached", "path": _relative(self.repo_root, output_path)}
 
@@ -1002,7 +1090,7 @@ class Phase1ProductionRerunService(BaseService):
         forcing_dir: Path,
     ) -> dict[str, Any]:
         output_path = forcing_dir / "hycom_curr.nc"
-        if output_path.exists():
+        if output_path.exists() and not self._force_refresh_enabled():
             return {"status": "cached", "path": _relative(self.repo_root, output_path)}
 
         for base_url in self._hycom_candidate_urls(start_time):
@@ -1088,12 +1176,17 @@ class Phase1ProductionRerunService(BaseService):
         start_time: pd.Timestamp,
         end_time: pd.Timestamp,
         forcing_dir: Path,
+        *,
+        budget_seconds: int | float | None = None,
     ) -> dict[str, Any]:
+        if self._force_refresh_enabled():
+            (forcing_dir / "gfs_wind.nc").unlink(missing_ok=True)
         return self.gfs_downloader.download(
             start_time=start_time,
             end_time=end_time,
             output_path=forcing_dir / "gfs_wind.nc",
             scratch_dir=forcing_dir,
+            budget_seconds=budget_seconds,
         )
 
     def _prepare_forcing_cache(
@@ -1110,8 +1203,10 @@ class Phase1ProductionRerunService(BaseService):
             "start_time_utc": start_time.isoformat(),
             "end_time_utc": end_time.isoformat(),
             "forcing_outage_policy": self.forcing_outage_policy,
+            "required_forcing_sources": list(self.required_forcing_source_ids),
         }
-        for source_id in ("hycom", "cmems", "cmems_wave", "era5", "gfs"):
+        active_source_ids = tuple(self.required_forcing_source_ids)
+        for source_id in active_source_ids:
             status[source_id] = self._download_forcing_source_with_policy(
                 source_id=source_id,
                 start_time=start_time,
@@ -1121,20 +1216,20 @@ class Phase1ProductionRerunService(BaseService):
         status["available_forcing_factors"] = sorted(
             item["forcing_factor"]
             for key, item in status.items()
-            if key in {"hycom", "cmems", "cmems_wave", "era5", "gfs"}
+            if key in active_source_ids
             and item.get("status") in {"downloaded", "cached"}
         )
         status["missing_forcing_factors"] = sorted(
             item["forcing_factor"]
             for key, item in status.items()
-            if key in {"hycom", "cmems", "cmems_wave", "era5", "gfs"}
+            if key in active_source_ids
             and item.get("status") == "skipped_outage_continue_degraded"
         )
         status["degraded_continue_used"] = bool(status["missing_forcing_factors"])
         status["upstream_outage_detected"] = any(
             bool(item.get("upstream_outage_detected", False))
             for key, item in status.items()
-            if key in {"hycom", "cmems", "cmems_wave", "era5", "gfs"}
+            if key in active_source_ids
         )
         return forcing_dir, status
 
@@ -1194,6 +1289,13 @@ class Phase1ProductionRerunService(BaseService):
         self.skipped_recipe_missing_factors.update(skipped_recipe_missing_factors)
         for missing_list in skipped_recipe_missing_factors.values():
             self.missing_forcing_factors.update(missing_list)
+
+        if skipped_recipe_ids and self.upstream_outage_detected and not self._continue_degraded_enabled():
+            raise RuntimeError(
+                "Phase 1 production rerun detected an upstream forcing outage that removed part of the "
+                "official recipe family. The strict/reportable lane will not rank a reduced subset unless "
+                "FORCING_OUTAGE_POLICY=continue_degraded is set explicitly."
+            )
 
         if not eligible_recipes:
             if self._continue_degraded_enabled() and self.upstream_outage_detected:
@@ -1399,6 +1501,7 @@ class Phase1ProductionRerunService(BaseService):
                 or "Completed 2016-2022 regional drogued-only non-overlapping 72 h transport-validation rerun"
             ),
             "forcing_outage_policy": self.forcing_outage_policy,
+            "forcing_source_budget_seconds": resolve_forcing_source_budget_seconds(),
             "degraded_continue_used": self.degraded_continue_used,
             "upstream_outage_detected": self.upstream_outage_detected,
             "missing_forcing_factors": sorted(self.missing_forcing_factors),
@@ -1466,6 +1569,7 @@ class Phase1ProductionRerunService(BaseService):
                     "hard_fail_on_missing_required_forcing": not self.degraded_continue_used,
                     "hard_fail_on_empty_valid_recipe_set": True,
                     "require_wave_stokes_reader": bool(self.transport_settings.get("require_wave_stokes_reader", False)),
+                    "forcing_source_budget_seconds": resolve_forcing_source_budget_seconds(),
                 },
                 "audit_status": {
                     "classification": "provisional_due_to_forcing_outage" if self.degraded_continue_used else "implemented_and_scientifically_ready",
@@ -1501,6 +1605,7 @@ class Phase1ProductionRerunService(BaseService):
             "workflow_flavor": self.case.workflow_flavor,
             "transport_track": self.case.transport_track,
             "forcing_outage_policy": self.forcing_outage_policy,
+            "forcing_source_budget_seconds": resolve_forcing_source_budget_seconds(),
             "degraded_continue_used": self.degraded_continue_used,
             "upstream_outage_detected": self.upstream_outage_detected,
             "missing_forcing_factors": sorted(self.missing_forcing_factors),

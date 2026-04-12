@@ -23,7 +23,14 @@ from opendrift.readers import reader_global_landmask, reader_netCDF_CF_generic
 
 from src.core.case_context import get_case_context
 from src.core.constants import BASE_OUTPUT_DIR
-from src.helpers.plotting import plot_probability_map
+from src.helpers.plotting import (
+    PROTOTYPE_2016_EXTENT_MODE_DYNAMIC_FORECAST,
+    derive_prototype_2016_display_bounds,
+    plot_legacy_drifter_track_ensemble_overlay,
+    plot_legacy_drifter_track_map,
+    plot_probability_map,
+    prototype_2016_rendering_metadata,
+)
 from src.helpers.raster import (
     GridBuilder,
     project_points_to_grid,
@@ -48,7 +55,15 @@ from src.utils.io import (
     get_official_prob_presence_path,
     get_phase2_recipe_family_status,
     get_phase2_loading_audit_paths,
+    load_drifter_data,
     resolve_spill_origin,
+    select_drifter_of_record,
+)
+from src.utils.startup_prompt_policy import (
+    PROTOTYPE_2016_ENSEMBLE_POLICY_ENV,
+    PROTOTYPE_2016_ENSEMBLE_POLICY_FULL_RERUN,
+    PROTOTYPE_2016_ENSEMBLE_POLICY_REUSE_IF_VALID,
+    normalize_prototype_2016_ensemble_policy,
 )
 
 logger = logging.getLogger(__name__)
@@ -63,6 +78,7 @@ WAVE_VARIABLE_HINTS = [
     "swh",
     "Hs",
 ]
+PROTOTYPE_2016_REQUIRED_PROBABILITY_HOURS = (24, 48, 72)
 WAVE_REQUIRED_VARS = [
     "sea_surface_wave_stokes_drift_x_velocity",
     "sea_surface_wave_stokes_drift_y_velocity",
@@ -419,6 +435,7 @@ class EnsembleForecastService:
             "exception_chain": [],
             "forcings": {},
             "perturbation": perturbation or {},
+            "seed_initialization": {},
             "written_files": [],
         }
         self.audit_records.append(audit)
@@ -894,6 +911,37 @@ class EnsembleForecastService:
             time=normalize_model_timestamp(start_time).to_pydatetime(),
         )
 
+    def _legacy_source_point_path(self) -> str:
+        layer = self.case.provenance_layer
+        if self.case.is_official:
+            return str(layer.processed_vector_path(self.case.run_name))
+        return str(layer.geojson_path(self.case.run_name))
+
+    def _build_legacy_drifter_point_seed_record(
+        self,
+        *,
+        start_time,
+        start_lat: float,
+        start_lon: float,
+        random_seed: int | None = None,
+    ) -> dict:
+        release_time = normalize_model_timestamp(start_time)
+        source_point_path = self._legacy_source_point_path()
+        return {
+            "initialization_mode": "drifter_of_record_point",
+            "source_geometry_path": source_point_path,
+            "source_point_path": source_point_path,
+            "release_geometry": "legacy_drifter_of_record_point",
+            "point_release_surrogate": "exact_point_release",
+            "custom_polygon_override_used": False,
+            "random_seed": random_seed if random_seed is not None else "",
+            "source_lat": float(start_lat),
+            "source_lon": float(start_lon),
+            "release_start_utc": timestamp_to_utc_iso(release_time),
+            "release_end_utc": timestamp_to_utc_iso(release_time),
+            "release_duration_hours": 0.0,
+        }
+
     def _seed_official_release(
         self,
         model: OceanDrift,
@@ -971,6 +1019,20 @@ class EnsembleForecastService:
         if audit is not None:
             audit["seed_initialization"] = seed_record
         return seed_record
+
+    @staticmethod
+    def _serialize_member_run(member: dict, base_output_dir: Path = BASE_OUTPUT_DIR) -> dict:
+        payload = {
+            "member_id": member["member_id"],
+            "relative_path": _relative_output_path(member["output_file"], base_output_dir),
+            "start_time_utc": member["start_time_utc"],
+            "end_time_utc": member["end_time_utc"],
+            "element_count": member["element_count"],
+            "perturbation": member["perturbation"],
+        }
+        if member.get("seed_initialization"):
+            payload["seed_initialization"] = member["seed_initialization"]
+        return payload
 
     def _record_output_timestep_coverage(self, output_file: Path, audit: dict):
         if not output_file.exists():
@@ -1372,6 +1434,281 @@ class EnsembleForecastService:
 
         return written_files, product_records
 
+    def _prototype_2016_ensemble_policy(self) -> str:
+        return normalize_prototype_2016_ensemble_policy(
+            os.environ.get(PROTOTYPE_2016_ENSEMBLE_POLICY_ENV) or PROTOTYPE_2016_ENSEMBLE_POLICY_FULL_RERUN
+        )
+
+    def _prototype_2016_should_attempt_science_reuse(self) -> bool:
+        return (
+            self.case.workflow_mode == "prototype_2016"
+            and self.output_run_name == self.case.run_name
+            and self._prototype_2016_ensemble_policy() == PROTOTYPE_2016_ENSEMBLE_POLICY_REUSE_IF_VALID
+        )
+
+    def _prototype_2016_required_science_paths(self) -> list[Path]:
+        paths = [
+            self.output_dir / f"member_{member_id:02d}.nc"
+            for member_id in range(1, int(self.ensemble_size) + 1)
+        ]
+        paths.append(self.output_dir / "metadata.json")
+        for hour in PROTOTYPE_2016_REQUIRED_PROBABILITY_HOURS:
+            paths.extend(
+                [
+                    self.output_dir / f"probability_{int(hour)}h.nc",
+                    self.output_dir / f"probability_{int(hour)}h.tif",
+                    self.output_dir / f"mask_p50_{int(hour)}h.tif",
+                    self.output_dir / f"mask_p90_{int(hour)}h.tif",
+                ]
+            )
+        return paths
+
+    def _prototype_2016_manifest_member_runs(self, manifest_payload: dict) -> list[dict]:
+        member_runs: list[dict] = []
+        for item in manifest_payload.get("member_runs") or []:
+            relative_path = str(item.get("relative_path") or "").strip()
+            if not relative_path:
+                continue
+            member_runs.append(
+                {
+                    "member_id": int(item["member_id"]),
+                    "output_file": self.base_output_dir / relative_path,
+                    "start_time_utc": str(item.get("start_time_utc") or ""),
+                    "end_time_utc": str(item.get("end_time_utc") or ""),
+                    "element_count": int(item.get("element_count") or 0),
+                    "perturbation": dict(item.get("perturbation") or {}),
+                    "seed_initialization": dict(item.get("seed_initialization") or {}),
+                }
+            )
+        return member_runs
+
+    def _validate_prototype_2016_reusable_science(self) -> dict:
+        manifest_path = Path(get_ensemble_manifest_path(run_name=self.output_run_name))
+        if not manifest_path.exists():
+            return {
+                "valid": False,
+                "reason": f"Missing ensemble manifest: {manifest_path}",
+                "manifest_path": manifest_path,
+            }
+
+        try:
+            manifest_payload = json.loads(manifest_path.read_text(encoding="utf-8")) or {}
+        except Exception as exc:
+            return {
+                "valid": False,
+                "reason": f"Unreadable ensemble manifest: {exc}",
+                "manifest_path": manifest_path,
+            }
+
+        if str(manifest_payload.get("manifest_type") or "") != "prototype_phase2_ensemble":
+            return {
+                "valid": False,
+                "reason": "Existing ensemble manifest is not a prototype_phase2_ensemble artifact.",
+                "manifest_path": manifest_path,
+            }
+        if str(manifest_payload.get("workflow_mode") or "") != "prototype_2016":
+            return {
+                "valid": False,
+                "reason": "Existing ensemble manifest belongs to a different workflow_mode.",
+                "manifest_path": manifest_path,
+            }
+
+        source_geometry = manifest_payload.get("source_geometry") or {}
+        if str(source_geometry.get("initialization_mode") or "") != "drifter_of_record_point":
+            return {
+                "valid": False,
+                "reason": "Existing ensemble manifest does not record drifter_of_record_point initialization.",
+                "manifest_path": manifest_path,
+            }
+        if str(source_geometry.get("release_geometry") or "") != "legacy_drifter_of_record_point":
+            return {
+                "valid": False,
+                "reason": "Existing ensemble manifest does not record legacy_drifter_of_record_point release geometry.",
+                "manifest_path": manifest_path,
+            }
+
+        member_runs = self._prototype_2016_manifest_member_runs(manifest_payload)
+        if len(member_runs) != int(self.ensemble_size):
+            return {
+                "valid": False,
+                "reason": (
+                    f"Existing ensemble manifest has {len(member_runs)} member records; "
+                    f"expected {int(self.ensemble_size)}."
+                ),
+                "manifest_path": manifest_path,
+            }
+
+        missing_or_empty = [
+            path
+            for path in self._prototype_2016_required_science_paths()
+            if (not path.exists()) or path.stat().st_size <= 0
+        ]
+        if missing_or_empty:
+            missing_preview = ", ".join(str(path) for path in missing_or_empty[:6])
+            suffix = "..." if len(missing_or_empty) > 6 else ""
+            return {
+                "valid": False,
+                "reason": f"Existing ensemble science outputs are incomplete or empty: {missing_preview}{suffix}",
+                "manifest_path": manifest_path,
+            }
+
+        return {
+            "valid": True,
+            "reason": "Validated same-case prototype_2016 ensemble science outputs are present.",
+            "manifest_path": manifest_path,
+            "manifest_payload": manifest_payload,
+            "member_runs": member_runs,
+            "product_records": list(manifest_payload.get("products") or []),
+        }
+
+    def _prototype_2016_display_bounds(self) -> tuple[float, float, float, float]:
+        drifter_track_df, _ = self._load_prototype_2016_drifter_track()
+        fallback_bounds = list(GridBuilder().display_bounds_wgs84 or self.case.region)
+        return derive_prototype_2016_display_bounds(
+            drifter_track_df=drifter_track_df,
+            mask_paths=[
+                self.output_dir / "mask_p50_72h.tif",
+                self.output_dir / "mask_p90_72h.tif",
+            ],
+            fallback_bounds=fallback_bounds,
+        )
+
+    def _write_prototype_2016_probability_metadata(
+        self,
+        *,
+        display_bounds: tuple[float, float, float, float],
+        ensemble_science_reused: bool,
+    ) -> Path:
+        grid = GridBuilder()
+        metadata = {
+            "ensemble_size": self.ensemble_size,
+            "grid": grid.spec.to_metadata(),
+            "snapshot_hours": list(self.snapshot_hours),
+            "snapshots_hours": list(self.snapshot_hours),
+            "variables": ["probability", "mask_p50", "mask_p90"],
+            "legacy_support_only": True,
+            "ensemble_science_reused": bool(ensemble_science_reused),
+            **prototype_2016_rendering_metadata(display_bounds),
+        }
+
+        metadata_path = self.output_dir / "metadata.json"
+        with open(metadata_path, "w", encoding="utf-8") as handle:
+            json.dump(metadata, handle, indent=4)
+        return metadata_path
+
+    def _decorate_prototype_2016_product_records(
+        self,
+        product_records: list[dict],
+        *,
+        display_bounds: tuple[float, float, float, float],
+    ) -> list[dict]:
+        rendering = prototype_2016_rendering_metadata(display_bounds)
+        decorated: list[dict] = []
+        for record in product_records:
+            merged = dict(record)
+            merged.update(rendering)
+            decorated.append(merged)
+        return decorated
+
+    def _render_prototype_2016_probability_figures(
+        self,
+        *,
+        start_lat: float,
+        start_lon: float,
+        display_bounds: tuple[float, float, float, float],
+    ) -> list[Path]:
+        written_paths: list[Path] = []
+        for hour in self.snapshot_hours:
+            probability_raster = self.output_dir / f"probability_{int(hour)}h.tif"
+            p50_mask = self.output_dir / f"mask_p50_{int(hour)}h.tif"
+            p90_mask = self.output_dir / f"mask_p90_{int(hour)}h.tif"
+            img_out = self.output_dir / f"probability_{int(hour)}h.png"
+            plot_probability_map(
+                output_file=str(img_out),
+                start_lon=float(start_lon),
+                start_lat=float(start_lat),
+                corners=list(display_bounds),
+                title=f"Ensemble Forecast: T+{int(hour)}h\nProbability Footprint (N={self.ensemble_size})",
+                use_projected_case_local=True,
+                probability_raster_path=str(probability_raster),
+                p50_mask_path=str(p50_mask),
+                p90_mask_path=str(p90_mask),
+                extent_mode=PROTOTYPE_2016_EXTENT_MODE_DYNAMIC_FORECAST,
+            )
+            written_paths.append(img_out)
+            if self.alias_probability_cone and int(hour) == 72 and img_out.exists():
+                alias_path = self.output_dir / "probability_cone.png"
+                shutil.copyfile(img_out, alias_path)
+                written_paths.append(alias_path)
+        return written_paths
+
+    def _reuse_prototype_2016_ensemble_science(
+        self,
+        *,
+        recipe_name: str,
+        start_time,
+        start_lat: float,
+        start_lon: float,
+        selection: RecipeSelection | None = None,
+    ) -> dict | None:
+        validation = self._validate_prototype_2016_reusable_science()
+        if not validation.get("valid"):
+            print(
+                f"Existing ensemble outputs are incomplete/stale for {self.case.case_id}; rerunning Phase 2. "
+                f"Reason: {validation.get('reason')}"
+            )
+            logger.info(
+                "Existing ensemble outputs are incomplete/stale for %s; rerunning Phase 2. Reason: %s",
+                self.case.case_id,
+                validation.get("reason"),
+            )
+            return None
+
+        print(f"Reusing valid ensemble science outputs for {self.case.case_id} and regenerating figures.")
+        logger.info(
+            "Reusing valid ensemble science outputs for %s and regenerating figures.",
+            self.case.case_id,
+        )
+        display_bounds = self._prototype_2016_display_bounds()
+        metadata_path = self._write_prototype_2016_probability_metadata(
+            display_bounds=display_bounds,
+            ensemble_science_reused=True,
+        )
+        visual_files = self._render_prototype_2016_probability_figures(
+            start_lat=float(start_lat),
+            start_lon=float(start_lon),
+            display_bounds=display_bounds,
+        )
+        drifter_visual_files, drifter_visual_records = self._generate_prototype_2016_drifter_visual_products(
+            display_bounds=display_bounds,
+        )
+        base_product_records = [
+            record
+            for record in list(validation.get("product_records") or [])
+            if str(record.get("product_type") or "")
+            not in {"drifter_track_map", "drifter_track_ensemble_overlay"}
+        ]
+        product_records = self._decorate_prototype_2016_product_records(
+            [*base_product_records, *drifter_visual_records],
+            display_bounds=display_bounds,
+        )
+        manifest = self.write_output_manifest(
+            recipe_name=recipe_name,
+            member_runs=list(validation.get("member_runs") or []),
+            written_files=[
+                *self._prototype_2016_required_science_paths(),
+                metadata_path,
+                *visual_files,
+                *drifter_visual_files,
+            ],
+            product_records=product_records,
+            start_time=start_time,
+            selection=selection,
+            ensemble_science_reused=True,
+            display_bounds=display_bounds,
+        )
+        return manifest
+
     def _generate_prototype_probability_products(self, file_list, start_lat, start_lon):
         """
         Generate gridded NetCDF probability fields and PNG snapshots for 24h, 48h, and 72h.
@@ -1381,17 +1718,23 @@ class EnsembleForecastService:
         written_files: list[Path] = []
         product_records: list[dict] = []
 
-        metadata = {
-            "ensemble_size": self.ensemble_size,
-            "grid": grid.spec.to_metadata(),
-            "snapshots_hours": snapshots,
-            "variables": ["probability", "mask_p50", "mask_p90"],
-            "legacy_support_only": True,
-        }
-
-        metadata_path = self.output_dir / "metadata.json"
-        with open(metadata_path, "w") as f:
-            json.dump(metadata, f, indent=4)
+        metadata_path: Path | None = None
+        if self.case.workflow_mode == "prototype_2016":
+            metadata_path = self._write_prototype_2016_probability_metadata(
+                display_bounds=tuple(grid.display_bounds_wgs84 or self.case.region),
+                ensemble_science_reused=False,
+            )
+        else:
+            metadata = {
+                "ensemble_size": self.ensemble_size,
+                "grid": grid.spec.to_metadata(),
+                "snapshots_hours": snapshots,
+                "variables": ["probability", "mask_p50", "mask_p90"],
+                "legacy_support_only": True,
+            }
+            metadata_path = self.output_dir / "metadata.json"
+            with open(metadata_path, "w", encoding="utf-8") as f:
+                json.dump(metadata, f, indent=4)
         written_files.append(metadata_path)
 
         for hr in snapshots:
@@ -1479,25 +1822,158 @@ class EnsembleForecastService:
                     }
                 )
 
-            img_out = self.output_dir / f"probability_{hr}h.png"
-            plot_corners = grid.display_bounds_wgs84 or [grid.min_lon, grid.max_lon, grid.min_lat, grid.max_lat]
-            plot_probability_map(
-                output_file=str(img_out),
-                all_lons=np.array(all_lons),
-                all_lats=np.array(all_lats),
-                start_lon=start_lon,
-                start_lat=start_lat,
-                corners=plot_corners,
-                title=f"Ensemble Forecast: T+{hr}h\nProbability Distribution (N={self.ensemble_size})",
-            )
-            written_files.append(img_out)
+            if self.case.workflow_mode != "prototype_2016":
+                img_out = self.output_dir / f"probability_{hr}h.png"
+                plot_corners = grid.display_bounds_wgs84 or [grid.min_lon, grid.max_lon, grid.min_lat, grid.max_lat]
+                plot_probability_map(
+                    output_file=str(img_out),
+                    all_lons=np.array(all_lons),
+                    all_lats=np.array(all_lats),
+                    start_lon=start_lon,
+                    start_lat=start_lat,
+                    corners=plot_corners,
+                    title=f"Ensemble Forecast: T+{hr}h\nProbability Distribution (N={self.ensemble_size})",
+                )
+                written_files.append(img_out)
 
-            if self.alias_probability_cone and hr == 72 and img_out.exists():
-                alias_path = self.output_dir / "probability_cone.png"
-                shutil.copyfile(img_out, alias_path)
-                written_files.append(alias_path)
+                if self.alias_probability_cone and hr == 72 and img_out.exists():
+                    alias_path = self.output_dir / "probability_cone.png"
+                    shutil.copyfile(img_out, alias_path)
+                    written_files.append(alias_path)
+
+        if self.case.workflow_mode == "prototype_2016":
+            display_bounds = self._prototype_2016_display_bounds()
+            metadata_path = self._write_prototype_2016_probability_metadata(
+                display_bounds=display_bounds,
+                ensemble_science_reused=False,
+            )
+            if metadata_path not in written_files:
+                written_files.append(metadata_path)
+            written_files.extend(
+                self._render_prototype_2016_probability_figures(
+                    start_lat=float(start_lat),
+                    start_lon=float(start_lon),
+                    display_bounds=display_bounds,
+                )
+            )
+            drifter_visual_files, drifter_visual_records = self._generate_prototype_2016_drifter_visual_products(
+                display_bounds=display_bounds,
+            )
+            written_files.extend(drifter_visual_files)
+            product_records.extend(drifter_visual_records)
+            product_records = self._decorate_prototype_2016_product_records(
+                product_records,
+                display_bounds=display_bounds,
+            )
 
         logger.info("All Phase 2 probability products saved to %s", self.output_dir)
+        return written_files, product_records
+
+    def _prototype_2016_drifter_path(self) -> Path:
+        return Path("data") / "drifters" / self.case.run_name / "drifters_noaa.csv"
+
+    def _load_prototype_2016_drifter_track(self) -> tuple[pd.DataFrame, dict]:
+        drifter_path = self._prototype_2016_drifter_path()
+        if not drifter_path.exists():
+            raise FileNotFoundError(
+                f"Prototype 2016 drifter track PNGs require the selected drifter source file: {drifter_path}"
+            )
+
+        selection = select_drifter_of_record(load_drifter_data(drifter_path))
+        drifter_track_df = selection["drifter_df"].copy()
+        drifter_track_df["time"] = pd.to_datetime(drifter_track_df["time"], utc=True, errors="coerce")
+        drifter_track_df = drifter_track_df.dropna(subset=["time", "lat", "lon"]).copy()
+
+        window_start = pd.Timestamp(self.case.release_start_utc)
+        window_end = pd.Timestamp(self.case.simulation_end_utc)
+        if window_start.tzinfo is None:
+            window_start = window_start.tz_localize("UTC")
+        else:
+            window_start = window_start.tz_convert("UTC")
+        if window_end.tzinfo is None:
+            window_end = window_end.tz_localize("UTC")
+        else:
+            window_end = window_end.tz_convert("UTC")
+        drifter_track_df = drifter_track_df.loc[
+            (drifter_track_df["time"] >= window_start) & (drifter_track_df["time"] <= window_end)
+        ].copy()
+        if drifter_track_df.empty:
+            raise RuntimeError(
+                "Prototype 2016 drifter track PNGs require the selected drifter-of-record track "
+                f"to overlap the case window {self.case.release_start_utc} to {self.case.simulation_end_utc}."
+            )
+
+        drifter_track_df["time"] = drifter_track_df["time"].dt.tz_convert("UTC").dt.tz_localize(None)
+        return drifter_track_df.sort_values("time").reset_index(drop=True), selection
+
+    def _generate_prototype_2016_drifter_visual_products(
+        self,
+        *,
+        display_bounds: tuple[float, float, float, float] | None = None,
+    ) -> tuple[list[Path], list[dict]]:
+        grid = GridBuilder()
+        corners = list(display_bounds or grid.display_bounds_wgs84 or [grid.min_lon, grid.max_lon, grid.min_lat, grid.max_lat])
+        drifter_track_df, selection = self._load_prototype_2016_drifter_track()
+
+        p50_mask_path = self.output_dir / "mask_p50_72h.tif"
+        p90_mask_path = self.output_dir / "mask_p90_72h.tif"
+        missing_masks = [path for path in (p50_mask_path, p90_mask_path) if not path.exists()]
+        if missing_masks:
+            missing_str = ", ".join(str(path) for path in missing_masks)
+            raise FileNotFoundError(
+                "Prototype 2016 drifter/ensemble overlay requires the 72 h ensemble footprint masks, "
+                f"but these files are missing: {missing_str}"
+            )
+
+        selected_label = selection["selected_id"] or "unlabeled"
+        track_png = self.output_dir / "drifter_track_72h.png"
+        overlay_png = self.output_dir / "drifter_track_vs_ensemble_72h.png"
+
+        plot_legacy_drifter_track_map(
+            output_file=str(track_png),
+            drifter_track_df=drifter_track_df,
+            corners=corners,
+            title=(
+                "Prototype 2016 Legacy Support Case: Observed Drifter-of-Record Track (72 h)\n"
+                f"Selected drifter: {selected_label}"
+            ),
+            extent_mode=PROTOTYPE_2016_EXTENT_MODE_DYNAMIC_FORECAST,
+            locator_bounds=corners,
+        )
+        plot_legacy_drifter_track_ensemble_overlay(
+            output_file=str(overlay_png),
+            drifter_track_df=drifter_track_df,
+            p50_mask_path=str(p50_mask_path),
+            p90_mask_path=str(p90_mask_path),
+            corners=corners,
+            title=(
+                "Prototype 2016 Legacy Support Case: Drifter Track vs Ensemble Footprints (72 h)\n"
+                f"Selected drifter: {selected_label}"
+            ),
+            extent_mode=PROTOTYPE_2016_EXTENT_MODE_DYNAMIC_FORECAST,
+            locator_bounds=corners,
+        )
+
+        written_files = [track_png, overlay_png]
+        product_records = [
+            {
+                "product_type": "drifter_track_map",
+                "hour": 72,
+                "relative_path": _relative_output_path(track_png, self.base_output_dir),
+                "semantics": "Legacy prototype support-only observed drifter-of-record track over the 72 h case window.",
+                "legacy_support_only": True,
+            },
+            {
+                "product_type": "drifter_track_ensemble_overlay",
+                "hour": 72,
+                "relative_path": _relative_output_path(overlay_png, self.base_output_dir),
+                "semantics": (
+                    "Legacy prototype support-only overlay of the observed drifter-of-record track "
+                    "against the 72 h ensemble p50/p90 footprint masks."
+                ),
+                "legacy_support_only": True,
+            },
+        ]
         return written_files, product_records
 
     def _write_loading_audit_artifacts(self):
@@ -1521,6 +1997,7 @@ class EnsembleForecastService:
 
         rows: list[dict] = []
         for audit in self.audit_records:
+            seed_initialization = audit.get("seed_initialization") or {}
             base_row = {
                 "run_kind": audit["run_kind"],
                 "member_id": audit["member_id"] if audit["member_id"] is not None else "",
@@ -1554,6 +2031,16 @@ class EnsembleForecastService:
                 "requires_phase1_production_rerun_for_full_freeze": phase2_finalization["requires_phase1_production_rerun_for_full_freeze"],
                 "phase1_finalization_classification": phase2_finalization["phase1_finalization_classification"],
                 "phase2_provisional_reasons": " | ".join(phase2_finalization["provisional_reasons"]),
+                "seed_initialization_mode": seed_initialization.get("initialization_mode", ""),
+                "seed_release_geometry": seed_initialization.get("release_geometry", ""),
+                "seed_source_geometry_path": seed_initialization.get("source_geometry_path", ""),
+                "seed_source_point_path": seed_initialization.get("source_point_path", ""),
+                "seed_point_release_surrogate": seed_initialization.get("point_release_surrogate", ""),
+                "seed_source_lat": seed_initialization.get("source_lat", ""),
+                "seed_source_lon": seed_initialization.get("source_lon", ""),
+                "seed_release_start_utc": seed_initialization.get("release_start_utc", ""),
+                "seed_release_end_utc": seed_initialization.get("release_end_utc", ""),
+                "seed_release_duration_hours": seed_initialization.get("release_duration_hours", ""),
             }
             if not audit["forcings"]:
                 rows.append(base_row)
@@ -1684,14 +2171,7 @@ class EnsembleForecastService:
                 else str(self.case.provenance_layer.geojson_path(self.case.run_name)),
             },
             "member_runs": [
-                {
-                    "member_id": member["member_id"],
-                    "relative_path": _relative_output_path(member["output_file"], self.base_output_dir),
-                    "start_time_utc": member["start_time_utc"],
-                    "end_time_utc": member["end_time_utc"],
-                    "element_count": member["element_count"],
-                    "perturbation": member["perturbation"],
-                }
+                self._serialize_member_run(member, self.base_output_dir)
                 for member in member_runs
             ],
             "products": product_records,
@@ -1705,6 +2185,8 @@ class EnsembleForecastService:
         product_records: list[dict],
         start_time,
         selection: RecipeSelection | None = None,
+        ensemble_science_reused: bool = False,
+        display_bounds: tuple[float, float, float, float] | None = None,
     ) -> dict:
         """Write the Phase 2 ensemble manifest."""
         manifest_path = get_ensemble_manifest_path(run_name=self.output_run_name)
@@ -1733,6 +2215,25 @@ class EnsembleForecastService:
                     if path.exists()
                 ]
             }
+            if self.case.workflow_mode == "prototype_2016":
+                rendering = prototype_2016_rendering_metadata(
+                    display_bounds or tuple(GridBuilder().display_bounds_wgs84 or self.case.region)
+                )
+                payload["source_geometry"] = {
+                    "initialization_mode": self.case.initialization_mode,
+                    "initialization_polygon": str(self.case.initialization_layer.geojson_path(self.case.run_name)),
+                    "initialization_polygon_metadata_only": True,
+                    "validation_polygon": str(self.case.validation_layer.geojson_path(self.case.run_name)),
+                    "source_point": self._legacy_source_point_path(),
+                    "release_geometry": "legacy_drifter_of_record_point",
+                    "release_reference": self.case.release_reference,
+                }
+                payload["ensemble_science_reused"] = bool(ensemble_science_reused)
+                payload["figure_rendering"] = rendering
+                payload["member_runs"] = [
+                    self._serialize_member_run(member, self.base_output_dir)
+                    for member in member_runs
+                ]
 
         _write_json_atomic(manifest_path, payload)
 
@@ -1807,20 +2308,12 @@ class EnsembleForecastService:
                 start_lon=float(start_lon),
                 num_elements=seed_element_count,
             )
-            seed_record = {
-                "initialization_mode": "drifter_of_record_point",
-                "source_geometry_path": "",
-                "source_point_path": "",
-                "release_geometry": "legacy_drifter_of_record_point",
-                "point_release_surrogate": "exact_point_release",
-                "custom_polygon_override_used": False,
-                "random_seed": seed_random_seed if seed_random_seed is not None else "",
-                "source_lat": float(start_lat),
-                "source_lon": float(start_lon),
-                "release_start_utc": timestamp_to_utc_iso(simulation_start),
-                "release_end_utc": timestamp_to_utc_iso(simulation_start),
-                "release_duration_hours": 0.0,
-            }
+            seed_record = self._build_legacy_drifter_point_seed_record(
+                start_time=simulation_start,
+                start_lat=float(start_lat),
+                start_lon=float(start_lon),
+                random_seed=seed_random_seed,
+            )
             audit["seed_initialization"] = seed_record
         else:
             seed_record = self._seed_official_release(
@@ -1969,6 +2462,16 @@ class EnsembleForecastService:
                 )
         else:
             base_time = normalize_model_timestamp(start_time)
+            if self._prototype_2016_should_attempt_science_reuse():
+                reused_manifest = self._reuse_prototype_2016_ensemble_science(
+                    recipe_name=recipe_name,
+                    start_time=base_time,
+                    start_lat=float(start_lat),
+                    start_lon=float(start_lon),
+                    selection=selection,
+                )
+                if reused_manifest is not None:
+                    return reused_manifest
             rng = np.random.default_rng()
             p_cfg = self.config["perturbations"]
 
@@ -2017,7 +2520,23 @@ class EnsembleForecastService:
                 model.set_config("drift:horizontal_diffusivity", diffusivity)
                 model.set_config("drift:wind_uncertainty", wind_uncertainty)
                 model.set_config("drift:current_uncertainty", 0.1)
-                self._seed_polygon_release(model, run_start_time, num_elements=2000)
+                seed_record = None
+                if self.case.workflow_mode == "prototype_2016":
+                    self._seed_point_release(
+                        model,
+                        start_time=run_start_time,
+                        start_lat=float(start_lat),
+                        start_lon=float(start_lon),
+                        num_elements=2000,
+                    )
+                    seed_record = self._build_legacy_drifter_point_seed_record(
+                        start_time=run_start_time,
+                        start_lat=float(start_lat),
+                        start_lon=float(start_lon),
+                    )
+                    audit["seed_initialization"] = seed_record
+                else:
+                    self._seed_polygon_release(model, run_start_time, num_elements=2000)
                 audit["seed_element_count"] = 2000
 
                 output_file = self.output_dir / f"member_{member_id:02d}.nc"
@@ -2036,6 +2555,7 @@ class EnsembleForecastService:
                         "end_time_utc": timestamp_to_utc_iso(run_end_time),
                         "element_count": 2000,
                         "perturbation": audit["perturbation"],
+                        "seed_initialization": seed_record,
                     }
                 )
 
@@ -2061,6 +2581,12 @@ class EnsembleForecastService:
             product_records=product_records,
             start_time=base_time,
             selection=selection,
+            ensemble_science_reused=False,
+            display_bounds=(
+                self._prototype_2016_display_bounds()
+                if self.case.workflow_mode == "prototype_2016"
+                else None
+            ),
         )
         return manifest
 

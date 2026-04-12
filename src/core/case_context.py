@@ -4,6 +4,7 @@ Centralized workflow and case loading.
 
 from __future__ import annotations
 
+import json
 import os
 from dataclasses import dataclass
 from functools import lru_cache
@@ -25,6 +26,8 @@ DEFAULT_MINDORO_FEATURE_SERVER = (
     "Mindoro_Oil_Spills_Monitoring_Map_WFL1/FeatureServer"
 )
 PROTOTYPE_CASE_ID_ENV = "PROTOTYPE_CASE_ID"
+PROTOTYPE_2016_CASE_LOCAL_HALO_DEGREES = 1.0
+PROTOTYPE_2016_CASE_LOCAL_MIN_SPAN_DEGREES = 8.0
 
 
 def load_settings(settings_path: str | Path = SETTINGS_PATH) -> dict:
@@ -286,6 +289,124 @@ def _resolve_repo_domains(
     return phase1_validation_box, mindoro_case_domain, legacy_prototype_display_domain
 
 
+def _prototype_2016_drifter_csv_path(run_name: str) -> Path:
+    return Path("data") / "drifters" / str(run_name) / "drifters_noaa.csv"
+
+
+def _prototype_2016_source_point_path(run_name: str) -> Path:
+    return Path("data") / "arcgis" / str(run_name) / "source_point_metadata.geojson"
+
+
+def _normalize_utc_timestamp(value: str | pd.Timestamp) -> pd.Timestamp:
+    timestamp = pd.Timestamp(value)
+    if timestamp.tzinfo is not None:
+        return timestamp.tz_convert("UTC").tz_localize(None)
+    return timestamp
+
+
+def _centered_bounds(
+    *,
+    center: float,
+    lower: float,
+    upper: float,
+    minimum_span: float,
+    absolute_min: float,
+    absolute_max: float,
+) -> tuple[float, float]:
+    half_span = max((float(upper) - float(lower)) / 2.0, minimum_span / 2.0)
+    adjusted_lower = center - half_span
+    adjusted_upper = center + half_span
+    if adjusted_lower < absolute_min:
+        adjusted_upper = min(absolute_max, adjusted_upper + (absolute_min - adjusted_lower))
+        adjusted_lower = absolute_min
+    if adjusted_upper > absolute_max:
+        adjusted_lower = max(absolute_min, adjusted_lower - (adjusted_upper - absolute_max))
+        adjusted_upper = absolute_max
+    return float(adjusted_lower), float(adjusted_upper)
+
+
+def _load_source_point_geometry(run_name: str) -> tuple[float, float] | None:
+    source_path = _prototype_2016_source_point_path(run_name)
+    if not source_path.exists():
+        return None
+
+    payload = json.loads(source_path.read_text(encoding="utf-8")) or {}
+    features = payload.get("features") or []
+    if not features:
+        return None
+    geometry = (features[0] or {}).get("geometry") or {}
+    if str(geometry.get("type") or "").lower() != "point":
+        return None
+    coordinates = geometry.get("coordinates") or []
+    if len(coordinates) < 2:
+        return None
+    return float(coordinates[1]), float(coordinates[0])
+
+
+def _derive_prototype_2016_case_local_domain(
+    *,
+    run_name: str,
+    start_time_utc: str,
+    end_time_utc: str,
+) -> list[float]:
+    track_lons: list[float] = []
+    track_lats: list[float] = []
+
+    drifter_path = _prototype_2016_drifter_csv_path(run_name)
+    if drifter_path.exists():
+        from src.utils.io import load_drifter_data, select_drifter_of_record
+
+        selection = select_drifter_of_record(load_drifter_data(drifter_path))
+        drifter_df = selection["drifter_df"].copy()
+        drifter_df["time"] = pd.to_datetime(drifter_df["time"], utc=True, errors="coerce")
+        drifter_df = drifter_df.dropna(subset=["time", "lat", "lon"]).copy()
+        drifter_df["time"] = drifter_df["time"].dt.tz_convert("UTC").dt.tz_localize(None)
+        start_ts = _normalize_utc_timestamp(start_time_utc)
+        end_ts = _normalize_utc_timestamp(end_time_utc)
+        window_df = drifter_df.loc[(drifter_df["time"] >= start_ts) & (drifter_df["time"] <= end_ts)].copy()
+        if not window_df.empty:
+            track_lons.extend(window_df["lon"].astype(float).tolist())
+            track_lats.extend(window_df["lat"].astype(float).tolist())
+        track_lons.append(float(selection["start_lon"]))
+        track_lats.append(float(selection["start_lat"]))
+
+    if not track_lons or not track_lats:
+        source_point = _load_source_point_geometry(run_name)
+        if source_point is None:
+            raise FileNotFoundError(
+                "Prototype 2016 case-local domain requires either the selected drifter-of-record CSV "
+                f"or source point metadata for {run_name}."
+            )
+        source_lat, source_lon = source_point
+        track_lons = [float(source_lon)]
+        track_lats = [float(source_lat)]
+
+    lon_min = min(track_lons)
+    lon_max = max(track_lons)
+    lat_min = min(track_lats)
+    lat_max = max(track_lats)
+    lon_center = (lon_min + lon_max) / 2.0
+    lat_center = (lat_min + lat_max) / 2.0
+
+    min_lon, max_lon = _centered_bounds(
+        center=lon_center,
+        lower=lon_min - PROTOTYPE_2016_CASE_LOCAL_HALO_DEGREES,
+        upper=lon_max + PROTOTYPE_2016_CASE_LOCAL_HALO_DEGREES,
+        minimum_span=PROTOTYPE_2016_CASE_LOCAL_MIN_SPAN_DEGREES,
+        absolute_min=-180.0,
+        absolute_max=180.0,
+    )
+    min_lat, max_lat = _centered_bounds(
+        center=lat_center,
+        lower=lat_min - PROTOTYPE_2016_CASE_LOCAL_HALO_DEGREES,
+        upper=lat_max + PROTOTYPE_2016_CASE_LOCAL_HALO_DEGREES,
+        minimum_span=PROTOTYPE_2016_CASE_LOCAL_MIN_SPAN_DEGREES,
+        absolute_min=-90.0,
+        absolute_max=90.0,
+    )
+    return [float(min_lon), float(max_lon), float(min_lat), float(max_lat)]
+
+
 def _load_official_context(settings: dict, workflow_mode: str) -> CaseContext:
     case_files = settings.get("workflow_case_files") or {}
     case_path = Path(os.environ.get("CASE_CONFIG_PATH") or case_files.get(workflow_mode, ""))
@@ -384,22 +505,27 @@ def _load_prototype_context(settings: dict) -> CaseContext:
     )
     run_name = os.environ.get("RUN_NAME", f"CASE_{active_date}")
     phase1_validation_box, mindoro_case_domain, legacy_prototype_display_domain = _resolve_repo_domains(settings)
+    prototype_2016_case_local_domain = _derive_prototype_2016_case_local_domain(
+        run_name=run_name,
+        start_time_utc=start_time_utc,
+        end_time_utc=end_time_utc,
+    )
 
     return CaseContext(
         workflow_mode="prototype_2016",
         workflow_lane="prototype",
-        active_domain_name="legacy_prototype_display_domain",
+        active_domain_name="prototype_2016_case_local_domain",
         mode_label="Prototype 2016 debugging workflow",
         case_id=run_name,
         run_name=run_name,
-        description="Prototype debugging workflow preserving the original 2016 multi-date behavior",
-        region=list(legacy_prototype_display_domain),
+        description="Prototype debugging workflow preserving the original 2016 multi-date behavior with drifter-of-record point releases and case-local domains",
+        region=list(prototype_2016_case_local_domain),
         phase1_validation_box=phase1_validation_box,
         mindoro_case_domain=mindoro_case_domain,
-        legacy_prototype_display_domain=legacy_prototype_display_domain,
+        legacy_prototype_display_domain=list(prototype_2016_case_local_domain),
         is_prototype=True,
-        initialization_mode="initialization_polygon",
-        source_point_role="legacy_metadata_context_only",
+        initialization_mode="drifter_of_record_point",
+        source_point_role="drifter_of_record_release_point",
         release_mode="prototype_debug",
         release_reference="phase1_drifter_of_record",
         validation_target="validation_polygon",

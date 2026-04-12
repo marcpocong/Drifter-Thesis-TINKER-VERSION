@@ -2,9 +2,12 @@
 
 This package is read-only with respect to completed scientific outputs. No Mindoro or DWH scientific result files were overwritten.
 
+Thesis-facing Phase 3B title: Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents
+
 ## Headline Results
 
 - Mindoro March 13 -> March 14 primary validation (B1): FSS(1/3/5/10 km) = 0.0000, 0.0441, 0.1371, 0.2490; IoU=0.0000; Dice=0.0000.
+- The later 2016-2023 Mindoro-focused drifter rerun independently confirmed the same cmems_era5 recipe used by the stored B1 run, so the promoted B1 story is now both artifact-preserving and drifter-confirmed.
 - Mindoro promoted cross-model top track (A): OpenDrift R1 previous reinit p50 with FSS(1/3/5/10 km) = 0.0000, 0.0441, 0.1371, 0.2490.
 - Mindoro legacy March 6 honesty-only sparse reference (B2): FSS(1/3/5/10 km) = 0.0000, 0.0000, 0.0000, 0.0000; IoU=0.0000; Dice=0.0000.
 - Mindoro legacy March 3-6 broader-support reference (B3): FSS(1/3/5/10 km) = 0.1722, 0.2004, 0.2166, 0.2438; IoU=0.0942; Dice=0.1722.
@@ -15,7 +18,7 @@ This package is read-only with respect to completed scientific outputs. No Mindo
 ## Recommended Final Structure
 
 - Base-case provenance: keep `config/case_mindoro_retro_2023.yaml` frozen for March 3 -> March 6 and carry the B1 promotion through `config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml`.
-- Main text: Mindoro B1 as the March 13 -> March 14 primary validation with the shared-imagery caveat plus DWH Phase 3C as the rich-data transfer-validation success.
+- Main text: Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents should foreground Mindoro B1 as the March 13 -> March 14 primary validation with the shared-imagery caveat and the later drifter-confirmation note, plus DWH Phase 3C as the rich-data transfer-validation success.
 - Comparative discussion: Mindoro A cross-model comparator and DWH deterministic-vs-ensemble-vs-PyGNOME comparison.
 - Legacy/reference and sensitivities: Mindoro B2/B3 legacy rows, recipe/init/source-history sensitivities, and optional future DWH extensions.
 

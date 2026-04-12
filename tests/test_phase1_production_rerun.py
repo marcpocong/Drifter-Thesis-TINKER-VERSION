@@ -7,10 +7,12 @@ from types import SimpleNamespace
 from unittest import mock
 
 import pandas as pd
+import requests
 import xarray as xr
 import yaml
 
 from src.core.case_context import get_case_context
+from src.utils.forcing_outage_policy import FORCING_OUTAGE_POLICY_CONTINUE_DEGRADED
 from src.services.phase1_production_rerun import Phase1ProductionRerunService, _apply_wind_cf_metadata
 from src.services.validation import TransportValidationService
 
@@ -339,6 +341,7 @@ class Phase1ProductionRerunTests(unittest.TestCase):
 
             with mock.patch("src.services.phase1_production_rerun.get_case_context", return_value=_case_context_stub()):
                 service = Phase1ProductionRerunService(repo_root=root)
+            service.gfs_downloader.expected_delta = pd.Timedelta(0)
 
             registry = service._build_segment_registry(drifter_df)
 
@@ -573,6 +576,156 @@ class Phase1ProductionRerunTests(unittest.TestCase):
             evaluated_subset = service._evaluate_accepted_segments.call_args.args[0]
             self.assertEqual(evaluated_subset["segment_id"].tolist(), ["MAR_SEGMENT"])
 
+    def test_strict_lane_fails_hard_when_outage_removes_part_of_recipe_family(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            _build_test_repo(root)
+
+            accepted_df = pd.DataFrame(
+                [
+                    {
+                        "segment_id": "A_SEGMENT",
+                        "drifter_id": "A",
+                        "start_time_utc": "2017-03-10T00:00:00+00:00",
+                        "end_time_utc": "2017-03-13T00:00:00+00:00",
+                        "month_key": "201703",
+                    }
+                ]
+            )
+            drifter_df = pd.DataFrame(
+                [
+                    {"time": pd.Timestamp("2017-03-10T00:00:00Z"), "lat": 13.2, "lon": 121.2, "ID": "A"},
+                    {"time": pd.Timestamp("2017-03-10T06:00:00Z"), "lat": 13.3, "lon": 121.3, "ID": "A"},
+                ]
+            )
+
+            with mock.patch("src.services.phase1_production_rerun.get_case_context", return_value=_case_context_stub()):
+                service = Phase1ProductionRerunService(repo_root=root)
+
+            service.upstream_outage_detected = True
+            service._prepare_forcing_cache = mock.Mock(
+                return_value=(
+                    root,
+                    {
+                        "month_key": "201703",
+                        "available_forcing_factors": [
+                            "cmems_curr.nc",
+                            "hycom_curr.nc",
+                            "era5_wind.nc",
+                            "cmems_wave.nc",
+                        ],
+                    },
+                )
+            )
+
+            with self.assertRaisesRegex(RuntimeError, "removed part of the official recipe family"):
+                service._evaluate_accepted_segments(accepted_df, drifter_df)
+
+    def test_experimental_lane_continues_with_surviving_recipe_subset_and_marks_candidate_provisional(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            _build_test_repo(root)
+
+            accepted_df = pd.DataFrame(
+                [
+                    {
+                        "segment_id": "A_SEGMENT",
+                        "drifter_id": "A",
+                        "start_time_utc": "2017-03-10T00:00:00+00:00",
+                        "end_time_utc": "2017-03-13T00:00:00+00:00",
+                        "month_key": "201703",
+                    }
+                ]
+            )
+            drifter_df = pd.DataFrame(
+                [
+                    {"time": pd.Timestamp("2017-03-10T00:00:00Z"), "lat": 13.2, "lon": 121.2, "ID": "A"},
+                    {"time": pd.Timestamp("2017-03-10T06:00:00Z"), "lat": 13.3, "lon": 121.3, "ID": "A"},
+                ]
+            )
+            experimental_case = _case_context_stub(
+                workflow_mode="phase1_mindoro_focus_pre_spill_2016_2023",
+                run_name="phase1_mindoro_focus_pre_spill_2016_2023",
+                validation_box=[118.751, 124.305, 10.620, 16.026],
+                description="experimental pre-spill 2016-2023 Mindoro-focused drifter-calibration rerun for trial recipe selection only",
+            )
+
+            with mock.patch(
+                "src.services.phase1_production_rerun.get_case_context",
+                return_value=experimental_case,
+            ):
+                service = Phase1ProductionRerunService(
+                    repo_root=root,
+                    config_path="config/phase1_mindoro_focus_pre_spill_2016_2023.yaml",
+                )
+
+            service.forcing_outage_policy = FORCING_OUTAGE_POLICY_CONTINUE_DEGRADED
+            service.degraded_continue_used = True
+            service.upstream_outage_detected = True
+            service._prepare_forcing_cache = mock.Mock(
+                return_value=(
+                    root,
+                    {
+                        "month_key": "201703",
+                        "available_forcing_factors": [
+                            "cmems_curr.nc",
+                            "hycom_curr.nc",
+                            "era5_wind.nc",
+                            "cmems_wave.nc",
+                        ],
+                    },
+                )
+            )
+
+            def _fake_validation_summary(**kwargs):
+                recipe_names = kwargs["recipe_names"]
+                rows = []
+                for recipe in recipe_names:
+                    rows.append(
+                        {
+                            "recipe": recipe,
+                            "validity_flag": "valid",
+                            "status_flag": "valid",
+                            "hard_fail": False,
+                            "hard_fail_reason": "",
+                            "invalidity_reason": "",
+                            "ncs_score": 0.1 if recipe.endswith("cmems_era5") else 0.2,
+                            "actual_current_reader": "",
+                            "actual_wind_reader": "",
+                            "actual_wave_reader": "",
+                            "wave_loading_status": "loaded",
+                            "current_fallback_used": False,
+                            "wind_fallback_used": False,
+                            "wave_fallback_used": False,
+                        }
+                    )
+                return {"audit_df": pd.DataFrame(rows)}
+
+            service.validation_service.run_validation_summary = mock.Mock(side_effect=_fake_validation_summary)
+
+            loading_audit_df, segment_metrics_df, _ = service._evaluate_accepted_segments(accepted_df, drifter_df)
+            recipe_summary_df, _, winning_recipe = service._build_recipe_tables(
+                segment_metrics_df,
+                recipe_rank_pool=service.ranking_subset_label,
+            )
+            candidate_payload = service._build_candidate_baseline_payload(
+                winning_recipe=winning_recipe,
+                accepted_df=accepted_df,
+                rejected_df=pd.DataFrame(),
+                ranking_subset_df=accepted_df,
+            )
+
+            self.assertEqual(sorted(loading_audit_df["recipe"].tolist()), ["cmems_era5", "hycom_era5"])
+            self.assertEqual(sorted(service.skipped_recipe_ids), ["cmems_gfs", "hycom_gfs"])
+            skipped_rows = recipe_summary_df[recipe_summary_df["status"] == "skipped_missing_forcing"].copy()
+            self.assertEqual(sorted(skipped_rows["recipe"].tolist()), ["cmems_gfs", "hycom_gfs"])
+            self.assertTrue((skipped_rows["excluded_from_ranking"]).all())
+            self.assertEqual(set(skipped_rows["missing_forcing_factors"].tolist()), {"gfs_wind.nc"})
+            self.assertTrue(candidate_payload["provisional"])
+            self.assertFalse(candidate_payload["valid"])
+            self.assertTrue(candidate_payload["rerun_required"])
+            self.assertEqual(candidate_payload["missing_forcing_factors"], ["gfs_wind.nc"])
+
     def test_launcher_matrix_includes_phase1_production_entry(self):
         matrix = json.loads(Path("config/launcher_matrix.json").read_text(encoding="utf-8"))
         entry = next(item for item in matrix["entries"] if item["entry_id"] == "phase1_production_rerun")
@@ -591,6 +744,197 @@ class Phase1ProductionRerunTests(unittest.TestCase):
         self.assertEqual(trial_entry["workflow_mode"], "mindoro_retro_2023")
         self.assertEqual(trial_entry["steps"][1]["phase"], "mindoro_march13_14_phase1_focus_trial")
         self.assertIn("MINDORO_PHASE1_FOCUS_TRIAL_BASELINE_SELECTION_PATH", trial_entry["steps"][1]["extra_env"])
+
+    def test_launcher_matrix_marks_support_reinit_rebuilds_as_continue_degraded(self):
+        matrix = json.loads(Path("config/launcher_matrix.json").read_text(encoding="utf-8"))
+        appendix_entry = next(item for item in matrix["entries"] if item["entry_id"] == "mindoro_appendix_sensitivity_bundle")
+        alias_entry = next(item for item in matrix["entries"] if item["entry_id"] == "mindoro_march13_14_noaa_reinit_stress_test")
+
+        appendix_step = next(
+            step for step in appendix_entry["steps"] if step["phase"] == "phase3b_extended_public_scored_march13_14_reinit"
+        )
+        alias_step = next(
+            step for step in alias_entry["steps"] if step["phase"] == "phase3b_extended_public_scored_march13_14_reinit"
+        )
+
+        self.assertEqual(appendix_step["extra_env"]["FORCING_OUTAGE_POLICY"], "continue_degraded")
+        self.assertEqual(alias_step["extra_env"]["FORCING_OUTAGE_POLICY"], "continue_degraded")
+
+    def test_phase1_support_lane_skips_budget_exhausted_gfs_source(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            _build_test_repo(root)
+
+            with mock.patch(
+                "src.services.phase1_production_rerun.get_case_context",
+                return_value=_case_context_stub(
+                    workflow_mode="phase1_mindoro_focus_pre_spill_2016_2023",
+                    run_name="phase1_mindoro_focus_pre_spill_2016_2023",
+                ),
+            ):
+                service = Phase1ProductionRerunService(
+                    repo_root=root,
+                    config_path=root / "config" / "phase1_mindoro_focus_pre_spill_2016_2023.yaml",
+                )
+
+            with mock.patch(
+                "src.services.phase1_production_rerun.run_budgeted_forcing_provider_call",
+                return_value={
+                    "status": "failed_remote_outage",
+                    "source_id": "gfs",
+                    "forcing_factor": "gfs_wind.nc",
+                    "upstream_outage_detected": True,
+                    "error": "Forcing provider 'gfs' exceeded the 300-second fail-fast budget and was stopped.",
+                    "budget_seconds": 300,
+                    "elapsed_seconds": 300.0,
+                    "budget_exhausted": True,
+                    "failure_stage": "budget_timeout",
+                },
+            ):
+                record = service._download_forcing_source_with_policy(
+                    source_id="gfs",
+                    start_time=pd.Timestamp("2017-03-01T00:00:00Z"),
+                    end_time=pd.Timestamp("2017-03-04T00:00:00Z"),
+                    forcing_dir=root / "forcing",
+                )
+
+            self.assertEqual(record["status"], "skipped_outage_continue_degraded")
+            self.assertEqual(record["budget_seconds"], 300)
+            self.assertTrue(record["budget_exhausted"])
+            self.assertEqual(record["failure_stage"], "budget_timeout")
+            self.assertIn("gfs_wind.nc", service.missing_forcing_factors)
+
+    def test_prepare_forcing_cache_only_downloads_sources_required_by_active_recipe_family(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            _build_test_repo(root)
+
+            experimental_config_path = root / "config" / "phase1_mindoro_focus_pre_spill_2016_2023.yaml"
+            experimental_config = yaml.safe_load(experimental_config_path.read_text(encoding="utf-8"))
+            experimental_config["phase1_recipe_family"] = ["cmems_era5", "hycom_era5"]
+            experimental_config_path.write_text(yaml.safe_dump(experimental_config, sort_keys=False), encoding="utf-8")
+
+            with mock.patch(
+                "src.services.phase1_production_rerun.get_case_context",
+                return_value=_case_context_stub(
+                    workflow_mode="phase1_mindoro_focus_pre_spill_2016_2023",
+                    run_name="phase1_mindoro_focus_pre_spill_2016_2023",
+                    validation_box=[118.751, 124.305, 10.620, 16.026],
+                    description="experimental pre-spill 2016-2023 Mindoro-focused drifter-calibration rerun for trial recipe selection only",
+                ),
+            ):
+                service = Phase1ProductionRerunService(
+                    repo_root=root,
+                    config_path=experimental_config_path,
+                )
+
+            def _fake_forcing_download(*, source_id, start_time, end_time, forcing_dir):
+                return {
+                    "status": "cached",
+                    "source_id": source_id,
+                    "forcing_factor": {
+                        "hycom": "hycom_curr.nc",
+                        "cmems": "cmems_curr.nc",
+                        "cmems_wave": "cmems_wave.nc",
+                        "era5": "era5_wind.nc",
+                        "gfs": "gfs_wind.nc",
+                    }[source_id],
+                }
+
+            service._download_forcing_source_with_policy = mock.Mock(side_effect=_fake_forcing_download)
+
+            _, status = service._prepare_forcing_cache(
+                month_key="201703",
+                start_time=pd.Timestamp("2017-03-10T00:00:00Z"),
+                end_time=pd.Timestamp("2017-03-13T00:00:00Z"),
+            )
+
+            requested_sources = [
+                call.kwargs["source_id"] for call in service._download_forcing_source_with_policy.call_args_list
+            ]
+            self.assertEqual(requested_sources, ["hycom", "cmems", "cmems_wave", "era5"])
+            self.assertEqual(status["required_forcing_sources"], ["hycom", "cmems", "cmems_wave", "era5"])
+            self.assertEqual(
+                status["available_forcing_factors"],
+                ["cmems_curr.nc", "cmems_wave.nc", "era5_wind.nc", "hycom_curr.nc"],
+            )
+            self.assertEqual(status["missing_forcing_factors"], [])
+            self.assertNotIn("gfs", status)
+
+    def test_force_refresh_bypasses_monthly_drifter_cache(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            _build_test_repo(root)
+
+            with mock.patch("src.services.phase1_production_rerun.get_case_context", return_value=_case_context_stub()):
+                service = Phase1ProductionRerunService(repo_root=root)
+
+            month_start = pd.Timestamp("2017-03-01T00:00:00Z")
+            cache_path = service.drifter_cache_root / "201703.csv"
+            cache_path.write_text("time,lat,lon,ID\n2017-03-01T00:00:00Z,12.0,121.0,CACHED\n", encoding="utf-8")
+
+            fetched = pd.DataFrame(
+                {
+                    "time (UTC)": ["2017-03-01T00:00:00Z"],
+                    "latitude": [12.0],
+                    "longitude": [121.0],
+                    "ID": ["REMOTE"],
+                    "ve": [0.0],
+                    "vn": [0.0],
+                    "drogue_lost_date": ["2018-01-01T00:00:00Z"],
+                    "deploy_date": ["2016-12-01T00:00:00Z"],
+                    "DrogueType": ["holey_sock"],
+                    "DrogueLength": ["15m"],
+                    "DrogueDetectSensor": ["yes"],
+                }
+            )
+            client = mock.Mock()
+            client.to_pandas.return_value = fetched
+
+            with mock.patch.dict(os.environ, {"INPUT_CACHE_POLICY": "force_refresh"}, clear=False), mock.patch(
+                "src.services.phase1_production_rerun.ERDDAP",
+                return_value=client,
+            ):
+                frame, metadata = service._fetch_monthly_drifter_chunk(month_start)
+
+            self.assertEqual(metadata["status"], "downloaded")
+            self.assertEqual(frame["ID"].tolist(), ["REMOTE"])
+            self.assertEqual(pd.read_csv(cache_path)["ID"].tolist(), ["REMOTE"])
+
+    def test_force_refresh_bypasses_monthly_forcing_cache(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            _build_test_repo(root)
+
+            with mock.patch("src.services.phase1_production_rerun.get_case_context", return_value=_case_context_stub()):
+                service = Phase1ProductionRerunService(repo_root=root)
+
+            forcing_dir = service.forcing_cache_root / "201703"
+            forcing_dir.mkdir(parents=True, exist_ok=True)
+            output_path = forcing_dir / "cmems_curr.nc"
+            output_path.write_text("stale-cache", encoding="utf-8")
+
+            subset_mock = mock.Mock(side_effect=lambda **kwargs: output_path.write_text("fresh-cache", encoding="utf-8"))
+            fake_cmems = mock.Mock(subset=subset_mock)
+
+            with mock.patch.dict(
+                os.environ,
+                {
+                    "INPUT_CACHE_POLICY": "force_refresh",
+                    "CMEMS_USERNAME": "user",
+                    "CMEMS_PASSWORD": "pass",
+                },
+                clear=False,
+            ), mock.patch("src.services.phase1_production_rerun.copernicusmarine", fake_cmems):
+                record = service._download_cmems_currents(
+                    pd.Timestamp("2017-03-01T00:00:00Z"),
+                    pd.Timestamp("2017-03-04T00:00:00Z"),
+                    forcing_dir,
+                )
+
+            subset_mock.assert_called_once()
+            self.assertEqual(record["status"], "downloaded")
+            self.assertEqual(output_path.read_text(encoding="utf-8"), "fresh-cache")
 
     def test_gfs_catalog_parser_supports_legacy_and_modern_archive_names(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -618,6 +962,61 @@ class Phase1ProductionRerunTests(unittest.TestCase):
             self.assertIn(pd.Timestamp("2021-03-05T21:00:00Z"), parsed)
             self.assertTrue(parsed[pd.Timestamp("2021-03-05T18:00:00Z")].endswith("gfs_4_20210305_1800_000.grb2"))
             self.assertTrue(parsed[pd.Timestamp("2021-03-05T21:00:00Z")].endswith("gfs_4_20210305_1800_003.grb2"))
+
+    def test_gfs_catalog_fail_fast_caps_attempts_at_two_before_fallback(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            _build_test_repo(root)
+
+            with mock.patch("src.services.phase1_production_rerun.get_case_context", return_value=_case_context_stub()):
+                service = Phase1ProductionRerunService(repo_root=root)
+
+            response = requests.Response()
+            response.status_code = 503
+            http_error = requests.exceptions.HTTPError(response=response)
+            attempt_count = {"value": 0}
+
+            def _always_503(*args, **kwargs):
+                attempt_count["value"] += 1
+                raise http_error
+
+            expected_fallback = [(pd.Timestamp("2021-03-05T00:00:00Z"), "fallback-url")]
+            with mock.patch("src.utils.gfs_wind.requests.get", side_effect=_always_503), mock.patch.object(
+                service.gfs_downloader,
+                "fallback_analysis_urls",
+                return_value=expected_fallback,
+            ):
+                discovered = service.gfs_downloader.discover_gfs_analysis_urls(
+                    pd.Timestamp("2021-03-05T00:00:00Z"),
+                    pd.Timestamp("2021-03-05T00:00:00Z"),
+                )
+
+            self.assertEqual(discovered, expected_fallback)
+            self.assertEqual(attempt_count["value"], 2)
+
+    def test_gfs_http_fallback_fail_fast_caps_attempts_at_one(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            _build_test_repo(root)
+
+            with mock.patch("src.services.phase1_production_rerun.get_case_context", return_value=_case_context_stub()):
+                service = Phase1ProductionRerunService(repo_root=root)
+
+            response = requests.Response()
+            response.status_code = 503
+            http_error = requests.exceptions.HTTPError(response=response)
+            with mock.patch("src.utils.gfs_wind.importlib.util.find_spec", return_value=object()), mock.patch(
+                "src.utils.gfs_wind.requests.get",
+                side_effect=http_error,
+            ) as request_get:
+                with self.assertRaises(RuntimeError):
+                    service.gfs_downloader.download_gfs_subset_via_http_cfgrib(
+                        url="https://www.ncei.noaa.gov/thredds/dodsC/model-gfs-g4-anl-files-old/201702/20170201/gfsanl_4_20170201_0000_000.grb2",
+                        timestamp=pd.Timestamp("2017-02-01T00:00:00Z"),
+                        scratch_dir=root,
+                    )
+
+            self.assertEqual(request_get.call_count, 1)
 
     def test_gfs_archived_download_prefers_http_cfgrib_before_opendap(self):
         with tempfile.TemporaryDirectory() as tmpdir:

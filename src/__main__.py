@@ -42,6 +42,7 @@ Container routing via the PIPELINE_PHASE environment variable:
   PIPELINE_PHASE=phase5_launcher_and_docs_sync -> Read-only launcher/docs/reproducibility package sync
   PIPELINE_PHASE=trajectory_gallery_build -> Read-only static trajectory/overlay/shoreline figure gallery
   PIPELINE_PHASE=prototype_pygnome_similarity_summary -> Read-only cross-case prototype OpenDrift-vs-PyGNOME transport summary
+  PIPELINE_PHASE=prototype_legacy_final_figures -> Read-only curated prototype_2016 final paper-figure export
   PIPELINE_PHASE=prototype_legacy_phase4_weathering -> Prototype 2016 legacy Phase 4 oil weathering and fate analysis
   PIPELINE_PHASE=3               -> Legacy compatibility alias (prototype_2016 Phase 4; otherwise legacy Phase 3 weathering path)
   PIPELINE_PHASE=benchmark       -> Phase 3A cross-model benchmark
@@ -86,12 +87,127 @@ def emit_forcing_outage_skip_and_exit(exc) -> None:
     sys.exit(FORCING_OUTAGE_SKIP_EXIT_CODE)
 
 
+def emit_benchmark_skip_and_exit(exc) -> None:
+    from src.exceptions.custom import BENCHMARK_SKIP_EXIT_CODE
+
+    print("")
+    print("Benchmark skipped.")
+    print(f"Reason: {exc}")
+    sys.exit(BENCHMARK_SKIP_EXIT_CODE)
+
+
 def _prep_command_hint() -> str:
     workflow_mode = os.environ.get("WORKFLOW_MODE", "prototype_2021")
     return (
         "docker-compose -f docker-compose.yml exec -T "
         f"-e WORKFLOW_MODE={workflow_mode} -e PIPELINE_PHASE=prep pipeline python -m src"
     )
+
+
+def _current_phase() -> str:
+    return str(os.environ.get("PIPELINE_PHASE", "1_2") or "1_2")
+
+
+def _current_workflow_mode() -> str:
+    return str(os.environ.get("WORKFLOW_MODE", "prototype_2021") or "prototype_2021")
+
+
+def _current_phase_allows_input_refresh() -> bool:
+    from src.utils.startup_prompt_policy import phase_uses_startup_prompts
+
+    phase = _current_phase()
+    if phase == "prep":
+        return False
+    return phase_uses_startup_prompts(phase, role=os.environ.get("PIPELINE_ROLE", ""))
+
+
+def _force_refresh_inputs_requested() -> bool:
+    from src.utils.startup_prompt_policy import input_cache_policy_force_refresh_enabled
+
+    return _current_phase_allows_input_refresh() and input_cache_policy_force_refresh_enabled()
+
+
+def _startup_refresh_marker_path(run_name: str) -> Path:
+    from src.utils.startup_prompt_policy import RUN_STARTUP_TOKEN_ENV
+
+    token = str(os.environ.get(RUN_STARTUP_TOKEN_ENV, "") or "").strip()
+    safe_run_name = str(run_name or "run").replace("\\", "_").replace("/", "_").replace(":", "_")
+    if not token:
+        return Path("logs") / f".startup_refresh_{safe_run_name}_no_token.json"
+    return Path("logs") / f".startup_refresh_{safe_run_name}_{token}.json"
+
+
+def _startup_refresh_already_completed(run_name: str) -> bool:
+    return _startup_refresh_marker_path(run_name).exists()
+
+
+def _mark_startup_refresh_completed(run_name: str) -> None:
+    marker_path = _startup_refresh_marker_path(run_name)
+    marker_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "run_name": str(run_name),
+        "workflow_mode": _current_workflow_mode(),
+        "phase": _current_phase(),
+    }
+    marker_path.write_text(json.dumps(payload, sort_keys=True), encoding="utf-8")
+
+
+def _resolve_startup_prompt_env_once(phase: str) -> dict | None:
+    from src.utils.startup_prompt_policy import (
+        RUN_STARTUP_PROMPTS_RESOLVED_ENV,
+        resolve_run_startup_state,
+    )
+
+    if os.environ.get(RUN_STARTUP_PROMPTS_RESOLVED_ENV, "").strip() == "1":
+        return None
+
+    return resolve_run_startup_state(
+        workflow_mode=_current_workflow_mode(),
+        phase=phase,
+        role=os.environ.get("PIPELINE_ROLE", ""),
+        apply=True,
+    )
+
+
+def _format_startup_policy_source_label(source_id: str) -> str:
+    source_map = {
+        "explicit_env": "explicit env",
+        "interactive_prompt": "interactive startup prompt",
+        "non_interactive_default": "non-interactive default",
+        "default_no_eligible_cache": "default; no eligible local input cache detected",
+        "default_non_promptable": "default; phase does not use startup prompts",
+        "prep_force_refresh_alias": "PREP_FORCE_REFRESH compatibility alias",
+    }
+    return source_map.get(str(source_id or ""), str(source_id or "default"))
+
+
+def _emit_direct_run_startup_banner(startup_state: dict | None) -> None:
+    if not startup_state:
+        return
+
+    probe = startup_state.get("probe") or {}
+    if not probe.get("should_prompt_wait_budget"):
+        return
+
+    print("")
+    print("Startup policy:")
+    print(
+        "  INPUT_CACHE_POLICY="
+        f"{startup_state['input_cache_policy']} "
+        f"({_format_startup_policy_source_label(startup_state['input_cache_policy_source'])})"
+    )
+    print(
+        "  FORCING_SOURCE_BUDGET_SECONDS="
+        f"{startup_state['forcing_source_budget_seconds']} "
+        f"({_format_startup_policy_source_label(startup_state['wait_budget_source'])})"
+    )
+
+    if startup_state.get("prompting_skipped_reason") == "non_interactive_runtime":
+        print("  Startup prompts were skipped because this direct run is non-interactive.")
+        matching_entry_id = str(startup_state.get("matching_launcher_entry_id") or "").strip()
+        if matching_entry_id:
+            print(f"  Use .\\start.ps1 -Entry {matching_entry_id} to be asked once at startup.")
+        print("  Or run docker-compose exec without -T if you want the direct container command to prompt.")
 
 
 def ensure_prepared_inputs(
@@ -101,6 +217,13 @@ def ensure_prepared_inputs(
     include_all_transport_forcing: bool = False,
     phase_label: str = "requested phase",
 ):
+    if _force_refresh_inputs_requested() and not _startup_refresh_already_completed(run_name):
+        from src.services.ingestion import DataIngestionService
+
+        print(f"Force-refresh requested for {phase_label}. Re-running input preparation first...")
+        DataIngestionService().run()
+        _mark_startup_refresh_completed(run_name)
+
     from src.utils.io import find_missing_prepared_inputs
 
     missing_specs = find_missing_prepared_inputs(
@@ -116,10 +239,9 @@ def ensure_prepared_inputs(
     optional_missing = [spec for spec in missing_specs if not spec.get("required", True)]
 
     if not required_missing:
-        print(f"Optional prepared inputs are still missing for {phase_label}, but this workflow can continue.")
+        print(f"Optional inputs are missing for {phase_label}. Continuing without them.")
         for spec in optional_missing:
-            print(f"  - {spec['label']}: {spec['path']}")
-            print(f"    source: {spec['source']} (best-effort input)")
+            print(f"  - {spec['source']}: {spec['path']}")
         return
 
     print(f"Missing prepared inputs for {phase_label}.")
@@ -129,10 +251,9 @@ def ensure_prepared_inputs(
         print(f"  - {spec['label']}: {spec['path']}")
         print(f"    source: {spec['source']}")
     if optional_missing:
-        print("Optional inputs that are also missing:")
+        print("Optional inputs also missing:")
         for spec in optional_missing:
-            print(f"  - {spec['label']}: {spec['path']}")
-            print(f"    source: {spec['source']} (best-effort input)")
+            print(f"  - {spec['source']}: {spec['path']}")
     print("Run the pipeline-only prep stage first:")
     print(f"  {_prep_command_hint()}")
     sys.exit(1)
@@ -184,9 +305,13 @@ def ensure_data_exists(run_name: str, require_drifter: bool = True):
         or not validation_polygon_path.exists()
         or (require_drifter and not drifter_path.exists())
     )
-    if missing:
-        print("Required data not found. Initiating ingestion service...")
+    if missing or (_force_refresh_inputs_requested() and not _startup_refresh_already_completed(run_name)):
+        if missing:
+            print("Required data not found. Initiating ingestion service...")
+        else:
+            print("Force-refresh requested. Initiating ingestion service...")
         DataIngestionService().run()
+        _mark_startup_refresh_completed(run_name)
 
         still_missing = (
             not init_polygon_path.exists()
@@ -435,7 +560,7 @@ def run_phase3(
     ensure_prepared_inputs(
         RUN_NAME,
         recipe_name=best_recipe,
-        phase_label="Phase 3",
+        phase_label=phase_label,
     )
     print_recipe_selection(selection, label="Transport recipe")
     start_lat, start_lon, start_time_str = resolve_spill_origin()
@@ -448,9 +573,22 @@ def run_phase3(
         start_time=start_time_str,
         start_lat=start_lat,
         start_lon=start_lon,
+        diagnostics_label=(
+            "Phase 3 Enhancement – Pre-Flight Diagnostics"
+            if phase_label == "Phase 3"
+            else f"{phase_label} – Pre-Flight Diagnostics"
+        ),
     )
     try:
-        plot_diagnostic_forcing(diag_report, str(BASE_OUTPUT_DIR / "diagnostics/forcing_summary.png"))
+        plot_diagnostic_forcing(
+            diag_report,
+            str(BASE_OUTPUT_DIR / "diagnostics/forcing_summary.png"),
+            title=(
+                "Phase 3 Enhancement – Pre-Flight Diagnostics"
+                if phase_label == "Phase 3"
+                else f"{phase_label} – Pre-Flight Diagnostics"
+            ),
+        )
         print(f"Diagnostic chart -> {BASE_OUTPUT_DIR}/diagnostics/forcing_summary.png")
     except Exception as e:
         print(f"Diagnostic chart generation failed: {e}")
@@ -460,6 +598,7 @@ def run_phase3(
         start_time=start_time_str,
         start_lat=start_lat,
         start_lon=start_lon,
+        phase_label=phase_label,
     )
 
     print(f"\n{phase_label} - Mass Budget Summary (at 72 h):")
@@ -511,6 +650,8 @@ def run_phase3(
         start_time=start_time_str,
         start_lat=start_lat,
         start_lon=start_lon,
+        phase_label=phase_label,
+        refined_stage_label=refined_stage_label,
     )
     if refined_result:
         r_df = refined_result["budget_df"]
@@ -568,6 +709,7 @@ def run_prototype_legacy_phase4_weathering(*, deprecated_alias: str | None = Non
 def run_benchmark():
     from src.core.case_context import get_case_context
     from src.core.constants import RUN_NAME
+    from src.exceptions.custom import BenchmarkCaseSkipped
     from src.services.benchmark import BenchmarkPipeline
     from src.utils.io import resolve_recipe_selection, resolve_spill_origin
 
@@ -589,12 +731,15 @@ def run_benchmark():
     print(f"Best recipe  : {best_recipe}")
     print(f"Spill origin : {start_lat:.4f}, {start_lon:.4f} at {start_time_str}")
 
-    BenchmarkPipeline().run(
-        best_recipe=best_recipe,
-        start_lat=start_lat,
-        start_lon=start_lon,
-        start_time=start_time_str,
-    )
+    try:
+        BenchmarkPipeline().run(
+            best_recipe=best_recipe,
+            start_lat=start_lat,
+            start_lon=start_lon,
+            start_time=start_time_str,
+        )
+    except BenchmarkCaseSkipped as exc:
+        emit_benchmark_skip_and_exit(exc)
 
 
 def run_prototype_pygnome_similarity_summary_phase():
@@ -634,6 +779,28 @@ def run_prototype_pygnome_similarity_summary_phase():
     print(f"Top-ranked mean FSS @ 5 km: {results['top_ranked_mean_fss_5km']:.4f}")
     print(f"Top-ranked mean KL: {results['top_ranked_mean_kl']:.4f}")
     print(f"Cases summarized: {results['case_count']}")
+
+
+def run_prototype_legacy_final_figures_phase():
+    from src.services.prototype_legacy_final_figures import run_prototype_legacy_final_figures
+    from src.core.case_context import get_case_context
+
+    case = get_case_context()
+    print(f"Starting {case.workflow_mode} final paper-figure export...")
+    print(
+        "This phase is read-only and redraws a curated legacy 2016 paper-figure set from existing "
+        "Phase 2, benchmark, and prototype similarity outputs only."
+    )
+
+    results = run_prototype_legacy_final_figures()
+
+    print("\nPrototype legacy final paper-figure export complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print(f"Manifest: {results['manifest_json']}")
+    print(f"Missing figures CSV: {results['missing_figures_csv']}")
+    print(f"Figure count: {results['figure_count']}")
+    print(f"Missing figure count: {results['missing_figure_count']}")
+    print(f"Typography: {results['font_family']}")
 
 
 def run_phase3b():
@@ -1658,10 +1825,20 @@ def run_final_validation_package_phase():
         print(f"  - {item}")
     print("Headline Mindoro promoted primary result:")
     strict = headlines["mindoro_primary_reinit"]
+    promotion = results["mindoro_primary_validation_promotion"]
+    confirmation = promotion.get("dual_provenance_confirmation") or {}
     print(
         f"  - FSS(1/3/5/10 km) = {strict['fss_1km']:.4f}, {strict['fss_3km']:.4f}, "
         f"{strict['fss_5km']:.4f}, {strict['fss_10km']:.4f}"
     )
+    print(f"  - Thesis-facing title: {promotion.get('thesis_phase_title', '')}")
+    if confirmation:
+        print(
+            "  - Recipe confirmation: "
+            f"stored={confirmation.get('stored_run_selected_recipe', '')}, "
+            f"later_drifter_rerun={confirmation.get('posthoc_phase1_confirmation_selected_recipe', '')}, "
+            f"matches={confirmation.get('matches_stored_b1_recipe', False)}"
+        )
     support = headlines["mindoro_legacy_broader_support"]
     print("Headline Mindoro legacy broader-support result:")
     print(
@@ -1700,6 +1877,8 @@ def run_final_validation_package_phase():
     print(f"Final recommendation: {results['final_recommendation']}")
     print(f"Main table: {results['artifacts']['final_validation_main_table']}")
     print(f"Summary memo: {results['artifacts']['final_validation_summary']}")
+    print(f"Curated B1 final-output export: {results['phase3b_march13_14_final_output']['output_dir']}")
+    print(f"Curated B1 final-output manifest: {results['artifacts']['phase3b_march13_14_final_output_manifest']}")
 
 
 def run_phase1_finalization_audit_phase():
@@ -2039,11 +2218,13 @@ def main():
     import subprocess
 
     from src.core.case_context import get_case_context
-    from src.exceptions.custom import PREP_OUTAGE_DECISION_EXIT_CODE
+    from src.exceptions.custom import BENCHMARK_SKIP_EXIT_CODE, PREP_OUTAGE_DECISION_EXIT_CODE
     from src.utils.forcing_outage_policy import FORCING_OUTAGE_SKIP_EXIT_CODE
 
     is_spawned = os.environ.get("RUN_SPAWNED")
     phase = os.environ.get("PIPELINE_PHASE", "1_2")
+    startup_state = _resolve_startup_prompt_env_once(phase)
+    _emit_direct_run_startup_banner(startup_state)
     if phase == "final_validation_package":
         run_final_validation_package_phase()
         return
@@ -2076,6 +2257,9 @@ def main():
         return
     if phase == "prototype_pygnome_similarity_summary":
         run_prototype_pygnome_similarity_summary_phase()
+        return
+    if phase == "prototype_legacy_final_figures":
+        run_prototype_legacy_final_figures_phase()
         return
     if phase == "prototype_legacy_phase4_weathering":
         run_prototype_legacy_phase4_weathering()
@@ -2110,6 +2294,9 @@ def main():
                     sys.exit(result.returncode)
                 if result.returncode == FORCING_OUTAGE_SKIP_EXIT_CODE:
                     print(f"Case {token} skipped after forcing outage under degraded continuation. Continuing to next case...")
+                    continue
+                if result.returncode == BENCHMARK_SKIP_EXIT_CODE:
+                    print(f"Case {token} skipped in benchmark phase because it lies outside the current benchmark grid. Continuing to next case...")
                     continue
                 print(f"Pipeline failed for case {token}. Continuing to next case...")
         return
@@ -2190,6 +2377,8 @@ def main():
         run_phase5_launcher_and_docs_sync_phase()
     elif phase == "trajectory_gallery_build":
         run_trajectory_gallery_build_phase()
+    elif phase == "prototype_legacy_final_figures":
+        run_prototype_legacy_final_figures_phase()
     elif phase == "trajectory_gallery_panel_polish":
         run_trajectory_gallery_panel_polish_phase()
     elif phase == "figure_package_publication":

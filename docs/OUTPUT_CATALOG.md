@@ -249,6 +249,31 @@ Interpretation:
 - this remains the thesis-facing summary bundle
 - Phase 5 reuses it rather than replacing it
 
+## Curated B1 Final Output Export
+
+### `output/Phase 3B March13-14 Final Output/`
+
+Purpose:
+Read-only curated export of the promoted B1 family for thesis-facing delivery under `Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents`.
+
+Expected files:
+
+- `README.md`
+- `final_output_manifest.json`
+- `publication/*.png`
+- `scientific_source_pngs/*.png`
+- `summary/march13_14_reinit_summary.csv`
+- `summary/march13_14_reinit_decision_note.md`
+- `summary/march13_14_reinit_run_manifest.json`
+
+Interpretation:
+
+- this directory is an alias/export layer, not the canonical scientific directory
+- it packages the B1 publication figures, the stored canonical March 13 -> March 14 QA/source PNGs, and the summary artifacts in one thesis-facing location
+- the stored B1 raw provenance remains tied to `config/phase1_baseline_selection.yaml`
+- the later `2016-2023` Mindoro-focused drifter rerun is carried here only as recipe-confirmation provenance showing the same `cmems_era5` recipe
+- the shared-imagery caveat remains explicit; do not describe March 13 -> March 14 as independent day-to-day validation
+
 ## Final Reproducibility Package
 
 ### `output/final_reproducibility_package/`

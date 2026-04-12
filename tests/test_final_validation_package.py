@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 
 import pandas as pd
 
@@ -39,9 +40,11 @@ class FinalValidationPackageTests(unittest.TestCase):
         service._mindoro_legacy_support_row = FinalValidationPackageService._mindoro_legacy_support_row.__get__(service, FinalValidationPackageService)
         service._mindoro_crossmodel_rows = FinalValidationPackageService._mindoro_crossmodel_rows.__get__(service, FinalValidationPackageService)
         service._mindoro_crossmodel_top_row = FinalValidationPackageService._mindoro_crossmodel_top_row.__get__(service, FinalValidationPackageService)
+        service._mindoro_dual_provenance_confirmation = FinalValidationPackageService._mindoro_dual_provenance_confirmation.__get__(service, FinalValidationPackageService)
         service._build_main_table = FinalValidationPackageService._build_main_table.__get__(service, FinalValidationPackageService)
         service._build_benchmark_table = FinalValidationPackageService._build_benchmark_table.__get__(service, FinalValidationPackageService)
         service._build_headlines = FinalValidationPackageService._build_headlines.__get__(service, FinalValidationPackageService)
+        service.repo_root = Path(".").resolve()
 
         service.mindoro_reinit_summary = pd.DataFrame(
             [
@@ -61,6 +64,15 @@ class FinalValidationPackageTests(unittest.TestCase):
             ]
         )
         service.mindoro_reinit_pairing = pd.DataFrame([{"branch_id": "R1_previous", "forecast_product": "mask_p50_2023-03-14_datecomposite.tif"}])
+        service.mindoro_reinit_manifest = {
+            "recipe": {
+                "recipe": "cmems_era5",
+                "source_path": "config/phase1_baseline_selection.yaml",
+            }
+        }
+        service.mindoro_phase1_confirmation_candidate = {
+            "selected_recipe": "cmems_era5",
+        }
         service.phase3b_summary = pd.DataFrame(
             [
                 {
@@ -184,6 +196,13 @@ class FinalValidationPackageTests(unittest.TestCase):
         b1 = main_table.loc[main_table["track_id"] == "B1"].iloc[0]
         self.assertEqual(b1["track_label"], "Mindoro March 13 -> March 14 NOAA reinit primary validation")
         self.assertAlmostEqual(float(b1["mean_fss"]), 0.1075, places=4)
+        self.assertEqual(
+            b1["thesis_phase_title"],
+            "Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents",
+        )
+        self.assertEqual(b1["stored_run_selected_recipe"], "cmems_era5")
+        self.assertEqual(b1["posthoc_phase1_confirmation_selected_recipe"], "cmems_era5")
+        self.assertTrue(bool(b1["matches_stored_b1_recipe"]))
         self.assertTrue((main_table["track_id"] == "B2").any())
         self.assertTrue((main_table["track_id"] == "B3").any())
         self.assertIn("primary_validation_mean_fss", benchmark_table.columns)

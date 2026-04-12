@@ -569,6 +569,10 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
                     missing_forcing_factors=[downloads["currents"]["forcing_factor"]],
                     skipped_branch_ids=[branch.branch_id for branch in BRANCHES],
                     manifest_path=str(manifest_path),
+                    budget_seconds=downloads["currents"].get("budget_seconds"),
+                    elapsed_seconds=downloads["currents"].get("elapsed_seconds"),
+                    budget_exhausted=bool(downloads["currents"].get("budget_exhausted", False)),
+                    failure_stage=str(downloads["currents"].get("failure_stage") or ""),
                 )
             self._write_download_failure_manifest(recipe_name, downloads)
             raise RuntimeError(f"March 13 -> March 14 reinit forcing download failed: {downloads['currents']}")
@@ -605,6 +609,10 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
                         missing_forcing_factors=[downloads["wind"]["forcing_factor"]],
                         skipped_branch_ids=[branch.branch_id for branch in BRANCHES],
                         manifest_path=str(manifest_path),
+                        budget_seconds=downloads["wind"].get("budget_seconds"),
+                        elapsed_seconds=downloads["wind"].get("elapsed_seconds"),
+                        budget_exhausted=bool(downloads["wind"].get("budget_exhausted", False)),
+                        failure_stage=str(downloads["wind"].get("failure_stage") or ""),
                     )
                 self._write_download_failure_manifest(recipe_name, downloads)
                 raise RuntimeError(f"March 13 -> March 14 reinit forcing download failed: {downloads['wind']}")
@@ -642,6 +650,10 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
                         missing_forcing_factors=[downloads["wave"]["forcing_factor"]],
                         skipped_branch_ids=[branch.branch_id for branch in BRANCHES],
                         manifest_path=str(manifest_path),
+                        budget_seconds=downloads["wave"].get("budget_seconds"),
+                        elapsed_seconds=downloads["wave"].get("elapsed_seconds"),
+                        budget_exhausted=bool(downloads["wave"].get("budget_exhausted", False)),
+                        failure_stage=str(downloads["wave"].get("failure_stage") or ""),
                     )
                 self._write_download_failure_manifest(recipe_name, downloads)
                 raise RuntimeError(f"March 13 -> March 14 reinit forcing download failed: {downloads['wave']}")
@@ -729,6 +741,10 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
             "recipe": recipe_name,
             "window": asdict(self.window),
             "rows": rows,
+            "forcing_outage_policy": self.forcing_outage_policy,
+            "degraded_continue_used": False,
+            "missing_forcing_factors": [],
+            "rerun_required": False,
             "status": "ready" if all(row["status"] == "ready" for row in rows) else "insufficient",
         }
         _write_json(self.output_dir / "march13_14_reinit_forcing_window_manifest.json", payload)

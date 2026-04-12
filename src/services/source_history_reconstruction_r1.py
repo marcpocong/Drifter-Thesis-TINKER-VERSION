@@ -444,6 +444,10 @@ class SourceHistoryReconstructionR1Service:
                     missing_forcing_factors=[downloads["currents"]["forcing_factor"]],
                     skipped_branch_ids=[scenario.scenario_id for scenario in A2_SCENARIOS],
                     manifest_path=str(manifest_path),
+                    budget_seconds=downloads["currents"].get("budget_seconds"),
+                    elapsed_seconds=downloads["currents"].get("elapsed_seconds"),
+                    budget_exhausted=bool(downloads["currents"].get("budget_exhausted", False)),
+                    failure_stage=str(downloads["currents"].get("failure_stage") or ""),
                 )
             self._write_download_failure_manifest(recipe_name, downloads, windows)
             raise RuntimeError(f"Source-history forcing download failed: {downloads['currents']}")
@@ -481,6 +485,10 @@ class SourceHistoryReconstructionR1Service:
                         missing_forcing_factors=[downloads["wind"]["forcing_factor"]],
                         skipped_branch_ids=[scenario.scenario_id for scenario in A2_SCENARIOS],
                         manifest_path=str(manifest_path),
+                        budget_seconds=downloads["wind"].get("budget_seconds"),
+                        elapsed_seconds=downloads["wind"].get("elapsed_seconds"),
+                        budget_exhausted=bool(downloads["wind"].get("budget_exhausted", False)),
+                        failure_stage=str(downloads["wind"].get("failure_stage") or ""),
                     )
                 self._write_download_failure_manifest(recipe_name, downloads, windows)
                 raise RuntimeError(f"Source-history forcing download failed: {downloads['wind']}")
@@ -519,6 +527,10 @@ class SourceHistoryReconstructionR1Service:
                         missing_forcing_factors=[downloads["wave"]["forcing_factor"]],
                         skipped_branch_ids=[scenario.scenario_id for scenario in A2_SCENARIOS],
                         manifest_path=str(manifest_path),
+                        budget_seconds=downloads["wave"].get("budget_seconds"),
+                        elapsed_seconds=downloads["wave"].get("elapsed_seconds"),
+                        budget_exhausted=bool(downloads["wave"].get("budget_exhausted", False)),
+                        failure_stage=str(downloads["wave"].get("failure_stage") or ""),
                     )
                 self._write_download_failure_manifest(recipe_name, downloads, windows)
                 raise RuntimeError(f"Source-history forcing download failed: {downloads['wave']}")
@@ -582,6 +594,10 @@ class SourceHistoryReconstructionR1Service:
             "date_composite_rule": "UTC calendar-date composites are used for comparability with init_mode_sensitivity_r1.",
             "rows": rows,
             "downloads": forcing_paths.get("downloads", {}),
+            "forcing_outage_policy": self.forcing_outage_policy,
+            "degraded_continue_used": False,
+            "missing_forcing_factors": [],
+            "rerun_required": False,
             "status": "ready" if all(row["status"] == "ready" for row in rows) else "insufficient",
         }
         _write_json(self.output_dir / "source_history_forcing_window_manifest.json", payload)

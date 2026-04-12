@@ -1,7 +1,9 @@
 import json
 import os
+import io
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
@@ -11,9 +13,13 @@ import pandas as pd
 import requests
 import yaml
 
+import src.__main__ as entrypoint
+
+from src.core.case_context import get_case_context, get_case_log_lines
+from src.exceptions.custom import BENCHMARK_SKIP_EXIT_CODE, BenchmarkCaseSkipped
 from src.models.results import ValidationResult
 from src.services.ingestion import DataIngestionService, compute_prototype_forcing_window
-from src.utils.gfs_wind import GFSWindDownloader
+from src.utils.gfs_wind import GFSWindDownloader, GFSAcquisitionError
 from src.services.validation import TransportValidationService
 from src.utils.io import (
     get_prepared_input_specs,
@@ -25,6 +31,114 @@ from src.utils.io import (
 
 
 class PrototypeLegacyBundleRestoreTests(unittest.TestCase):
+    def test_run_benchmark_exits_with_skip_code_for_out_of_grid_case(self):
+        case_stub = SimpleNamespace(drifter_required=True)
+        selection = SimpleNamespace(recipe="cmems_era5")
+        buffer = io.StringIO()
+
+        with mock.patch("src.core.case_context.get_case_context", return_value=case_stub), \
+            mock.patch("src.__main__.print_workflow_context"), \
+            mock.patch("src.__main__.ensure_prepared_inputs"), \
+            mock.patch("src.__main__.print_recipe_selection"), \
+            mock.patch("src.utils.io.resolve_recipe_selection", return_value=selection), \
+            mock.patch("src.utils.io.resolve_spill_origin", return_value=(16.2980, 112.6630, "2016-09-17T00:00:00Z")), \
+            mock.patch("src.core.constants.RUN_NAME", "CASE_2016-09-17"), \
+            mock.patch("src.services.benchmark.BenchmarkPipeline.run", side_effect=BenchmarkCaseSkipped("Out-of-grid benchmark case")):
+            with redirect_stdout(buffer):
+                with self.assertRaises(SystemExit) as exit_context:
+                    entrypoint.run_benchmark()
+
+        output = buffer.getvalue()
+        self.assertEqual(exit_context.exception.code, BENCHMARK_SKIP_EXIT_CODE)
+        self.assertIn("Benchmark skipped.", output)
+        self.assertIn("Out-of-grid benchmark case", output)
+
+    def test_prototype_legacy_phase4_wrapper_propagates_phase4_labels(self):
+        case_stub = SimpleNamespace(workflow_mode="prototype_2016")
+        selection = SimpleNamespace(
+            recipe="cmems_era5",
+            source_kind="test",
+            status_flag="valid",
+            valid=True,
+            provisional=False,
+            rerun_required=False,
+            source_path=None,
+            note=None,
+        )
+        budget_df = pd.DataFrame(
+            [
+                {
+                    "hours_elapsed": 72,
+                    "surface_pct": 40.0,
+                    "evaporated_pct": 25.0,
+                    "dispersed_pct": 20.0,
+                    "beached_pct": 15.0,
+                }
+            ]
+        )
+        weathering_results = {
+            "light": {
+                "display_name": "Light oil",
+                "budget_df": budget_df,
+                "nc_path": "fake.nc",
+                "csv_path": "fake.csv",
+                "qc": {"passed": True, "max_deviation_pct": 0.1},
+            }
+        }
+        refined_result = {
+            "display_name": "Refined Oil",
+            "budget_df": budget_df,
+            "nc_path": "fake_refined.nc",
+            "csv_path": "fake_refined.csv",
+            "qc": {"passed": True, "max_deviation_pct": 0.1},
+        }
+
+        with mock.patch("src.core.case_context.get_case_context", return_value=case_stub), mock.patch(
+            "src.__main__.ensure_prepared_inputs"
+        ) as mock_prepare, mock.patch(
+            "src.__main__.print_recipe_selection"
+        ), mock.patch(
+            "src.__main__.print_workflow_context"
+        ), mock.patch(
+            "src.helpers.plotting.plot_diagnostic_forcing"
+        ) as mock_plot, mock.patch(
+            "src.utils.io.resolve_recipe_selection",
+            return_value=selection,
+        ), mock.patch(
+            "src.utils.io.resolve_spill_origin",
+            return_value=(13.0, 121.0, "2016-09-01T00:00:00Z"),
+        ), mock.patch(
+            "src.services.diagnostics.run_diagnostics",
+            return_value={"ok": True},
+        ) as mock_diag, mock.patch(
+            "src.services.weathering.run_weathering",
+            return_value=weathering_results,
+        ) as mock_weathering, mock.patch(
+            "src.services.weathering.run_refined_weathering",
+            return_value=refined_result,
+        ) as mock_refined, mock.patch(
+            "builtins.open",
+            mock.mock_open(read_data="shoreline:\n  enabled: false\n"),
+        ), mock.patch(
+            "yaml.safe_load",
+            return_value={"shoreline": {"enabled": False}},
+        ):
+            entrypoint.run_prototype_legacy_phase4_weathering()
+
+        mock_prepare.assert_called_once()
+        self.assertEqual(mock_prepare.call_args.kwargs["phase_label"], "Phase 4")
+        self.assertEqual(
+            mock_diag.call_args.kwargs["diagnostics_label"],
+            "Phase 4 – Pre-Flight Diagnostics",
+        )
+        self.assertEqual(mock_plot.call_args.kwargs["title"], "Phase 4 – Pre-Flight Diagnostics")
+        self.assertEqual(mock_weathering.call_args.kwargs["phase_label"], "Phase 4")
+        self.assertEqual(mock_refined.call_args.kwargs["phase_label"], "Phase 4")
+        self.assertEqual(
+            mock_refined.call_args.kwargs["refined_stage_label"],
+            "Legacy refined oil appendix",
+        )
+
     def test_launcher_matrix_marks_prototype_bundle_as_debug_only_with_best_effort_gfs(self):
         launcher_matrix = json.loads(Path("config/launcher_matrix.json").read_text(encoding="utf-8"))
         prototype_entry = next(
@@ -40,7 +154,14 @@ class PrototypeLegacyBundleRestoreTests(unittest.TestCase):
         phases = [step["phase"] for step in prototype_entry["steps"]]
         self.assertEqual(
             phases,
-            ["prep", "1_2", "benchmark", "prototype_pygnome_similarity_summary", "prototype_legacy_phase4_weathering"],
+            [
+                "prep",
+                "1_2",
+                "benchmark",
+                "prototype_pygnome_similarity_summary",
+                "prototype_legacy_phase4_weathering",
+                "prototype_legacy_final_figures",
+            ],
         )
 
     def test_select_drifter_of_record_matches_phase1_rule(self):
@@ -91,6 +212,66 @@ class PrototypeLegacyBundleRestoreTests(unittest.TestCase):
                 lat, lon, time_str = resolve_spill_origin(drifter_path)
 
         self.assertEqual((lat, lon, time_str), (10.0, 117.0, "2016-09-01T00:00:00Z"))
+
+    def test_prototype_2016_case_context_reports_drifter_point_initialization(self):
+        with mock.patch.dict(
+            os.environ,
+            {
+                "WORKFLOW_MODE": "prototype_2016",
+                "PHASE_1_START_DATE": "2016-09-01",
+                "RUN_NAME": "CASE_2016-09-01",
+            },
+            clear=False,
+        ):
+            get_case_context.cache_clear()
+            case = get_case_context()
+            lines = get_case_log_lines()
+
+        self.assertEqual(case.initialization_mode, "drifter_of_record_point")
+        self.assertEqual(case.source_point_role, "drifter_of_record_release_point")
+        self.assertEqual(case.release_reference, "phase1_drifter_of_record")
+        self.assertEqual(case.active_domain_name, "prototype_2016_case_local_domain")
+        self.assertTrue(any("initialization_mode: drifter_of_record_point" in line for line in lines))
+        self.assertTrue(any("source_point_role  : drifter_of_record_release_point" in line for line in lines))
+        get_case_context.cache_clear()
+
+    def test_prototype_2016_case_context_derives_case_local_domain_from_drifter_track(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            drifter_path = Path(tmpdir) / "drifters_noaa.csv"
+            pd.DataFrame(
+                {
+                    "time": [
+                        "2016-09-17T00:00:00Z",
+                        "2016-09-18T00:00:00Z",
+                        "2016-09-19T00:00:00Z",
+                        "2016-09-20T00:00:00Z",
+                    ],
+                    "lat": [16.298, 16.420, 16.610, 16.770],
+                    "lon": [112.663, 112.920, 113.180, 113.410],
+                    "ID": ["DRIFTER_A", "DRIFTER_A", "DRIFTER_A", "DRIFTER_A"],
+                }
+            ).to_csv(drifter_path, index=False)
+
+            with mock.patch.dict(
+                os.environ,
+                {
+                    "WORKFLOW_MODE": "prototype_2016",
+                    "PHASE_1_START_DATE": "2016-09-17",
+                    "RUN_NAME": "CASE_2016-09-17",
+                },
+                clear=False,
+            ), mock.patch("src.core.case_context._prototype_2016_drifter_csv_path", return_value=drifter_path):
+                get_case_context.cache_clear()
+                case = get_case_context()
+
+            self.assertEqual(case.active_domain_name, "prototype_2016_case_local_domain")
+            self.assertGreaterEqual(case.region[1] - case.region[0], 8.0)
+            self.assertGreaterEqual(case.region[3] - case.region[2], 8.0)
+            self.assertLessEqual(case.region[0], 112.663)
+            self.assertGreaterEqual(case.region[1], 113.410)
+            self.assertLessEqual(case.region[2], 16.298)
+            self.assertGreaterEqual(case.region[3], 16.770)
+            get_case_context.cache_clear()
 
     def test_prototype_debug_recipe_family_is_explicit_and_workflow_aware(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -187,19 +368,45 @@ class PrototypeLegacyBundleRestoreTests(unittest.TestCase):
 
         with mock.patch("src.utils.gfs_wind.requests.get", side_effect=timeout_error):
             with self.assertLogs("src.utils.gfs_wind", level="WARNING") as captured_logs:
-                with self.assertRaises(RuntimeError) as error_context:
-                    downloader.discover_gfs_analysis_urls(
-                        "2016-08-31T21:00:00Z",
-                        "2016-09-04T03:00:00Z",
-                    )
+                urls = downloader.discover_gfs_analysis_urls(
+                    "2016-08-31T21:00:00Z",
+                    "2016-09-04T03:00:00Z",
+                )
+
+        self.assertTrue(urls)
+        self.assertTrue(
+            any("GFS catalog for 2016-08-31 is unavailable" in log for log in captured_logs.output)
+        )
+        self.assertTrue(any("Retrying" in log for log in captured_logs.output))
+        self.assertTrue(any("Trying direct file access" in log for log in captured_logs.output))
+        self.assertTrue(any("GFS catalog stayed unavailable" in log for log in captured_logs.output))
+        self.assertTrue(any("timeout" in log for log in captured_logs.output))
+
+    def test_gfs_file_download_fallback_error_is_user_friendly(self):
+        downloader = GFSWindDownloader(forcing_box=[115.0, 122.0, 6.0, 14.5])
+        response = requests.Response()
+        response.status_code = 503
+        response.url = (
+            "https://www.ncei.noaa.gov/thredds/fileServer/model-gfs-g4-anl-files-old/"
+            "201608/20160830/gfsanl_4_20160830_1800_000.grb2"
+        )
+        http_error = requests.exceptions.HTTPError(response=response)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with mock.patch("src.utils.gfs_wind.requests.get", side_effect=http_error):
+                with self.assertLogs("src.utils.gfs_wind", level="WARNING") as captured_logs:
+                    with self.assertRaises(GFSAcquisitionError) as error_context:
+                        downloader.download_gfs_subset_via_http_cfgrib(
+                            url="https://www.ncei.noaa.gov/thredds/dodsC/model-gfs-g4-anl-files-old/201608/20160830/gfsanl_4_20160830_1800_000.grb2",
+                            timestamp="2016-08-30T18:00:00Z",
+                            scratch_dir=tmpdir,
+                        )
 
         message = str(error_context.exception)
-        self.assertIn("Archived NOAA/NCEI GFS catalog remained unavailable after 3 attempts", message)
-        self.assertIn("slow or temporarily down", message)
-        self.assertIn("180-second read timeout", message)
-        self.assertTrue(
-            any("Archived NOAA/NCEI GFS catalog is slow or unavailable" in log for log in captured_logs.output)
-        )
+        self.assertIn("Direct file access failed after 1 attempt(s)", message)
+        self.assertIn("HTTP 503", message)
+        self.assertTrue(any("GFS direct file access failed for 2016-08-30 18:00 UTC" in log for log in captured_logs.output))
+        self.assertTrue(any("No retries left" in log for log in captured_logs.output))
 
     def test_prototype_ingestion_records_padded_window_and_best_effort_gfs_failure(self):
         case_stub = SimpleNamespace(
@@ -259,6 +466,33 @@ class PrototypeLegacyBundleRestoreTests(unittest.TestCase):
                 manifest["config"]["effective_forcing_end_utc"],
                 "2016-09-04T03:00:00Z",
             )
+
+    def test_optional_missing_prepared_inputs_message_is_clear(self):
+        import src.__main__ as entrypoint
+
+        buffer = io.StringIO()
+        with mock.patch(
+            "src.utils.io.find_missing_prepared_inputs",
+            return_value=[
+                {
+                    "label": "forcing_wind_gfs_wind.nc",
+                    "path": "data/forcing/CASE_2016-09-01/gfs_wind.nc",
+                    "source": "GFS",
+                    "required": False,
+                }
+            ],
+        ):
+            with redirect_stdout(buffer):
+                entrypoint.ensure_prepared_inputs(
+                    "CASE_2016-09-01",
+                    recipe_name="cmems_gfs",
+                    require_drifter=True,
+                    phase_label="pipeline prep stage",
+                )
+
+        output = buffer.getvalue()
+        self.assertIn("Optional inputs are missing for pipeline prep stage. Continuing without them.", output)
+        self.assertIn("  - GFS: data/forcing/CASE_2016-09-01/gfs_wind.nc", output)
 
     def test_validation_can_continue_when_only_gfs_backed_prototype_recipe_is_invalid(self):
         with tempfile.TemporaryDirectory() as tmpdir:

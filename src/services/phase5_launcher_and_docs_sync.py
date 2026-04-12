@@ -15,9 +15,13 @@ import yaml
 from src.core.artifact_status import get_artifact_status
 from src.services.mindoro_primary_validation_metadata import (
     MINDORO_BASE_CASE_CONFIG_PATH,
+    MINDORO_PHASE1_CONFIRMATION_CANDIDATE_BASELINE_PATH,
     MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH,
+    MINDORO_PRIMARY_VALIDATION_FINAL_OUTPUT_DIR,
     MINDORO_PRIMARY_VALIDATION_LAUNCHER_ALIAS_ENTRY_ID,
     MINDORO_PRIMARY_VALIDATION_LAUNCHER_ENTRY_ID,
+    MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE,
+    MINDORO_SHARED_IMAGERY_CAVEAT,
 )
 
 PHASE = "phase5_launcher_and_docs_sync"
@@ -404,6 +408,8 @@ class Phase5LauncherAndDocsSyncService:
             if "case_dwh" in rel_lower:
                 return "phase4", "dwh_phase4_appendix_pilot", "DWH Phase 4 appendix pilot"
             return "phase4", "mindoro_phase4", "Mindoro Phase 4"
+        if "phase 3b march13-14 final output" in rel_lower:
+            return "phase3b", "B1", get_artifact_status("mindoro_primary_validation").label
         if "final_validation_package" in rel_lower:
             return "phase5", "final_validation_package", "Final validation package"
         if "trajectory_gallery_panel" in rel_lower:
@@ -845,6 +851,20 @@ class Phase5LauncherAndDocsSyncService:
                     output_path,
                     "Read-only publication-grade figure package artifact built from existing outputs for canonical defense and paper presentation.",
                 )
+        mindoro_final_output_dir = self.repo_root / MINDORO_PRIMARY_VALIDATION_FINAL_OUTPUT_DIR
+        if mindoro_final_output_dir.exists():
+            for output_path in sorted(mindoro_final_output_dir.rglob("*")):
+                if output_path.is_dir():
+                    continue
+                add_row(
+                    "phase3b",
+                    "B1",
+                    "phase3b_march13_14_final_output",
+                    output_path.name,
+                    output_path,
+                    "Read-only curated export of the promoted B1 family for thesis-facing Phase 3B delivery.",
+                    _relative_to_repo(self.repo_root, self.repo_root / FINAL_VALIDATION_MANIFEST_JSON),
+                )
         for prototype_dir_rel, track_id, artifact_group, description in PROTOTYPE_OUTPUT_DIRS:
             prototype_similarity_dir = self.repo_root / prototype_dir_rel
             if prototype_similarity_dir.exists():
@@ -893,6 +913,11 @@ class Phase5LauncherAndDocsSyncService:
             for entry in self.launcher_matrix.get("entries", [])
             if bool(entry.get("safe_default"))
         ]
+        promotion = self.final_validation_manifest.get("mindoro_primary_validation_promotion") or {}
+        final_output_dir = _coerce_text(
+            promotion.get("final_output_export_dir")
+            or self.final_validation_manifest.get("phase3b_march13_14_final_output", {}).get("output_dir")
+        )
         lines = [
             "# Final Reproducibility Summary",
             "",
@@ -921,6 +946,15 @@ class Phase5LauncherAndDocsSyncService:
                     f"and records the promoted March 13 -> March 14 Phase 3B primary row through the separate "
                     f"`{MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH.as_posix()}` amendment file."
                 ),
+                (
+                    f"- The thesis-facing B1 title is `{MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE}`, and the "
+                    "later 2016-2023 Mindoro-focused drifter rerun confirmed the same `cmems_era5` recipe "
+                    "without rewriting the stored B1 raw provenance."
+                ),
+                (
+                    f"- The curated read-only B1 export now lives under `{final_output_dir or MINDORO_PRIMARY_VALIDATION_FINAL_OUTPUT_DIR.as_posix()}` "
+                    "and packages the publication figures, canonical scientific source PNGs, summary CSV, decision note, and local manifest."
+                ),
                 "- `prototype_2016` is cataloged here as a legacy Phase 1 / 2 / 3A / 4 support lane, with Phase 5 available only through the separate read-only sync entry.",
                 "- Mindoro Phase 4 now participates in the reproducibility/package layer via the current `phase4_run_manifest.json` and verdict bundle.",
                 "- The static `output/trajectory_gallery/` bundle now participates in the reproducibility/package layer as a read-only technical figure set.",
@@ -938,6 +972,7 @@ class Phase5LauncherAndDocsSyncService:
                 "- Trajectory gallery manifest: `output/trajectory_gallery/trajectory_gallery_manifest.json`",
                 "- Panel gallery manifest: `output/trajectory_gallery_panel/panel_figure_manifest.json`",
                 "- Publication figure manifest: `output/figure_package_publication/publication_figure_manifest.json`",
+                f"- Curated B1 final-output export: `{final_output_dir or MINDORO_PRIMARY_VALIDATION_FINAL_OUTPUT_DIR.as_posix()}`",
             ]
         )
         return "\n".join(lines)
@@ -961,6 +996,8 @@ class Phase5LauncherAndDocsSyncService:
             f"- Existing Mindoro Phase 4 manifest: `{_relative_to_repo(self.repo_root, self.repo_root / PHASE4_MANIFEST_JSON)}`",
             f"- Frozen Mindoro base case definition: `{MINDORO_BASE_CASE_CONFIG_PATH.as_posix()}`",
             f"- Mindoro primary-validation amendment file: `{MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH.as_posix()}`",
+            f"- Mindoro drifter-confirmation candidate baseline: `{MINDORO_PHASE1_CONFIRMATION_CANDIDATE_BASELINE_PATH.as_posix()}`",
+            f"- Mindoro curated final-output export: `{MINDORO_PRIMARY_VALIDATION_FINAL_OUTPUT_DIR.as_posix()}`",
             "- Existing trajectory gallery outputs under `output/trajectory_gallery/` when present.",
             "- Existing polished panel gallery outputs under `output/trajectory_gallery_panel/` when present.",
             "- Existing publication-grade figure package outputs under `output/figure_package_publication/` when present.",
@@ -971,6 +1008,8 @@ class Phase5LauncherAndDocsSyncService:
             "- No scientific score tables were recomputed here.",
             "- No finished Mindoro or DWH scientific outputs were overwritten.",
             "- The March 3 -> March 6 Mindoro base case YAML remains frozen; the promoted March 13 -> March 14 row is recorded as an amendment rather than a silent rewrite.",
+            f"- `{MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE}` remains tied to B1, and {MINDORO_SHARED_IMAGERY_CAVEAT.lower()}",
+            "- The later 2016-2023 Mindoro-focused drifter rerun is packaged only as recipe-confirmation provenance for B1, not as the raw generation history of the stored March 13 -> March 14 science bundle.",
             "- The legacy `prototype_2016` lane is framed as Phase 1 / 2 / 3A / 4 only; it has no thesis-facing Phase 3B or Phase 3C.",
             "- The launcher/menu is now organized around current track categories instead of the older monolithic Mindoro full-chain story.",
             "- The first dashboard version is intentionally read-only and does not add scientific run buttons.",
@@ -1167,6 +1206,7 @@ class Phase5LauncherAndDocsSyncService:
         manifest_index_rows: list[dict[str, Any]],
         overall_verdict: dict[str, Any],
     ) -> dict[str, Any]:
+        promotion = self.final_validation_manifest.get("mindoro_primary_validation_promotion") or {}
         return {
             "phase": PHASE,
             "generated_at_utc": generated_at_utc,
@@ -1199,6 +1239,12 @@ class Phase5LauncherAndDocsSyncService:
                 "base_case_window": "2023-03-03_to_2023-03-06",
                 "promoted_primary_window": "2023-03-13_to_2023-03-14",
                 "legacy_row_retained": "B2",
+                "thesis_phase_title": _coerce_text(promotion.get("thesis_phase_title")) or MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE,
+                "thesis_phase_subtitle": _coerce_text(promotion.get("thesis_phase_subtitle")),
+                "shared_imagery_caveat": _coerce_text(promotion.get("shared_imagery_caveat")) or MINDORO_SHARED_IMAGERY_CAVEAT,
+                "dual_provenance_confirmation": promotion.get("dual_provenance_confirmation") or {},
+                "final_output_export_dir": _coerce_text(promotion.get("final_output_export_dir"))
+                or _coerce_text(self.final_validation_manifest.get("phase3b_march13_14_final_output", {}).get("output_dir")),
             },
             "docs_updated": [
                 _relative_to_repo(self.repo_root, self.repo_root / path) for path in self.docs_updated

@@ -7,6 +7,7 @@ The repo now has three read-only figure layers:
 - `output/trajectory_gallery/`: the raw technical gallery with standardized filenames and machine-readable metadata
 - `output/trajectory_gallery_panel/`: the intermediate polished board pack for non-technical review
 - `output/figure_package_publication/`: the canonical publication-grade presentation layer with paper-ready singles and defense boards
+- `output/2016 Legacy Runs FINAL Figures/`: the curated prototype_2016 paper-facing export with per-case final PNGs plus explicit missing-figure diagnostics
 
 It is built from existing outputs only:
 
@@ -24,6 +25,7 @@ It does not rerun expensive scientific branches.
 .\start.ps1 -Entry trajectory_gallery -NoPause
 .\start.ps1 -Entry trajectory_gallery_panel -NoPause
 .\start.ps1 -Entry figure_package_publication -NoPause
+.\start.ps1 -Entry prototype_legacy_final_figures -NoPause
 ```
 
 Equivalent direct command:
@@ -33,6 +35,7 @@ docker-compose exec -T -e PIPELINE_PHASE=trajectory_gallery_build pipeline pytho
 docker-compose exec -T -e PIPELINE_PHASE=trajectory_gallery_panel_polish pipeline python -m src
 docker-compose exec -T -e PIPELINE_PHASE=figure_package_publication pipeline python -m src
 docker-compose exec -T -e WORKFLOW_MODE=prototype_2016 -e PIPELINE_PHASE=prototype_pygnome_similarity_summary pipeline python -m src
+docker-compose exec -T -e WORKFLOW_MODE=prototype_2016 -e PIPELINE_PHASE=prototype_legacy_final_figures pipeline python -m src
 ```
 
 ## Raw Technical Gallery Outputs
@@ -57,6 +60,13 @@ docker-compose exec -T -e WORKFLOW_MODE=prototype_2016 -e PIPELINE_PHASE=prototy
 - `output/figure_package_publication/publication_figure_captions.md`
 - `output/figure_package_publication/publication_figure_talking_points.md`
 - publication-grade `.png` single figures and side-by-side boards with case/phase/model/run/date/scenario/view/variant tokens in the filename
+
+## Prototype 2016 Final Figure Outputs
+
+- `output/2016 Legacy Runs FINAL Figures/final_figure_manifest.json`
+- `output/2016 Legacy Runs FINAL Figures/missing_figures.csv`
+- per-case folders such as `output/2016 Legacy Runs FINAL Figures/CASE_2016-09-01/`
+- curated `.png` exports for drifter tracks, ensemble 24/48/72 plus consolidated 72 h, PyGNOME 24/48/72 plus consolidated 72 h, and PyGNOME-vs-ensemble 24/48/72 plus consolidated 72 h
 
 ## Raw Gallery Figure Groups
 
@@ -126,10 +136,20 @@ The publication package adds:
 - separate paper-ready single-image figures
 - explicit side-by-side comparison boards
 - plain-language captions and defense talking points
-- a promoted March 13 -> March 14 Mindoro presentation lane with the shared March 12 imagery caveat kept explicit
+- a promoted March 13 -> March 14 Mindoro presentation lane for `Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents`, with the shared March 12 imagery caveat kept explicit and the later drifter-confirmation note carried as provenance rather than rewritten run history
 - an explicit publication-grade note figure explaining why Phase 4 OpenDrift-versus-PyGNOME comparison is still deferred
 - support-only prototype family `K`, which now republishes the preferred accepted-segment 2021 deterministic OpenDrift-vs-PyGNOME forecast figures without elevating them into the default main-defense list
 - the canonical presentation layer for defense and manuscript use
+
+## Curated B1 Final Output Export
+
+- `output/Phase 3B March13-14 Final Output/README.md`
+- `output/Phase 3B March13-14 Final Output/final_output_manifest.json`
+- `output/Phase 3B March13-14 Final Output/publication/*.png`
+- `output/Phase 3B March13-14 Final Output/scientific_source_pngs/*.png`
+- `output/Phase 3B March13-14 Final Output/summary/*`
+
+This export is the thesis-facing alias for the promoted B1 family. It reuses the publication package and the stored March 13 -> March 14 scientific source PNGs without renaming the canonical scientific directory.
 
 ## Prototype Forecast Support Figures
 

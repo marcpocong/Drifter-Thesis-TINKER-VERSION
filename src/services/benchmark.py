@@ -19,6 +19,8 @@ import rasterio
 import yaml
 
 from src.core.case_context import get_case_context
+from src.exceptions.custom import BenchmarkCaseSkipped
+from src.helpers.plotting import prototype_2016_rendering_metadata
 from src.helpers.metrics import calculate_fss, calculate_kl_divergence
 from src.helpers.raster import GridBuilder, extract_particles_at_time, rasterize_particles, save_raster
 from src.helpers.scoring import precheck_same_grid
@@ -65,13 +67,108 @@ def _read_raster_data(path: Path) -> np.ndarray:
         return src.read(1)
 
 
+def _raster_matches_grid(path: Path, grid: GridBuilder, tol: float = 1.0e-9) -> bool:
+    if not path.exists():
+        return False
+    with rasterio.open(path) as src:
+        if str(src.crs) != str(grid.crs):
+            return False
+        if int(src.width) != int(grid.width) or int(src.height) != int(grid.height):
+            return False
+        checks = (
+            abs(float(src.transform.a) - float(grid.transform.a)) <= tol,
+            abs(float(src.transform.b) - float(grid.transform.b)) <= tol,
+            abs(float(src.transform.c) - float(grid.transform.c)) <= tol,
+            abs(float(src.transform.d) - float(grid.transform.d)) <= tol,
+            abs(float(src.transform.e) - float(grid.transform.e)) <= tol,
+            abs(float(src.transform.f) - float(grid.transform.f)) <= tol,
+        )
+        return all(checks)
+
+
+def _prepare_density_pair_for_metrics(
+    *,
+    forecast_density: np.ndarray,
+    observed_density: np.ndarray,
+    forecast_hits: np.ndarray,
+    observed_hits: np.ndarray,
+    valid_mask: np.ndarray,
+    allow_blank_support_fallback: bool = False,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict[str, float | str]]:
+    forecast_arr = np.asarray(forecast_density, dtype=float)
+    observed_arr = np.asarray(observed_density, dtype=float)
+    forecast_hits_arr = np.asarray(forecast_hits, dtype=float)
+    observed_hits_arr = np.asarray(observed_hits, dtype=float)
+    metric_mask = np.asarray(valid_mask, dtype=bool)
+
+    if forecast_arr.shape != observed_arr.shape:
+        raise ValueError("Benchmark density pairs must share the same shape.")
+    if forecast_hits_arr.shape != forecast_arr.shape or observed_hits_arr.shape != observed_arr.shape:
+        raise ValueError("Benchmark hit rasters must align with their density rasters.")
+    if metric_mask.shape != forecast_arr.shape:
+        raise ValueError("Benchmark valid_mask must align with the density rasters.")
+
+    def _positive_sum(array: np.ndarray, mask: np.ndarray) -> float:
+        return float(np.clip(np.asarray(array, dtype=float)[mask], 0.0, None).sum())
+
+    raw_forecast_sum = _positive_sum(forecast_arr, metric_mask)
+    raw_observed_sum = _positive_sum(observed_arr, metric_mask)
+    metadata: dict[str, float | str] = {
+        "raw_forecast_sum": raw_forecast_sum,
+        "raw_observed_sum": raw_observed_sum,
+        "effective_forecast_sum": raw_forecast_sum,
+        "effective_observed_sum": raw_observed_sum,
+        "strategy": "ocean_mask",
+    }
+    if not allow_blank_support_fallback:
+        return forecast_arr, observed_arr, metric_mask, metadata
+
+    rebuilt_from_hits = False
+    if metadata["effective_forecast_sum"] <= 0.0 and _positive_sum(forecast_hits_arr, metric_mask) > 0.0:
+        forecast_arr = np.where(metric_mask & (forecast_hits_arr > 0.0), 1.0, 0.0).astype(np.float64)
+        forecast_arr /= float(forecast_arr[metric_mask].sum())
+        metadata["effective_forecast_sum"] = _positive_sum(forecast_arr, metric_mask)
+        rebuilt_from_hits = True
+    if metadata["effective_observed_sum"] <= 0.0 and _positive_sum(observed_hits_arr, metric_mask) > 0.0:
+        observed_arr = np.where(metric_mask & (observed_hits_arr > 0.0), 1.0, 0.0).astype(np.float64)
+        observed_arr /= float(observed_arr[metric_mask].sum())
+        metadata["effective_observed_sum"] = _positive_sum(observed_arr, metric_mask)
+        rebuilt_from_hits = True
+
+    if metadata["effective_forecast_sum"] > 0.0 and metadata["effective_observed_sum"] > 0.0:
+        if rebuilt_from_hits:
+            metadata["strategy"] = "support_hits_density_rebuild"
+        return forecast_arr, observed_arr, metric_mask, metadata
+
+    support_mask = (
+        (np.clip(forecast_arr, 0.0, None) > 0.0)
+        | (np.clip(observed_arr, 0.0, None) > 0.0)
+        | (forecast_hits_arr > 0.0)
+        | (observed_hits_arr > 0.0)
+    )
+    if not np.any(support_mask):
+        support_mask = np.ones(forecast_arr.shape, dtype=bool)
+
+    safe_forecast = np.asarray(forecast_arr, dtype=float)
+    safe_observed = np.asarray(observed_arr, dtype=float)
+    if _positive_sum(safe_forecast, support_mask) <= 0.0:
+        safe_forecast = np.where(support_mask, 1.0, 0.0)
+    if _positive_sum(safe_observed, support_mask) <= 0.0:
+        safe_observed = np.where(support_mask, 1.0, 0.0)
+
+    metadata["effective_forecast_sum"] = _positive_sum(safe_forecast, support_mask)
+    metadata["effective_observed_sum"] = _positive_sum(safe_observed, support_mask)
+    metadata["strategy"] = "support_positive_mask_fallback"
+    return safe_forecast, safe_observed, support_mask, metadata
+
+
 def ensure_point_within_benchmark_grid(*, lon: float, lat: float, grid: GridBuilder, label: str = "Benchmark spill origin") -> None:
     if (
         float(grid.min_lon) <= float(lon) <= float(grid.max_lon)
         and float(grid.min_lat) <= float(lat) <= float(grid.max_lat)
     ):
         return
-    raise RuntimeError(
+    raise BenchmarkCaseSkipped(
         f"{label} {float(lon):.4f}E, {float(lat):.4f}N lies outside the benchmark grid "
         f"({float(grid.min_lon):.2f}-{float(grid.max_lon):.2f}E, {float(grid.min_lat):.2f}-{float(grid.max_lat):.2f}N). "
         "This case cannot produce defensible Phase 3A rasters on the current scoring grid."
@@ -133,6 +230,9 @@ class BenchmarkPipeline:
             "fss_windows_km": self.fss_windows_km,
             "kl_epsilon": self.kl_epsilon,
             "grid": grid.spec.to_metadata(),
+            "figure_rendering": prototype_2016_rendering_metadata(
+                grid.display_bounds_wgs84 or [grid.min_lon, grid.max_lon, grid.min_lat, grid.max_lat]
+            ),
             "pygnome_benchmark": pygnome_metadata,
         }
         with open(self.base_dir / "config_snapshot.yaml", "w", encoding="utf-8") as f:
@@ -184,6 +284,7 @@ class BenchmarkPipeline:
         start_lat: float,
         start_lon: float,
         start_time: str,
+        grid: GridBuilder,
     ) -> list[dict]:
         targets = self._snapshot_targets(start_time, service.snapshot_hours)
         control_nc_path = service.output_dir / f"deterministic_control_{recipe_name}.nc"
@@ -194,7 +295,10 @@ class BenchmarkPipeline:
             )
             for _, target_time in targets
         ]
-        if not all(foot.exists() and density.exists() for foot, density in expected_paths):
+        if not all(
+            _raster_matches_grid(foot, grid) and _raster_matches_grid(density, grid)
+            for foot, density in expected_paths
+        ):
             service.run_deterministic_control(
                 recipe_name=recipe_name,
                 start_time=start_time,
@@ -233,6 +337,7 @@ class BenchmarkPipeline:
         start_lat: float,
         start_lon: float,
         start_time: str,
+        grid: GridBuilder,
     ) -> list[dict]:
         if self.case.workflow_mode != "prototype_2016":
             return []
@@ -245,7 +350,7 @@ class BenchmarkPipeline:
             service.output_dir / f"mask_p90_{hour}h.tif"
             for hour, _ in targets
         ]
-        if not all(path.exists() for path in expected_sources):
+        if not all(_raster_matches_grid(path, grid) for path in expected_sources):
             service.run_ensemble(
                 recipe_name=recipe_name,
                 start_lat=start_lat,
@@ -283,6 +388,7 @@ class BenchmarkPipeline:
         start_lat: float,
         start_lon: float,
         start_time: str,
+        grid: GridBuilder,
     ) -> list[dict]:
         deterministic_records = self._ensure_deterministic_control_products(
             service,
@@ -290,6 +396,7 @@ class BenchmarkPipeline:
             start_lat,
             start_lon,
             start_time,
+            grid,
         )
         extra_records = self._ensure_legacy_threshold_products(
             service,
@@ -297,6 +404,7 @@ class BenchmarkPipeline:
             start_lat,
             start_lon,
             start_time,
+            grid,
         )
         return sorted(
             [*deterministic_records, *extra_records],
@@ -486,7 +594,16 @@ class BenchmarkPipeline:
 
         grid = GridBuilder()
         ensure_point_within_benchmark_grid(lon=start_lon, lat=start_lat, grid=grid)
-        grid.save_metadata(self.base_dir / "grid" / "grid.json")
+        grid_metadata_path = self.base_dir / "grid" / "grid.json"
+        grid_metadata = grid.save_metadata(grid_metadata_path)
+        if self.case.workflow_mode == "prototype_2016":
+            grid_metadata.update(
+                prototype_2016_rendering_metadata(
+                    grid.display_bounds_wgs84 or [grid.min_lon, grid.max_lon, grid.min_lat, grid.max_lat]
+                )
+            )
+            with open(grid_metadata_path, "w", encoding="utf-8") as handle:
+                json.dump(grid_metadata, handle, indent=2)
         sea_mask = self._load_sea_mask(grid)
 
         forcing = get_forcing_files(best_recipe)
@@ -497,6 +614,7 @@ class BenchmarkPipeline:
             start_lat,
             start_lon,
             start_time,
+            grid,
         )
 
         print("   Running deterministic PyGNOME benchmark transport case...")
@@ -545,12 +663,37 @@ class BenchmarkPipeline:
             opendrift_density = _read_raster_data(Path(opendrift["opendrift_density_path"]))
             py_density = _read_raster_data(Path(py_record["pygnome_density_path"]))
 
-            opendrift_density_ocean_sum = float(np.clip(opendrift_density[sea_mask], 0.0, None).sum())
-            py_density_ocean_sum = float(np.clip(py_density[sea_mask], 0.0, None).sum())
-            if opendrift_density_ocean_sum <= 0.0 or py_density_ocean_sum <= 0.0:
+            allow_blank_support_fallback = (
+                self.case.workflow_mode == "prototype_2016"
+                and opendrift["comparison_track_id"] in {"ensemble_p50", "ensemble_p90"}
+            )
+            metric_forecast_density, metric_py_density, kl_valid_mask, density_pair_meta = _prepare_density_pair_for_metrics(
+                forecast_density=opendrift_density,
+                observed_density=py_density,
+                forecast_hits=opendrift_hits,
+                observed_hits=py_hits,
+                valid_mask=sea_mask,
+                allow_blank_support_fallback=allow_blank_support_fallback,
+            )
+            opendrift_density_ocean_sum = float(density_pair_meta["raw_forecast_sum"])
+            py_density_ocean_sum = float(density_pair_meta["raw_observed_sum"])
+            if (
+                float(density_pair_meta["effective_forecast_sum"]) <= 0.0
+                or float(density_pair_meta["effective_observed_sum"]) <= 0.0
+            ):
                 raise RuntimeError(
                     f"Invalid density pair for {timestamp_utc} ({opendrift['comparison_track_id']}): "
                     f"opendrift_sum={opendrift_density_ocean_sum}, pygnome_sum={py_density_ocean_sum}"
+                )
+            if str(density_pair_meta["strategy"]) != "ocean_mask":
+                self.logger.warning(
+                    "Legacy support track %s at %s used %s during KL preparation "
+                    "(raw_opendrift_sum=%.6f, raw_pygnome_sum=%.6f).",
+                    opendrift["comparison_track_id"],
+                    timestamp_utc,
+                    density_pair_meta["strategy"],
+                    opendrift_density_ocean_sum,
+                    py_density_ocean_sum,
                 )
 
             overlay_path = self._write_overlay(
@@ -581,15 +724,15 @@ class BenchmarkPipeline:
                     "timestamp_utc": timestamp_utc,
                     "hour": int(opendrift["hour"]),
                     "epsilon": self.kl_epsilon,
-                    "ocean_cell_count": int(np.count_nonzero(sea_mask)),
+                    "ocean_cell_count": int(np.count_nonzero(kl_valid_mask)),
                     "kl_divergence": calculate_kl_divergence(
-                        opendrift_density,
-                        py_density,
+                        metric_forecast_density,
+                        metric_py_density,
                         epsilon=self.kl_epsilon,
-                        valid_mask=sea_mask,
+                        valid_mask=kl_valid_mask,
                     ),
                 }
-            )
+                )
 
             pairing_rows.append(
                 {
@@ -611,6 +754,7 @@ class BenchmarkPipeline:
                     "pygnome_mass_strategy": py_record["pygnome_mass_strategy"],
                     "opendrift_density_ocean_sum": opendrift_density_ocean_sum,
                     "pygnome_density_ocean_sum": py_density_ocean_sum,
+                    "density_pair_strategy": density_pair_meta["strategy"],
                 }
             )
 

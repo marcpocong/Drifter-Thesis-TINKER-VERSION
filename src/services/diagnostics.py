@@ -45,12 +45,14 @@ class DiagnosticsService:
         spill_lat: float,
         spill_lon: float,
         start_time: str,
+        diagnostics_label: str = "Phase 3 Enhancement – Pre-Flight Diagnostics",
     ):
         self.currents_file = Path(currents_file)
         self.winds_file = Path(winds_file)
         self.spill_lat = spill_lat
         self.spill_lon = spill_lon
         self.start_time = pd.to_datetime(start_time)
+        self.diagnostics_label = str(diagnostics_label)
 
         from src.core.constants import BASE_OUTPUT_DIR
         self.output_dir = BASE_OUTPUT_DIR / "diagnostics"
@@ -511,6 +513,7 @@ def run_diagnostics(
     start_time: str,
     start_lat: float,
     start_lon: float,
+    diagnostics_label: str = "Phase 3 Enhancement – Pre-Flight Diagnostics",
 ) -> dict:
     """
     Entry-point wrapper called from __main__.py before weathering runs.
@@ -527,5 +530,17 @@ def run_diagnostics(
         spill_lat=start_lat,
         spill_lon=start_lon,
         start_time=start_time,
+        diagnostics_label=diagnostics_label,
     )
-    return service.run_all()
+    if diagnostics_label == "Phase 3 Enhancement – Pre-Flight Diagnostics":
+        return service.run_all()
+
+    print("\n" + "=" * 60)
+    print(service.diagnostics_label)
+    print("=" * 60)
+    service._check_environmental_forcing()
+    service._check_openoil_config()
+    service._check_gnome_availability()
+    service._print_summary()
+    service._save_report()
+    return service.report

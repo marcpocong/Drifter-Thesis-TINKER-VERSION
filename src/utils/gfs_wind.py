@@ -2,8 +2,12 @@ from __future__ import annotations
 
 import importlib.util
 import logging
+import multiprocessing
+import queue as queue_module
 import re
 import tempfile
+import time
+import traceback
 import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
@@ -21,6 +25,18 @@ GFS_FILE_PATTERNS = (
     re.compile(r"gfsanl_4_(\d{8})_(\d{4})_(\d{3})\.grb2$"),
     re.compile(r"gfs_4_(\d{8})_(\d{4})_(\d{3})\.grb2$"),
 )
+GFS_CATALOG_TIMEOUT_SECONDS = 45
+GFS_CATALOG_MAX_ATTEMPTS = 2
+GFS_HTTP_FALLBACK_TIMEOUT_SECONDS = 75
+GFS_HTTP_FALLBACK_MAX_ATTEMPTS = 1
+GFS_OPENDAP_ATTEMPT_TIMEOUT_SECONDS = 45
+GFS_MIN_ATTEMPT_SECONDS = 5
+
+
+class GFSAcquisitionError(RuntimeError):
+    def __init__(self, message: str, *, failure_stage: str) -> None:
+        self.failure_stage = str(failure_stage)
+        super().__init__(message)
 
 
 def _relative(repo_root: Path, path: Path) -> str:
@@ -39,19 +55,99 @@ def _normalize_utc_timestamp(value: pd.Timestamp | str) -> pd.Timestamp:
 
 def _describe_remote_error(exc: Exception) -> str:
     if isinstance(exc, requests.exceptions.ReadTimeout):
-        return "the remote server did not respond before the 180-second read timeout"
+        return "timeout"
     if isinstance(exc, requests.exceptions.ConnectTimeout):
-        return "the connection to the remote server timed out before it was established"
+        return "connect timeout"
     if isinstance(exc, requests.exceptions.Timeout):
-        return "the remote request timed out"
+        return "timeout"
     if isinstance(exc, requests.exceptions.ConnectionError):
-        return "the connection to the remote server failed"
+        return "connection failed"
     if isinstance(exc, requests.exceptions.HTTPError):
         response = getattr(exc, "response", None)
         if response is not None:
-            return f"the remote service returned HTTP {response.status_code}"
-        return "the remote service returned an HTTP error"
+            return f"HTTP {response.status_code}"
+        return "HTTP error"
     return str(exc)
+
+
+def _transport_mode_label(mode_name: str) -> str:
+    return {
+        "http_cfgrib_fallback": "direct file access",
+        "opendap": "OPeNDAP",
+    }.get(str(mode_name), str(mode_name))
+
+
+def _catalog_day_label(value: pd.Timestamp | str) -> str:
+    return _normalize_utc_timestamp(value).strftime("%Y-%m-%d")
+
+
+def _analysis_label(value: pd.Timestamp | str) -> str:
+    return _normalize_utc_timestamp(value).strftime("%Y-%m-%d %H:%M UTC")
+
+
+def _remaining_budget_seconds(deadline_monotonic: float | None) -> float | None:
+    if deadline_monotonic is None:
+        return None
+    return max(0.0, float(deadline_monotonic) - time.monotonic())
+
+
+def _require_remaining_budget(
+    deadline_monotonic: float | None,
+    *,
+    minimum_seconds: float,
+    failure_stage: str,
+    stage_label: str,
+) -> float | None:
+    remaining = _remaining_budget_seconds(deadline_monotonic)
+    if remaining is None:
+        return None
+    if remaining < float(minimum_seconds):
+        raise GFSAcquisitionError(
+            (
+                f"GFS fail-fast budget exhausted before {stage_label}; "
+                f"{remaining:.1f}s remained and at least {minimum_seconds:.1f}s was required."
+            ),
+            failure_stage=failure_stage,
+        )
+    return remaining
+
+
+def _capped_timeout(
+    deadline_monotonic: float | None,
+    *,
+    preferred_seconds: int,
+    minimum_seconds: int = GFS_MIN_ATTEMPT_SECONDS,
+) -> int:
+    remaining = _remaining_budget_seconds(deadline_monotonic)
+    if remaining is None:
+        return int(preferred_seconds)
+    return max(int(minimum_seconds), min(int(preferred_seconds), int(max(minimum_seconds, remaining))))
+
+
+def _opendap_subset_child(
+    result_queue,
+    *,
+    url: str,
+    output_path: str,
+) -> None:
+    try:
+        with xr.open_dataset(url) as remote:
+            subset = remote[
+                [
+                    "u-component_of_wind_height_above_ground",
+                    "v-component_of_wind_height_above_ground",
+                ]
+            ].load()
+        subset.to_netcdf(output_path)
+        result_queue.put({"ok": True})
+    except BaseException as exc:  # pragma: no cover - subprocess path
+        result_queue.put(
+            {
+                "ok": False,
+                "error": str(exc),
+                "traceback": traceback.format_exc(),
+            }
+        )
 
 
 def apply_wind_cf_metadata(ds: xr.Dataset) -> xr.Dataset:
@@ -183,6 +279,8 @@ class GFSWindDownloader:
         self,
         start_time: pd.Timestamp | str,
         end_time: pd.Timestamp | str,
+        *,
+        deadline_monotonic: float | None = None,
     ) -> list[tuple[pd.Timestamp, str]]:
         start_utc = _normalize_utc_timestamp(start_time)
         end_utc = _normalize_utc_timestamp(end_time)
@@ -198,9 +296,21 @@ class GFSWindDownloader:
             catalog_url = self.gfs_catalog_url_for_day(day)
             response = None
             last_error: Exception | None = None
-            for attempt in range(1, 4):
+            for attempt in range(1, GFS_CATALOG_MAX_ATTEMPTS + 1):
                 try:
-                    response = requests.get(catalog_url, timeout=180)
+                    _require_remaining_budget(
+                        deadline_monotonic,
+                        minimum_seconds=GFS_MIN_ATTEMPT_SECONDS,
+                        failure_stage="catalog_request",
+                        stage_label="the next GFS catalog request",
+                    )
+                    response = requests.get(
+                        catalog_url,
+                        timeout=_capped_timeout(
+                            deadline_monotonic,
+                            preferred_seconds=GFS_CATALOG_TIMEOUT_SECONDS,
+                        ),
+                    )
                     if response.status_code == 404:
                         response = None
                         break
@@ -208,20 +318,27 @@ class GFSWindDownloader:
                     break
                 except Exception as exc:  # pragma: no cover - remote variability
                     last_error = exc
-                    logger.warning(
-                        "Archived NOAA/NCEI GFS catalog is slow or unavailable for %s (attempt %s/3). "
-                        "Retrying. Details: %s",
-                        catalog_url,
-                        attempt,
-                        _describe_remote_error(exc),
-                    )
+                    if attempt < GFS_CATALOG_MAX_ATTEMPTS:
+                        logger.warning(
+                            "GFS catalog for %s is unavailable (%s/%s). Retrying. Reason: %s",
+                            _catalog_day_label(day),
+                            attempt,
+                            GFS_CATALOG_MAX_ATTEMPTS,
+                            _describe_remote_error(exc),
+                        )
+                    else:
+                        logger.warning(
+                            "GFS catalog for %s is still unavailable (%s/%s). Trying direct file access. Reason: %s",
+                            _catalog_day_label(day),
+                            attempt,
+                            GFS_CATALOG_MAX_ATTEMPTS,
+                            _describe_remote_error(exc),
+                        )
             if response is None:
                 if last_error is not None:
                     logger.warning(
-                        "Falling back to deterministic GFS archive URLs because the catalog stayed unavailable for %s. "
-                        "Technical detail: %s",
-                        catalog_url,
-                        _describe_remote_error(last_error),
+                        "GFS catalog stayed unavailable for %s. Trying direct file access instead.",
+                        _catalog_day_label(day),
                     )
                     return self.fallback_analysis_urls(start_utc, end_utc)
                 continue
@@ -229,10 +346,9 @@ class GFSWindDownloader:
                 analysis_urls.update(self.parse_gfs_catalog(response.text))
             except ET.ParseError as exc:
                 logger.warning(
-                    "Falling back to deterministic GFS archive URLs because the catalog response for %s was not valid XML. "
-                    "Technical detail: %s",
-                    catalog_url,
-                    exc,
+                    "GFS catalog for %s returned unreadable data. Trying direct file access instead. Reason: %s",
+                    _catalog_day_label(day),
+                    "invalid catalog response",
                 )
                 return self.fallback_analysis_urls(start_utc, end_utc)
 
@@ -345,15 +461,56 @@ class GFSWindDownloader:
         *,
         url: str,
         timestamp: pd.Timestamp | str,
+        deadline_monotonic: float | None = None,
     ) -> xr.Dataset:
-        with xr.open_dataset(url) as remote:
-            subset = remote[
-                [
-                    "u-component_of_wind_height_above_ground",
-                    "v-component_of_wind_height_above_ground",
-                ]
-            ].load()
-        return self.normalize_gfs_subset(subset, analysis_time=timestamp)
+        _require_remaining_budget(
+            deadline_monotonic,
+            minimum_seconds=GFS_OPENDAP_ATTEMPT_TIMEOUT_SECONDS,
+            failure_stage="opendap",
+            stage_label="the GFS OPeNDAP subset attempt",
+        )
+        timeout_seconds = _capped_timeout(
+            deadline_monotonic,
+            preferred_seconds=GFS_OPENDAP_ATTEMPT_TIMEOUT_SECONDS,
+            minimum_seconds=10,
+        )
+        with tempfile.NamedTemporaryFile(suffix=".nc", prefix="gfs_opendap_subset_", delete=False) as handle:
+            temp_path = Path(handle.name)
+        context_name = "fork" if "fork" in multiprocessing.get_all_start_methods() else "spawn"
+        context = multiprocessing.get_context(context_name)
+        result_queue = context.Queue()
+        process = context.Process(
+            target=_opendap_subset_child,
+            kwargs={
+                "result_queue": result_queue,
+                "url": url,
+                "output_path": str(temp_path),
+            },
+        )
+        process.start()
+        process.join(timeout=timeout_seconds)
+        try:
+            if process.is_alive():
+                process.terminate()
+                process.join(timeout=5)
+                raise GFSAcquisitionError(
+                    f"OPeNDAP timed out after {timeout_seconds}s",
+                    failure_stage="opendap",
+                )
+            try:
+                payload = result_queue.get_nowait()
+            except queue_module.Empty:
+                payload = None
+            if not payload or not payload.get("ok"):
+                raise GFSAcquisitionError(
+                    "OPeNDAP subset failed",
+                    failure_stage="opendap",
+                )
+            with xr.open_dataset(temp_path) as subset_ds:
+                subset = subset_ds.load()
+            return self.normalize_gfs_subset(subset, analysis_time=timestamp)
+        finally:
+            temp_path.unlink(missing_ok=True)
 
     def download_gfs_subset_via_http_cfgrib(
         self,
@@ -361,6 +518,7 @@ class GFSWindDownloader:
         url: str,
         timestamp: pd.Timestamp | str,
         scratch_dir: str | Path,
+        deadline_monotonic: float | None = None,
     ) -> xr.Dataset:
         if importlib.util.find_spec("cfgrib") is None:
             raise RuntimeError("cfgrib is required for the archived GFS HTTP fallback path.")
@@ -370,9 +528,15 @@ class GFSWindDownloader:
         temp_parent = Path(scratch_dir)
         temp_parent.mkdir(parents=True, exist_ok=True)
 
-        for attempt in range(1, 4):
+        for attempt in range(1, GFS_HTTP_FALLBACK_MAX_ATTEMPTS + 1):
             temp_path: Path | None = None
             try:
+                _require_remaining_budget(
+                    deadline_monotonic,
+                    minimum_seconds=GFS_MIN_ATTEMPT_SECONDS,
+                    failure_stage="http_cfgrib_fallback",
+                    stage_label="the GFS HTTP fallback attempt",
+                )
                 with tempfile.NamedTemporaryFile(
                     suffix=".grb2",
                     prefix=f"gfs_{_normalize_utc_timestamp(timestamp).strftime('%Y%m%d%H')}_{attempt}_",
@@ -380,7 +544,14 @@ class GFSWindDownloader:
                     delete=False,
                 ) as handle:
                     temp_path = Path(handle.name)
-                    response = requests.get(file_url, stream=True, timeout=300)
+                    response = requests.get(
+                        file_url,
+                        stream=True,
+                        timeout=_capped_timeout(
+                            deadline_monotonic,
+                            preferred_seconds=GFS_HTTP_FALLBACK_TIMEOUT_SECONDS,
+                        ),
+                    )
                     response.raise_for_status()
                     for chunk in response.iter_content(chunk_size=1024 * 1024):
                         if chunk:
@@ -399,21 +570,31 @@ class GFSWindDownloader:
                 return self.normalize_gfs_subset(loaded, analysis_time=timestamp)
             except Exception as exc:  # pragma: no cover - remote dataset variability
                 last_error = exc
-                logger.warning(
-                    "Archived NOAA/NCEI GFS file download fallback is slow or unavailable for %s (attempt %s/3). "
-                    "Retrying. Details: %s",
-                    file_url,
-                    attempt,
-                    _describe_remote_error(exc),
-                )
+                if attempt < GFS_HTTP_FALLBACK_MAX_ATTEMPTS:
+                    logger.warning(
+                        "GFS direct file access failed for %s (%s/%s). Retrying. Reason: %s",
+                        _analysis_label(timestamp),
+                        attempt,
+                        GFS_HTTP_FALLBACK_MAX_ATTEMPTS,
+                        _describe_remote_error(exc),
+                    )
+                else:
+                    logger.warning(
+                        "GFS direct file access failed for %s (%s/%s). No retries left. Reason: %s",
+                        _analysis_label(timestamp),
+                        attempt,
+                        GFS_HTTP_FALLBACK_MAX_ATTEMPTS,
+                        _describe_remote_error(exc),
+                    )
             finally:
                 if temp_path is not None:
                     temp_path.unlink(missing_ok=True)
 
-        raise RuntimeError(
-            "Archived NOAA/NCEI GFS file download fallback failed after 3 attempts for "
-            f"{file_url}. This usually means the NCEI file server is slow or temporarily down. "
-            f"Technical detail: {_describe_remote_error(last_error) if last_error is not None else 'unknown remote error'}."
+        raise GFSAcquisitionError(
+            "Direct file access failed after "
+            f"{GFS_HTTP_FALLBACK_MAX_ATTEMPTS} attempt(s). "
+            f"Reason: {_describe_remote_error(last_error) if last_error is not None else 'unknown error'}.",
+            failure_stage="http_cfgrib_fallback",
         )
 
     @staticmethod
@@ -426,6 +607,7 @@ class GFSWindDownloader:
         url: str,
         timestamp: pd.Timestamp | str,
         scratch_dir: str | Path,
+        deadline_monotonic: float | None = None,
     ) -> tuple[xr.Dataset, str]:
         prefer_http_first = self.prefers_http_cfgrib(url)
         transport_attempts = (
@@ -441,19 +623,47 @@ class GFSWindDownloader:
         )
 
         errors: list[tuple[str, Exception]] = []
-        for mode_name, loader in transport_attempts:
+        for attempt_index, (mode_name, loader) in enumerate(transport_attempts, start=1):
             try:
                 if mode_name == "http_cfgrib_fallback":
-                    dataset = loader(url=url, timestamp=timestamp, scratch_dir=scratch_dir)
+                    dataset = loader(
+                        url=url,
+                        timestamp=timestamp,
+                        scratch_dir=scratch_dir,
+                        deadline_monotonic=deadline_monotonic,
+                    )
                 else:
-                    dataset = loader(url=url, timestamp=timestamp)
+                    dataset = loader(
+                        url=url,
+                        timestamp=timestamp,
+                        deadline_monotonic=deadline_monotonic,
+                    )
                 return dataset, mode_name
             except Exception as exc:  # pragma: no cover - remote dataset variability
                 errors.append((mode_name, exc))
-                logger.warning("GFS %s subset failed for %s: %s", mode_name, url, exc)
+                mode_label = _transport_mode_label(mode_name)
+                if attempt_index < len(transport_attempts):
+                    next_mode_label = _transport_mode_label(transport_attempts[attempt_index][0])
+                    logger.warning(
+                        "GFS %s failed for %s. Trying %s. Reason: %s",
+                        mode_label,
+                        _analysis_label(timestamp),
+                        next_mode_label,
+                        exc,
+                    )
+                else:
+                    logger.warning(
+                        "GFS %s failed for %s. No access paths remain. Reason: %s",
+                        mode_label,
+                        _analysis_label(timestamp),
+                        exc,
+                    )
 
-        error_text = "; ".join(f"{mode}={exc}" for mode, exc in errors)
-        raise RuntimeError(f"All GFS transport modes failed for {url}: {error_text}")
+        tried_modes = ", ".join(_transport_mode_label(mode) for mode, _ in errors)
+        raise GFSAcquisitionError(
+            f"GFS data for {_analysis_label(timestamp)} could not be opened. Tried: {tried_modes}.",
+            failure_stage="transport_modes",
+        )
 
     def download(
         self,
@@ -462,9 +672,15 @@ class GFSWindDownloader:
         end_time: pd.Timestamp | str,
         output_path: str | Path,
         scratch_dir: str | Path | None = None,
+        budget_seconds: int | float | None = None,
     ) -> dict[str, Any]:
         start_utc = _normalize_utc_timestamp(start_time)
         end_utc = _normalize_utc_timestamp(end_time)
+        deadline_monotonic = (
+            None
+            if budget_seconds in (None, 0)
+            else time.monotonic() + float(budget_seconds)
+        )
         target_path = Path(output_path)
         target_path.parent.mkdir(parents=True, exist_ok=True)
         if target_path.exists():
@@ -474,37 +690,40 @@ class GFSWindDownloader:
         frames = []
         source_urls: list[str] = []
         source_modes: list[str] = []
-        skipped_urls: list[dict[str, str]] = []
-        discovered = self.discover_gfs_analysis_urls(start_utc, end_utc)
+        discovered = self.discover_gfs_analysis_urls(
+            start_utc,
+            end_utc,
+            deadline_monotonic=deadline_monotonic,
+        )
         working_dir = Path(scratch_dir or target_path.parent)
 
         for timestamp, url in discovered:
+            _require_remaining_budget(
+                deadline_monotonic,
+                minimum_seconds=GFS_MIN_ATTEMPT_SECONDS,
+                failure_stage="analysis_selection",
+                stage_label="the next required GFS analysis",
+            )
             try:
                 subset, mode_name = self.download_gfs_subset_with_preferred_transport(
                     url=url,
                     timestamp=timestamp,
                     scratch_dir=working_dir,
+                    deadline_monotonic=deadline_monotonic,
                 )
                 source_modes.append(mode_name)
             except Exception as exc:  # pragma: no cover - remote dataset variability
-                logger.warning("Skipping broken GFS analysis %s after transport retries: %s", url, exc)
-                skipped_urls.append(
-                    {
-                        "timestamp_utc": timestamp.isoformat(),
-                        "url": url,
-                        "error": str(exc),
-                    }
-                )
-                continue
+                raise GFSAcquisitionError(
+                    f"Required GFS data for {_analysis_label(timestamp)} could not be opened. {exc}",
+                    failure_stage=getattr(exc, "failure_stage", "transport_modes"),
+                ) from exc
             frames.append(subset)
             source_urls.append(url)
 
         if not frames:
-            raise RuntimeError("All discovered GFS analysis files failed to open for the requested forcing window.")
-        if skipped_urls:
-            raise RuntimeError(
-                "Required GFS analyses were missing or unreadable for the requested forcing window: "
-                f"{len(skipped_urls)} skipped entries. First error: {skipped_urls[0]['error']}"
+            raise GFSAcquisitionError(
+                "All discovered GFS analysis files failed to open for the requested forcing window.",
+                failure_stage="transport_modes",
             )
 
         combined = xr.concat(frames, dim="time").sortby("time")
@@ -513,12 +732,12 @@ class GFSWindDownloader:
             "status": "downloaded",
             "analysis_count": len(discovered),
             "opened_analysis_count": len(source_urls),
-            "skipped_analysis_count": len(skipped_urls),
+            "skipped_analysis_count": 0,
             "analysis_time_start_utc": discovered[0][0].isoformat(),
             "analysis_time_end_utc": discovered[-1][0].isoformat(),
             "source_url_count": len(source_urls),
             "sample_source_url": source_urls[0] if source_urls else "",
             "source_modes_used": sorted(set(source_modes)),
-            "skipped_urls": skipped_urls[:10],
+            "skipped_urls": [],
             "path": _relative(self.repo_root, target_path),
         }

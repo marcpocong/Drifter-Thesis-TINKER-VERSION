@@ -60,6 +60,7 @@ class OilWeatheringService:
         config_path: str | Path = "config/oil.yaml",
         scenarios: dict[str, dict[str, Any]] | None = None,
         phase_label: str = "Phase 3",
+        refined_stage_label: str = "Stage 3b",
     ):
         from src.core.constants import BASE_OUTPUT_DIR
 
@@ -70,10 +71,11 @@ class OilWeatheringService:
         self.winds_file = winds_file
         self.wave_file = Path(wave_file) if wave_file else None
         self.phase_label = str(phase_label)
+        self.refined_stage_label = str(refined_stage_label)
 
         config_path = Path(config_path)
         if not config_path.exists():
-            raise FileNotFoundError(f"Phase 3 config required at {config_path}")
+            raise FileNotFoundError(f"Oil weathering config required at {config_path}")
 
         with open(config_path, "r") as f:
             self.config = yaml.safe_load(f)
@@ -134,6 +136,51 @@ class OilWeatheringService:
         Reads the ``refined_oil`` section from config/oil.yaml.  Returns
         ``None`` when disabled or when no ``adios_id`` is specified.
         """
+        if self.refined_stage_label != "Stage 3b":
+            refined_cfg = self.config.get("refined_oil", {})
+            if not refined_cfg.get("enabled", False):
+                return None
+
+            adios_id = refined_cfg.get("adios_id", "")
+            if not adios_id:
+                logger.warning("%s enabled but no adios_id specified - skipping.", self.refined_stage_label)
+                return None
+
+            oil_cfg = {
+                "adios_id": adios_id,
+                "display_name": refined_cfg.get("display_name", "Refined Oil"),
+                "color": refined_cfg.get("color", "#228B22"),
+                "openoil_overrides": {
+                    "drift:vertical_mixing": False,
+                    "processes:dispersion": True,
+                    "processes:evaporation": True,
+                    "processes:emulsification": True,
+                    "processes:update_oilfilm_thickness": True,
+                    "general:coastline_action": "stranding",
+                    "wave_entrainment:droplet_size_distribution": "Johansen2015",
+                },
+            }
+
+            print(f"\n{self.refined_stage_label}: Running refined oil simulation ({adios_id})")
+            budget_df, nc_path = self._run_single(
+                oil_key="refined",
+                oil_cfg=oil_cfg,
+                start_lat=start_lat,
+                start_lon=start_lon,
+                start_time=start_time,
+            )
+
+            tolerance = self.sim_cfg.get("mass_balance_tolerance_pct", 2.0)
+            qc = check_mass_balance(budget_df, tolerance)
+
+            return {
+                "display_name": oil_cfg["display_name"],
+                "budget_df": budget_df,
+                "nc_path": nc_path,
+                "csv_path": self.output_dir / "budget_refined.csv",
+                "qc": qc,
+            }
+
         refined_cfg = self.config.get("refined_oil", {})
         if not refined_cfg.get("enabled", False):
             return None
@@ -388,6 +435,7 @@ class OilWeatheringService:
             plot_mass_budget_comparison(
                 results=results,
                 output_file=str(comparison_path),
+                title=f"{self.phase_label} – Oil Type Comparison: Mass Budget Over 72 Hours",
             )
             print(f"   📈 Comparison chart   → {comparison_path.name}")
 
@@ -422,6 +470,8 @@ def run_weathering(
     start_time: str,
     start_lat: float,
     start_lon: float,
+    *,
+    phase_label: str = "Phase 3",
 ) -> dict:
     """
     Entry-point wrapper called from __main__.py.
@@ -441,7 +491,12 @@ def run_weathering(
     """
     currents_file, winds_file, wave_file = _resolve_forcing_paths(best_recipe)
 
-    service = OilWeatheringService(currents_file, winds_file, wave_file=wave_file)
+    service = OilWeatheringService(
+        currents_file,
+        winds_file,
+        wave_file=wave_file,
+        phase_label=phase_label,
+    )
     return service.run_all(
         start_lat=start_lat,
         start_lon=start_lon,
@@ -482,6 +537,9 @@ def run_refined_weathering(
     start_time: str,
     start_lat: float,
     start_lon: float,
+    *,
+    phase_label: str = "Phase 3",
+    refined_stage_label: str = "Stage 3b",
 ) -> dict | None:
     """
     Stage 3b entry point: re-run with ADIOS-confirmed oil.
@@ -493,7 +551,13 @@ def run_refined_weathering(
     except Exception:
         return None
 
-    service = OilWeatheringService(currents_file, winds_file, wave_file=wave_file)
+    service = OilWeatheringService(
+        currents_file,
+        winds_file,
+        wave_file=wave_file,
+        phase_label=phase_label,
+        refined_stage_label=refined_stage_label,
+    )
     return service.run_refined_oil(
         start_lat=start_lat,
         start_lon=start_lon,

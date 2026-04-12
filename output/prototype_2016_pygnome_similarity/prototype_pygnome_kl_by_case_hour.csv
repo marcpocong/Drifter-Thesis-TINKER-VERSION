@@ -1,28 +1,28 @@
 case_id,comparison_track_id,comparison_track_label,hour,kl_divergence,epsilon,ocean_cell_count
-CASE_2016-09-01,deterministic,OpenDrift deterministic,24,21.365070656173256,1e-10,23800
-CASE_2016-09-01,deterministic,OpenDrift deterministic,48,21.362214705633527,1e-10,23800
-CASE_2016-09-01,deterministic,OpenDrift deterministic,72,21.360935853097512,1e-10,23800
-CASE_2016-09-01,ensemble_p50,OpenDrift p50 threshold,24,0.0,1e-10,1
-CASE_2016-09-01,ensemble_p50,OpenDrift p50 threshold,48,0.0,1e-10,1
-CASE_2016-09-01,ensemble_p50,OpenDrift p50 threshold,72,0.6912437620110167,1e-10,2
-CASE_2016-09-01,ensemble_p90,OpenDrift p90 threshold,24,0.0,1e-10,1
-CASE_2016-09-01,ensemble_p90,OpenDrift p90 threshold,48,0.0,1e-10,1
-CASE_2016-09-01,ensemble_p90,OpenDrift p90 threshold,72,0.6912437620110167,1e-10,2
-CASE_2016-09-06,deterministic,OpenDrift deterministic,24,19.67646350728629,1e-10,23800
-CASE_2016-09-06,deterministic,OpenDrift deterministic,48,21.452669478201223,1e-10,23800
-CASE_2016-09-06,deterministic,OpenDrift deterministic,72,10.632309240654257,1e-10,23800
-CASE_2016-09-06,ensemble_p50,OpenDrift p50 threshold,24,0.0,1e-10,1
-CASE_2016-09-06,ensemble_p50,OpenDrift p50 threshold,48,0.0,1e-10,1
-CASE_2016-09-06,ensemble_p50,OpenDrift p50 threshold,72,0.6912437620110167,1e-10,2
-CASE_2016-09-06,ensemble_p90,OpenDrift p90 threshold,24,0.0,1e-10,1
-CASE_2016-09-06,ensemble_p90,OpenDrift p90 threshold,48,0.0,1e-10,1
-CASE_2016-09-06,ensemble_p90,OpenDrift p90 threshold,72,0.6912437620110167,1e-10,2
-CASE_2016-09-17,deterministic,OpenDrift deterministic,24,21.414020469313947,1e-10,23800
-CASE_2016-09-17,deterministic,OpenDrift deterministic,48,21.3978178546354,1e-10,23800
-CASE_2016-09-17,deterministic,OpenDrift deterministic,72,21.38053909008527,1e-10,23800
-CASE_2016-09-17,ensemble_p50,OpenDrift p50 threshold,24,0.3341306612394067,1e-10,7
-CASE_2016-09-17,ensemble_p50,OpenDrift p50 threshold,48,0.4514594005074108,1e-10,8
-CASE_2016-09-17,ensemble_p50,OpenDrift p50 threshold,72,0.4341805925242553,1e-10,8
-CASE_2016-09-17,ensemble_p90,OpenDrift p90 threshold,24,0.3341306612394067,1e-10,7
-CASE_2016-09-17,ensemble_p90,OpenDrift p90 threshold,48,0.4514594005074108,1e-10,8
-CASE_2016-09-17,ensemble_p90,OpenDrift p90 threshold,72,0.4341805925242553,1e-10,8
+CASE_2016-09-01,deterministic,OpenDrift deterministic,24,22.34723571391521,1e-10,25600
+CASE_2016-09-01,deterministic,OpenDrift deterministic,48,22.391049876303683,1e-10,25600
+CASE_2016-09-01,deterministic,OpenDrift deterministic,72,22.516645574445334,1e-10,25600
+CASE_2016-09-01,ensemble_p50,OpenDrift p50 threshold,24,22.34723571391521,1e-10,25600
+CASE_2016-09-01,ensemble_p50,OpenDrift p50 threshold,48,0.0584034457352398,1e-10,2
+CASE_2016-09-01,ensemble_p50,OpenDrift p50 threshold,72,0.1839994653767589,1e-10,2
+CASE_2016-09-01,ensemble_p90,OpenDrift p90 threshold,24,0.0145891711912688,1e-10,2
+CASE_2016-09-01,ensemble_p90,OpenDrift p90 threshold,48,0.0584034457352398,1e-10,2
+CASE_2016-09-01,ensemble_p90,OpenDrift p90 threshold,72,0.1839994653767589,1e-10,2
+CASE_2016-09-06,deterministic,OpenDrift deterministic,24,23.020741030615504,1e-10,25600
+CASE_2016-09-06,deterministic,OpenDrift deterministic,48,22.88077177462232,1e-10,25600
+CASE_2016-09-06,deterministic,OpenDrift deterministic,72,22.598257701919884,1e-10,25600
+CASE_2016-09-06,ensemble_p50,OpenDrift p50 threshold,24,0.6880962119304719,1e-10,2
+CASE_2016-09-06,ensemble_p50,OpenDrift p50 threshold,48,0.5481265976439859,1e-10,2
+CASE_2016-09-06,ensemble_p50,OpenDrift p50 threshold,72,0.2656118017620267,1e-10,2
+CASE_2016-09-06,ensemble_p90,OpenDrift p90 threshold,24,0.6880962119304719,1e-10,2
+CASE_2016-09-06,ensemble_p90,OpenDrift p90 threshold,48,0.5481265976439859,1e-10,2
+CASE_2016-09-06,ensemble_p90,OpenDrift p90 threshold,72,0.2656118017620267,1e-10,2
+CASE_2016-09-17,deterministic,OpenDrift deterministic,24,22.347235713915204,1e-10,25600
+CASE_2016-09-17,deterministic,OpenDrift deterministic,48,22.39104987630369,1e-10,25600
+CASE_2016-09-17,deterministic,OpenDrift deterministic,72,22.516645574445334,1e-10,25600
+CASE_2016-09-17,ensemble_p50,OpenDrift p50 threshold,24,22.347235713915204,1e-10,25600
+CASE_2016-09-17,ensemble_p50,OpenDrift p50 threshold,48,0.0584034457352398,1e-10,2
+CASE_2016-09-17,ensemble_p50,OpenDrift p50 threshold,72,0.1839994653767589,1e-10,2
+CASE_2016-09-17,ensemble_p90,OpenDrift p90 threshold,24,0.0145891711912688,1e-10,2
+CASE_2016-09-17,ensemble_p90,OpenDrift p90 threshold,48,0.0584034457352398,1e-10,2
+CASE_2016-09-17,ensemble_p90,OpenDrift p90 threshold,72,0.1839994653767589,1e-10,2

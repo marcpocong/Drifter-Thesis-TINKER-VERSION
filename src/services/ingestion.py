@@ -44,6 +44,7 @@ from src.core.constants import CMEMS_SURFACE_CURRENT_MAX_DEPTH_M, RUN_NAME
 from src.core.base import BaseService
 from src.exceptions.custom import (
     DataLoadingError,
+    ForcingProviderAcquisitionError,
     PREP_FORCE_REFRESH_ENV,
     PrepOutageDecisionRequired,
     PREP_REUSE_APPROVED_ONCE_ENV,
@@ -53,10 +54,14 @@ from src.models.ingestion import IngestionManifest
 from src.helpers.raster import GridBuilder
 from src.utils.gfs_wind import GFSWindDownloader
 from src.utils.forcing_outage_policy import (
+    FORCING_OUTAGE_POLICY_CONTINUE_DEGRADED,
     forcing_factor_id_for_source,
     is_remote_outage_error,
+    run_budgeted_forcing_provider_call,
     resolve_forcing_outage_policy,
+    resolve_forcing_source_budget_seconds,
 )
+from src.utils.startup_prompt_policy import input_cache_policy_force_refresh_enabled
 from src.utils.io import (
     find_current_vars,
     find_wave_vars,
@@ -109,6 +114,53 @@ def compute_prototype_forcing_window(
 
 class ArcGISLayerIngestionError(RuntimeError):
     pass
+
+
+def _budgeted_ingestion_forcing_download(
+    *,
+    source_id: str,
+    output_dir: str,
+    forcing_dir: str,
+    start_date: str,
+    end_date: str,
+    strict: bool = True,
+) -> dict[str, Any]:
+    service = DataIngestionService(output_dir=output_dir)
+    service.forcing_dir = Path(forcing_dir)
+    service.forcing_dir.mkdir(parents=True, exist_ok=True)
+    service.configure_explicit_download_window(start_date=start_date, end_date=end_date)
+
+    try:
+        if source_id == "hycom":
+            result = service.download_hycom(raise_on_failure=True)
+        elif source_id == "cmems":
+            result = service.download_cmems(raise_on_failure=True)
+        elif source_id == "cmems_wave":
+            result = service.download_cmems_wave(raise_on_failure=True)
+        elif source_id == "era5":
+            result = service.download_era5(raise_on_failure=True)
+        elif source_id == "ncep":
+            result = service.download_ncep(raise_on_failure=True)
+        elif source_id == "gfs":
+            result = service.download_gfs(
+                strict=bool(strict),
+                budget_seconds=resolve_forcing_source_budget_seconds(),
+            )
+        else:
+            raise KeyError(f"Unsupported forcing source id: {source_id}")
+    except Exception as exc:
+        outage = service._is_remote_outage_error(exc)
+        return {
+            "status": "failed_remote_outage" if outage else "failed",
+            "source_id": str(source_id),
+            "forcing_factor": forcing_factor_id_for_source(source_id),
+            "path": str(service.forcing_dir / forcing_factor_id_for_source(source_id)),
+            "upstream_outage_detected": outage,
+            "failure_stage": str(getattr(exc, "failure_stage", "provider_call") or "provider_call"),
+            "error": str(exc),
+        }
+
+    return service._normalize_download_record(source_id, result)
 
 class DataIngestionService(BaseService):
     """
@@ -178,19 +230,27 @@ class DataIngestionService(BaseService):
         else:
             # Pad bounding box heavily to prevent edge-clipping during interpolation for low-res models like NCEP
             pad = 3.0
-            prototype_display_domain = list(self.case_context.legacy_prototype_display_domain)
+            prototype_display_domain = list(self.case_context.region)
             self.bbox = [
                 prototype_display_domain[0] - pad,
                 prototype_display_domain[1] + pad,
                 prototype_display_domain[2] - pad,
                 prototype_display_domain[3] + pad,
             ]
-            self.bbox_source = "legacy_prototype_display_domain_plus_3deg_pad"
+            self.bbox_source = (
+                "prototype_2016_case_local_domain_plus_3deg_pad"
+                if self.case_context.workflow_mode == "prototype_2016"
+                else "legacy_prototype_display_domain_plus_3deg_pad"
+            )
         self.grid = GridBuilder() if self.case_context.is_prototype else None
         self.gfs_downloader = GFSWindDownloader(
             forcing_box=self.bbox,
             expected_delta=pd.Timedelta(hours=PROTOTYPE_GFS_ANALYSIS_DELTA_HOURS),
         )
+        self.degraded_continue_used = False
+        self.upstream_outage_detected = False
+        self.missing_forcing_factors: set[str] = set()
+        self.skipped_forcing_sources: set[str] = set()
         self._apply_forcing_window(
             self.case_context.forcing_start_utc,
             self.case_context.forcing_end_utc,
@@ -287,7 +347,12 @@ class DataIngestionService(BaseService):
             "prototype_forcing_halo_hours": str(self.prototype_forcing_halo_hours),
             "prep_cache_policy": "force_refresh" if self._force_refresh_enabled() else "cache_first",
             "forcing_outage_policy": self.forcing_outage_policy,
+            "forcing_source_budget_seconds": str(resolve_forcing_source_budget_seconds()),
             "pipeline_phase": self.current_phase,
+            "degraded_continue_used": str(self.degraded_continue_used).lower(),
+            "upstream_outage_detected": str(self.upstream_outage_detected).lower(),
+            "missing_forcing_factors": ";".join(sorted(self.missing_forcing_factors)),
+            "skipped_forcing_sources": ";".join(sorted(self.skipped_forcing_sources)),
         }
 
     def configure_explicit_download_window(self, *, start_date: str, end_date: str) -> None:
@@ -304,7 +369,9 @@ class DataIngestionService(BaseService):
         return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "y", "on"}
 
     def _force_refresh_enabled(self) -> bool:
-        return self._env_flag_enabled(PREP_FORCE_REFRESH_ENV)
+        return input_cache_policy_force_refresh_enabled(
+            prep_force_refresh_value=os.environ.get(PREP_FORCE_REFRESH_ENV),
+        )
 
     def _validated_cache_hit(
         self,
@@ -618,36 +685,31 @@ class DataIngestionService(BaseService):
     def _is_remote_outage_error(self, exc: Exception) -> bool:
         return is_remote_outage_error(exc)
 
-    def download_required_forcing_record(self, source_id: str) -> dict[str, Any]:
+    def download_budgeted_forcing_record(self, source_id: str, *, strict: bool = True) -> dict[str, Any]:
         source_id = str(source_id).strip()
-        try:
-            if source_id == "hycom":
-                result = self.download_hycom(raise_on_failure=True)
-            elif source_id == "cmems":
-                result = self.download_cmems(raise_on_failure=True)
-            elif source_id == "cmems_wave":
-                result = self.download_cmems_wave(raise_on_failure=True)
-            elif source_id == "era5":
-                result = self.download_era5(raise_on_failure=True)
-            elif source_id == "ncep":
-                result = self.download_ncep(raise_on_failure=True)
-            elif source_id == "gfs":
-                result = self.download_gfs(strict=True)
-            else:
-                raise KeyError(f"Unsupported forcing source id: {source_id}")
-        except Exception as exc:
-            return {
-                "status": "failed_remote_outage" if self._is_remote_outage_error(exc) else "failed",
+        forcing_factor = forcing_factor_id_for_source(source_id)
+        return run_budgeted_forcing_provider_call(
+            callable_path="src.services.ingestion._budgeted_ingestion_forcing_download",
+            kwargs={
                 "source_id": source_id,
-                "path": str(self._canonical_cache_path(source_id)),
-                "forcing_factor": forcing_factor_id_for_source(source_id),
-                "upstream_outage_detected": self._is_remote_outage_error(exc),
-                "error": str(exc),
-            }
+                "output_dir": str(self.output_dir),
+                "forcing_dir": str(self.forcing_dir),
+                "start_date": self.start_date,
+                "end_date": self.end_date,
+                "strict": bool(strict),
+            },
+            source_id=source_id,
+            forcing_factor=forcing_factor,
+            failure_path=str(self.forcing_dir / forcing_factor),
+        )
 
-        record = self._normalize_download_record(source_id, result)
-        record["forcing_factor"] = forcing_factor_id_for_source(source_id)
-        record["upstream_outage_detected"] = False
+    def download_required_forcing_record(self, source_id: str) -> dict[str, Any]:
+        return self.download_budgeted_forcing_record(source_id, strict=True)
+
+    def _download_required_forcing_or_raise(self, source_id: str) -> dict[str, Any]:
+        record = self.download_required_forcing_record(source_id)
+        if record.get("status") in {"failed", "failed_remote_outage"}:
+            raise ForcingProviderAcquisitionError(record)
         return record
 
     def _reuse_approved_for_source(self, source_id: str) -> bool:
@@ -662,6 +724,7 @@ class DataIngestionService(BaseService):
         *,
         source_id: str,
         download_callable,
+        allow_outage_skip: bool = False,
     ) -> dict[str, Any]:
         cached_record = self._validated_cache_hit(source_id)
         if cached_record is not None:
@@ -670,8 +733,62 @@ class DataIngestionService(BaseService):
         try:
             result = download_callable()
         except Exception as exc:
+            forcing_record = getattr(exc, "record", None)
             cache_validation = self._validate_cached_source(source_id)
-            if self._is_remote_outage_error(exc):
+            outage_detected = (
+                bool(forcing_record.get("upstream_outage_detected", False))
+                if isinstance(forcing_record, dict)
+                else self._is_remote_outage_error(exc)
+            )
+            remote_error = (
+                str(forcing_record.get("error") or str(exc))
+                if isinstance(forcing_record, dict)
+                else str(exc)
+            )
+            failure_stage = (
+                str(forcing_record.get("failure_stage") or "")
+                if isinstance(forcing_record, dict)
+                else ""
+            )
+            elapsed_seconds = (
+                forcing_record.get("elapsed_seconds")
+                if isinstance(forcing_record, dict)
+                else None
+            )
+            budget_seconds = (
+                forcing_record.get("budget_seconds")
+                if isinstance(forcing_record, dict)
+                else None
+            )
+            budget_exhausted = (
+                bool(forcing_record.get("budget_exhausted", False))
+                if isinstance(forcing_record, dict)
+                else False
+            )
+            if outage_detected:
+                if allow_outage_skip:
+                    factor_id = forcing_factor_id_for_source(source_id)
+                    self.degraded_continue_used = True
+                    self.upstream_outage_detected = True
+                    self.missing_forcing_factors.add(factor_id)
+                    self.skipped_forcing_sources.add(str(source_id))
+                    return self._record_download(
+                        manifest,
+                        source_id,
+                        {
+                            "status": "skipped_outage_continue_degraded",
+                            "source_id": source_id,
+                            "path": str(self._canonical_cache_path(source_id)),
+                            "forcing_factor": factor_id,
+                            "upstream_outage_detected": True,
+                            "elapsed_seconds": elapsed_seconds,
+                            "budget_seconds": budget_seconds,
+                            "budget_exhausted": budget_exhausted,
+                            "failure_stage": failure_stage,
+                            "validation": cache_validation if cache_validation.get("path") else None,
+                            "remote_error": remote_error,
+                        },
+                    )
                 if cache_validation.get("valid") and self._reuse_approved_for_source(source_id):
                     return self._record_download(
                         manifest,
@@ -680,7 +797,11 @@ class DataIngestionService(BaseService):
                             "status": "reused_validated_cache",
                             "path": cache_validation.get("path"),
                             "validation": cache_validation,
-                            "remote_error": str(exc),
+                            "remote_error": remote_error,
+                            "elapsed_seconds": elapsed_seconds,
+                            "budget_seconds": budget_seconds,
+                            "budget_exhausted": budget_exhausted,
+                            "failure_stage": failure_stage,
                             "reuse_mode": "outage_prompt_approved",
                         },
                     )
@@ -692,7 +813,11 @@ class DataIngestionService(BaseService):
                             "status": "awaiting_cache_reuse_decision",
                             "path": cache_validation.get("path"),
                             "validation": cache_validation,
-                            "remote_error": str(exc),
+                            "remote_error": remote_error,
+                            "elapsed_seconds": elapsed_seconds,
+                            "budget_seconds": budget_seconds,
+                            "budget_exhausted": budget_exhausted,
+                            "failure_stage": failure_stage,
                         },
                     )
                     raise PrepOutageDecisionRequired(
@@ -700,14 +825,18 @@ class DataIngestionService(BaseService):
                         source_id=source_id,
                         cache_path=str(cache_validation.get("path") or self._canonical_cache_path(source_id)),
                         validation=cache_validation,
-                        error=str(exc),
+                        error=remote_error,
                     ) from exc
 
                 record = {
                     "status": "cancelled_no_cache",
                     "path": cache_validation.get("path"),
                     "validation": cache_validation,
-                    "remote_error": str(exc),
+                    "remote_error": remote_error,
+                    "elapsed_seconds": elapsed_seconds,
+                    "budget_seconds": budget_seconds,
+                    "budget_exhausted": budget_exhausted,
+                    "failure_stage": failure_stage,
                 }
                 if cache_validation.get("valid") and self._reuse_prompt_already_consumed():
                     record["status"] = "failed_after_reuse_prompt"
@@ -724,9 +853,14 @@ class DataIngestionService(BaseService):
                 manifest,
                 source_id,
                 {
-                    "status": "failed",
+                    "status": forcing_record.get("status", "failed") if isinstance(forcing_record, dict) else "failed",
                     "path": str(self._canonical_cache_path(source_id)),
-                    "error": str(exc),
+                    "error": remote_error,
+                    "elapsed_seconds": elapsed_seconds,
+                    "budget_seconds": budget_seconds,
+                    "budget_exhausted": budget_exhausted,
+                    "failure_stage": failure_stage,
+                    "upstream_outage_detected": outage_detected,
                     "validation": cache_validation if cache_validation.get("path") else None,
                 },
             )
@@ -781,43 +915,48 @@ class DataIngestionService(BaseService):
                     forcing_box=self.bbox,
                     expected_delta=pd.Timedelta(hours=PROTOTYPE_GFS_ANALYSIS_DELTA_HOURS),
                 )
-                manifest.config.update(self._manifest_config())
-                self._persist_download_manifest(manifest)
-            
+            manifest.config.update(self._manifest_config())
+            self._persist_download_manifest(manifest)
+
             # 2. Download HYCOM
             self._handle_required_download_step(
                 manifest,
                 source_id="hycom",
-                download_callable=lambda: self.download_hycom(raise_on_failure=True),
+                download_callable=lambda: self._download_required_forcing_or_raise("hycom"),
+                allow_outage_skip=self.forcing_outage_policy == FORCING_OUTAGE_POLICY_CONTINUE_DEGRADED,
             )
             
             # 3. Download CMEMS
             self._handle_required_download_step(
                 manifest,
                 source_id="cmems",
-                download_callable=lambda: self.download_cmems(raise_on_failure=True),
+                download_callable=lambda: self._download_required_forcing_or_raise("cmems"),
+                allow_outage_skip=self.forcing_outage_policy == FORCING_OUTAGE_POLICY_CONTINUE_DEGRADED,
             )
             self._handle_required_download_step(
                 manifest,
                 source_id="cmems_wave",
-                download_callable=lambda: self.download_cmems_wave(raise_on_failure=True),
+                download_callable=lambda: self._download_required_forcing_or_raise("cmems_wave"),
+                allow_outage_skip=self.forcing_outage_policy == FORCING_OUTAGE_POLICY_CONTINUE_DEGRADED,
             )
             
             # 4. Download ERA5
             self._handle_required_download_step(
                 manifest,
                 source_id="era5",
-                download_callable=lambda: self.download_era5(raise_on_failure=True),
+                download_callable=lambda: self._download_required_forcing_or_raise("era5"),
+                allow_outage_skip=self.forcing_outage_policy == FORCING_OUTAGE_POLICY_CONTINUE_DEGRADED,
             )
 
             if self.case_context.is_prototype:
-                self._record_download(manifest, "gfs", self.download_gfs(strict=False))
+                self._record_download(manifest, "gfs", self.download_budgeted_forcing_record("gfs", strict=False))
 
             # 5. Download NCEP
             self._handle_required_download_step(
                 manifest,
                 source_id="ncep",
-                download_callable=lambda: self.download_ncep(raise_on_failure=True),
+                download_callable=lambda: self._download_required_forcing_or_raise("ncep"),
+                allow_outage_skip=self.forcing_outage_policy == FORCING_OUTAGE_POLICY_CONTINUE_DEGRADED,
             )
 
             if not self.case_context.is_official:
@@ -827,6 +966,7 @@ class DataIngestionService(BaseService):
                     download_callable=self.download_arcgis_layers,
                 )
 
+            manifest.config.update(self._manifest_config())
             manifest_path = self._persist_download_manifest(manifest)
 
             prepared_manifest_path = self.write_prepared_input_manifest()
@@ -1050,7 +1190,12 @@ class DataIngestionService(BaseService):
         self._apply_forcing_window(self.case_context.forcing_start_utc, self.case_context.forcing_end_utc)
         return str(output_path)
 
-    def download_gfs(self, *, strict: bool = False) -> dict[str, Any] | str:
+    def download_gfs(
+        self,
+        *,
+        strict: bool = False,
+        budget_seconds: int | float | None = None,
+    ) -> dict[str, Any] | str:
         output_path = self.forcing_dir / "gfs_wind.nc"
         cached = self._validated_cache_hit("gfs")
         if cached is not None:
@@ -1062,13 +1207,13 @@ class DataIngestionService(BaseService):
                 end_time=self.effective_forcing_end_utc,
                 output_path=output_path,
                 scratch_dir=self.forcing_dir,
+                budget_seconds=budget_seconds,
             )
         except Exception as exc:
             if strict:
                 raise
             logger.warning(
-                "Best-effort GFS wind prep failed for prototype workflow %s. "
-                "The run will continue without gfs_wind.nc because GFS is optional in this lane. Reason: %s",
+                "Optional GFS winds are unavailable for %s. Continuing without gfs_wind.nc. Reason: %s",
                 self.case_context.workflow_mode,
                 exc,
             )

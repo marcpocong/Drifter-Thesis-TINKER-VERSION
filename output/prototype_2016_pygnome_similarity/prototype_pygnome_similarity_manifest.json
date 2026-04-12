@@ -1,7 +1,7 @@
 {
   "phase": "prototype_pygnome_similarity_summary",
   "workflow_mode": "prototype_2016",
-  "generated_at_utc": "2026-04-12T15:41:16.041193+00:00",
+  "generated_at_utc": "2026-04-12T22:12:19.030299+00:00",
   "output_root": "output/prototype_2016_pygnome_similarity",
   "configured_case_ids": [
     "CASE_2016-09-01",
@@ -17,7 +17,64 @@
   "pygnome_role": "comparator_only",
   "legacy_debug_only": true,
   "final_chapter3_evidence": false,
-  "support_context_mode": "mindoro_canonical",
+  "support_context_mode": "case_local_drifter_track",
+  "extent_modes_supported": [
+    "fixed_regional_extent",
+    "dynamic_forecast_extent"
+  ],
+  "default_extent_mode": "dynamic_forecast_extent",
+  "rendering_profile": "prototype_2016_case_local_projected_v1",
+  "map_projection": "local_azimuthal_equidistant",
+  "common_locator_bounds_wgs84": [
+    105.6465,
+    124.3655,
+    3.1865000000000023,
+    23.3515
+  ],
+  "case_rendering": {
+    "CASE_2016-09-01": {
+      "rendering_profile": "prototype_2016_case_local_projected_v1",
+      "display_bounds_wgs84": [
+        116.855,
+        117.50500000000001,
+        10.091750000000001,
+        10.74175
+      ],
+      "map_projection": "local_azimuthal_equidistant",
+      "projection_center": {
+        "lon": 117.18,
+        "lat": 10.41675
+      }
+    },
+    "CASE_2016-09-06": {
+      "rendering_profile": "prototype_2016_case_local_projected_v1",
+      "display_bounds_wgs84": [
+        117.099,
+        117.74900000000001,
+        9.947000000000001,
+        10.597
+      ],
+      "map_projection": "local_azimuthal_equidistant",
+      "projection_center": {
+        "lon": 117.424,
+        "lat": 10.272
+      }
+    },
+    "CASE_2016-09-17": {
+      "rendering_profile": "prototype_2016_case_local_projected_v1",
+      "display_bounds_wgs84": [
+        112.2465,
+        112.91299999999998,
+        15.972999999999999,
+        16.622999999999998
+      ],
+      "map_projection": "local_azimuthal_equidistant",
+      "projection_center": {
+        "lon": 112.57974999999999,
+        "lat": 16.298
+      }
+    }
+  },
   "ranking_rule": "higher mean FSS @ 5 km, then lower mean KL, within each comparison track",
   "required_artifacts_per_case": [
     "phase3a_summary.csv",
@@ -29,8 +86,8 @@
   "headline": {
     "top_ranked_case_id": "CASE_2016-09-06",
     "top_ranked_comparison_track_id": "deterministic",
-    "top_ranked_mean_fss_5km": 0.7827227384162759,
-    "top_ranked_mean_kl": 17.253814075380593
+    "top_ranked_mean_fss_5km": 0.43478260869565216,
+    "top_ranked_mean_kl": 22.833256835719236
   },
   "outputs": {
     "case_registry_csv": "output/prototype_2016_pygnome_similarity/prototype_pygnome_case_registry.csv",

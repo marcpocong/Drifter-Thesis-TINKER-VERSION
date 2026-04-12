@@ -34,6 +34,7 @@ $Script:PrepOutageExitCode = 86
 $Script:PrepOutagePayloadPrefix = "PREP_OUTAGE_PAYLOAD="
 $Script:ForcingOutageSkipExitCode = 87
 $Script:ForcingOutageSkipPayloadPrefix = "FORCING_OUTAGE_SKIP_PAYLOAD="
+$Script:StartupPromptProbePrefix = "STARTUP_PROMPT_PROBE="
 
 Set-Location $Script:RepoRoot
 
@@ -106,23 +107,34 @@ function Invoke-DockerPhaseCommand {
 
     $prepPayloadLine = $null
     $forcingSkipPayloadLine = $null
-    & docker-compose @dockerArgs 2>&1 | ForEach-Object {
-        $message = if ($_ -is [System.Management.Automation.ErrorRecord]) {
-            $_.Exception.Message
-        } else {
-            [string]$_
+    $previousErrorActionPreference = $ErrorActionPreference
+    try {
+        # Docker writes routine status lines to stderr, and PowerShell 5.1 will surface those as
+        # ErrorRecord objects when ErrorActionPreference=Stop. Downgrade just this native call so
+        # benign container/status chatter does not abort the launcher.
+        $ErrorActionPreference = "Continue"
+        & docker-compose @dockerArgs 2>&1 | ForEach-Object {
+            $message = if ($_ -is [System.Management.Automation.ErrorRecord]) {
+                $_.Exception.Message
+            } else {
+                [string]$_
+            }
+            if ($message.StartsWith($Script:PrepOutagePayloadPrefix)) {
+                $prepPayloadLine = $message
+            }
+            if ($message.StartsWith($Script:ForcingOutageSkipPayloadPrefix)) {
+                $forcingSkipPayloadLine = $message
+            }
+            Write-ProcessLine $message
         }
-        if ($message.StartsWith($Script:PrepOutagePayloadPrefix)) {
-            $prepPayloadLine = $message
-        }
-        if ($message.StartsWith($Script:ForcingOutageSkipPayloadPrefix)) {
-            $forcingSkipPayloadLine = $message
-        }
-        Write-ProcessLine $message
+        $phaseExitCode = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorActionPreference
     }
 
     return @{
-        ExitCode = $LASTEXITCODE
+        ExitCode = $phaseExitCode
         PayloadLine = $prepPayloadLine
         ForcingSkipPayloadLine = $forcingSkipPayloadLine
     }
@@ -143,7 +155,7 @@ function Update-PrepManifestCancelledByUser {
     }
 
     try {
-        $payload = Get-Content $manifestPath -Raw | ConvertFrom-Json -AsHashtable
+        $payload = ConvertFrom-JsonCompat -Json (Get-Content $manifestPath -Raw)
         if (-not $payload.ContainsKey($RunName)) {
             return
         }
@@ -224,6 +236,289 @@ function ConvertTo-Hashtable {
     return $result
 }
 
+function ConvertTo-NativeJsonData {
+    param([object]$InputObject)
+
+    if ($null -eq $InputObject) {
+        return $null
+    }
+
+    if ($InputObject -is [System.Collections.IDictionary]) {
+        $result = @{}
+        foreach ($key in $InputObject.Keys) {
+            $result[[string]$key] = ConvertTo-NativeJsonData -InputObject $InputObject[$key]
+        }
+        return $result
+    }
+
+    if ($InputObject -is [System.Array] -or $InputObject -is [System.Collections.IList]) {
+        $items = @()
+        foreach ($item in $InputObject) {
+            $items += ,(ConvertTo-NativeJsonData -InputObject $item)
+        }
+        return ,$items
+    }
+
+    if (
+        $InputObject -isnot [string] -and
+        $InputObject -isnot [char] -and
+        $InputObject.PSObject -and
+        $InputObject.PSObject.Properties.Count -gt 0
+    ) {
+        $result = @{}
+        foreach ($property in $InputObject.PSObject.Properties) {
+            $result[[string]$property.Name] = ConvertTo-NativeJsonData -InputObject $property.Value
+        }
+        return $result
+    }
+
+    return $InputObject
+}
+
+function ConvertFrom-JsonCompat {
+    param([Parameter(Mandatory = $true)][string]$Json)
+
+    $parsed = $Json | ConvertFrom-Json
+    return ConvertTo-NativeJsonData -InputObject $parsed
+}
+
+function Merge-Hashtables {
+    param(
+        [hashtable]$Base = @{},
+        [hashtable]$Override = @{}
+    )
+
+    $merged = @{}
+    foreach ($key in $Base.Keys) {
+        $merged[$key] = $Base[$key]
+    }
+    foreach ($key in $Override.Keys) {
+        $merged[$key] = $Override[$key]
+    }
+    return $merged
+}
+
+function Test-LauncherStartupPromptInteractive {
+    if ($NoPause) {
+        return $false
+    }
+
+    try {
+        return [Environment]::UserInteractive -and -not [Console]::IsInputRedirected -and -not [Console]::IsOutputRedirected
+    }
+    catch {
+        return $false
+    }
+}
+
+function Get-ExplicitForcingBudgetSetting {
+    $raw = [string]$env:FORCING_SOURCE_BUDGET_SECONDS
+    if ([string]::IsNullOrWhiteSpace($raw)) {
+        return $null
+    }
+
+    $parsed = 0
+    if (-not [int]::TryParse($raw.Trim(), [ref]$parsed) -or $parsed -lt 0) {
+        throw "FORCING_SOURCE_BUDGET_SECONDS must be a non-negative integer number of seconds."
+    }
+    return [string]$parsed
+}
+
+function Get-ExplicitInputCachePolicySetting {
+    $raw = [string]$env:INPUT_CACHE_POLICY
+    $normalized = $raw.Trim().ToLowerInvariant()
+    switch ($normalized) {
+        "" { break }
+        "default" { break }
+        "reuse_if_valid" { return "reuse_if_valid" }
+        "force_refresh" { return "force_refresh" }
+        default {
+            throw "INPUT_CACHE_POLICY must be one of: default, reuse_if_valid, force_refresh."
+        }
+    }
+
+    $prepForceRefresh = [string]$env:PREP_FORCE_REFRESH
+    if ($prepForceRefresh.Trim().ToLowerInvariant() -in @("1", "true", "yes", "y", "on")) {
+        return "force_refresh"
+    }
+    return $null
+}
+
+function Get-ExplicitPrototype2016EnsemblePolicySetting {
+    $raw = [string]$env:PROTOTYPE_2016_ENSEMBLE_POLICY
+    $normalized = $raw.Trim().ToLowerInvariant()
+    switch ($normalized) {
+        "" { return $null }
+        "full_rerun" { return "full_rerun" }
+        "reuse_if_valid" { return "reuse_if_valid" }
+        default {
+            throw "PROTOTYPE_2016_ENSEMBLE_POLICY must be one of: full_rerun, reuse_if_valid."
+        }
+    }
+}
+
+function Read-StartupWaitBudgetChoice {
+    Write-Host ""
+    Write-Host "Choose one forcing wait budget for this run:" -ForegroundColor Yellow
+    Write-Host "  1. 120 seconds" -ForegroundColor White
+    Write-Host "  2. 300 seconds (Recommended)" -ForegroundColor White
+    Write-Host "  3. 600 seconds" -ForegroundColor White
+    Write-Host "  4. 0 seconds (no hard cap)" -ForegroundColor White
+
+    while ($true) {
+        $choice = (Read-Host "Select wait budget [2]").Trim()
+        switch ($choice) {
+            "" { return "300" }
+            "1" { return "120" }
+            "2" { return "300" }
+            "3" { return "600" }
+            "4" { return "0" }
+            "120" { return "120" }
+            "300" { return "300" }
+            "600" { return "600" }
+            "0" { return "0" }
+            default {
+                Write-Host "Enter 1, 2, 3, or 4." -ForegroundColor DarkYellow
+            }
+        }
+    }
+}
+
+function Read-StartupInputCacheChoice {
+    Write-Host ""
+    Write-Host "Eligible local input data already exists for this run." -ForegroundColor Yellow
+    Write-Host "  1. Reuse validated local inputs when available (Recommended)" -ForegroundColor White
+    Write-Host "  2. Force refresh remote inputs" -ForegroundColor White
+
+    while ($true) {
+        $choice = (Read-Host "Select input cache policy [1]").Trim().ToLowerInvariant()
+        switch ($choice) {
+            "" { return "reuse_if_valid" }
+            "1" { return "reuse_if_valid" }
+            "reuse" { return "reuse_if_valid" }
+            "reuse_if_valid" { return "reuse_if_valid" }
+            "2" { return "force_refresh" }
+            "refresh" { return "force_refresh" }
+            "force_refresh" { return "force_refresh" }
+            default {
+                Write-Host "Enter 1 or 2." -ForegroundColor DarkYellow
+            }
+        }
+    }
+}
+
+function Read-StartupPrototype2016EnsembleChoice {
+    Write-Host ""
+    Write-Host "Prototype 2016 legacy bundle:" -ForegroundColor Yellow
+    Write-Host "  1. Reuse valid ensemble outputs and refresh figures (Recommended for figure/layout-only updates)" -ForegroundColor White
+    Write-Host "  2. Rerun full legacy bundle" -ForegroundColor White
+
+    while ($true) {
+        $choice = (Read-Host "Select 2016 ensemble policy [1]").Trim().ToLowerInvariant()
+        switch ($choice) {
+            "" { return "reuse_if_valid" }
+            "1" { return "reuse_if_valid" }
+            "reuse" { return "reuse_if_valid" }
+            "reuse_if_valid" { return "reuse_if_valid" }
+            "2" { return "full_rerun" }
+            "rerun" { return "full_rerun" }
+            "full_rerun" { return "full_rerun" }
+            default {
+                Write-Host "Enter 1 or 2." -ForegroundColor DarkYellow
+            }
+        }
+    }
+}
+
+function Invoke-StartupPromptProbe {
+    param([Parameter(Mandatory = $true)][string]$EntryId)
+
+    $probeLine = $null
+    $dockerArgs = @(
+        "exec", "-T",
+        "pipeline",
+        "python",
+        "-m",
+        "src.utils.startup_prompt_policy",
+        "--probe-launcher-entry",
+        $EntryId
+    )
+
+    & docker-compose @dockerArgs 2>&1 | ForEach-Object {
+        $message = if ($_ -is [System.Management.Automation.ErrorRecord]) {
+            $_.Exception.Message
+        } else {
+            [string]$_
+        }
+        if ($message.StartsWith($Script:StartupPromptProbePrefix)) {
+            $probeLine = $message
+        } else {
+            Write-ProcessLine $message
+        }
+    }
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Startup prompt probe failed for launcher entry '$EntryId' with exit code $LASTEXITCODE."
+    }
+    if (-not $probeLine) {
+        throw "Startup prompt probe for launcher entry '$EntryId' did not return a machine-readable payload."
+    }
+
+    $payloadJson = $probeLine.Substring($Script:StartupPromptProbePrefix.Length)
+    try {
+        return ConvertFrom-JsonCompat -Json $payloadJson
+    }
+    catch {
+        throw "Startup prompt probe for launcher entry '$EntryId' returned unreadable JSON: $($_.Exception.Message)"
+    }
+}
+
+function Resolve-LauncherStartupEnv {
+    param([Parameter(Mandatory = $true)]$LauncherEntry)
+
+    $resolved = @{
+        "RUN_STARTUP_PROMPTS_RESOLVED" = "1"
+        "RUN_STARTUP_TOKEN" = "startup_$([guid]::NewGuid().ToString('N'))"
+    }
+
+    $explicitBudget = Get-ExplicitForcingBudgetSetting
+    $explicitCachePolicy = Get-ExplicitInputCachePolicySetting
+    $explicitPrototype2016EnsemblePolicy = Get-ExplicitPrototype2016EnsemblePolicySetting
+    $interactivePromptAllowed = Test-LauncherStartupPromptInteractive
+    $readOnlyCategory = ([string]$LauncherEntry.category_id -eq "read_only_packaging_help_utilities")
+    $probe = $null
+
+    if ($interactivePromptAllowed -and -not $readOnlyCategory -and ($null -eq $explicitBudget -or $null -eq $explicitCachePolicy)) {
+        $probe = Invoke-StartupPromptProbe -EntryId ([string]$LauncherEntry.entry_id)
+    }
+
+    if ($null -ne $explicitBudget) {
+        $resolved["FORCING_SOURCE_BUDGET_SECONDS"] = $explicitBudget
+    } elseif ($interactivePromptAllowed -and $probe -and [bool]$probe.should_prompt_wait_budget) {
+        $resolved["FORCING_SOURCE_BUDGET_SECONDS"] = Read-StartupWaitBudgetChoice
+    } else {
+        $resolved["FORCING_SOURCE_BUDGET_SECONDS"] = "300"
+    }
+
+    if ($null -ne $explicitCachePolicy) {
+        $resolved["INPUT_CACHE_POLICY"] = $explicitCachePolicy
+    } elseif ($interactivePromptAllowed -and $probe -and [bool]$probe.has_eligible_input_cache) {
+        $resolved["INPUT_CACHE_POLICY"] = Read-StartupInputCacheChoice
+    } else {
+        $resolved["INPUT_CACHE_POLICY"] = "reuse_if_valid"
+    }
+
+    if ($null -ne $explicitPrototype2016EnsemblePolicy) {
+        $resolved["PROTOTYPE_2016_ENSEMBLE_POLICY"] = $explicitPrototype2016EnsemblePolicy
+    } elseif ($interactivePromptAllowed -and $probe -and [bool]$probe.should_prompt_prototype_2016_ensemble_policy) {
+        $resolved["PROTOTYPE_2016_ENSEMBLE_POLICY"] = Read-StartupPrototype2016EnsembleChoice
+    } else {
+        $resolved["PROTOTYPE_2016_ENSEMBLE_POLICY"] = "full_rerun"
+    }
+
+    return $resolved
+}
+
 function Invoke-DockerPhase {
     param(
         [Parameter(Mandatory = $true)][string]$Phase,
@@ -260,7 +555,7 @@ function Invoke-DockerPhase {
 
         $payloadJson = $phaseResult.ForcingSkipPayloadLine.Substring($Script:ForcingOutageSkipPayloadPrefix.Length)
         try {
-            $payload = $payloadJson | ConvertFrom-Json -AsHashtable
+            $payload = ConvertFrom-JsonCompat -Json $payloadJson
         }
         catch {
             throw "Phase '$Phase' returned an unreadable degraded-skip payload: $($_.Exception.Message)"
@@ -280,6 +575,18 @@ function Invoke-DockerPhase {
         if ($payload.skipped_branch_ids) {
             Write-Host "Skipped branches: $($payload.skipped_branch_ids -join ', ')" -ForegroundColor DarkGray
         }
+        if ($null -ne $payload.budget_seconds) {
+            Write-Host "Budget: $($payload.budget_seconds) seconds" -ForegroundColor DarkGray
+        }
+        if ($null -ne $payload.elapsed_seconds) {
+            Write-Host "Elapsed: $($payload.elapsed_seconds) seconds" -ForegroundColor DarkGray
+        }
+        if ($payload.failure_stage) {
+            Write-Host "Failure stage: $($payload.failure_stage)" -ForegroundColor DarkGray
+        }
+        if ($null -ne $payload.budget_exhausted) {
+            Write-Host "Budget exhausted: $($payload.budget_exhausted)" -ForegroundColor DarkGray
+        }
         if ($payload.manifest_path) {
             Write-Host "Manifest: $($payload.manifest_path)" -ForegroundColor DarkGray
         }
@@ -296,7 +603,7 @@ function Invoke-DockerPhase {
 
         $payloadJson = $phaseResult.PayloadLine.Substring($Script:PrepOutagePayloadPrefix.Length)
         try {
-            $payload = $payloadJson | ConvertFrom-Json -AsHashtable
+            $payload = ConvertFrom-JsonCompat -Json $payloadJson
         }
         catch {
             throw "Prep returned an unreadable outage payload: $($_.Exception.Message)"
@@ -359,17 +666,37 @@ function Invoke-LauncherEntry {
     Start-Transcript -Path $logFile -Append | Out-Null
     try {
         Write-Host "Starting Docker containers..." -ForegroundColor Yellow
-        docker-compose up -d 2>&1 | ForEach-Object { Write-ProcessLine $_ }
-        $composeExitCode = $LASTEXITCODE
+        $previousErrorActionPreference = $ErrorActionPreference
+        try {
+            # Docker may emit "Container ... Running" on stderr even when the command succeeds.
+            # Treat that output as normal launcher chatter instead of a terminating PowerShell error.
+            $ErrorActionPreference = "Continue"
+            docker-compose up -d 2>&1 | ForEach-Object { Write-ProcessLine $_ }
+            $composeExitCode = $LASTEXITCODE
+        }
+        finally {
+            $ErrorActionPreference = $previousErrorActionPreference
+        }
         if ($composeExitCode -ne 0) {
             throw "docker-compose up failed with exit code $composeExitCode."
+        }
+
+        $entryStartupEnv = Resolve-LauncherStartupEnv -LauncherEntry $LauncherEntry
+        Write-Host ""
+        Write-Host "Run-start policy:" -ForegroundColor Yellow
+        Write-Host "  INPUT_CACHE_POLICY=$($entryStartupEnv['INPUT_CACHE_POLICY'])" -ForegroundColor DarkGray
+        Write-Host "  FORCING_SOURCE_BUDGET_SECONDS=$($entryStartupEnv['FORCING_SOURCE_BUDGET_SECONDS'])" -ForegroundColor DarkGray
+        if ($entryStartupEnv.ContainsKey("PROTOTYPE_2016_ENSEMBLE_POLICY")) {
+            Write-Host "  PROTOTYPE_2016_ENSEMBLE_POLICY=$($entryStartupEnv['PROTOTYPE_2016_ENSEMBLE_POLICY'])" -ForegroundColor DarkGray
         }
 
         $steps = @($LauncherEntry.steps)
         $index = 0
         foreach ($step in $steps) {
             $index += 1
-            $stepExtraEnv = ConvertTo-Hashtable -InputObject $step.extra_env
+            $stepExtraEnv = Merge-Hashtables `
+                -Base $entryStartupEnv `
+                -Override (ConvertTo-Hashtable -InputObject $step.extra_env)
             Write-Host ""
             Write-Host "[$index/$($steps.Count)]" -ForegroundColor Cyan -NoNewline
             Invoke-DockerPhase `
@@ -451,9 +778,19 @@ function Show-Help {
     Write-Host "Scientific rerun commands require explicit intent:" -ForegroundColor Yellow
     Write-Host "  .\start.ps1 -Entry mindoro_reportable_core -NoPause" -ForegroundColor Gray
     Write-Host "  .\start.ps1 -Entry dwh_reportable_bundle -NoPause" -ForegroundColor Gray
+    Write-Host "  .\start.ps1 -Entry phase1_mindoro_focus_pre_spill_experiment" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "Direct container runs only prompt when they have a TTY:" -ForegroundColor Yellow
+    Write-Host "  docker-compose exec -e WORKFLOW_MODE=phase1_mindoro_focus_pre_spill_2016_2023 -e PIPELINE_PHASE=phase1_production_rerun pipeline python -m src" -ForegroundColor Gray
+    Write-Host "  docker-compose exec -T ... stays prompt-free and now prints the resolved startup policy instead." -ForegroundColor White
     Write-Host ""
     Write-Host "Current status guardrails:" -ForegroundColor Yellow
     Write-Host "  - Phase 1 is architecture-audited, but the full 2016-2022 production rerun is still needed." -ForegroundColor White
+    Write-Host "  - FORCING_OUTAGE_POLICY=default|continue_degraded|fail_hard controls forcing-only outage behavior. Reportable lanes fail hard by default; appendix/legacy/experimental lanes may continue in degraded mode." -ForegroundColor White
+    Write-Host "  - Interactive launcher runs now ask once for the forcing wait budget and, when eligible caches already exist, whether to reuse validated inputs or force refresh." -ForegroundColor White
+    Write-Host "  - Direct interactive docker-compose exec runs do the same once per run; no-TTY direct runs skip prompts and print the resolved policy instead." -ForegroundColor White
+    Write-Host "  - Non-interactive launcher runs default silently to INPUT_CACHE_POLICY=reuse_if_valid and FORCING_SOURCE_BUDGET_SECONDS=300." -ForegroundColor White
+    Write-Host "  - Drifter truth and ArcGIS/observation truth inputs stay hard requirements even when degraded forcing continuation is enabled." -ForegroundColor White
     Write-Host "  - Phase 2 is scientifically usable, but not scientifically frozen." -ForegroundColor White
     Write-Host "  - Phase 4 is scientifically reportable now for Mindoro, but inherited-provisional from the upstream Phase 1/2 state." -ForegroundColor White
     Write-Host "  - DWH Phase 3C stays a separate external transfer-validation story with readiness-gated HYCOM GOFS 3.1 + ERA5 + CMEMS wave/Stokes forcing; observed masks remain truth and PyGNOME remains comparator-only." -ForegroundColor White

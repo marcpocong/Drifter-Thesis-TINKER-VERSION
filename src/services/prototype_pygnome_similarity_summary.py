@@ -15,18 +15,32 @@ import pandas as pd
 import rasterio
 import xarray as xr
 import yaml
+import cartopy.crs as ccrs
 from rasterio import features as raster_features
 from shapely.geometry import shape as shapely_shape
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.colors import to_rgba
+from matplotlib.colors import LinearSegmentedColormap, to_rgba
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch, Polygon, Rectangle
 
 from src.core.artifact_status import artifact_status_columns, status_for_track_id
 from src.core.domain_semantics import resolve_legacy_prototype_display_domain
+from src.helpers.plotting import (
+    add_prototype_2016_geoaxes,
+    bounds_from_point,
+    bounds_from_points,
+    derive_prototype_2016_figure_bounds,
+    figure_relative_inset_rect,
+    merge_case_display_bounds,
+    normalize_prototype_2016_extent_mode,
+    PROTOTYPE_2016_EXTENT_MODE_DYNAMIC_FORECAST,
+    PROTOTYPE_2016_EXTENT_MODE_FIXED_REGIONAL,
+    prototype_2016_rendering_metadata,
+)
 from src.helpers.metrics import calculate_fss, calculate_kl_divergence
+from src.utils.io import load_drifter_data, select_drifter_of_record
 
 PHASE = "prototype_pygnome_similarity_summary"
 DEFAULT_OUTPUT_DIRS = {
@@ -50,6 +64,7 @@ REQUIRED_PAIRING_COLUMNS = (
     "qa_overlay_path",
 )
 DOMAIN_BOUNDS = (115.0, 122.0, 6.0, 14.5)
+CASE_LOCAL_SUPPORT_CONTEXT_MODE = "case_local_drifter_track"
 SINGLE_FIGURE_SIZE = (8.4, 12.2)
 BOARD_FIGURE_SIZE = (13.4, 10.8)
 FIGURE_DPI = 180
@@ -196,7 +211,8 @@ class PrototypePygnomeSimilaritySummaryService:
         if not self.case_ids:
             raise ValueError("Prototype PyGNOME similarity summary requires at least one configured case.")
         self.domain_bounds = tuple(float(value) for value in workflow_config.get("domain_bounds") or DOMAIN_BOUNDS)
-        self.support_context_mode = str(workflow_config.get("support_context_mode") or "mindoro_canonical")
+        default_context_mode = CASE_LOCAL_SUPPORT_CONTEXT_MODE if self.workflow_mode == "prototype_2016" else "mindoro_canonical"
+        self.support_context_mode = str(workflow_config.get("support_context_mode") or default_context_mode)
         self.case_metadata_by_id = {
             str(case_id): dict(payload or {})
             for case_id, payload in (workflow_config.get("case_metadata_by_id") or {}).items()
@@ -205,6 +221,11 @@ class PrototypePygnomeSimilaritySummaryService:
         self._vector_cache: dict[tuple[Path, str], gpd.GeoDataFrame | None] = {}
         self._prototype_map_context: dict[str, Any] | None = None
         self._sea_mask_cache: np.ndarray | None = None
+        self.extent_mode = (
+            PROTOTYPE_2016_EXTENT_MODE_DYNAMIC_FORECAST
+            if self.workflow_mode == "prototype_2016"
+            else PROTOTYPE_2016_EXTENT_MODE_FIXED_REGIONAL
+        )
 
     def _load_settings(self) -> dict[str, Any]:
         settings_path = self.repo_root / "config" / "settings.yaml"
@@ -247,7 +268,7 @@ class PrototypePygnomeSimilaritySummaryService:
             "prototype_case_dates": prototype_dates,
             "case_ids": tuple(case_ids),
             "domain_bounds": tuple(resolve_legacy_prototype_display_domain(settings)),
-            "support_context_mode": "mindoro_canonical",
+            "support_context_mode": CASE_LOCAL_SUPPORT_CONTEXT_MODE,
             "case_metadata_by_id": {},
         }
 
@@ -260,12 +281,21 @@ class PrototypePygnomeSimilaritySummaryService:
     def _context_phrase(self) -> str:
         if self.support_context_mode == "mindoro_canonical":
             return "canonical Mindoro land/shoreline context"
+        if self.support_context_mode == CASE_LOCAL_SUPPORT_CONTEXT_MODE:
+            return "case-local drifter-centered geographic context"
         return "neutral case-local geographic context"
 
     def _support_status_phrase(self) -> str:
         if self.workflow_mode == "prototype_2021":
             return "accepted-segment debug support only"
         return "legacy/debug support only"
+
+    def _context_note_sentence(self) -> str:
+        if self.support_context_mode == "mindoro_canonical":
+            return "Map context reuses the stored canonical Mindoro scoring-grid assets."
+        if self.support_context_mode == CASE_LOCAL_SUPPORT_CONTEXT_MODE:
+            return "Map context is case-local and drifter-centered, so the legacy 2016 support lane is no longer framed on the old Mindoro prototype domain."
+        return "Map context is neutral/case-local because this preferred 2021 debug lane is not tied to the old Mindoro prototype geography."
 
     def _comparison_track_ids(self) -> tuple[str, ...]:
         if self.workflow_mode == "prototype_2016":
@@ -293,17 +323,41 @@ class PrototypePygnomeSimilaritySummaryService:
     def _case_benchmark_dir(self, case_id: str) -> Path:
         return self.repo_root / "output" / case_id / "benchmark"
 
+    def _case_grid_metadata_path(self, case_id: str) -> Path:
+        return self._case_benchmark_dir(case_id) / "grid" / "grid.json"
+
+    def _load_case_display_bounds(self, case_id: str) -> tuple[float, float, float, float]:
+        ensemble_metadata_path = self.repo_root / "output" / case_id / "ensemble" / "metadata.json"
+        if ensemble_metadata_path.exists():
+            payload = json.loads(ensemble_metadata_path.read_text(encoding="utf-8")) or {}
+            display_bounds = (
+                payload.get("display_bounds_wgs84")
+                or (payload.get("figure_rendering") or {}).get("display_bounds_wgs84")
+                or []
+            )
+            if len(display_bounds) == 4:
+                return tuple(float(value) for value in display_bounds)
+        grid_path = self._case_grid_metadata_path(case_id)
+        if grid_path.exists():
+            payload = json.loads(grid_path.read_text(encoding="utf-8")) or {}
+            display_bounds = payload.get("display_bounds_wgs84") or payload.get("extent") or []
+            if len(display_bounds) == 4:
+                return tuple(float(value) for value in display_bounds)
+        return tuple(float(value) for value in self.domain_bounds)
+
     def _load_prototype_map_context(self) -> dict[str, Any]:
         if self._prototype_map_context is not None:
             return self._prototype_map_context
 
         if self.support_context_mode != "mindoro_canonical":
+            case_bounds = [self._load_case_display_bounds(case_id) for case_id in self.case_ids]
+            full_bounds = merge_case_display_bounds(case_bounds, halo_degrees=2.0, minimum_span_degrees=8.0)
             self._prototype_map_context = {
                 "land_mask_path": None,
                 "shoreline_path": None,
                 "labels_path": None,
                 "labels_df": pd.DataFrame(columns=["label_text", "lon", "lat", "enabled_yes_no"]),
-                "full_bounds_wgs84": tuple(float(value) for value in self.domain_bounds),
+                "full_bounds_wgs84": tuple(float(value) for value in full_bounds),
             }
             return self._prototype_map_context
 
@@ -404,7 +458,18 @@ class PrototypePygnomeSimilaritySummaryService:
             case_dir / "source_point_metadata.geojson",
         ]
 
+    def _prototype_drifter_csv_path(self, case_id: str) -> Path:
+        return self.repo_root / "data" / "drifters" / case_id / "drifters_noaa.csv"
+
     def _resolve_case_source_point(self, case_id: str) -> tuple[float, float] | None:
+        if self.workflow_mode == "prototype_2016":
+            drifter_csv = self._prototype_drifter_csv_path(case_id)
+            if drifter_csv.exists():
+                try:
+                    selection = select_drifter_of_record(load_drifter_data(drifter_csv))
+                    return float(selection["start_lon"]), float(selection["start_lat"])
+                except Exception:
+                    pass
         for candidate in self._prototype_source_point_candidates(case_id):
             if not candidate.exists():
                 continue
@@ -521,6 +586,28 @@ class PrototypePygnomeSimilaritySummaryService:
 
         self._sea_mask_cache = np.ones(reference_shape, dtype=bool)
         return self._sea_mask_cache
+
+    def _raster_bounds_for_paths(
+        self,
+        *paths: Path | str | None,
+    ) -> tuple[list[tuple[float, float, float, float]], list[float], list[float]]:
+        bounds_sets: list[tuple[float, float, float, float]] = []
+        cell_widths: list[float] = []
+        cell_heights: list[float] = []
+        for path in paths:
+            if not path:
+                continue
+            candidate = Path(path)
+            if not candidate.exists():
+                continue
+            info = self._load_raster_mask(candidate)
+            positive_cell_bounds = info.get("positive_cell_bounds")
+            if positive_cell_bounds is None:
+                continue
+            bounds_sets.append(tuple(float(value) for value in positive_cell_bounds))
+            cell_widths.append(float(info.get("cell_width") or 0.0))
+            cell_heights.append(float(info.get("cell_height") or 0.0))
+        return bounds_sets, cell_widths, cell_heights
 
     def _ensure_overlay_png(self, overlay_path: Path, opendrift_hits: np.ndarray, pygnome_hits: np.ndarray) -> None:
         if overlay_path.exists():
@@ -858,9 +945,14 @@ class PrototypePygnomeSimilaritySummaryService:
             return domain_min, min(domain_max, domain_min + minimum_span)
         return max(domain_min, domain_max - minimum_span), domain_max
 
-    def _compute_case_crop_bounds(self, pairings_by_hour: dict[str, dict[int, dict[str, Any]]]) -> tuple[float, float, float, float]:
-        x_values: list[float] = []
-        y_values: list[float] = []
+    def _compute_case_crop_bounds(
+        self,
+        pairings_by_hour: dict[str, dict[int, dict[str, Any]]],
+        display_bounds: tuple[float, float, float, float],
+        *,
+        source_point: tuple[float, float] | None = None,
+    ) -> tuple[float, float, float, float]:
+        bounds_sets: list[tuple[float, float, float, float]] = []
         cell_widths: list[float] = []
         cell_heights: list[float] = []
         for track_pairings in pairings_by_hour.values():
@@ -872,37 +964,56 @@ class PrototypePygnomeSimilaritySummaryService:
                     positive_cell_bounds = info.get("positive_cell_bounds")
                     if positive_cell_bounds is None:
                         continue
-                    x_values.extend([positive_cell_bounds[0], positive_cell_bounds[2]])
-                    y_values.extend([positive_cell_bounds[1], positive_cell_bounds[3]])
+                    bounds_sets.append(tuple(float(value) for value in positive_cell_bounds))
                     cell_widths.append(float(info["cell_width"]))
                     cell_heights.append(float(info["cell_height"]))
-        if not x_values or not y_values:
-            return DOMAIN_BOUNDS
-        cell_width = max(cell_widths) if cell_widths else 0.05
-        cell_height = max(cell_heights) if cell_heights else 0.05
-        x_min = min(x_values)
-        x_max = max(x_values)
-        y_min = min(y_values)
-        y_max = max(y_values)
-        x_min = max(DOMAIN_BOUNDS[0], x_min - (cell_width * PROTOTYPE_CROP_PAD_CELLS))
-        x_max = min(DOMAIN_BOUNDS[1], x_max + (cell_width * PROTOTYPE_CROP_PAD_CELLS))
-        y_min = max(DOMAIN_BOUNDS[2], y_min - (cell_height * PROTOTYPE_CROP_PAD_CELLS))
-        y_max = min(DOMAIN_BOUNDS[3], y_max + (cell_height * PROTOTYPE_CROP_PAD_CELLS))
-        x_min, x_max = self._apply_minimum_crop_span(
-            x_min,
-            x_max,
-            minimum_span=cell_width * PROTOTYPE_MIN_CROP_CELLS_X,
-            domain_min=DOMAIN_BOUNDS[0],
-            domain_max=DOMAIN_BOUNDS[1],
+        point_bounds = bounds_from_point(
+            source_point,
+            lon_pad=max(cell_widths, default=0.05) * 2.0,
+            lat_pad=max(cell_heights, default=0.05) * 2.0,
         )
-        y_min, y_max = self._apply_minimum_crop_span(
-            y_min,
-            y_max,
-            minimum_span=cell_height * PROTOTYPE_MIN_CROP_CELLS_Y,
-            domain_min=DOMAIN_BOUNDS[2],
-            domain_max=DOMAIN_BOUNDS[3],
+        if point_bounds is not None:
+            bounds_sets.append(point_bounds)
+        return derive_prototype_2016_figure_bounds(
+            base_bounds=display_bounds,
+            bounds_sets=bounds_sets,
+            cell_widths=cell_widths,
+            cell_heights=cell_heights,
+            extent_mode=self.extent_mode,
+            minimum_span_degrees=max(
+                max(cell_widths, default=0.05) * PROTOTYPE_MIN_CROP_CELLS_X,
+                max(cell_heights, default=0.05) * PROTOTYPE_MIN_CROP_CELLS_Y,
+                0.65,
+            ),
         )
-        return (x_min, x_max, y_min, y_max)
+
+    def _resolve_plot_bounds(
+        self,
+        *,
+        base_bounds: tuple[float, float, float, float],
+        raster_paths: list[Path | str | None] | tuple[Path | str | None, ...] = (),
+        source_point: tuple[float, float] | None = None,
+        trajectory_points: list[tuple[float, float]] | tuple[tuple[float, float], ...] | None = None,
+    ) -> tuple[float, float, float, float]:
+        bounds_sets, cell_widths, cell_heights = self._raster_bounds_for_paths(*raster_paths)
+        trajectory_bounds = bounds_from_points(trajectory_points)
+        if trajectory_bounds is not None:
+            bounds_sets.append(trajectory_bounds)
+        point_bounds = bounds_from_point(
+            source_point,
+            lon_pad=max(cell_widths, default=0.05) * 2.0 if source_point is not None else 0.0,
+            lat_pad=max(cell_heights, default=0.05) * 2.0 if source_point is not None else 0.0,
+        )
+        if point_bounds is not None:
+            bounds_sets.append(point_bounds)
+        return derive_prototype_2016_figure_bounds(
+            base_bounds=base_bounds,
+            bounds_sets=bounds_sets,
+            cell_widths=cell_widths,
+            cell_heights=cell_heights,
+            extent_mode=self.extent_mode,
+            minimum_span_degrees=0.65,
+        )
 
     def _build_pairings_by_hour(self, case_id: str, pairing_df: pd.DataFrame) -> dict[str, dict[int, dict[str, Any]]]:
         missing_columns = [column for column in REQUIRED_PAIRING_COLUMNS if column not in pairing_df.columns]
@@ -1045,6 +1156,8 @@ class PrototypePygnomeSimilaritySummaryService:
             )
 
         pairings_by_hour = self._build_pairings_by_hour(case_id, pairing_df)
+        display_bounds = self._load_case_display_bounds(case_id)
+        source_point = self._resolve_case_source_point(case_id)
 
         return {
             "case_id": case_id,
@@ -1056,7 +1169,13 @@ class PrototypePygnomeSimilaritySummaryService:
             "pairing_df": pairing_df,
             "pairings_by_hour": pairings_by_hour,
             "metadata": metadata,
-            "crop_bounds": self._compute_case_crop_bounds(pairings_by_hour),
+            "display_bounds": display_bounds,
+            "crop_bounds": self._compute_case_crop_bounds(
+                pairings_by_hour,
+                display_bounds,
+                source_point=source_point,
+            ),
+            "source_point": source_point,
         }
 
     def _load_available_case_artifacts(
@@ -1083,6 +1202,7 @@ class PrototypePygnomeSimilaritySummaryService:
             metadata = item["metadata"]
             fss_df = item["fss_df"]
             crop_bounds = item["crop_bounds"]
+            rendering = prototype_2016_rendering_metadata(crop_bounds)
             rows.append(
                 {
                     "case_id": item["case_id"],
@@ -1099,6 +1219,11 @@ class PrototypePygnomeSimilaritySummaryService:
                         for track_id in sorted(fss_df["comparison_track_id"].astype(str).unique().tolist())
                     ),
                     "case_crop_bounds": ",".join(f"{value:.4f}" for value in crop_bounds),
+                    "display_bounds_wgs84": ",".join(f"{value:.4f}" for value in rendering["display_bounds_wgs84"]),
+                    "rendering_profile": rendering["rendering_profile"],
+                    "map_projection": rendering["map_projection"],
+                    "projection_center_lon": float(rendering["projection_center"]["lon"]),
+                    "projection_center_lat": float(rendering["projection_center"]["lat"]),
                     "pygnome_weathering_enabled": _coerce_bool(metadata.get("weathering_enabled")),
                     "pygnome_role": "comparator_only",
                     "benchmark_particles": int(metadata.get("benchmark_particles", 0) or 0),
@@ -1334,6 +1459,9 @@ class PrototypePygnomeSimilaritySummaryService:
         if labels_df.empty:
             return
         for _, row in labels_df.iterrows():
+            text_kwargs = {}
+            if self.workflow_mode == "prototype_2016":
+                text_kwargs["transform"] = ccrs.PlateCarree()
             ax.text(
                 float(row["lon"]),
                 float(row["lat"]),
@@ -1344,15 +1472,22 @@ class PrototypePygnomeSimilaritySummaryService:
                 va="bottom",
                 zorder=7,
                 bbox={"boxstyle": "round,pad=0.16", "facecolor": (1, 1, 1, 0.68), "edgecolor": "none"},
+                **text_kwargs,
             )
 
-    def _draw_locator(self, ax: plt.Axes, crop_bounds: tuple[float, float, float, float]) -> None:
+    def _draw_locator(
+        self,
+        ax: plt.Axes,
+        crop_bounds: tuple[float, float, float, float],
+        full_bounds: tuple[float, float, float, float] | None = None,
+    ) -> None:
         context = self._load_prototype_map_context()
         shoreline_path = context.get("shoreline_path")
         shoreline = self._load_vector(Path(shoreline_path), "EPSG:4326") if shoreline_path else None
         labels_df = context["labels_df"]
-        full_bounds = context["full_bounds_wgs84"]
+        active_full_bounds = tuple(float(value) for value in (full_bounds or context["full_bounds_wgs84"]))
         ax.set_facecolor(MAP_WATER_COLOR)
+        locator_patch_kwargs = {"transform": ccrs.PlateCarree()} if self.workflow_mode == "prototype_2016" else {}
         if shoreline is not None and not shoreline.empty:
             shoreline.plot(ax=ax, color=MAP_SHORELINE_COLOR, linewidth=0.6, alpha=0.92, zorder=1)
         if not labels_df.empty:
@@ -1380,14 +1515,26 @@ class PrototypePygnomeSimilaritySummaryService:
                 linestyle="-",
                 edgecolor="#b42318",
                 zorder=5,
+                **locator_patch_kwargs,
             )
         )
-        lon_pad = max((full_bounds[1] - full_bounds[0]) * PROTOTYPE_LOCATOR_PADDING_FRACTION, 0.08)
-        lat_pad = max((full_bounds[3] - full_bounds[2]) * PROTOTYPE_LOCATOR_PADDING_FRACTION, 0.08)
-        ax.set_xlim(full_bounds[0] - lon_pad, full_bounds[1] + lon_pad)
-        ax.set_ylim(full_bounds[2] - lat_pad, full_bounds[3] + lat_pad)
-        center_lat = ((full_bounds[2] - lat_pad) + (full_bounds[3] + lat_pad)) / 2.0
-        ax.set_aspect(self._geographic_aspect(center_lat), adjustable="box")
+        lon_pad = max((active_full_bounds[1] - active_full_bounds[0]) * PROTOTYPE_LOCATOR_PADDING_FRACTION, 0.08)
+        lat_pad = max((active_full_bounds[3] - active_full_bounds[2]) * PROTOTYPE_LOCATOR_PADDING_FRACTION, 0.08)
+        if self.workflow_mode == "prototype_2016":
+            ax.set_extent(
+                [
+                    active_full_bounds[0] - lon_pad,
+                    active_full_bounds[1] + lon_pad,
+                    active_full_bounds[2] - lat_pad,
+                    active_full_bounds[3] + lat_pad,
+                ],
+                crs=ccrs.PlateCarree(),
+            )
+        else:
+            ax.set_xlim(active_full_bounds[0] - lon_pad, active_full_bounds[1] + lon_pad)
+            ax.set_ylim(active_full_bounds[2] - lat_pad, active_full_bounds[3] + lat_pad)
+            center_lat = ((active_full_bounds[2] - lat_pad) + (active_full_bounds[3] + lat_pad)) / 2.0
+            ax.set_aspect(self._geographic_aspect(center_lat), adjustable="box")
         ax.set_title("Locator", fontsize=9.2, loc="left", pad=4)
         ax.set_xticks([])
         ax.set_yticks([])
@@ -1395,7 +1542,14 @@ class PrototypePygnomeSimilaritySummaryService:
             spine.set_edgecolor("#94a3b8")
             spine.set_linewidth(0.8)
 
-    def _single_legend_handles(self, model_name: str, *, include_source_point: bool) -> list[Any]:
+    def _single_legend_handles(
+        self,
+        model_name: str,
+        *,
+        include_source_point: bool,
+        show_raster_cells: bool = True,
+        show_outline: bool = True,
+    ) -> list[Any]:
         handles: list[Any] = []
         if include_source_point:
             handles.append(
@@ -1410,27 +1564,24 @@ class PrototypePygnomeSimilaritySummaryService:
                     label="Provenance source point",
                 )
             )
-        handles.extend(
-            [
+        if show_raster_cells:
+            handles.append(
                 Patch(
-                    facecolor=to_rgba(MODEL_STYLES[model_name]["mid_color"], alpha=0.46),
+                    facecolor=to_rgba(MODEL_STYLES[model_name]["mid_color"], alpha=0.40),
                     edgecolor="none",
-                    label="Higher-density core",
-                ),
-                Patch(
-                    facecolor=to_rgba(MODEL_STYLES[model_name]["light_color"], alpha=0.26),
-                    edgecolor="none",
-                    label="Broader support envelope",
-                ),
+                    label="Stored raster cells",
+                )
+            )
+        if show_outline:
+            handles.append(
                 Line2D(
                     [0],
                     [0],
                     color=MODEL_STYLES[model_name]["color"],
                     lw=1.4,
-                    label="Exact deterministic footprint outline",
-                ),
-            ]
-        )
+                    label="Exact footprint outline",
+                )
+            )
         return handles
 
     def _board_legend_handles(self, include_source_point: bool) -> list[Any]:
@@ -1450,8 +1601,7 @@ class PrototypePygnomeSimilaritySummaryService:
             )
         handles.extend(
             [
-                Patch(facecolor=to_rgba("#94a3b8", alpha=0.48), edgecolor="none", label="Higher-density core"),
-                Patch(facecolor=to_rgba("#cbd5e1", alpha=0.60), edgecolor="none", label="Broader support envelope"),
+                Patch(facecolor=to_rgba("#94a3b8", alpha=0.45), edgecolor="none", label="Stored raster cells"),
                 Line2D([0], [0], color=MODEL_STYLES["opendrift"]["color"], lw=1.5, label="OpenDrift outline"),
                 Line2D([0], [0], color=MODEL_STYLES["pygnome"]["color"], lw=1.5, label="PyGNOME outline"),
             ]
@@ -1474,12 +1624,8 @@ class PrototypePygnomeSimilaritySummaryService:
         legend.get_frame().set_linewidth(0.9)
         lines = [
             f"Case: {item['case_id']}",
-            (
-                "Map context reuses the stored canonical Mindoro scoring-grid assets."
-                if self.support_context_mode == "mindoro_canonical"
-                else "Map context is neutral/case-local because this preferred 2021 debug lane is not tied to the old Mindoro prototype geography."
-            ),
-            "The inner core and outer envelope come from the stored deterministic normalized density raster. The dark outline remains the exact benchmark footprint.",
+            self._context_note_sentence(),
+            "Panels show exact stored raster cells and exact footprint outlines only. Empty stored layers are omitted.",
             "PyGNOME is comparator-only, not truth.",
         ]
         ax.text(
@@ -1534,87 +1680,55 @@ class PrototypePygnomeSimilaritySummaryService:
         show_labels: bool = True,
         source_point: tuple[float, float] | None = None,
         trajectory_points: list[tuple[float, float]] | None = None,
-    ) -> None:
+    ) -> dict[str, Any]:
         info = self._load_raster_mask(raster_path)
         display_info = self._load_raster_mask(display_raster_path or raster_path)
         ax.set_facecolor(MAP_WATER_COLOR)
         self._draw_context_layers(ax)
+        geographic_transform = ccrs.PlateCarree() if self.workflow_mode == "prototype_2016" else None
+        patch_kwargs = {"transform": geographic_transform} if geographic_transform is not None else {}
+        line_kwargs = {"transform": geographic_transform} if geographic_transform is not None else {}
 
-        density_surface = self._build_density_surface(display_info, crop_bounds)
-        if density_surface is not None:
-            level_info = self._density_envelope_levels(density_surface["surface"])
-            if level_info is not None:
-                x_grid = density_surface["x"]
-                y_grid = density_surface["y"]
-                surface = density_surface["surface"]
-                eps = level_info["epsilon"]
-                ax.contourf(
-                    x_grid,
-                    y_grid,
-                    surface,
-                    levels=[level_info["outer_level"], level_info["max_level"] + eps],
-                    colors=[to_rgba(MODEL_STYLES[model_name]["light_color"], alpha=0.26)],
-                    antialiased=True,
-                    zorder=2,
-                )
-                ax.contour(
-                    x_grid,
-                    y_grid,
-                    surface,
-                    levels=[level_info["outer_level"]],
-                    colors=[MODEL_STYLES[model_name]["mid_color"]],
-                    linewidths=1.2,
-                    linestyles="--",
-                    zorder=3,
-                )
-                ax.contourf(
-                    x_grid,
-                    y_grid,
-                    surface,
-                    levels=[level_info["core_level"], level_info["max_level"] + eps],
-                    colors=[to_rgba(MODEL_STYLES[model_name]["mid_color"], alpha=0.48)],
-                    antialiased=True,
-                    zorder=4,
-                )
-                ax.contour(
-                    x_grid,
-                    y_grid,
-                    surface,
-                    levels=[level_info["core_level"]],
-                    colors=[MODEL_STYLES[model_name]["color"]],
-                    linewidths=1.7,
-                    zorder=5,
-                )
-        positive_cell_bounds = info.get("positive_cell_bounds")
+        raster_cells_drawn = self._render_exact_raster_cells(
+            ax,
+            display_info=display_info,
+            model_name=model_name,
+        )
         polygons = info.get("footprint_polygons") or []
+        geometry_drawn = False
         if polygons:
             for coordinates in polygons:
                 ax.add_patch(
                     Polygon(
                         coordinates,
                         closed=True,
-                        facecolor="none",
+                        facecolor=to_rgba(MODEL_STYLES[model_name]["light_color"], alpha=0.10),
                         edgecolor=MODEL_STYLES[model_name]["color"],
                         linewidth=1.2,
                         alpha=0.98,
                         joinstyle="round",
                         zorder=6,
+                        **patch_kwargs,
                     )
                 )
-        elif positive_cell_bounds is not None:
-            ax.add_patch(
-                Rectangle(
-                    (positive_cell_bounds[0], positive_cell_bounds[1]),
-                    positive_cell_bounds[2] - positive_cell_bounds[0],
-                    positive_cell_bounds[3] - positive_cell_bounds[1],
-                    facecolor="none",
-                    edgecolor=MODEL_STYLES[model_name]["color"],
-                    linewidth=1.1,
-                    linestyle="-",
-                    alpha=0.82,
-                    zorder=6,
+                geometry_drawn = True
+        else:
+            for bounds in info.get("positive_cell_boxes") or []:
+                ax.add_patch(
+                    Rectangle(
+                        (bounds[0], bounds[1]),
+                        bounds[2] - bounds[0],
+                        bounds[3] - bounds[1],
+                        facecolor=to_rgba(MODEL_STYLES[model_name]["light_color"], alpha=0.10),
+                        edgecolor=MODEL_STYLES[model_name]["color"],
+                        linewidth=1.1,
+                        linestyle="-",
+                        alpha=0.90,
+                        zorder=6,
+                        **patch_kwargs,
                     )
                 )
+                geometry_drawn = True
         if trajectory_points:
             traj_x = [point[0] for point in trajectory_points]
             traj_y = [point[1] for point in trajectory_points]
@@ -1626,6 +1740,7 @@ class PrototypePygnomeSimilaritySummaryService:
                 alpha=0.75,
                 linestyle="-",
                 zorder=6.5,
+                **line_kwargs,
             )
         if source_point is not None:
             ax.scatter(
@@ -1637,12 +1752,17 @@ class PrototypePygnomeSimilaritySummaryService:
                 edgecolors="#111827",
                 linewidths=1.0,
                 zorder=7,
+                **line_kwargs,
             )
-        ax.set_xlim(crop_bounds[0], crop_bounds[1])
-        ax.set_ylim(crop_bounds[2], crop_bounds[3])
+        if self.workflow_mode == "prototype_2016":
+            ax.set_extent(crop_bounds, crs=ccrs.PlateCarree())
+        else:
+            ax.set_xlim(crop_bounds[0], crop_bounds[1])
+            ax.set_ylim(crop_bounds[2], crop_bounds[3])
         if show_labels:
             self._draw_crop_labels(ax, crop_bounds)
-        ax.grid(alpha=0.32, color="#9ca3af", linewidth=0.6, linestyle="--", zorder=1)
+        if self.workflow_mode != "prototype_2016":
+            ax.grid(alpha=0.32, color="#9ca3af", linewidth=0.6, linestyle="--", zorder=1)
         ax.set_title(panel_title, loc="left", fontsize=11.0, fontweight="bold")
         if show_xlabel:
             ax.set_xlabel("Longitude (°E)", fontsize=9.0)
@@ -1670,90 +1790,79 @@ class PrototypePygnomeSimilaritySummaryService:
         for spine in ax.spines.values():
             spine.set_edgecolor("#111827")
             spine.set_linewidth(0.8)
+        return {
+            "geometry_render_mode": "exact_stored_raster",
+            "density_render_mode": "direct_raster" if raster_cells_drawn else "omitted",
+            "stored_geometry_status": "nonempty" if geometry_drawn else "empty_stored_artifact",
+            "display_positive_cell_count": int(np.count_nonzero(display_info["mask"])),
+            "geometry_positive_cell_count": int(np.count_nonzero(info["mask"])),
+        }
 
-    def _build_density_surface(
+    def _render_exact_raster_cells(
         self,
+        ax: plt.Axes,
+        *,
         display_info: dict[str, Any],
-        crop_bounds: tuple[float, float, float, float],
-    ) -> dict[str, np.ndarray] | None:
-        display_array = np.array(display_info["array"], dtype=float)
+        model_name: str,
+    ) -> bool:
+        display_array = np.asarray(display_info["array"], dtype=float)
         display_array[~np.isfinite(display_array)] = 0.0
         display_array = np.clip(display_array, a_min=0.0, a_max=None)
         positive_mask = display_array > 0
         if not positive_mask.any():
-            return None
+            return False
 
+        normalized = np.zeros_like(display_array, dtype=float)
+        max_value = float(display_array[positive_mask].max())
+        if max_value > 0.0:
+            normalized[positive_mask] = display_array[positive_mask] / max_value
+        else:
+            normalized[positive_mask] = 1.0
+
+        cmap = LinearSegmentedColormap.from_list(
+            f"{model_name}_exact_raster_cells",
+            [
+                (0.0, (1.0, 1.0, 1.0, 0.0)),
+                (0.45, to_rgba(MODEL_STYLES[model_name]["light_color"], alpha=0.34)),
+                (1.0, to_rgba(MODEL_STYLES[model_name]["mid_color"], alpha=0.58)),
+            ],
+        )
+        masked = np.ma.masked_where(~positive_mask, normalized)
         left, bottom, right, top = [float(value) for value in display_info["bounds"]]
-        rows, cols = display_array.shape
-        cell_width = float(display_info["cell_width"])
-        cell_height = float(display_info["cell_height"])
-        x_centers = left + ((np.arange(cols) + 0.5) * cell_width)
-        y_centers = top - ((np.arange(rows) + 0.5) * cell_height)
-        pos_rows, pos_cols = np.where(positive_mask)
-        sample_x = x_centers[pos_cols]
-        sample_y = y_centers[pos_rows]
-        sample_values = display_array[positive_mask]
-
-        x_min, x_max, y_min, y_max = crop_bounds
-        x_span = max(x_max - x_min, cell_width * PROTOTYPE_MIN_CROP_CELLS_X)
-        y_span = max(y_max - y_min, cell_height * PROTOTYPE_MIN_CROP_CELLS_Y)
-        base_grid = max(PROTOTYPE_DENSITY_GRID_MIN, int(round(max(x_span / cell_width, y_span / cell_height) * 24)))
-        grid_width = min(PROTOTYPE_DENSITY_GRID_MAX, max(PROTOTYPE_DENSITY_GRID_MIN, base_grid))
-        aspect_ratio = y_span / max(x_span, 1.0e-9)
-        grid_height = min(PROTOTYPE_DENSITY_GRID_MAX, max(PROTOTYPE_DENSITY_GRID_MIN, int(round(grid_width * aspect_ratio))))
-
-        x_grid = np.linspace(x_min, x_max, grid_width)
-        y_grid = np.linspace(y_min, y_max, grid_height)
-        mesh_x, mesh_y = np.meshgrid(x_grid, y_grid)
-
-        sigma_x = max(cell_width * 1.75, x_span / 26.0)
-        sigma_y = max(cell_height * 1.75, y_span / 26.0)
-        surface = np.zeros_like(mesh_x, dtype=float)
-        for center_x, center_y, value in zip(sample_x, sample_y, sample_values):
-            surface += value * np.exp(
-                -(
-                    ((mesh_x - center_x) ** 2) / (2.0 * (sigma_x**2))
-                    + ((mesh_y - center_y) ** 2) / (2.0 * (sigma_y**2))
+        geographic_transform = ccrs.PlateCarree() if self.workflow_mode == "prototype_2016" else None
+        imshow_kwargs = {"transform": geographic_transform} if geographic_transform is not None else {}
+        ax.imshow(
+            masked,
+            extent=(left, right, bottom, top),
+            origin="upper",
+            cmap=cmap,
+            interpolation="nearest",
+            vmin=0.0,
+            vmax=1.0,
+            zorder=2,
+            **imshow_kwargs,
+        )
+        if int(np.count_nonzero(positive_mask)) <= 196:
+            for bounds in display_info.get("positive_cell_boxes") or []:
+                ax.add_patch(
+                    Rectangle(
+                        (bounds[0], bounds[1]),
+                        bounds[2] - bounds[0],
+                        bounds[3] - bounds[1],
+                        facecolor="none",
+                        edgecolor=to_rgba(MODEL_STYLES[model_name]["mid_color"], alpha=0.78),
+                        linewidth=0.42,
+                        zorder=3,
+                        **({"transform": geographic_transform} if geographic_transform is not None else {}),
+                    )
                 )
-            )
-
-        max_surface = float(np.nanmax(surface))
-        if max_surface <= 0.0:
-            return None
-        surface = surface / max_surface
-        return {"x": x_grid, "y": y_grid, "surface": surface}
-
-    def _density_envelope_levels(self, surface: np.ndarray) -> dict[str, float] | None:
-        finite = np.asarray(surface, dtype=float)
-        finite = finite[np.isfinite(finite) & (finite > 0)]
-        if finite.size == 0:
-            return None
-        ranked = np.sort(finite)[::-1]
-        cumulative = np.cumsum(ranked)
-        total = float(cumulative[-1])
-        if total <= 0.0:
-            return None
-        max_level = float(ranked[0])
-        eps = max(max_level * 1.0e-6, 1.0e-6)
-        outer_idx = min(int(np.searchsorted(cumulative, total * 0.90)), len(ranked) - 1)
-        core_idx = min(int(np.searchsorted(cumulative, total * 0.50)), len(ranked) - 1)
-        outer_level = min(float(ranked[outer_idx]), max_level - (eps * 2.0))
-        core_level = min(float(ranked[core_idx]), max_level - eps)
-        if core_level <= outer_level:
-            outer_level = max(max_level * 0.34, eps)
-            core_level = max(max_level * 0.60, outer_level + eps)
-        return {
-            "outer_level": outer_level,
-            "core_level": core_level,
-            "max_level": max_level,
-            "epsilon": eps,
-        }
+        return True
 
     def _single_note_lines(self, item: dict[str, Any], hour: int, model_name: str) -> list[str]:
         comparison_track_id = MODEL_NAME_TO_TRACK_ID.get(model_name, "deterministic")
         return [
             self._metrics_snippet(item, comparison_track_id, hour),
-            "Exact footprint outlines remain primary; any density envelope is faint presentation support only.",
+            "Stored forecast raster cells and exact footprint outlines are rendered directly. Empty stored layers are omitted.",
             "PyGNOME is comparator-only, not truth.",
         ]
 
@@ -1770,12 +1879,8 @@ class PrototypePygnomeSimilaritySummaryService:
                 lines.append(f"{hour} h: {self._metrics_snippet(item, 'deterministic', hour)}")
         lines.extend(
             [
-                "Exact footprint outlines remain primary; smoothed density support is secondary presentation context only.",
-                (
-                    "The shoreline, land backdrop, and locator reuse the stored canonical Mindoro scoring-grid assets."
-                    if self.support_context_mode == "mindoro_canonical"
-                    else "The figure uses neutral/case-local context so the 2021 debug lane is not misframed as the older Mindoro prototype geography."
-                ),
+                "Stored forecast raster cells and exact footprint outlines are rendered directly. Empty stored layers are omitted.",
+                self._context_note_sentence(),
                 "PyGNOME is a comparator only, not truth.",
                 f"{self._support_status_phrase().capitalize()}; not final Chapter 3 evidence.",
             ]
@@ -1791,29 +1896,62 @@ class PrototypePygnomeSimilaritySummaryService:
         density_path = pair_row.get(density_key)
         source_point = self._resolve_case_source_point(item["case_id"])
         trajectory_points = self._trajectory_for_model(pair_row, model_name)
+        plot_bounds = self._resolve_plot_bounds(
+            base_bounds=item["display_bounds"],
+            raster_paths=[
+                source_path,
+                Path(density_path) if density_path else None,
+            ],
+            source_point=source_point,
+            trajectory_points=trajectory_points,
+        )
         output_path = self.figures_dir / self._single_figure_filename(item["case_id"], hour, model_name)
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         fig = plt.figure(figsize=SINGLE_FIGURE_SIZE, dpi=FIGURE_DPI, facecolor="#ffffff")
         grid = fig.add_gridspec(2, 1, height_ratios=[0.92, 0.08], left=0.07, right=0.98, top=0.90, bottom=0.06, hspace=0.04)
-        map_ax = fig.add_subplot(grid[0, 0])
+        if self.workflow_mode == "prototype_2016":
+            map_ax = add_prototype_2016_geoaxes(
+                fig,
+                grid[0, 0].get_position(fig).bounds,
+                plot_bounds,
+                show_grid_labels=True,
+                add_north_arrow=True,
+            )
+        else:
+            map_ax = fig.add_subplot(grid[0, 0])
         footer_ax = fig.add_subplot(grid[1, 0])
 
-        self._render_model_footprint(
+        render_info = self._render_model_footprint(
             map_ax,
             raster_path=source_path,
             display_raster_path=Path(density_path) if density_path else None,
-            crop_bounds=item["crop_bounds"],
+            crop_bounds=plot_bounds,
             model_name=model_name,
             panel_title=f"{MODEL_STYLES[model_name]['short_label']} footprint",
             source_point=source_point,
             trajectory_points=trajectory_points,
         )
 
-        locator_ax = map_ax.inset_axes([0.74, 0.74, 0.22, 0.22])
-        self._draw_locator(locator_ax, item["crop_bounds"])
+        if self.workflow_mode == "prototype_2016":
+            locator_ax = add_prototype_2016_geoaxes(
+                fig,
+                figure_relative_inset_rect(map_ax, [0.74, 0.74, 0.22, 0.22]),
+                self._load_prototype_map_context()["full_bounds_wgs84"],
+                show_grid_labels=False,
+                add_scale_bar=False,
+                add_north_arrow=False,
+            )
+        else:
+            locator_ax = map_ax.inset_axes([0.74, 0.74, 0.22, 0.22])
+        self._draw_locator(locator_ax, plot_bounds, item.get("display_bounds"))
         map_ax.legend(
-            handles=self._single_legend_handles(model_name, include_source_point=source_point is not None),
+            handles=self._single_legend_handles(
+                model_name,
+                include_source_point=source_point is not None,
+                show_raster_cells=(render_info["density_render_mode"] == "direct_raster"),
+                show_outline=(render_info["stored_geometry_status"] == "nonempty"),
+            ),
             loc="upper center",
             bbox_to_anchor=(0.5, -0.085),
             frameon=True,
@@ -1841,7 +1979,7 @@ class PrototypePygnomeSimilaritySummaryService:
         fig.text(
             0.07,
             0.932,
-            f"{MODEL_STYLES[model_name]['label']} | exact footprint first, density support secondary | {self.workflow_mode} comparator-only",
+            f"{MODEL_STYLES[model_name]['label']} | exact stored raster cells and footprint outlines | {self.workflow_mode} comparator-only",
             ha="left",
             va="top",
             fontsize=10,
@@ -1853,7 +1991,7 @@ class PrototypePygnomeSimilaritySummaryService:
 
         interpretation = (
             f"{self._workflow_label()} support figure for {item['case_id']} at {hour} h showing the "
-            f"{MODEL_STYLES[model_name]['label']} exact benchmark footprint with faint density support context and {self._context_phrase()}. "
+            f"{MODEL_STYLES[model_name]['label']} exact benchmark footprint and direct stored raster cells over {self._context_phrase()}. "
             "PyGNOME remains comparator-only, not truth, and this is not final Chapter 3 evidence."
         )
         context = self._load_prototype_map_context()
@@ -1920,13 +2058,16 @@ class PrototypePygnomeSimilaritySummaryService:
             "source_paths": " | ".join(dict.fromkeys(source_paths)),
             "notes": (
                 f"{self._support_status_phrase().capitalize()} transport comparator with {self._context_phrase()}, "
-                f"a small locator inset, footprint-first rendering, and {source_note}. "
+                f"a small locator inset, exact stored-raster geometry rendering, and {source_note}. "
                 f"{MODEL_STYLES[model_name]['label']} vs deterministic PyGNOME."
             ),
+            "extent_mode": self.extent_mode,
+            "plot_bounds_wgs84": ",".join(f"{value:.4f}" for value in plot_bounds),
             "comparison_track_id": comparison_track_id,
             "comparison_track_label": COMPARISON_TRACK_LABELS.get(comparison_track_id, MODEL_STYLES[model_name]["label"]),
             "legacy_debug_only": self.workflow_mode == "prototype_2016",
             "pygnome_role": "comparator_only",
+            **render_info,
         }
 
     def _render_board_figure(self, item: dict[str, Any]) -> dict[str, Any]:
@@ -1953,7 +2094,17 @@ class PrototypePygnomeSimilaritySummaryService:
             comparison_track_id = MODEL_NAME_TO_TRACK_ID.get(model_name, "deterministic")
             for col_idx, hour in enumerate(REQUIRED_HOURS):
                 pair_row = self._pairing_row_for_model(item, hour, model_name)
-                ax = fig.add_subplot(grid[row_idx, col_idx])
+                if self.workflow_mode == "prototype_2016":
+                    ax = add_prototype_2016_geoaxes(
+                        fig,
+                        grid[row_idx, col_idx].get_position(fig).bounds,
+                        item["crop_bounds"],
+                        show_grid_labels=False,
+                        add_scale_bar=False,
+                        add_north_arrow=False,
+                    )
+                else:
+                    ax = fig.add_subplot(grid[row_idx, col_idx])
                 source_key = "opendrift_footprint_path_resolved" if model_name != "pygnome" else "pygnome_footprint_path_resolved"
                 density_key = "opendrift_density_path_resolved" if model_name != "pygnome" else "pygnome_density_path_resolved"
                 source_path = Path(pair_row[source_key])
@@ -2006,8 +2157,18 @@ class PrototypePygnomeSimilaritySummaryService:
                     bbox={"boxstyle": "round,pad=0.18", "facecolor": (1, 1, 1, 0.92), "edgecolor": "#cbd5e1"},
                 )
                 if row_idx == 0 and col_idx == len(REQUIRED_HOURS) - 1:
-                    locator_ax = ax.inset_axes([0.62, 0.60, 0.34, 0.34])
-                    self._draw_locator(locator_ax, item["crop_bounds"])
+                    if self.workflow_mode == "prototype_2016":
+                        locator_ax = add_prototype_2016_geoaxes(
+                            fig,
+                            figure_relative_inset_rect(ax, [0.62, 0.60, 0.34, 0.34]),
+                            self._load_prototype_map_context()["full_bounds_wgs84"],
+                            show_grid_labels=False,
+                            add_scale_bar=False,
+                            add_north_arrow=False,
+                        )
+                    else:
+                        locator_ax = ax.inset_axes([0.62, 0.60, 0.34, 0.34])
+                    self._draw_locator(locator_ax, item["crop_bounds"], item.get("display_bounds"))
 
         note_ax = fig.add_subplot(grid[len(board_models), :])
         self._draw_footer_note(note_ax, "Board reading guide", self._board_note_lines(item), width=190)
@@ -2016,7 +2177,7 @@ class PrototypePygnomeSimilaritySummaryService:
         fig.text(
             0.05,
             0.932,
-            f"{self.workflow_mode} | deterministic, p50, p90, and PyGNOME footprints | PyGNOME comparator-only",
+            f"{self.workflow_mode} | exact stored raster cells and footprint outlines | PyGNOME comparator-only",
             ha="left",
             va="top",
             fontsize=10,
@@ -2076,9 +2237,14 @@ class PrototypePygnomeSimilaritySummaryService:
             "pixel_height": pixel_height,
             "short_plain_language_interpretation": interpretation,
             "source_paths": " | ".join(dict.fromkeys(source_paths)),
-            "notes": f"{self._support_status_phrase().capitalize()} transport comparator board with {self._context_phrase()}, on-panel FSS/KL annotations, and {source_note}. Deterministic OpenDrift plus legacy support-only p50/p90 tracks vs deterministic PyGNOME.",
+            "notes": f"{self._support_status_phrase().capitalize()} transport comparator board with {self._context_phrase()}, on-panel FSS/KL annotations, exact stored-raster geometry rendering, and {source_note}. Deterministic OpenDrift plus legacy support-only p50/p90 tracks vs deterministic PyGNOME.",
             "legacy_debug_only": self.workflow_mode == "prototype_2016",
             "pygnome_role": "comparator_only",
+            "extent_mode": self.extent_mode,
+            "plot_bounds_wgs84": ",".join(f"{value:.4f}" for value in item["crop_bounds"]),
+            "geometry_render_mode": "exact_stored_raster",
+            "density_render_mode": "direct_raster_or_omitted_per_panel",
+            "stored_geometry_status": "mixed_panel_stored_artifacts",
         }
 
     def _render_forecast_figures(self, case_data: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -2248,7 +2414,7 @@ class PrototypePygnomeSimilaritySummaryService:
                 "- Higher FSS means stronger footprint overlap between the named OpenDrift track and deterministic PyGNOME.",
                 "- Lower KL means the normalized density fields are more similar over the ocean cells.",
                 f"- The ranking is relative within each comparison track inside the {self.workflow_mode} support set only.",
-                f"- The per-forecast figures under `figures/` are support visuals built from the stored benchmark rasters only, now shown with footprint-first rendering over {self._context_phrase()}, with a provenance source-point star when available.",
+                f"- The per-forecast figures under `figures/` are support visuals built from the stored benchmark rasters only, now shown with exact stored raster cells and exact footprint outlines over {self._context_phrase()}, with a provenance source-point star when available.",
             ]
         )
         return "\n".join(lines)
@@ -2265,7 +2431,7 @@ class PrototypePygnomeSimilaritySummaryService:
         lines = [
             f"# {self._workflow_label()} Forecast Figure Captions",
             "",
-            f"These figures are {self._support_status_phrase()} transport benchmark support visuals built from the stored benchmark rasters, with {self._context_phrase()}, a small locator inset, footprint-first rendering, faint density support where available, and a provenance source-point star when that asset is available.",
+            f"These figures are {self._support_status_phrase()} transport benchmark support visuals built from the stored benchmark rasters, with {self._context_phrase()}, a small locator inset, exact stored raster cells, exact footprint outlines, and a provenance source-point star when that asset is available.",
             "",
             "Guardrails:",
             "",
@@ -2359,6 +2525,11 @@ class PrototypePygnomeSimilaritySummaryService:
                 "short_plain_language_interpretation",
                 "source_paths",
                 "notes",
+                "extent_mode",
+                "plot_bounds_wgs84",
+                "geometry_render_mode",
+                "density_render_mode",
+                "stored_geometry_status",
                 "legacy_debug_only",
                 "pygnome_role",
                 "status_key",
@@ -2392,6 +2563,10 @@ class PrototypePygnomeSimilaritySummaryService:
         ]
         ranking_source_rows = deterministic_rows or similarity_rows
         top_case = min(ranking_source_rows, key=lambda row: int(row["relative_similarity_rank"]))
+        per_case_rendering = {
+            item["case_id"]: prototype_2016_rendering_metadata(item["crop_bounds"])
+            for item in case_data
+        }
         manifest = {
             "phase": PHASE,
             "workflow_mode": self.workflow_mode,
@@ -2408,6 +2583,15 @@ class PrototypePygnomeSimilaritySummaryService:
             "legacy_debug_only": self.workflow_mode == "prototype_2016",
             "final_chapter3_evidence": False,
             "support_context_mode": self.support_context_mode,
+            "extent_modes_supported": [
+                PROTOTYPE_2016_EXTENT_MODE_FIXED_REGIONAL,
+                PROTOTYPE_2016_EXTENT_MODE_DYNAMIC_FORECAST,
+            ],
+            "default_extent_mode": self.extent_mode,
+            "rendering_profile": "prototype_2016_case_local_projected_v1" if self.workflow_mode == "prototype_2016" else "",
+            "map_projection": "local_azimuthal_equidistant" if self.workflow_mode == "prototype_2016" else "",
+            "common_locator_bounds_wgs84": list(self._load_prototype_map_context()["full_bounds_wgs84"]),
+            "case_rendering": per_case_rendering,
             "ranking_rule": "higher mean FSS @ 5 km, then lower mean KL, within each comparison track",
             "required_artifacts_per_case": list(REQUIRED_BENCHMARK_FILES.values()),
             "headline": {

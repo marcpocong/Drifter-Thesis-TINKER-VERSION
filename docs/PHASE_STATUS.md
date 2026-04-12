@@ -4,7 +4,7 @@
 
 - Phase 1: dedicated production rerun implemented; candidate baseline staged, but canonical promotion remains manual.
 - Phase 2: scientifically usable, not frozen.
-- Mindoro Phase 3: scientifically informative and reportable; March 13 -> March 14 is now the promoted primary validation, while March 6 remains the preserved sparse-reference honesty case and the promotion is tracked by amendment rather than by rewriting the frozen March 3 -> March 6 case file.
+- Mindoro Phase 3: scientifically informative and reportable; `Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents` is now carried by the March 13 -> March 14 B1 row, March 6 remains the preserved sparse-reference honesty case, the promotion is tracked by amendment rather than by rewriting the frozen March 3 -> March 6 case file, and the later `2016-2023` Mindoro-focused drifter rerun confirmed the same `cmems_era5` recipe without rewriting stored B1 provenance.
 - DWH Phase 3C: external rich-data transfer validation success.
 - Phase 4: scientifically reportable now for Mindoro, inherited-provisional.
 - Phase 4 cross-model comparison: deferred; current PyGNOME branches remain comparator-only for transport/spatial work rather than matched Phase 4 fate-and-shoreline outputs.
@@ -21,6 +21,8 @@
 - Scientifically frozen: `candidate_staged_but_not_promoted`
 - Inherited provisional: `false`
 - Official Phase 1 audit box/window: `119.5-124.5E / 11.5-16.5N`, `2016-2022`
+- Forcing-outage policy: strict/reportable by default. If a provider outage removes part of the official recipe family, the dedicated scientific lane now fails hard unless you explicitly set `FORCING_OUTAGE_POLICY=continue_degraded`.
+- Forcing-provider acquisition is also fail-fast now: each forcing source gets a shared `FORCING_SOURCE_BUDGET_SECONDS` wall-clock budget with a default of `300` seconds, while drifter truth and ArcGIS/observation truth remain strict inputs outside that timeout policy.
 - Biggest remaining follow-up: downstream spill-case trial or explicit promotion of `output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml` remains manual by design.
 
 What is already in place:
@@ -31,6 +33,7 @@ What is already in place:
 - strict gate implementation for drogued-only, full-duration, continuous, non-overlapping, in-box 72 h segments
 - preferred `prototype_2021` debug lane frozen from the two accepted 2021 strict-gate segments
 - preserved `prototype_2016` workflow for debugging/regression
+- degraded forcing continuation is available only for forcing-provider outages in appendix/legacy/experimental lanes; drifter truth and ArcGIS/observation truth remain hard requirements
 - explicit read-only audit outputs under `output/phase1_finalization_audit/`
 - structural separation between historical/regional validation and spill-case validation
 
@@ -69,9 +72,12 @@ What remains provisional:
 
 - Plain-language status: preserved legacy support lane only, reframed thesis-facing as `Phase 1 -> Phase 2 -> Phase 3A -> Phase 4`, with `phase5_sync` separate.
 - Reportable: `false` as final evidence, `true` as legacy support/comparator context.
+- Methodological role: this preserved three-date 2016 lane captures the earliest prototype stage of the study, when the ingestion-and-validation pipeline was first exercised on 2016 drifter records in the Palawan-side western Philippine context before the study widened toward the broader west-coast Palawan/Mindoro context.
 - Guardrail: there is no thesis-facing `Phase 3B` or `Phase 3C` for `prototype_2016`.
 - Phase 3A package scope: deterministic plus support-only `p50`/`p90` OpenDrift tracks against deterministic PyGNOME.
+- Comparator interpretation: the Phase 3A OpenDrift-versus-deterministic-PyGNOME check is support-only. A non-zero fraction skill score means the ensemble footprint was not completely disjoint from the deterministic PyGNOME forecast; it does not make PyGNOME truth or elevate this lane into final Chapter 3 evidence.
 - Phase 4 legacy weathering scope: drifter-of-record point seeding, preserved as honesty-support/debug context rather than as official Phase 4 validation.
+- Release-origin note: the authoritative `prototype_2016` release lat/lon/time comes from the selected drifter-of-record start in `data/drifters/CASE_2016-*/drifters_noaa.csv`. Some stored compatibility fields may still mention `data/arcgis/CASE_2016-*/source_point_metadata.geojson`, but that file is not the actual spill origin for the 2016 runs.
 
 ## Mindoro Phase 3
 
@@ -92,10 +98,11 @@ Promotion and provenance control:
 
 ### Phase 3B1 March 13 -> March 14 Primary Validation
 
-- Plain-language status: scientifically informative and reportable promoted primary validation row, with an explicit caveat that both NOAA products cite March 12 WorldView-3 imagery.
+- Plain-language status: scientifically informative and reportable promoted primary validation row carried under the thesis-facing title `Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents`, with an explicit caveat that both NOAA products cite March 12 WorldView-3 imagery.
 - Reportable: `true`
 - Frozen: `false`
 - Provenance: the original March 3 -> March 6 base case YAML stays frozen; this promotion is authorized through the separate amendment file above.
+- Recipe-confirmation note: the later `phase1_mindoro_focus_pre_spill_2016_2023` drifter rerun independently selected the same `cmems_era5` recipe used by the stored B1 run; that later rerun is packaged as confirmation provenance only, not as a replacement raw-generation history.
 - Guardrail: present it as the canonical Mindoro validation row, but keep the shared-imagery caveat explicit and do not describe it as independent day-to-day validation.
 
 ### Phase 3B2 Legacy March 6 Sparse Reference
@@ -124,6 +131,7 @@ Promotion and provenance control:
 - Guardrail: DWH observed masks remain truth, and PyGNOME remains comparator-only.
 - Forcing-stack selection rule: readiness-gated historical stack, not Phase 1 drifter-selected baseline logic.
 - Current frozen DWH stack: HYCOM GOFS 3.1 currents + ERA5 winds + CMEMS wave/Stokes.
+- Forcing-outage policy: strict/reportable by default. Use `FORCING_OUTAGE_POLICY=continue_degraded` only if you intentionally want a provisional readiness result after a temporary forcing-provider outage.
 - Scientific-ready means: not smoke-only, full May 20-23, 2010 coverage, required variables and usable metadata present, OpenDrift reader exposes the required variables, and the assembled stack completes a small reader-check forecast.
 - Drop-in methods note: `docs/DWH_METHODS_NOTE.md`
 
@@ -192,6 +200,7 @@ What is already in place:
 - `output/trajectory_gallery/` with a static technical figure manifest, index, and trajectory/overlay/Phase 4 figures built from existing artifacts only
 - `output/trajectory_gallery_panel/` with polished comparison boards, captions, talking points, and panel recommendations built from the existing gallery and stored outputs only
 - `output/figure_package_publication/` with canonical publication-grade single figures, side-by-side boards, captions, and defense talking points built from existing outputs only
+- `output/2016 Legacy Runs FINAL Figures/` with a curated prototype_2016 paper-facing figure set, per-case subfolders, `final_figure_manifest.json`, and `missing_figures.csv` built from existing legacy outputs only
 - `ui/` read-only dashboard pages that consume the publication package first, then expose panel/raw/archive artifacts only when advanced mode is enabled
 
 Optional future work still deferred:

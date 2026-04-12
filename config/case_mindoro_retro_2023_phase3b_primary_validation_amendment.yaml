@@ -12,6 +12,8 @@ promotion:
   primary_track_id: B1
   primary_phase_or_track: phase3b_reinit_primary
   primary_track_label: Mindoro March 13 -> March 14 NOAA reinit primary validation
+  thesis_phase_title: Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents
+  thesis_phase_subtitle: Mindoro March 13 -> March 14 public spill-extent reinitialization validation
   canonical_output_dir: output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit
   canonical_launcher_entry_id: mindoro_phase3b_primary_public_validation
   retained_launcher_alias_entry_id: mindoro_march13_14_noaa_reinit_stress_test

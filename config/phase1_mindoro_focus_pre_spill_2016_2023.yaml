@@ -53,11 +53,11 @@ drifter:
     - DrogueLength
     - DrogueDetectSensor
 
+# Temporary outage-constrained family for the experimental Mindoro-focused lane.
+# GFS-backed recipes are excluded here only while archived NOAA/NCEI GFS access is unavailable.
 phase1_recipe_family:
   - cmems_era5
-  - cmems_gfs
   - hycom_era5
-  - hycom_gfs
 
 ranking_subset:
   mode: seasonal_start_months
@@ -89,3 +89,4 @@ candidate_baseline:
     - This artifact is staged only and does not overwrite config/phase1_baseline_selection.yaml.
     - This experimental lane does not modify legacy 2016 prototype outputs or the canonical March 13 -> March 14 B1 outputs.
     - Downstream trial runs may set BASELINE_SELECTION_PATH to this candidate artifact explicitly.
+    - This temporary outage-constrained experiment excludes GFS-backed recipes until archived NOAA/NCEI GFS access is healthy again.

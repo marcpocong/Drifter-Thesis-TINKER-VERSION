@@ -14,6 +14,10 @@ MINDORO_PRIMARY_VALIDATION_MIGRATION_NOTE_PATH = (
 MINDORO_PRIMARY_VALIDATION_TRACK_ID = "B1"
 MINDORO_PRIMARY_VALIDATION_TRACK_LABEL = "Mindoro March 13 -> March 14 NOAA reinit primary validation"
 MINDORO_PRIMARY_VALIDATION_PHASE_OR_TRACK = "phase3b_reinit_primary"
+MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE = "Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents"
+MINDORO_PRIMARY_VALIDATION_THESIS_SUBTITLE = (
+    "Mindoro March 13 -> March 14 public spill-extent reinitialization validation"
+)
 
 MINDORO_LEGACY_MARCH6_TRACK_ID = "B2"
 MINDORO_LEGACY_MARCH6_TRACK_LABEL = "Mindoro legacy March 6 sparse strict reference"
@@ -24,6 +28,11 @@ MINDORO_LEGACY_SUPPORT_TRACK_LABEL = "Mindoro legacy March 3-6 broader-support r
 
 MINDORO_PRIMARY_VALIDATION_LAUNCHER_ENTRY_ID = "mindoro_phase3b_primary_public_validation"
 MINDORO_PRIMARY_VALIDATION_LAUNCHER_ALIAS_ENTRY_ID = "mindoro_march13_14_noaa_reinit_stress_test"
+MINDORO_PRIMARY_VALIDATION_FINAL_OUTPUT_DIR = Path("output") / "Phase 3B March13-14 Final Output"
+MINDORO_PHASE1_CONFIRMATION_WORKFLOW_MODE = "phase1_mindoro_focus_pre_spill_2016_2023"
+MINDORO_PHASE1_CONFIRMATION_CANDIDATE_BASELINE_PATH = (
+    Path("output") / "phase1_mindoro_focus_pre_spill_2016_2023" / "phase1_baseline_selection_candidate.yaml"
+)
 
 MINDORO_SHARED_IMAGERY_CAVEAT = (
     "Both NOAA/NESDIS public products cite WorldView-3 imagery acquired on 2023-03-12, so the promoted "
@@ -31,3 +40,7 @@ MINDORO_SHARED_IMAGERY_CAVEAT = (
     "provenance rather than a fully independent day-to-day validation."
 )
 
+MINDORO_PHASE1_CONFIRMATION_INTERPRETATION_TEMPLATE = (
+    "The later {workflow_mode} Mindoro-focused drifter rerun independently selected the same recipe used by "
+    "the stored B1 run ({recipe}), so it supports promoting B1 without rewriting the original run provenance."
+)

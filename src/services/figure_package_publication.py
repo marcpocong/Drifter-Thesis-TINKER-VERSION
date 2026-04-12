@@ -27,7 +27,11 @@ from rasterio.warp import transform_bounds
 from shapely.geometry import MultiPoint
 
 from src.core.artifact_status import artifact_status_columns
-from src.services.mindoro_primary_validation_metadata import MINDORO_SHARED_IMAGERY_CAVEAT
+from src.services.mindoro_primary_validation_metadata import (
+    MINDORO_PHASE1_CONFIRMATION_CANDIDATE_BASELINE_PATH,
+    MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE,
+    MINDORO_SHARED_IMAGERY_CAVEAT,
+)
 
 matplotlib.use("Agg")
 
@@ -262,6 +266,51 @@ def load_publication_style_config(path: str | Path = STYLE_CONFIG_PATH) -> dict[
     return payload
 
 
+def apply_publication_typography(style: dict[str, Any], repo_root: str | Path) -> str:
+    repo_root_path = Path(repo_root).resolve()
+    typography = style.get("typography") or {}
+    font_family = str(typography.get("font_family") or "Arial").strip() or "Arial"
+    fallbacks = [
+        str(item).strip()
+        for item in (typography.get("font_fallbacks") or ["DejaVu Sans", "Liberation Sans", "sans-serif"])
+        if str(item).strip()
+    ]
+    candidate_paths: list[Path] = []
+    for value in typography.get("font_paths") or []:
+        path = Path(value)
+        if not path.is_absolute():
+            path = repo_root_path / path
+        candidate_paths.append(path.resolve())
+    local_font_dir = repo_root_path / LOCAL_FONT_DIR
+    if local_font_dir.exists():
+        candidate_paths.extend(sorted(local_font_dir.glob("*.ttf")))
+        candidate_paths.extend(sorted(local_font_dir.glob("*.otf")))
+    seen: set[Path] = set()
+    for path in candidate_paths:
+        if not path.exists():
+            continue
+        resolved = path.resolve()
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        try:
+            matplotlib.font_manager.fontManager.addfont(str(resolved))
+        except Exception:
+            continue
+    resolved_family = font_family
+    try:
+        matplotlib.font_manager.findfont(font_family, fallback_to_default=False)
+    except Exception:
+        resolved_family = fallbacks[0] if fallbacks else "sans-serif"
+    sans_serif = [resolved_family]
+    for candidate in [font_family, *fallbacks]:
+        if candidate and candidate not in sans_serif:
+            sans_serif.append(candidate)
+    matplotlib.rcParams["font.family"] = [resolved_family]
+    matplotlib.rcParams["font.sans-serif"] = sans_serif
+    return resolved_family
+
+
 def _safe_float(value: Any, default: float = 0.0) -> float:
     try:
         result = float(value)
@@ -294,6 +343,9 @@ class FigurePackagePublicationService:
         self.mindoro_phase3b_summary = _read_csv(self.repo_root / MINDORO_PHASE3B_SUMMARY)
         self.mindoro_reinit_summary = _read_csv(self.repo_root / MINDORO_REINIT_SUMMARY)
         self.mindoro_reinit_manifest = _read_json(self.repo_root / MINDORO_REINIT_RUN_MANIFEST)
+        self.mindoro_phase1_confirmation_candidate = _read_yaml(
+            self.repo_root / MINDORO_PHASE1_CONFIRMATION_CANDIDATE_BASELINE_PATH
+        )
         self.mindoro_reinit_crossmodel_summary = _read_csv(self.repo_root / MINDORO_REINIT_CROSSMODEL_SUMMARY)
         self.mindoro_reinit_crossmodel_manifest = _read_json(self.repo_root / MINDORO_REINIT_CROSSMODEL_RUN_MANIFEST)
         self.mindoro_phase4_manifest = _read_json(self.repo_root / MINDORO_PHASE4_MANIFEST)
@@ -318,43 +370,7 @@ class FigurePackagePublicationService:
         return legacy_dir, legacy_registry
 
     def _configure_typography(self) -> None:
-        typography = self.style.get("typography") or {}
-        font_family = str(typography.get("font_family") or "Arial").strip() or "Arial"
-        fallbacks = [
-            str(item).strip()
-            for item in (typography.get("font_fallbacks") or ["DejaVu Sans", "Liberation Sans", "sans-serif"])
-            if str(item).strip()
-        ]
-        candidate_paths: list[Path] = []
-        for value in typography.get("font_paths") or []:
-            candidate_paths.append(self._resolve(value))
-        local_font_dir = self.repo_root / LOCAL_FONT_DIR
-        if local_font_dir.exists():
-            candidate_paths.extend(sorted(local_font_dir.glob("*.ttf")))
-            candidate_paths.extend(sorted(local_font_dir.glob("*.otf")))
-        seen: set[Path] = set()
-        for path in candidate_paths:
-            if not path.exists():
-                continue
-            resolved = path.resolve()
-            if resolved in seen:
-                continue
-            seen.add(resolved)
-            try:
-                matplotlib.font_manager.fontManager.addfont(str(resolved))
-            except Exception:
-                continue
-        resolved_family = font_family
-        try:
-            matplotlib.font_manager.findfont(font_family, fallback_to_default=False)
-        except Exception:
-            resolved_family = fallbacks[0] if fallbacks else "sans-serif"
-        sans_serif = [resolved_family]
-        for candidate in [font_family, *fallbacks]:
-            if candidate and candidate not in sans_serif:
-                sans_serif.append(candidate)
-        matplotlib.rcParams["font.family"] = [resolved_family]
-        matplotlib.rcParams["font.sans-serif"] = sans_serif
+        apply_publication_typography(self.style, self.repo_root)
 
     def _record_missing(self, path: Path, notes: str) -> None:
         entry = {"relative_path": _relative_to_repo(self.repo_root, path), "notes": notes}
@@ -1340,6 +1356,7 @@ class FigurePackagePublicationService:
                 "relative_path": relative_path,
                 "notes": str(spec.get("notes") or ""),
                 "short_plain_language_interpretation": str(spec["short_plain_language_interpretation"]),
+                "legacy_debug_only": bool(spec.get("legacy_debug_only")),
             }
         )
         record = PublicationFigureRecord(
@@ -1746,6 +1763,7 @@ class FigurePackagePublicationService:
         source_paths: list[str] | None = None,
         recommended_for_main_defense: bool = False,
         recommended_for_paper: bool = False,
+        legacy_debug_only: bool = False,
     ) -> dict[str, Any]:
         return {
             "spec_id": spec_id,
@@ -1767,6 +1785,7 @@ class FigurePackagePublicationService:
             "short_plain_language_interpretation": interpretation,
             "recommended_for_main_defense": recommended_for_main_defense,
             "recommended_for_paper": recommended_for_paper,
+            "legacy_debug_only": legacy_debug_only,
             "notes": notes,
             "source_image_path": source_image_path,
             "source_paths": source_paths or [],
@@ -1970,9 +1989,15 @@ class FigurePackagePublicationService:
         row = self._mindoro_primary_row()
         if row is None:
             return ["The March 13 -> March 14 reinit summary CSV was not available, so this figure should be read visually."]
+        confirmation_recipe = str(self.mindoro_phase1_confirmation_candidate.get("selected_recipe", "") or "")
         return [
-            "March 13 -> March 14 is now the promoted Mindoro validation pair, seeded from the March 13 NOAA polygon and scored against the March 14 NOAA target.",
+            f"{MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE} is now carried by the March 13 -> March 14 promoted Mindoro validation pair, seeded from the March 13 NOAA polygon and scored against the March 14 NOAA target.",
             MINDORO_SHARED_IMAGERY_CAVEAT,
+            (
+                f"The later 2016-2023 Mindoro-focused drifter rerun confirmed the same {confirmation_recipe} recipe used by the stored B1 run."
+                if confirmation_recipe
+                else "The later 2016-2023 Mindoro-focused drifter rerun confirmation artifact was unavailable."
+            ),
             f"The promoted OpenDrift R1 previous reinit p50 row reaches FSS beyond zero at 3/5/10 km with {int(row.get('forecast_nonzero_cells', 0))} forecast cells against {int(row.get('obs_nonzero_cells', 0))} observed cells.",
         ]
 
@@ -2103,7 +2128,10 @@ class FigurePackagePublicationService:
         )
 
     def _mindoro_primary_publication_specs(self) -> list[dict[str, Any]]:
-        subtitle = "Mindoro | 13-14 March 2023 | promoted NOAA reinit validation | shared March 12 imagery caveat"
+        subtitle = (
+            f"{MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE} | Mindoro | 13-14 March 2023 | "
+            "shared-imagery caveat explicit"
+        )
         seed_mask = self._mindoro_reinit_seed_mask_path()
         target_mask = self._mindoro_reinit_target_mask_path()
         r1_row = self._mindoro_primary_branch_row("R1_previous")
@@ -2125,8 +2153,16 @@ class FigurePackagePublicationService:
                 figure_title="Mindoro March 13 seed mask on grid",
                 map_panel_title="",
                 subtitle=subtitle,
-                interpretation="This figure redraws the stored March 13 seed geometry on the scoring grid so the promoted next-day validation row starts from a publication-grade observation panel rather than a QA screenshot.",
-                notes="Built from the stored March 13 seed mask raster, shoreline context, and source-point geometry only; no scientific rerun was triggered.",
+                interpretation=(
+                    "This figure redraws the stored March 13 seed geometry on the scoring grid so "
+                    f"{MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE.lower()} starts from a "
+                    "publication-grade observation panel rather than a QA screenshot."
+                ),
+                notes=(
+                    "Built from the stored March 13 seed mask raster, shoreline context, and "
+                    "source-point geometry only; no scientific rerun was triggered, and the later "
+                    "2016-2023 Mindoro-focused drifter rerun is used only as recipe-confirmation provenance."
+                ),
                 note_lines=self._mindoro_primary_note_lines(
                     "Seed geometry is shown on the same canonical grid used downstream for the March 14 comparison."
                 ),
@@ -2158,8 +2194,15 @@ class FigurePackagePublicationService:
                 figure_title="Mindoro March 13 seed vs March 14 target",
                 map_panel_title="",
                 subtitle=subtitle,
-                interpretation="This figure makes the promoted March 13 seed and March 14 observation geometry explicit before any model overlay is shown, using the stored on-grid rasters rather than the earlier QA composite.",
-                notes="Built from the stored March 13 seed mask and March 14 observation mask only, with the shared-imagery caveat carried into the note box.",
+                interpretation=(
+                    "This figure makes the promoted March 13 seed and March 14 observation geometry "
+                    f"explicit before any model overlay is shown for {MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE.lower()}, "
+                    "using the stored on-grid rasters rather than the earlier QA composite."
+                ),
+                notes=(
+                    "Built from the stored March 13 seed mask and March 14 observation mask only, "
+                    "with the shared-imagery caveat and recipe-confirmation provenance carried into the note box."
+                ),
                 note_lines=self._mindoro_primary_note_lines(
                     "Orange shows the March 13 seed geometry and dark slate shows the March 14 observation target."
                 ),
@@ -2198,8 +2241,16 @@ class FigurePackagePublicationService:
                 figure_title="Mindoro March 14 promoted OpenDrift R1_previous",
                 map_panel_title="",
                 subtitle=subtitle,
-                interpretation="This is the promoted March 14 Mindoro validation overlay, rebuilt from stored rasters with the same publication grammar used by the DWH boards.",
-                notes="Built from the stored March 14 observation mask, the stored March 13 seed mask outline, and the stored OpenDrift R1 previous p50 raster only.",
+                interpretation=(
+                    "This is the promoted March 14 Mindoro validation overlay for "
+                    f"{MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE.lower()}, rebuilt from stored "
+                    "rasters with the same publication grammar used by the DWH boards."
+                ),
+                notes=(
+                    "Built from the stored March 14 observation mask, the stored March 13 seed mask "
+                    "outline, and the stored OpenDrift R1 previous p50 raster only; the later "
+                    "2016-2023 Mindoro-focused drifter rerun confirmed the same recipe without rewriting stored run provenance."
+                ),
                 note_lines=self._mindoro_primary_note_lines(
                     self._mindoro_primary_branch_score_line("R1_previous", "OpenDrift R1 previous reinit p50")
                 ),
@@ -2248,8 +2299,15 @@ class FigurePackagePublicationService:
                 figure_title="Mindoro March 14 OpenDrift R0 branch",
                 map_panel_title="",
                 subtitle=subtitle,
-                interpretation="This companion figure keeps the stored R0 branch visible in the same publication grammar so the promoted R1 result can be compared against it honestly.",
-                notes="Built from the stored March 14 observation mask, the stored March 13 seed mask outline, and the stored OpenDrift R0 p50 raster only.",
+                interpretation=(
+                    "This companion figure keeps the stored R0 branch visible in the same publication "
+                    "grammar so the promoted R1 result can be compared against it honestly within the "
+                    "final B1 Phase 3B framing."
+                ),
+                notes=(
+                    "Built from the stored March 14 observation mask, the stored March 13 seed mask "
+                    "outline, and the stored OpenDrift R0 p50 raster only."
+                ),
                 note_lines=self._mindoro_primary_note_lines(
                     self._mindoro_primary_branch_score_line("R0", "OpenDrift R0 reinit p50"),
                     self._stored_empty_forecast_line(r0_row, "OpenDrift R0 reinit p50"),
@@ -2486,7 +2544,7 @@ class FigurePackagePublicationService:
 
     def _mindoro_promoted_board_specs(self) -> list[dict[str, Any]]:
         primary_subtitle = (
-            "Mindoro | 13-14 March 2023 | promoted NOAA reinit validation | shared-imagery caveat explicit"
+            f"{MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE} | Mindoro | 13-14 March 2023 | shared-imagery caveat explicit"
         )
         crossmodel_subtitle = (
             "Mindoro | 13-14 March 2023 | promoted cross-model comparator on the March 14 NOAA target | shared-imagery caveat explicit"
@@ -2504,7 +2562,11 @@ class FigurePackagePublicationService:
                 figure_slug="mindoro_primary_validation_board",
                 figure_title="Mindoro March 13 -> March 14 primary validation board",
                 subtitle=primary_subtitle,
-                interpretation="This is now the main Mindoro presentation board because it centers the promoted March 13 -> March 14 validation pair and the best OpenDrift result while keeping the shared-imagery caveat explicit.",
+                interpretation=(
+                    "This is now the main Mindoro presentation board for Phase 3B observation-based spatial validation "
+                    "using public Mindoro spill extents because it centers the promoted March 13 -> March 14 validation "
+                    "pair, the best OpenDrift result, and the shared-imagery caveat without rewriting the stored run provenance."
+                ),
                 notes="Board assembled from publication-grade March 13 -> March 14 singles rebuilt from stored rasters and vectors only.",
                 note_lines=self._mindoro_primary_note_lines(
                     self._mindoro_primary_branch_score_line("R1_previous", "OpenDrift R1 previous reinit p50"),
@@ -3839,12 +3901,13 @@ class FigurePackagePublicationService:
                     figure_title=title,
                     subtitle=subtitle,
                     interpretation=interpretation,
-                    notes=notes,
-                    source_image_path=relative_path,
-                    source_paths=source_paths,
-                    recommended_for_main_defense=False,
-                    recommended_for_paper=not is_board,
-                )
+                notes=notes,
+                source_image_path=relative_path,
+                source_paths=source_paths,
+                legacy_debug_only=not is_preferred_2021,
+                recommended_for_main_defense=False,
+                recommended_for_paper=not is_board,
+            )
             )
         return specs, []
 

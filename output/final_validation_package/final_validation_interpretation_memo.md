@@ -2,7 +2,8 @@
 
 Key scientific takeaway:
 
-- Mindoro primary validation is now the March 13 -> March 14 NOAA reinit track.
+- Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents is now carried by the Mindoro March 13 -> March 14 NOAA reinit track.
+- The later 2016-2023 Mindoro-focused drifter rerun confirmed the same cmems_era5 recipe used by the stored B1 run.
 - DWH is the rich-data external transfer-validation success.
 - Ensemble benefit is case-dependent, not universal.
 

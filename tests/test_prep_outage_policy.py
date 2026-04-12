@@ -13,6 +13,7 @@ import xarray as xr
 
 import src.__main__ as main_module
 from src.exceptions.custom import (
+    ForcingProviderAcquisitionError,
     PREP_OUTAGE_DECISION_EXIT_CODE,
     PREP_FORCE_REFRESH_ENV,
     PREP_REUSE_APPROVED_ONCE_ENV,
@@ -21,6 +22,8 @@ from src.exceptions.custom import (
 )
 from src.models.ingestion import IngestionManifest
 from src.services.ingestion import DataIngestionService
+from src.utils.forcing_outage_policy import FORCING_OUTAGE_SKIP_EXIT_CODE
+from src.utils.startup_prompt_policy import INPUT_CACHE_POLICY_ENV
 
 
 def _prototype_case_stub() -> SimpleNamespace:
@@ -154,6 +157,99 @@ class PrepOutagePolicyTests(unittest.TestCase):
             self.assertEqual(record["status"], "downloaded")
             self.assertEqual(record["path"], str(fresh_path))
 
+    def test_input_cache_policy_force_refresh_bypasses_valid_cache(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            service = self._build_service(tmpdir)
+            cache_path = Path(tmpdir) / "data" / "forcing" / "CASE_2016-09-01" / "era5_wind.nc"
+            _write_valid_wind_cache(cache_path)
+            manifest = IngestionManifest(config=service._manifest_config())
+            fresh_path = Path(tmpdir) / "fresh_era5.nc"
+            download_callable = mock.Mock(return_value=str(fresh_path))
+
+            with mock.patch.dict(os.environ, {INPUT_CACHE_POLICY_ENV: "force_refresh"}, clear=False):
+                record = service._handle_required_download_step(
+                    manifest,
+                    source_id="era5",
+                    download_callable=download_callable,
+                )
+
+            download_callable.assert_called_once()
+            self.assertEqual(record["status"], "downloaded")
+            self.assertEqual(record["path"], str(fresh_path))
+
+    def test_input_cache_policy_reuse_overrides_prep_force_refresh_alias(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            service = self._build_service(tmpdir)
+            cache_path = Path(tmpdir) / "data" / "forcing" / "CASE_2016-09-01" / "era5_wind.nc"
+            _write_valid_wind_cache(cache_path)
+            manifest = IngestionManifest(config=service._manifest_config())
+            download_callable = mock.Mock(side_effect=AssertionError("remote download should not run"))
+
+            with mock.patch.dict(
+                os.environ,
+                {
+                    INPUT_CACHE_POLICY_ENV: "reuse_if_valid",
+                    PREP_FORCE_REFRESH_ENV: "1",
+                },
+                clear=False,
+            ):
+                record = service._handle_required_download_step(
+                    manifest,
+                    source_id="era5",
+                    download_callable=download_callable,
+                )
+
+            download_callable.assert_not_called()
+            self.assertEqual(record["status"], "reused_validated_cache")
+
+    def test_required_forcing_outage_can_continue_degraded_for_support_lane(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            service = self._build_service(tmpdir)
+            manifest = IngestionManifest(config=service._manifest_config())
+
+            record = service._handle_required_download_step(
+                manifest,
+                source_id="era5",
+                download_callable=lambda: (_ for _ in ()).throw(RuntimeError("503 Server Error: Service Unavailable")),
+                allow_outage_skip=True,
+            )
+
+            self.assertEqual(record["status"], "skipped_outage_continue_degraded")
+            self.assertTrue(record["upstream_outage_detected"])
+            self.assertEqual(record["forcing_factor"], "era5_wind.nc")
+            self.assertTrue(service.degraded_continue_used)
+            self.assertIn("era5", service.skipped_forcing_sources)
+            self.assertIn("era5_wind.nc", service.missing_forcing_factors)
+
+    def test_required_forcing_outage_skip_record_preserves_budget_metadata(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            service = self._build_service(tmpdir)
+            manifest = IngestionManifest(config=service._manifest_config())
+            failure_record = {
+                "status": "failed_remote_outage",
+                "source_id": "era5",
+                "forcing_factor": "era5_wind.nc",
+                "upstream_outage_detected": True,
+                "error": "Forcing provider 'era5' exceeded the 300-second fail-fast budget and was stopped.",
+                "budget_seconds": 300,
+                "elapsed_seconds": 300.0,
+                "budget_exhausted": True,
+                "failure_stage": "budget_timeout",
+            }
+
+            record = service._handle_required_download_step(
+                manifest,
+                source_id="era5",
+                download_callable=lambda: (_ for _ in ()).throw(ForcingProviderAcquisitionError(failure_record)),
+                allow_outage_skip=True,
+            )
+
+            self.assertEqual(record["status"], "skipped_outage_continue_degraded")
+            self.assertEqual(record["budget_seconds"], 300)
+            self.assertEqual(record["elapsed_seconds"], 300.0)
+            self.assertTrue(record["budget_exhausted"])
+            self.assertEqual(record["failure_stage"], "budget_timeout")
+
     def test_required_remote_outage_without_valid_cache_cancels_immediately(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             service = self._build_service(tmpdir)
@@ -239,6 +335,29 @@ class PrepOutagePolicyTests(unittest.TestCase):
 
         self.assertEqual(exit_context.exception.code, PREP_OUTAGE_DECISION_EXIT_CODE)
         self.assertNotIn("Continuing to next case", stdout.getvalue())
+
+    def test_main_continues_after_nonfatal_forcing_skip_in_orchestrated_case(self):
+        case_stub = SimpleNamespace(
+            orchestration_dates=["2016-09-01", "2016-09-08"],
+            workflow_mode="prototype_2016",
+        )
+        stdout = io.StringIO()
+
+        with mock.patch("src.core.case_context.get_case_context", return_value=case_stub), mock.patch(
+            "subprocess.run",
+            side_effect=[
+                SimpleNamespace(returncode=FORCING_OUTAGE_SKIP_EXIT_CODE),
+                SimpleNamespace(returncode=0),
+            ],
+        ), mock.patch.dict(
+            os.environ,
+            {"PIPELINE_PHASE": "prep", "WORKFLOW_MODE": "prototype_2016"},
+            clear=False,
+        ), redirect_stdout(stdout):
+            main_module.main()
+
+        self.assertIn("skipped after forcing outage under degraded continuation", stdout.getvalue())
+        self.assertIn("Spawning pipeline for CASE 2016-09-08", stdout.getvalue())
 
 
 if __name__ == "__main__":

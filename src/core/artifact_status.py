@@ -33,9 +33,19 @@ STATUS_REGISTRY: dict[str, ArtifactStatus] = {
         reportability="reportable_now_inherited_provisional",
         official_status="promoted_primary_validation",
         frozen_status="not_frozen",
-        provenance_label="March 13 seed, March 14 target, and explicit shared March 12 imagery caveat.",
-        panel_text="Use this as the main Mindoro validation view, but state clearly that both NOAA products cite March 12 imagery.",
-        dashboard_summary="Promoted primary validation; inherited-provisional; not frozen.",
+        provenance_label=(
+            "March 13 seed, March 14 target, explicit shared March 12 imagery caveat, and later "
+            "2016-2023 Mindoro-focused drifter confirmation of the same cmems_era5 recipe."
+        ),
+        panel_text=(
+            "Use this as the main Mindoro Phase 3B observation-based spatial validation view. The stored B1 run "
+            "remains tied to the frozen baseline artifact, while the later 2016-2023 Mindoro-focused drifter rerun "
+            "independently confirmed the same cmems_era5 recipe. Keep the shared March 12 imagery caveat explicit."
+        ),
+        dashboard_summary=(
+            "Promoted primary validation; later 2016-2023 drifter rerun confirmed the same cmems_era5 recipe; "
+            "inherited-provisional; not frozen."
+        ),
     ),
     "mindoro_crossmodel_comparator": ArtifactStatus(
         key="mindoro_crossmodel_comparator",

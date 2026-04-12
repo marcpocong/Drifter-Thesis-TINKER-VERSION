@@ -371,6 +371,10 @@ class Phase3BExtendedPublicScoredService:
                     missing_forcing_factors=[downloads["currents"]["forcing_factor"]],
                     skipped_branch_ids=["appendix_only_short_extended_public_validation"],
                     manifest_path=str(manifest_path),
+                    budget_seconds=downloads["currents"].get("budget_seconds"),
+                    elapsed_seconds=downloads["currents"].get("elapsed_seconds"),
+                    budget_exhausted=bool(downloads["currents"].get("budget_exhausted", False)),
+                    failure_stage=str(downloads["currents"].get("failure_stage") or ""),
                 )
             self._write_download_failure_manifest(recipe_name, downloads)
             raise RuntimeError(f"Extended forcing download failed: {downloads['currents']}")
@@ -407,6 +411,10 @@ class Phase3BExtendedPublicScoredService:
                         missing_forcing_factors=[downloads["wind"]["forcing_factor"]],
                         skipped_branch_ids=["appendix_only_short_extended_public_validation"],
                         manifest_path=str(manifest_path),
+                        budget_seconds=downloads["wind"].get("budget_seconds"),
+                        elapsed_seconds=downloads["wind"].get("elapsed_seconds"),
+                        budget_exhausted=bool(downloads["wind"].get("budget_exhausted", False)),
+                        failure_stage=str(downloads["wind"].get("failure_stage") or ""),
                     )
                 self._write_download_failure_manifest(recipe_name, downloads)
                 raise RuntimeError(f"Extended forcing download failed: {downloads['wind']}")
@@ -444,6 +452,10 @@ class Phase3BExtendedPublicScoredService:
                         missing_forcing_factors=[downloads["wave"]["forcing_factor"]],
                         skipped_branch_ids=["appendix_only_short_extended_public_validation"],
                         manifest_path=str(manifest_path),
+                        budget_seconds=downloads["wave"].get("budget_seconds"),
+                        elapsed_seconds=downloads["wave"].get("elapsed_seconds"),
+                        budget_exhausted=bool(downloads["wave"].get("budget_exhausted", False)),
+                        failure_stage=str(downloads["wave"].get("failure_stage") or ""),
                     )
                 self._write_download_failure_manifest(recipe_name, downloads)
                 raise RuntimeError(f"Extended forcing download failed: {downloads['wave']}")
@@ -530,6 +542,10 @@ class Phase3BExtendedPublicScoredService:
             "recipe": recipe_name,
             "tier_window": asdict(self.window),
             "rows": rows,
+            "forcing_outage_policy": self.forcing_outage_policy,
+            "degraded_continue_used": False,
+            "missing_forcing_factors": [],
+            "rerun_required": False,
             "status": "ready" if all(row["status"] == "ready" for row in rows) else "insufficient",
         }
         _write_json(self.output_dir / "extended_forcing_window_manifest.json", payload)

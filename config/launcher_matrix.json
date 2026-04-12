@@ -107,7 +107,7 @@
       "service_profile": "pipeline_only",
       "rerun_cost": "expensive",
       "safe_default": false,
-      "notes": "Scientific rerun only. This does not overwrite config/phase1_baseline_selection.yaml and does not auto-run phase1_audit or phase5_sync.",
+      "notes": "Scientific rerun only. This does not overwrite config/phase1_baseline_selection.yaml, does not auto-run phase1_audit or phase5_sync, and fails hard by default if a forcing-provider outage removes part of the official recipe family.",
       "steps": [
         {
           "phase": "phase1_production_rerun",
@@ -145,7 +145,7 @@
       "service_profile": "mixed_pipeline_and_gnome",
       "rerun_cost": "expensive",
       "safe_default": false,
-      "notes": "Separate external transfer-validation story only. Mindoro remains the main Philippine thesis case; DWH observed masks remain truth; PyGNOME remains comparator-only; current frozen stack is HYCOM GOFS 3.1 + ERA5 + CMEMS wave/Stokes.",
+      "notes": "Separate external transfer-validation story only. Mindoro remains the main Philippine thesis case; DWH observed masks remain truth; PyGNOME remains comparator-only; current frozen stack is HYCOM GOFS 3.1 + ERA5 + CMEMS wave/Stokes; forcing-readiness stays strict by default unless FORCING_OUTAGE_POLICY=continue_degraded is set explicitly.",
       "steps": [
         {
           "phase": "phase3c_external_case_setup",
@@ -184,7 +184,7 @@
       "service_profile": "mixed_pipeline_and_gnome",
       "rerun_cost": "expensive",
       "safe_default": false,
-      "notes": "These tracks are informative and reportable as support material, but the promoted B1 row now has its own scientific launcher entry.",
+      "notes": "These tracks are informative and reportable as support material, but the promoted B1 row now has its own scientific launcher entry. Forcing-only outages may skip the affected support branch with explicit degraded-mode honesty fields.",
       "steps": [
         {
           "phase": "public_obs_appendix",
@@ -209,7 +209,10 @@
         {
           "phase": "phase3b_extended_public_scored_march13_14_reinit",
           "service": "pipeline",
-          "description": "Rebuild/reuse the promoted March 13 -> March 14 B1 source bundle for downstream support tracks"
+          "description": "Rebuild/reuse the promoted March 13 -> March 14 B1 source bundle for downstream support tracks",
+          "extra_env": {
+            "FORCING_OUTAGE_POLICY": "continue_degraded"
+          }
         },
         {
           "phase": "phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison",
@@ -268,7 +271,7 @@
       "service_profile": "pipeline_only",
       "rerun_cost": "expensive",
       "safe_default": false,
-      "notes": "Trial-only. This does not overwrite config/phase1_baseline_selection.yaml and does not modify legacy 2016 prototype outputs.",
+      "notes": "Trial-only. This does not overwrite config/phase1_baseline_selection.yaml, does not modify legacy 2016 prototype outputs, and may auto-skip outage-hit forcing families with provisional rerun-required outputs.",
       "steps": [
         {
           "phase": "phase1_production_rerun",
@@ -358,7 +361,7 @@
       "service_profile": "mixed_pipeline_and_gnome",
       "rerun_cost": "expensive",
       "safe_default": false,
-      "notes": "Compatibility alias retained for older scripts. B1 is primary, B2 is legacy honesty-only, and PyGNOME remains comparator-only.",
+      "notes": "Compatibility alias retained for older scripts. B1 is primary, B2 is legacy honesty-only, PyGNOME remains comparator-only, and the support-side B1 rebuild uses degraded forcing continuation if a temporary provider outage blocks only forcing acquisition.",
       "steps": [
         {
           "phase": "phase3b_extended_public",
@@ -368,7 +371,10 @@
         {
           "phase": "phase3b_extended_public_scored_march13_14_reinit",
           "service": "pipeline",
-          "description": "March 13 -> March 14 primary public-validation row"
+          "description": "March 13 -> March 14 primary public-validation row",
+          "extra_env": {
+            "FORCING_OUTAGE_POLICY": "continue_degraded"
+          }
         },
         {
           "phase": "phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison",
@@ -511,6 +517,25 @@
       ]
     },
     {
+      "entry_id": "prototype_legacy_final_figures",
+      "menu_order": 88,
+      "category_id": "read_only_packaging_help_utilities",
+      "workflow_mode": "prototype_2016",
+      "label": "Prototype 2016 final paper figures",
+      "description": "Read-only curated legacy-2016 final paper-figure export built from existing Phase 2, benchmark, and prototype similarity outputs only.",
+      "service_profile": "pipeline_only",
+      "rerun_cost": "cheap_read_only",
+      "safe_default": true,
+      "notes": "Builds output/2016 Legacy Runs FINAL Figures without rerunning the scientific workflow. This is a legacy-support paper set only; output/figure_package_publication remains the canonical generic publication package.",
+      "steps": [
+        {
+          "phase": "prototype_legacy_final_figures",
+          "service": "pipeline",
+          "description": "Read-only curated legacy-2016 final paper-figure export"
+        }
+      ]
+    },
+    {
       "entry_id": "prototype_2021_bundle",
       "menu_order": 89,
       "category_id": "legacy_prototype_tracks",
@@ -550,7 +575,7 @@
       "category_id": "legacy_prototype_tracks",
       "workflow_mode": "prototype_2016",
       "label": "Prototype 2016 legacy bundle",
-      "description": "Historical legacy-only prep, Phase 1/2, Phase 3A PyGNOME comparator package, and legacy Phase 4 weathering/fate analysis.",
+      "description": "Historical legacy-only prep, Phase 1/2, Phase 3A PyGNOME comparator package, legacy Phase 4 weathering/fate analysis, and the curated final paper-figure export.",
       "service_profile": "mixed_pipeline_and_gnome",
       "rerun_cost": "moderate",
       "safe_default": false,
@@ -580,6 +605,11 @@
           "phase": "prototype_legacy_phase4_weathering",
           "service": "gnome",
           "description": "Prototype legacy Phase 4 oil weathering and fate analysis"
+        },
+        {
+          "phase": "prototype_legacy_final_figures",
+          "service": "pipeline",
+          "description": "Curated final paper-figure export for the legacy 2016 support cases"
         }
       ]
     }
