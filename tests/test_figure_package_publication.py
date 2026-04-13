@@ -295,7 +295,7 @@ class FigurePackagePublicationTests(unittest.TestCase):
                 specs["mindoro_primary_board"]["note_lines"],
             )
             self.assertIn(
-                "The later 2016-2023 Mindoro-focused drifter rerun confirmed the same cmems_era5 recipe used by the stored B1 run.",
+                "The separate focused 2016-2023 Mindoro drifter rerun selected the same cmems_era5 recipe used by the stored B1 run and now serves as the active B1 recipe-provenance lane.",
                 specs["mindoro_primary_board"]["note_lines"],
             )
             self.assertIn(
@@ -432,6 +432,31 @@ class FigurePackagePublicationTests(unittest.TestCase):
                 & registry_df["figure_id"].str.contains("trajectory_board", na=False)
             ].iloc[0]
             self.assertEqual(dwh_trajectory_board["status_key"], "dwh_trajectory_context")
+            dwh_event_det = registry_df[
+                (registry_df["case_id"] == "CASE_DWH_RETRO_2010_72H")
+                & registry_df["figure_id"].str.contains("eventcorridor_deterministic", na=False)
+            ].iloc[0]
+            self.assertEqual(dwh_event_det["status_key"], "dwh_deterministic_transfer")
+            dwh_event_p50 = registry_df[
+                (registry_df["case_id"] == "CASE_DWH_RETRO_2010_72H")
+                & registry_df["figure_id"].str.contains("eventcorridor_p50", na=False)
+            ].iloc[0]
+            self.assertEqual(dwh_event_p50["status_key"], "dwh_ensemble_transfer")
+            dwh_event_p90 = registry_df[
+                (registry_df["case_id"] == "CASE_DWH_RETRO_2010_72H")
+                & registry_df["figure_id"].str.contains("eventcorridor_p90", na=False)
+            ].iloc[0]
+            self.assertEqual(dwh_event_p90["status_key"], "dwh_ensemble_transfer")
+            dwh_event_pygnome = registry_df[
+                (registry_df["case_id"] == "CASE_DWH_RETRO_2010_72H")
+                & registry_df["figure_id"].str.contains("eventcorridor_pygnome", na=False)
+            ].iloc[0]
+            self.assertEqual(dwh_event_pygnome["status_key"], "dwh_crossmodel_comparator")
+            dwh_event_obs = registry_df[
+                (registry_df["case_id"] == "CASE_DWH_RETRO_2010_72H")
+                & registry_df["figure_id"].str.contains("eventcorridor_observation", na=False)
+            ].iloc[0]
+            self.assertEqual(dwh_event_obs["status_key"], "dwh_observation_truth_context")
 
             expected_single_dims = (
                 int(service._single_size()[0] * service._dpi()),

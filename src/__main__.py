@@ -14,7 +14,7 @@ Container routing via the PIPELINE_PHASE environment variable:
   PIPELINE_PHASE=phase3b_extended_public_scored -> Appendix-only short extended public-observation scoring
   PIPELINE_PHASE=phase3b_extended_public_scored_march23 -> Appendix-only March 23 extended public branch stress test
   PIPELINE_PHASE=phase3b_extended_public_scored_march13_14_reinit -> Mindoro Phase 3B primary public-validation row (March 13 -> March 14 NOAA reinit with explicit shared-imagery caveat)
-  PIPELINE_PHASE=phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison -> Mindoro Phase 3A comparator-only March 13 -> March 14 cross-model lane
+  PIPELINE_PHASE=phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison -> Mindoro Phase 3A same-case comparator-only March 13 -> March 14 support lane
   PIPELINE_PHASE=horizon_survival_audit -> Read-only short-extended horizon survival diagnosis
   PIPELINE_PHASE=transport_retention_fix -> Official transport-retention sensitivity diagnostics
   PIPELINE_PHASE=official_rerun_r1 -> Promote selected R1 retention mode and rescore strict/short tracks

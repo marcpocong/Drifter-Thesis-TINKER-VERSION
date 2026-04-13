@@ -33,6 +33,22 @@ from src.services.mindoro_primary_validation_metadata import (
     MINDORO_PRIMARY_VALIDATION_TRACK_LABEL,
     MINDORO_SHARED_IMAGERY_CAVEAT,
 )
+from src.services.dwh_phase3c_metadata import (
+    DWH_BASE_CASE_CONFIG_PATH,
+    DWH_PHASE3C_DATE_COMPOSITE_NOTE,
+    DWH_PHASE3C_FINAL_NOTE_PATH,
+    DWH_PHASE3C_FINAL_OUTPUT_DIR,
+    DWH_PHASE3C_FINAL_RECOMMENDATION,
+    DWH_PHASE3C_FORCING_STACK,
+    DWH_PHASE3C_THESIS_PHASE_TITLE,
+    DWH_PHASE3C_THESIS_SUBTITLE,
+    DWH_PHASE3C_TRACK_ID_COMPARATOR,
+    DWH_PHASE3C_TRACK_ID_DETERMINISTIC,
+    DWH_PHASE3C_TRACK_ID_ENSEMBLE,
+    DWH_PHASE3C_TRACK_LABEL_COMPARATOR,
+    DWH_PHASE3C_TRACK_LABEL_DETERMINISTIC,
+    DWH_PHASE3C_TRACK_LABEL_ENSEMBLE,
+)
 
 
 PHASE = "final_validation_package"
@@ -132,11 +148,150 @@ MINDORO_MARCH14_SOURCE_KEY = "10b37c42a9754363a5f7b14199b077e6"
 
 TRACK_SEQUENCE = {"A": 1, "B1": 2, "B2": 3, "B3": 4, "C1": 5, "C2": 6, "C3": 7}
 FSS_WINDOWS_KM = (1, 3, 5, 10)
+MINDORO_COMPARATOR_TRACK_ID = "A"
+MINDORO_COMPARATOR_TRACK_LABEL = "Mindoro March 13 -> March 14 cross-model comparator"
+MINDORO_COMPARATOR_SUPPORT_CONTEXT = "Mindoro March 13 -> March 14 same-case comparator support"
 DWH_TRACK_LABELS = {
     "opendrift_control": "OpenDrift deterministic control",
     "ensemble_p50": "OpenDrift ensemble p50",
     "ensemble_p90": "OpenDrift ensemble p90",
     "pygnome_deterministic": "PyGNOME deterministic comparator",
+}
+
+DWH_FINAL_OUTPUT_DIR = DWH_PHASE3C_FINAL_OUTPUT_DIR
+DWH_PUBLICATION_EXPORTS: dict[str, dict[str, Path]] = {
+    "opendrift_deterministic": {
+        "dwh_2010-05-21_deterministic_overlay.png": Path("output")
+        / "figure_package_publication"
+        / "case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__single_overlay__2010_05_21__zoom__paper__forecast_vs_observation.png",
+        "dwh_2010-05-22_deterministic_overlay.png": Path("output")
+        / "figure_package_publication"
+        / "case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__single_overlay__2010_05_22__zoom__paper__forecast_vs_observation.png",
+        "dwh_2010-05-23_deterministic_overlay.png": Path("output")
+        / "figure_package_publication"
+        / "case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__single_overlay__2010_05_23__zoom__paper__forecast_vs_observation.png",
+        "dwh_daily_deterministic_board.png": Path("output")
+        / "figure_package_publication"
+        / "case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__daily_deterministic_board.png",
+        "dwh_eventcorridor_deterministic.png": Path("output")
+        / "figure_package_publication"
+        / "case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__single_model__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_deterministic.png",
+    },
+    "opendrift_ensemble": {
+        "dwh_eventcorridor_p50.png": Path("output")
+        / "figure_package_publication"
+        / "case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__single_model__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_p50.png",
+        "dwh_eventcorridor_p90.png": Path("output")
+        / "figure_package_publication"
+        / "case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__single_model__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_p90.png",
+        "dwh_deterministic_vs_ensemble_board.png": Path("output")
+        / "figure_package_publication"
+        / "case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__deterministic_vs_ensemble_board.png",
+    },
+    "comparator_pygnome": {
+        "dwh_eventcorridor_pygnome.png": Path("output")
+        / "figure_package_publication"
+        / "case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__pygnome__single_model__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_pygnome.png",
+        "dwh_opendrift_vs_pygnome_board.png": Path("output")
+        / "figure_package_publication"
+        / "case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__opendrift_vs_pygnome__comparison_board__2010_05_21_to_2010_05_23__board__slide__opendrift_vs_pygnome_board.png",
+    },
+    "context_optional": {
+        "dwh_ensemble_sampled_trajectory_context.png": Path("output")
+        / "figure_package_publication"
+        / "case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__single_trajectory__2010_05_20_to_2010_05_23__zoom__paper__ensemble_sampled_trajectory.png",
+    },
+}
+
+DWH_OBSERVATION_SOURCE_MASKS: dict[str, Path] = {
+    "dwh_2010-05-21_observation_context.png": DWH_DIR / "phase3c_external_case_setup" / "obs_mask_2010-05-21.tif",
+    "dwh_2010-05-22_observation_context.png": DWH_DIR / "phase3c_external_case_setup" / "obs_mask_2010-05-22.tif",
+    "dwh_2010-05-23_observation_context.png": DWH_DIR / "phase3c_external_case_setup" / "obs_mask_2010-05-23.tif",
+    "dwh_2010-05-21_to_2010-05-23_eventcorridor_observation_context.png": DWH_DIR
+    / "phase3c_external_case_run"
+    / "products"
+    / "obs_mask_2010-05-21_2010-05-23_eventcorridor.tif",
+}
+
+DWH_SCIENTIFIC_SOURCE_EXPORTS: dict[str, dict[str, Path]] = {
+    "deterministic": {
+        "qa_phase3c_overlays.png": DWH_DIR / "phase3c_external_case_run" / "qa_phase3c_overlays.png",
+        "qa_phase3c_eventcorridor_overlay.png": DWH_DIR / "phase3c_external_case_run" / "qa_phase3c_eventcorridor_overlay.png",
+    },
+    "ensemble": {
+        "qa_phase3c_ensemble_overlays.png": DWH_DIR
+        / "phase3c_external_case_ensemble_comparison"
+        / "qa_phase3c_ensemble_overlays.png",
+        "qa_phase3c_ensemble_eventcorridor_overlay.png": DWH_DIR
+        / "phase3c_external_case_ensemble_comparison"
+        / "qa_phase3c_ensemble_eventcorridor_overlay.png",
+    },
+    "comparator_pygnome": {
+        "qa_phase3c_dwh_pygnome_overlays.png": DWH_DIR
+        / "phase3c_dwh_pygnome_comparator"
+        / "qa_phase3c_dwh_pygnome_overlays.png",
+        "qa_phase3c_dwh_pygnome_eventcorridor_overlay.png": DWH_DIR
+        / "phase3c_dwh_pygnome_comparator"
+        / "qa_phase3c_dwh_pygnome_eventcorridor_overlay.png",
+    },
+}
+
+DWH_SUMMARY_EXPORTS: dict[str, dict[str, Path]] = {
+    "deterministic": {
+        "phase3c_summary.csv": DWH_DIR / "phase3c_external_case_run" / "phase3c_summary.csv",
+        "phase3c_run_manifest.json": DWH_DIR / "phase3c_external_case_run" / "phase3c_run_manifest.json",
+        "phase3c_pairing_manifest.csv": DWH_DIR / "phase3c_external_case_run" / "phase3c_pairing_manifest.csv",
+        "phase3c_product_registry.csv": DWH_DIR / "phase3c_external_case_run" / "phase3c_product_registry.csv",
+        "phase3c_product_registry.json": DWH_DIR / "phase3c_external_case_run" / "phase3c_product_registry.json",
+        "phase3c_eventcorridor_summary.csv": DWH_DIR / "phase3c_external_case_run" / "phase3c_eventcorridor_summary.csv",
+        "chapter3_phase3c_external_case_run_memo.md": DWH_DIR / "phase3c_external_case_run" / "chapter3_phase3c_external_case_run_memo.md",
+    },
+    "ensemble": {
+        "phase3c_ensemble_summary.csv": DWH_DIR
+        / "phase3c_external_case_ensemble_comparison"
+        / "phase3c_ensemble_summary.csv",
+        "phase3c_ensemble_run_manifest.json": DWH_DIR
+        / "phase3c_external_case_ensemble_comparison"
+        / "phase3c_ensemble_run_manifest.json",
+        "phase3c_ensemble_pairing_manifest.csv": DWH_DIR
+        / "phase3c_external_case_ensemble_comparison"
+        / "phase3c_ensemble_pairing_manifest.csv",
+        "phase3c_ensemble_product_registry.csv": DWH_DIR
+        / "phase3c_external_case_ensemble_comparison"
+        / "phase3c_ensemble_product_registry.csv",
+        "phase3c_ensemble_eventcorridor_summary.csv": DWH_DIR
+        / "phase3c_external_case_ensemble_comparison"
+        / "phase3c_ensemble_eventcorridor_summary.csv",
+        "chapter3_phase3c_ensemble_extension_memo.md": DWH_DIR
+        / "phase3c_external_case_ensemble_comparison"
+        / "chapter3_phase3c_ensemble_extension_memo.md",
+    },
+    "comparator_pygnome": {
+        "phase3c_dwh_pygnome_summary.csv": DWH_DIR
+        / "phase3c_dwh_pygnome_comparator"
+        / "phase3c_dwh_pygnome_summary.csv",
+        "phase3c_dwh_pygnome_run_manifest.json": DWH_DIR
+        / "phase3c_dwh_pygnome_comparator"
+        / "phase3c_dwh_pygnome_run_manifest.json",
+        "phase3c_dwh_pygnome_pairing_manifest.csv": DWH_DIR
+        / "phase3c_dwh_pygnome_comparator"
+        / "phase3c_dwh_pygnome_pairing_manifest.csv",
+        "phase3c_dwh_pygnome_product_registry.csv": DWH_DIR
+        / "phase3c_dwh_pygnome_comparator"
+        / "phase3c_dwh_pygnome_product_registry.csv",
+        "phase3c_dwh_pygnome_product_registry.json": DWH_DIR
+        / "phase3c_dwh_pygnome_comparator"
+        / "phase3c_dwh_pygnome_product_registry.json",
+        "phase3c_dwh_pygnome_eventcorridor_summary.csv": DWH_DIR
+        / "phase3c_dwh_pygnome_comparator"
+        / "phase3c_dwh_pygnome_eventcorridor_summary.csv",
+        "phase3c_dwh_all_results_table.csv": DWH_DIR
+        / "phase3c_dwh_pygnome_comparator"
+        / "phase3c_dwh_all_results_table.csv",
+        "chapter3_phase3c_dwh_pygnome_comparison_memo.md": DWH_DIR
+        / "phase3c_dwh_pygnome_comparator"
+        / "chapter3_phase3c_dwh_pygnome_comparison_memo.md",
+    },
 }
 
 
@@ -205,10 +360,12 @@ def decide_final_structure() -> str:
     return (
         "Main text should emphasize Mindoro B1 as the March 13 -> March 14 NOAA reinit validation with an explicit "
         "caveat that both NOAA products cite March 12 WorldView-3 imagery, while DWH Phase 3C remains the rich-data "
-        "transfer-validation success; comparative discussion should emphasize the March 13 -> March 14 Mindoro "
-        "cross-model comparator and the DWH deterministic-vs-ensemble-vs-PyGNOME comparison; legacy/reference and "
-        "appendix sections should retain the Mindoro March 6 sparse reference, the March 3-6 broader-support "
-        "reference, recipe/init/source-history sensitivities, and any future DWH threshold or harmonization extensions."
+        "transfer-validation success with deterministic as the clean baseline, p50 as the preferred probabilistic "
+        "extension, p90 as support/comparison only, and PyGNOME as comparator-only; comparative discussion should "
+        "emphasize the same-case Mindoro A comparator support track attached to B1 and the DWH "
+        "deterministic-vs-ensemble-vs-PyGNOME comparison; legacy/reference and appendix sections should retain the "
+        "Mindoro March 6 sparse reference, the March 3-6 broader-support reference, recipe/init/source-history "
+        "sensitivities, and any future DWH threshold or harmonization extensions."
     )
 
 
@@ -254,6 +411,15 @@ class FinalValidationPackageService:
             ],
             *[path for exports in MINDORO_B1_SCIENTIFIC_SOURCE_EXPORTS.values() for path in exports.values()],
             *[path for exports in MINDORO_B1_SUMMARY_EXPORTS.values() for path in exports.values()],
+            *[path for path in DWH_OBSERVATION_SOURCE_MASKS.values()],
+            *[
+                path
+                for group_name, exports in DWH_PUBLICATION_EXPORTS.items()
+                if group_name != "context_optional"
+                for path in exports.values()
+            ],
+            *[path for exports in DWH_SCIENTIFIC_SOURCE_EXPORTS.values() for path in exports.values()],
+            *[path for exports in DWH_SUMMARY_EXPORTS.values() for path in exports.values()],
         ]
 
     def _assert_required_artifacts(self) -> None:
@@ -731,6 +897,397 @@ class FinalValidationPackageService:
         fig.savefig(destination, bbox_inches="tight")
         plt.close(fig)
 
+    def _render_dwh_observation_context_png(
+        self,
+        source_relative_path: Path,
+        destination: Path,
+        *,
+        title: str,
+        subtitle: str,
+    ) -> None:
+        import matplotlib.pyplot as plt
+        from matplotlib.colors import ListedColormap
+        import rasterio
+        from rasterio.plot import plotting_extent
+
+        style = _read_yaml(self.repo_root / Path("config") / "publication_figure_style.yaml")
+        palette = style.get("palette") or {}
+        source = self.repo_root / source_relative_path
+        with rasterio.open(source) as dataset:
+            array = dataset.read(1)
+            if not np.any(np.isfinite(array) & (array > 0)):
+                raise ValueError(f"Stored DWH observation mask is empty: {source}")
+            masked = np.ma.masked_where(~np.isfinite(array) | (array <= 0), array)
+            extent = plotting_extent(dataset)
+
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        fig, ax = plt.subplots(figsize=(7.6, 5.6), dpi=200)
+        fig.patch.set_facecolor("white")
+        ax.set_facecolor(palette.get("background_sea", "#f7fbfd"))
+        ax.imshow(
+            masked,
+            extent=extent,
+            cmap=ListedColormap([palette.get("observed_mask", "#2f3a46")]),
+            interpolation="nearest",
+            alpha=0.9,
+        )
+        ax.set_title(title, fontsize=13, fontweight="bold", loc="left")
+        ax.text(
+            0.0,
+            1.02,
+            subtitle,
+            transform=ax.transAxes,
+            ha="left",
+            va="bottom",
+            fontsize=9,
+            color="#24323d",
+        )
+        ax.set_xlabel("Longitude")
+        ax.set_ylabel("Latitude")
+        ax.grid(color="#90a4ae", linestyle=":", linewidth=0.7, alpha=0.5)
+        ax.text(
+            0.01,
+            0.01,
+            "Observation-derived date-composite truth context only\nNo exact sub-daily acquisition time claimed",
+            transform=ax.transAxes,
+            ha="left",
+            va="bottom",
+            fontsize=8,
+            color="#24323d",
+            bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.88, "edgecolor": "#c9d4dd"},
+        )
+        fig.tight_layout()
+        fig.savefig(destination, bbox_inches="tight")
+        plt.close(fig)
+
+    def _dwh_final_output_readme(self) -> str:
+        return "\n".join(
+            [
+                "# Phase 3C DWH Final Output",
+                "",
+                "This folder is a read-only curated packaging layer over the canonical stored DWH Phase 3C outputs.",
+                "",
+                "Governance summary:",
+                f"- DWH is `{DWH_PHASE3C_THESIS_PHASE_TITLE}` and remains a separate external transfer-validation lane.",
+                "- No drifter baseline is used here and no new drifter ingestion is part of the thesis-facing DWH lane.",
+                "- Truth comes from public observation-derived daily masks and the event-corridor union, used honestly as date-composite masks only.",
+                f"- Forcing stack: `{DWH_PHASE3C_FORCING_STACK}`.",
+                "- Deterministic is the clean baseline transfer-validation result.",
+                "- Ensemble p50 is the preferred probabilistic extension.",
+                "- Ensemble p90 is support/comparison only.",
+                "- PyGNOME is comparator-only and never truth.",
+                "",
+                "C-track meanings:",
+                f"- `{DWH_PHASE3C_TRACK_ID_DETERMINISTIC}` = {DWH_PHASE3C_TRACK_LABEL_DETERMINISTIC}.",
+                f"- `{DWH_PHASE3C_TRACK_ID_ENSEMBLE}` = {DWH_PHASE3C_TRACK_LABEL_ENSEMBLE}.",
+                f"- `{DWH_PHASE3C_TRACK_ID_COMPARATOR}` = {DWH_PHASE3C_TRACK_LABEL_COMPARATOR}.",
+                "",
+                "Date-composite guardrail:",
+                f"- {DWH_PHASE3C_DATE_COMPOSITE_NOTE}",
+                "",
+                "Packaging rule:",
+                "- This folder copies or lightly regenerates presentation artifacts from stored rasters, stored publication figures, and stored summary/manifests only.",
+                "- It does not rename or replace the canonical scientific directories under `output/CASE_DWH_RETRO_2010_72H/`.",
+            ]
+        )
+
+    def _build_dwh_final_output_export(self) -> dict[str, Any]:
+        export_dir = self.repo_root / DWH_FINAL_OUTPUT_DIR
+        if export_dir.exists():
+            rmtree(export_dir)
+        publication_dir = export_dir / "publication"
+        scientific_dir = export_dir / "scientific_source_pngs"
+        summary_dir = export_dir / "summary"
+        manifests_dir = export_dir / "manifests"
+        copied_files: list[dict[str, Any]] = []
+        registry_rows: list[dict[str, Any]] = []
+        missing_optional: list[str] = []
+
+        def _record_export(
+            *,
+            artifact_group: str,
+            destination: Path,
+            source: Path,
+            track_id: str,
+            track_label: str,
+            scientific_vs_display_only: str,
+            primary_vs_secondary: str,
+            comparator_only: bool,
+            provenance_note: str,
+            packaging_action: str,
+            optional_context_only: bool = False,
+        ) -> None:
+            row = {
+                "final_relative_path": _relative_to_repo(self.repo_root, destination),
+                "source_relative_path": _relative_to_repo(self.repo_root, source),
+                "artifact_group": artifact_group,
+                "track_id": track_id,
+                "track_label": track_label,
+                "scientific_vs_display_only": scientific_vs_display_only,
+                "primary_vs_secondary": primary_vs_secondary,
+                "comparator_only": comparator_only,
+                "optional_context_only": optional_context_only,
+                "packaging_action": packaging_action,
+                "provenance_note": provenance_note,
+            }
+            copied_files.append(
+                {
+                    "group": artifact_group,
+                    "file_name": destination.name,
+                    **row,
+                }
+            )
+            registry_rows.append(row)
+
+        def _copy_group(
+            *,
+            base_dir: Path,
+            group_name: str,
+            exports: dict[str, Path],
+            track_id: str,
+            track_label: str,
+            scientific_vs_display_only: str,
+            primary_vs_secondary: str,
+            comparator_only: bool,
+            provenance_note: str,
+            packaging_action: str,
+            optional_context_only: bool = False,
+            optional_missing_ok: bool = False,
+        ) -> None:
+            for destination_name, relative_source in exports.items():
+                source = self.repo_root / relative_source
+                if optional_missing_ok and not source.exists():
+                    missing_optional.append(_relative_to_repo(self.repo_root, source))
+                    continue
+                destination = base_dir / group_name / destination_name
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                copy2(source, destination)
+                _record_export(
+                    artifact_group=f"{base_dir.name}/{group_name}",
+                    destination=destination,
+                    source=source,
+                    track_id=track_id,
+                    track_label=track_label,
+                    scientific_vs_display_only=scientific_vs_display_only,
+                    primary_vs_secondary=primary_vs_secondary,
+                    comparator_only=comparator_only,
+                    provenance_note=provenance_note,
+                    packaging_action=packaging_action,
+                    optional_context_only=optional_context_only,
+                )
+
+        observation_titles = {
+            "dwh_2010-05-21_observation_context.png": (
+                "DWH 21 May 2010 observation context",
+                "Deepwater Horizon | 21 May 2010 | public observation-derived daily mask",
+            ),
+            "dwh_2010-05-22_observation_context.png": (
+                "DWH 22 May 2010 observation context",
+                "Deepwater Horizon | 22 May 2010 | public observation-derived daily mask",
+            ),
+            "dwh_2010-05-23_observation_context.png": (
+                "DWH 23 May 2010 observation context",
+                "Deepwater Horizon | 23 May 2010 | public observation-derived daily mask",
+            ),
+            "dwh_2010-05-21_to_2010-05-23_eventcorridor_observation_context.png": (
+                "DWH event-corridor observation context",
+                "Deepwater Horizon | 21-23 May 2010 | public observation-derived event corridor",
+            ),
+        }
+        for destination_name, relative_source in DWH_OBSERVATION_SOURCE_MASKS.items():
+            destination = publication_dir / "observations" / destination_name
+            title, subtitle = observation_titles[destination_name]
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            self._render_dwh_observation_context_png(relative_source, destination, title=title, subtitle=subtitle)
+            _record_export(
+                artifact_group="publication/observations",
+                destination=destination,
+                source=self.repo_root / relative_source,
+                track_id="truth_context",
+                track_label="DWH observation-derived truth context",
+                scientific_vs_display_only="display_only",
+                primary_vs_secondary="primary",
+                comparator_only=False,
+                provenance_note=(
+                    "Lightweight publication rendering rebuilt from the stored DWH observation-derived mask only; "
+                    "no scientific rerun and no exact sub-daily acquisition time claimed."
+                ),
+                packaging_action="generated_lightweight_from_stored_raster",
+            )
+
+        _copy_group(
+            base_dir=publication_dir,
+            group_name="opendrift_deterministic",
+            exports=DWH_PUBLICATION_EXPORTS["opendrift_deterministic"],
+            track_id=DWH_PHASE3C_TRACK_ID_DETERMINISTIC,
+            track_label=DWH_PHASE3C_TRACK_LABEL_DETERMINISTIC,
+            scientific_vs_display_only="display_only",
+            primary_vs_secondary="primary",
+            comparator_only=False,
+            provenance_note=(
+                "Copied publication figures for the authoritative DWH deterministic external transfer-validation lane."
+            ),
+            packaging_action="copied_existing_publication_png",
+        )
+        _copy_group(
+            base_dir=publication_dir,
+            group_name="opendrift_ensemble",
+            exports=DWH_PUBLICATION_EXPORTS["opendrift_ensemble"],
+            track_id=DWH_PHASE3C_TRACK_ID_ENSEMBLE,
+            track_label=DWH_PHASE3C_TRACK_LABEL_ENSEMBLE,
+            scientific_vs_display_only="display_only",
+            primary_vs_secondary="secondary",
+            comparator_only=False,
+            provenance_note=(
+                "Copied publication figures for the DWH ensemble extension; p50 is preferred probabilistic "
+                "extension and p90 is support/comparison only."
+            ),
+            packaging_action="copied_existing_publication_png",
+        )
+        _copy_group(
+            base_dir=publication_dir,
+            group_name="comparator_pygnome",
+            exports=DWH_PUBLICATION_EXPORTS["comparator_pygnome"],
+            track_id=DWH_PHASE3C_TRACK_ID_COMPARATOR,
+            track_label=DWH_PHASE3C_TRACK_LABEL_COMPARATOR,
+            scientific_vs_display_only="display_only",
+            primary_vs_secondary="secondary",
+            comparator_only=True,
+            provenance_note="Copied publication figures for the DWH PyGNOME comparator-only lane; PyGNOME is never truth.",
+            packaging_action="copied_existing_publication_png",
+        )
+        _copy_group(
+            base_dir=publication_dir,
+            group_name="context_optional",
+            exports=DWH_PUBLICATION_EXPORTS["context_optional"],
+            track_id="context_optional",
+            track_label="DWH context-only trajectory support",
+            scientific_vs_display_only="display_only",
+            primary_vs_secondary="secondary",
+            comparator_only=False,
+            provenance_note="Optional context-only trajectory figure copied for transport intuition; not a scored truth panel.",
+            packaging_action="copied_existing_publication_png",
+            optional_context_only=True,
+            optional_missing_ok=True,
+        )
+        _copy_group(
+            base_dir=scientific_dir,
+            group_name="deterministic",
+            exports=DWH_SCIENTIFIC_SOURCE_EXPORTS["deterministic"],
+            track_id=DWH_PHASE3C_TRACK_ID_DETERMINISTIC,
+            track_label=DWH_PHASE3C_TRACK_LABEL_DETERMINISTIC,
+            scientific_vs_display_only="scientific_source_png",
+            primary_vs_secondary="primary",
+            comparator_only=False,
+            provenance_note="Exact stored deterministic QA/source PNGs from the canonical DWH scientific directory.",
+            packaging_action="copied_existing_scientific_source_png",
+        )
+        _copy_group(
+            base_dir=scientific_dir,
+            group_name="ensemble",
+            exports=DWH_SCIENTIFIC_SOURCE_EXPORTS["ensemble"],
+            track_id=DWH_PHASE3C_TRACK_ID_ENSEMBLE,
+            track_label=DWH_PHASE3C_TRACK_LABEL_ENSEMBLE,
+            scientific_vs_display_only="scientific_source_png",
+            primary_vs_secondary="secondary",
+            comparator_only=False,
+            provenance_note="Exact stored ensemble QA/source PNGs from the canonical DWH scientific directory.",
+            packaging_action="copied_existing_scientific_source_png",
+        )
+        _copy_group(
+            base_dir=scientific_dir,
+            group_name="comparator_pygnome",
+            exports=DWH_SCIENTIFIC_SOURCE_EXPORTS["comparator_pygnome"],
+            track_id=DWH_PHASE3C_TRACK_ID_COMPARATOR,
+            track_label=DWH_PHASE3C_TRACK_LABEL_COMPARATOR,
+            scientific_vs_display_only="scientific_source_png",
+            primary_vs_secondary="secondary",
+            comparator_only=True,
+            provenance_note="Exact stored comparator QA/source PNGs from the canonical DWH scientific directory.",
+            packaging_action="copied_existing_scientific_source_png",
+        )
+        _copy_group(
+            base_dir=summary_dir,
+            group_name="deterministic",
+            exports=DWH_SUMMARY_EXPORTS["deterministic"],
+            track_id=DWH_PHASE3C_TRACK_ID_DETERMINISTIC,
+            track_label=DWH_PHASE3C_TRACK_LABEL_DETERMINISTIC,
+            scientific_vs_display_only="scientific_summary",
+            primary_vs_secondary="primary",
+            comparator_only=False,
+            provenance_note="Canonical deterministic DWH Phase 3C summary and manifest artifacts.",
+            packaging_action="copied_existing_summary_artifact",
+        )
+        _copy_group(
+            base_dir=summary_dir,
+            group_name="ensemble",
+            exports=DWH_SUMMARY_EXPORTS["ensemble"],
+            track_id=DWH_PHASE3C_TRACK_ID_ENSEMBLE,
+            track_label=DWH_PHASE3C_TRACK_LABEL_ENSEMBLE,
+            scientific_vs_display_only="scientific_summary",
+            primary_vs_secondary="secondary",
+            comparator_only=False,
+            provenance_note="Canonical ensemble DWH Phase 3C summary and manifest artifacts.",
+            packaging_action="copied_existing_summary_artifact",
+        )
+        _copy_group(
+            base_dir=summary_dir,
+            group_name="comparator_pygnome",
+            exports=DWH_SUMMARY_EXPORTS["comparator_pygnome"],
+            track_id=DWH_PHASE3C_TRACK_ID_COMPARATOR,
+            track_label=DWH_PHASE3C_TRACK_LABEL_COMPARATOR,
+            scientific_vs_display_only="scientific_summary",
+            primary_vs_secondary="secondary",
+            comparator_only=True,
+            provenance_note="Canonical comparator-only DWH Phase 3C summary and manifest artifacts.",
+            packaging_action="copied_existing_summary_artifact",
+        )
+
+        readme_path = export_dir / "README.md"
+        _write_text(readme_path, self._dwh_final_output_readme())
+
+        manifest_payload = {
+            "title": DWH_PHASE3C_THESIS_PHASE_TITLE,
+            "subtitle": DWH_PHASE3C_THESIS_SUBTITLE,
+            "output_dir": _relative_to_repo(self.repo_root, export_dir),
+            "canonical_deterministic_output_dir": _relative_to_repo(
+                self.repo_root, self.repo_root / DWH_DIR / "phase3c_external_case_run"
+            ),
+            "canonical_ensemble_output_dir": _relative_to_repo(
+                self.repo_root, self.repo_root / DWH_DIR / "phase3c_external_case_ensemble_comparison"
+            ),
+            "canonical_comparator_output_dir": _relative_to_repo(
+                self.repo_root, self.repo_root / DWH_DIR / "phase3c_dwh_pygnome_comparator"
+            ),
+            "read_only_export": True,
+            "scientific_rerun_triggered": False,
+            "forcing_stack": DWH_PHASE3C_FORCING_STACK,
+            "date_composite_note": DWH_PHASE3C_DATE_COMPOSITE_NOTE,
+            "final_recommendation": DWH_PHASE3C_FINAL_RECOMMENDATION,
+            "exported_files": copied_files,
+            "missing_optional_exports": missing_optional,
+            "registry_path": _relative_to_repo(
+                self.repo_root, manifests_dir / "phase3c_final_output_registry.csv"
+            ),
+        }
+
+        manifest_path = manifests_dir / "phase3c_final_output_manifest.json"
+        registry_csv_path = manifests_dir / "phase3c_final_output_registry.csv"
+        registry_json_path = manifests_dir / "phase3c_final_output_registry.json"
+        _write_json(manifest_path, manifest_payload)
+        pd.DataFrame(registry_rows).to_csv(registry_csv_path, index=False)
+        _write_json(registry_json_path, {"rows": registry_rows})
+
+        return {
+            "output_dir": _relative_to_repo(self.repo_root, export_dir),
+            "readme_path": _relative_to_repo(self.repo_root, readme_path),
+            "manifest_path": _relative_to_repo(self.repo_root, manifest_path),
+            "registry_csv_path": _relative_to_repo(self.repo_root, registry_csv_path),
+            "registry_json_path": _relative_to_repo(self.repo_root, registry_json_path),
+            "copied_files": copied_files,
+            "missing_optional_exports": missing_optional,
+        }
+
     def _extended_obs_row(self, source_key: str) -> pd.Series:
         rows = self.extended_public_registry[self.extended_public_registry["source_key"].astype(str) == source_key]
         if rows.empty:
@@ -740,17 +1297,23 @@ class FinalValidationPackageService:
     def _build_dwh_main_row(self, row: pd.Series, track_id: str) -> dict[str, Any]:
         track_name = str(row.get("track_id", ""))
         model_comparator = DWH_TRACK_LABELS.get(track_name, str(row.get("track_id", "")))
-        if track_id == "C1":
-            track_label = "DWH deterministic external transfer validation"
-            notes = "Scientific deterministic OpenDrift control using the frozen real historical forcing stack."
-        elif track_id == "C2":
-            track_label = "DWH ensemble extension and deterministic-vs-ensemble comparison"
+        if track_id == DWH_PHASE3C_TRACK_ID_DETERMINISTIC:
+            track_label = DWH_PHASE3C_TRACK_LABEL_DETERMINISTIC
+            notes = (
+                "Scientific deterministic OpenDrift control using the authoritative readiness-gated historical stack; "
+                "this remains the clean baseline DWH transfer-validation result."
+            )
+        elif track_id == DWH_PHASE3C_TRACK_ID_ENSEMBLE:
+            track_label = DWH_PHASE3C_TRACK_LABEL_ENSEMBLE
             if track_name == "ensemble_p50":
-                notes = "Scientific ensemble p50 track; strongest DWH overall mean FSS across per-date and event-corridor rows."
+                notes = (
+                    "Scientific ensemble p50 track on the same DWH truth masks; preferred probabilistic extension and "
+                    "strongest overall mean FSS across per-date and event-corridor rows."
+                )
             else:
-                notes = "Scientific ensemble threshold track used for comparison against deterministic and p50."
+                notes = "Scientific ensemble p90 threshold track kept for support/comparison against deterministic and p50."
         else:
-            track_label = "DWH PyGNOME comparator against the same DWH truth masks"
+            track_label = DWH_PHASE3C_TRACK_LABEL_COMPARATOR
             notes = (
                 "Comparator only; DWH observed masks remain truth. PyGNOME wave/Stokes handling is not identical to the "
                 "OpenDrift scientific stack and should be interpreted as a cross-model comparison, not as truth."
@@ -776,20 +1339,22 @@ class FinalValidationPackageService:
             "transport_model": transport_model,
             "provisional_transport_model": bool(row.get("provisional_transport_model", True)),
             "shoreline_mask_status": "dwh_epsg32616_scoring_grid_with_sea_mask_applied",
-            "case_definition_path": "",
-            "case_freeze_amendment_path": "",
+            "case_definition_path": str(DWH_BASE_CASE_CONFIG_PATH),
+            "case_freeze_amendment_path": str(DWH_PHASE3C_FINAL_NOTE_PATH),
             "base_case_definition_preserved": False,
-            "row_role": "scientific_result" if track_id != "C3" else "comparator_only",
+            "row_role": "scientific_result" if track_id != DWH_PHASE3C_TRACK_ID_COMPARATOR else "comparator_only",
             "shared_imagery_caveat": "",
+            "thesis_phase_title": DWH_PHASE3C_THESIS_PHASE_TITLE,
+            "thesis_phase_subtitle": DWH_PHASE3C_THESIS_SUBTITLE,
             "notes": notes,
             "source_summary_path": str(
                 DWH_DIR
                 / (
                     "phase3c_dwh_pygnome_comparator/phase3c_dwh_pygnome_summary.csv"
-                    if track_id == "C3"
+                    if track_id == DWH_PHASE3C_TRACK_ID_COMPARATOR
                     else (
                         "phase3c_external_case_ensemble_comparison/phase3c_ensemble_summary.csv"
-                        if track_id == "C2"
+                        if track_id == DWH_PHASE3C_TRACK_ID_ENSEMBLE
                         else "phase3c_external_case_run/phase3c_summary.csv"
                     )
                 )
@@ -928,11 +1493,11 @@ class FinalValidationPackageService:
             rows.append(
                 {
                     "case_id": MINDORO_CASE_ID,
-                    "track_id": "A",
-                    "track_label": "Mindoro March 13 -> March 14 cross-model comparator",
+                    "track_id": MINDORO_COMPARATOR_TRACK_ID,
+                    "track_label": MINDORO_COMPARATOR_TRACK_LABEL,
                     "model_comparator": str(row["model_name"]),
                     "validation_dates": "2023-03-14",
-                    "result_scope": "primary_cross_model_reinit_compare",
+                    "result_scope": "same_case_cross_model_comparator_support",
                     "fss_1km": float(row["fss_1km"]),
                     "fss_3km": float(row["fss_3km"]),
                     "fss_5km": float(row["fss_5km"]),
@@ -952,7 +1517,8 @@ class FinalValidationPackageService:
                     "row_role": "comparator_only",
                     "shared_imagery_caveat": MINDORO_SHARED_IMAGERY_CAVEAT,
                     "notes": (
-                        "Comparator track only; the accepted March 14 NOAA observation mask remains truth. "
+                        "Same-case comparator-support track attached to B1 only; the accepted March 14 NOAA "
+                        "observation mask remains truth. "
                         + str(row.get("structural_limitations", "") or "")
                     ).strip(),
                     "source_summary_path": str(
@@ -984,13 +1550,55 @@ class FinalValidationPackageService:
         table.drop(columns=["track_order"], inplace=True)
         return table
 
+    def _assert_mindoro_primary_semantics(self, main_table: pd.DataFrame, case_registry: pd.DataFrame) -> None:
+        mindoro_registry = case_registry[case_registry["case_id"].astype(str) == MINDORO_CASE_ID].copy()
+        required_track_ids = {
+            MINDORO_COMPARATOR_TRACK_ID,
+            MINDORO_PRIMARY_VALIDATION_TRACK_ID,
+            MINDORO_LEGACY_MARCH6_TRACK_ID,
+            MINDORO_LEGACY_SUPPORT_TRACK_ID,
+        }
+        available_track_ids = set(mindoro_registry["track_id"].astype(str).tolist())
+        missing = sorted(required_track_ids - available_track_ids)
+        if missing:
+            raise ValueError(f"Mindoro case registry is missing required track IDs: {', '.join(missing)}")
+
+        primary_rows = mindoro_registry[mindoro_registry["main_text_priority"].astype(str) == "primary"]
+        primary_track_ids = set(primary_rows["track_id"].astype(str).tolist())
+        if primary_track_ids != {MINDORO_PRIMARY_VALIDATION_TRACK_ID}:
+            raise ValueError(
+                "Mindoro packaging semantics drift detected: only B1 may keep main_text_priority=primary."
+            )
+
+        a_row = mindoro_registry[mindoro_registry["track_id"].astype(str) == MINDORO_COMPARATOR_TRACK_ID]
+        if a_row.empty:
+            raise ValueError("Mindoro comparator-support row A is missing from the case registry.")
+        a_row = a_row.iloc[0]
+        if str(a_row.get("row_role", "")) != "comparator_only":
+            raise ValueError("Mindoro track A must keep row_role=comparator_only.")
+        if str(a_row.get("reporting_role", "")) != "comparative discussion":
+            raise ValueError("Mindoro track A must stay in comparative discussion only.")
+        if str(a_row.get("main_text_priority", "")) != "secondary":
+            raise ValueError("Mindoro track A must not be selectable as a primary validation row.")
+
+        a_rows = main_table[
+            (main_table["case_id"].astype(str) == MINDORO_CASE_ID)
+            & (main_table["track_id"].astype(str) == MINDORO_COMPARATOR_TRACK_ID)
+        ].copy()
+        if a_rows.empty:
+            raise ValueError("Mindoro comparator-support rows are missing from the main table.")
+        if not (a_rows["row_role"].astype(str) == "comparator_only").all():
+            raise ValueError("Mindoro track A rows in the main table must remain comparator_only.")
+        if a_rows["result_scope"].astype(str).str.contains("primary", case=False, na=False).any():
+            raise ValueError("Mindoro track A result_scope must not contain primary wording.")
+
     def _build_case_registry(self) -> pd.DataFrame:
         confirmation = self._mindoro_dual_provenance_confirmation()
         rows = [
             {
                 "case_id": MINDORO_CASE_ID,
-                "track_id": "A",
-                "track_label": "Mindoro March 13 -> March 14 cross-model comparator",
+                "track_id": MINDORO_COMPARATOR_TRACK_ID,
+                "track_label": MINDORO_COMPARATOR_TRACK_LABEL,
                 "status": "complete",
                 "truth_source": "accepted March 14 NOAA/NESDIS observation mask",
                 "primary_output_dir": str(MINDORO_REINIT_CROSSMODEL_DIR),
@@ -1000,10 +1608,11 @@ class FinalValidationPackageService:
                 "launcher_alias_entry_id": "",
                 "row_role": "comparator_only",
                 "reporting_role": "comparative discussion",
-                "main_text_priority": "primary",
+                "main_text_priority": "secondary",
                 "notes": (
-                    "Comparator role only. PyGNOME is not truth, and the March 13/14 comparator must be reported "
-                    "with the explicit caveat that both NOAA products cite March 12 WorldView-3 imagery."
+                    "Same-case comparator-support track attached to B1 only. PyGNOME is not truth, the A row is "
+                    "not a co-primary validation claim, and the March 13/14 comparator must be reported with the "
+                    "explicit caveat that both NOAA products cite March 12 WorldView-3 imagery."
                 ),
             },
             {
@@ -1044,7 +1653,7 @@ class FinalValidationPackageService:
                 "row_role": "legacy_honesty_only",
                 "reporting_role": "legacy reference",
                 "main_text_priority": "secondary",
-                "notes": "Legacy honesty-only reference preserved because the processed strict March 6 target is extremely small.",
+                "notes": "B2 legacy honesty-only reference preserved because the processed strict March 6 target is extremely small.",
             },
             {
                 "case_id": MINDORO_CASE_ID,
@@ -1060,55 +1669,68 @@ class FinalValidationPackageService:
                 "row_role": "legacy_support_only",
                 "reporting_role": "legacy reference",
                 "main_text_priority": "secondary",
-                "notes": "Legacy broader-support reference only; keep it visible, but do not present it as the replacement primary row.",
+                "notes": "B3 legacy broader-support reference only; keep it visible, but do not present it as the replacement primary row.",
             },
             {
                 "case_id": DWH_CASE_ID,
-                "track_id": "C1",
-                "track_label": "DWH deterministic external transfer validation",
+                "track_id": DWH_PHASE3C_TRACK_ID_DETERMINISTIC,
+                "track_label": DWH_PHASE3C_TRACK_LABEL_DETERMINISTIC,
                 "status": "complete",
                 "truth_source": "DWH daily public observation-derived masks for 2010-05-21 to 2010-05-23",
                 "primary_output_dir": str(DWH_DIR / "phase3c_external_case_run"),
-                "case_definition_path": "",
-                "case_freeze_amendment_path": "",
+                "case_definition_path": str(DWH_BASE_CASE_CONFIG_PATH),
+                "case_freeze_amendment_path": str(DWH_PHASE3C_FINAL_NOTE_PATH),
                 "launcher_entry_id": "dwh_reportable_bundle",
                 "launcher_alias_entry_id": "",
                 "row_role": "scientific_result",
                 "reporting_role": "main-text scientific result",
                 "main_text_priority": "primary",
-                "notes": "Real historical HYCOM + ERA5 + CMEMS wave/Stokes forcing stack.",
+                "thesis_phase_title": DWH_PHASE3C_THESIS_PHASE_TITLE,
+                "thesis_phase_subtitle": DWH_PHASE3C_THESIS_SUBTITLE,
+                "notes": (
+                    f"Separate external transfer-validation lane with no drifter baseline. Uses the authoritative "
+                    f"readiness-gated historical stack `{DWH_PHASE3C_FORCING_STACK}` and keeps deterministic as the "
+                    "clean baseline result on daily date-composite truth masks."
+                ),
             },
             {
                 "case_id": DWH_CASE_ID,
-                "track_id": "C2",
-                "track_label": "DWH ensemble extension and deterministic-vs-ensemble comparison",
+                "track_id": DWH_PHASE3C_TRACK_ID_ENSEMBLE,
+                "track_label": DWH_PHASE3C_TRACK_LABEL_ENSEMBLE,
                 "status": "complete",
                 "truth_source": "same DWH daily public masks as C1",
                 "primary_output_dir": str(DWH_DIR / "phase3c_external_case_ensemble_comparison"),
-                "case_definition_path": "",
-                "case_freeze_amendment_path": "",
+                "case_definition_path": str(DWH_BASE_CASE_CONFIG_PATH),
+                "case_freeze_amendment_path": str(DWH_PHASE3C_FINAL_NOTE_PATH),
                 "launcher_entry_id": "dwh_reportable_bundle",
                 "launcher_alias_entry_id": "",
                 "row_role": "scientific_result",
                 "reporting_role": "comparative discussion",
-                "main_text_priority": "primary",
-                "notes": "p50 leads by overall mean FSS; deterministic remains strongest on the May 21-23 event corridor.",
+                "main_text_priority": "secondary",
+                "thesis_phase_title": DWH_PHASE3C_THESIS_PHASE_TITLE,
+                "thesis_phase_subtitle": DWH_PHASE3C_THESIS_SUBTITLE,
+                "notes": (
+                    "Ensemble extension on the same DWH truth masks. p50 is the preferred probabilistic extension, "
+                    "while p90 is support/comparison only; deterministic remains the clean baseline transfer-validation result."
+                ),
             },
             {
                 "case_id": DWH_CASE_ID,
-                "track_id": "C3",
-                "track_label": "DWH PyGNOME comparator",
+                "track_id": DWH_PHASE3C_TRACK_ID_COMPARATOR,
+                "track_label": DWH_PHASE3C_TRACK_LABEL_COMPARATOR,
                 "status": "complete",
                 "truth_source": "same DWH daily public masks as C1",
                 "primary_output_dir": str(DWH_DIR / "phase3c_dwh_pygnome_comparator"),
-                "case_definition_path": "",
-                "case_freeze_amendment_path": "",
+                "case_definition_path": str(DWH_BASE_CASE_CONFIG_PATH),
+                "case_freeze_amendment_path": str(DWH_PHASE3C_FINAL_NOTE_PATH),
                 "launcher_entry_id": "dwh_reportable_bundle",
                 "launcher_alias_entry_id": "",
                 "row_role": "comparator_only",
                 "reporting_role": "comparative discussion",
                 "main_text_priority": "secondary",
-                "notes": "Comparator only; DWH observed masks remain truth.",
+                "thesis_phase_title": DWH_PHASE3C_THESIS_PHASE_TITLE,
+                "thesis_phase_subtitle": DWH_PHASE3C_THESIS_SUBTITLE,
+                "notes": "Comparator-only lane; DWH observed masks remain truth and PyGNOME is never surfaced as truth.",
             },
             {
                 "case_id": MINDORO_CASE_ID,
@@ -1150,8 +1772,8 @@ class FinalValidationPackageService:
             rows.append(
                 {
                     "case_id": MINDORO_CASE_ID,
-                    "benchmark_context": "Mindoro March 13 -> March 14 cross-model comparator",
-                    "track_id": "A",
+                    "benchmark_context": MINDORO_COMPARATOR_SUPPORT_CONTEXT,
+                    "track_id": MINDORO_COMPARATOR_TRACK_ID,
                     "model_comparator": str(row["model_name"]),
                     "benchmark_mean_fss": float(row["mean_fss"]),
                     "benchmark_iou": float(row["iou"]),
@@ -1483,14 +2105,17 @@ class FinalValidationPackageService:
             "# Final Validation Claims Guardrails",
             "",
             f"- {MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE} is represented by Mindoro B1, the March 13 -> March 14 NOAA reinit validation, and it should be described with the explicit March 12 WorldView-3 caveat.",
+            "- Mindoro A is the same-case March 13 -> March 14 comparator-support track attached to B1. It is never truth and never a co-primary validation row.",
             "- The separate focused 2016-2023 Mindoro drifter rerun now supplies the active cmems_era5 recipe provenance used to frame B1, but it does not replace the original B1 raw provenance.",
             "- The broader 2016-2022 regional rerun is preserved as a reference/governance lane and is not the active provenance for B1.",
             "- Mindoro B2 and B3 remain legacy/reference rows, with B2 framed as honesty-only, and they should not be silently rewritten as if they never existed.",
             "- PyGNOME is a comparator, not truth, in both the promoted Mindoro cross-model lane and the DWH cross-model comparison.",
-            "- DWH observed masks are truth for Phase 3C.",
+            "- DWH remains a separate Phase 3C external transfer-validation lane; do not recast it as a local drifter-calibrated case or a second Phase 1 study.",
+            "- DWH uses no drifter baseline and no new thesis-facing drifter ingestion; its forcing choice is the readiness-gated historical stack rather than a drifter-ranked recipe.",
+            "- DWH observed masks are truth for Phase 3C and must stay date-composite honest rather than implying exact sub-daily acquisition times.",
             "- DWH currently demonstrates workflow transferability and meaningful spatial skill under real historical forcing.",
             "- On DWH, OpenDrift outperforms PyGNOME under the current case definition.",
-            "- On DWH, ensemble p50 improves overall mean FSS while deterministic remains strongest on the May 21-23 event corridor.",
+            "- On DWH, deterministic remains the clean baseline transfer-validation result, p50 is the preferred probabilistic extension, and p90 is support/comparison only.",
             "- DWH Phase 3C is scientifically reportable even if some optional future extensions remain.",
             "- Do not relabel legacy/reference or sensitivity products as if they were the new promoted primary validation row.",
         ]
@@ -1508,7 +2133,7 @@ class FinalValidationPackageService:
             "",
             "1. Phase 1 = Transport Validation and Baseline Configuration Selection",
             "2. Phase 2 = Standardized Machine-Readable Forecast Product Generation",
-            "3. Phase 3A = Mindoro March 13 -> March 14 Cross-Model Comparator",
+            "3. Phase 3A = Mindoro March 13 -> March 14 Same-Case Comparator Support Track",
             "4. Phase 3B1 = Mindoro March 13 -> March 14 NOAA Reinit Primary Validation",
             "5. Phase 3B2 = Mindoro Legacy March 6 Sparse Strict Reference",
             "6. Phase 3B3 = Mindoro Legacy March 3-6 Broader-Support Reference",
@@ -1519,13 +2144,14 @@ class FinalValidationPackageService:
             "Packaging guidance:",
             "",
             "- Keep Mindoro as the main Philippine case.",
-            "- Keep DWH as the rich-data external transfer-validation branch.",
-            "- Present Phase 3A as comparator-only benchmarking, not as a truth-source replacement.",
+            "- Keep DWH as the separate Phase 3C external rich-data transfer-validation branch, with no new drifter ingestion in the thesis-facing lane.",
+            "- Present Phase 3A as same-case comparator-only support attached to B1, not as a co-primary claim or truth-source replacement.",
             "- Preserve `config/case_mindoro_retro_2023.yaml` as the frozen March 3 -> March 6 case definition and carry the Phase 3B promotion through the amendment file instead.",
             "- Present March 13 -> March 14 as the canonical Mindoro validation with the shared-imagery caveat stated explicitly.",
             "- State that the separate focused 2016-2023 Mindoro drifter rerun now supplies the active cmems_era5 recipe provenance used by the stored B1 story without rewriting the original run provenance.",
             "- State that the broader 2016-2022 regional rerun is preserved as reference/governance context rather than as the active B1 provenance lane.",
             "- Keep March 6 and March 3-6 visible as legacy/reference material rather than deleting or hiding them.",
+            "- State that DWH uses the readiness-gated historical forcing stack rather than a Phase 1 drifter-ranked recipe, and that deterministic stays the baseline while p50 is the preferred probabilistic extension.",
         ]
         _write_text(path, "\n".join(lines))
         return path
@@ -1540,7 +2166,7 @@ class FinalValidationPackageService:
             f"- {MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE} is now carried by the Mindoro March 13 -> March 14 NOAA reinit track.",
             "- The separate focused 2016-2023 Mindoro drifter rerun now supplies the active cmems_era5 recipe provenance used by the stored B1 story.",
             "- That focused rerun searched through early 2023, but its accepted registry does not include near-2023 accepted segments.",
-            "- DWH is the rich-data external transfer-validation success.",
+            "- DWH is the separate external transfer-validation success under the readiness-gated historical stack, not a second local drifter-calibration story.",
             "- Ensemble benefit is case-dependent, not universal.",
             "",
             "Interpretation notes:",
@@ -1549,8 +2175,8 @@ class FinalValidationPackageService:
             "- The legacy March 6 row should still be interpreted as an honesty-only difficult sparse-data edge case rather than erased from the methods story.",
             "- The legacy March 3-6 broader-support row remains helpful context, but it is not the same claim as the promoted B1 reinit validation.",
             "- The promoted Mindoro comparator lane shows OpenDrift R1 previous reinit p50 leading the March 13 -> March 14 cross-model comparison under the current case definition.",
-            "- The DWH external case shows that the workflow transfers to a richer observation setting with meaningful spatial skill.",
-            "- On DWH, ensemble p50 improves overall mean FSS, while deterministic retains the strongest event-corridor result.",
+            "- The DWH external case shows that the workflow transfers to a richer observation setting with meaningful spatial skill while keeping daily date-composite masks as truth.",
+            "- On DWH, deterministic remains the clean baseline transfer-validation result, p50 is the preferred probabilistic extension, and p90 stays support/comparison only.",
         ]
         _write_text(path, "\n".join(lines))
         return path
@@ -1597,6 +2223,7 @@ class FinalValidationPackageService:
                 f"{headlines['dwh_deterministic_event']['fss_5km']:.4f}, {headlines['dwh_deterministic_event']['fss_10km']:.4f}; "
                 f"IoU={headlines['dwh_deterministic_event']['iou']:.4f}; Dice={headlines['dwh_deterministic_event']['dice']:.4f}."
             ),
+            "- DWH governance note: no drifter baseline is used in the thesis-facing DWH lane; forcing remains the readiness-gated HYCOM GOFS 3.1 + ERA5 + CMEMS wave/Stokes stack on date-composite truth masks.",
             (
                 f"- DWH ensemble p50 event corridor (C2): FSS(1/3/5/10 km) = "
                 f"{headlines['dwh_ensemble_p50_event']['fss_1km']:.4f}, {headlines['dwh_ensemble_p50_event']['fss_3km']:.4f}, "
@@ -1604,6 +2231,7 @@ class FinalValidationPackageService:
                 f"overall mean leader = {headlines['dwh_overall_mean_top']['model_comparator']} "
                 f"({headlines['dwh_overall_mean_top']['overall_mean_fss']:.4f})."
             ),
+            "- DWH recommendation: deterministic remains the clean baseline result, p50 is the preferred probabilistic extension, p90 is support/comparison only, and PyGNOME remains comparator-only.",
             (
                 f"- DWH PyGNOME comparator (C3) event corridor: FSS(1/3/5/10 km) = "
                 f"{headlines['dwh_pygnome_event']['fss_1km']:.4f}, {headlines['dwh_pygnome_event']['fss_3km']:.4f}, "
@@ -1614,8 +2242,8 @@ class FinalValidationPackageService:
             "## Recommended Final Structure",
             "",
             f"- Base-case provenance: keep `{MINDORO_BASE_CASE_CONFIG_PATH}` frozen for March 3 -> March 6 and carry the B1 promotion through `{MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH}`.",
-            f"- Main text: {MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE} should foreground Mindoro B1 as the March 13 -> March 14 primary validation with the shared-imagery caveat and the later drifter-confirmation note, plus DWH Phase 3C as the rich-data transfer-validation success.",
-            "- Comparative discussion: Mindoro A cross-model comparator and DWH deterministic-vs-ensemble-vs-PyGNOME comparison.",
+            f"- Main text: {MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE} should foreground Mindoro B1 as the March 13 -> March 14 primary validation with the shared-imagery caveat and the later drifter-confirmation note, plus DWH Phase 3C as the separate external transfer-validation success with deterministic baseline and p50 extension wording kept explicit.",
+            "- Comparative discussion: Mindoro A same-case comparator-support track attached to B1 and DWH deterministic-vs-ensemble-vs-PyGNOME comparison.",
             "- Legacy/reference and sensitivities: Mindoro B2/B3 legacy rows, recipe/init/source-history sensitivities, and optional future DWH extensions.",
             "",
             "## Final Recommendation",
@@ -1632,6 +2260,7 @@ class FinalValidationPackageService:
 
         main_table = self._build_main_table()
         case_registry = self._build_case_registry()
+        self._assert_mindoro_primary_semantics(main_table, case_registry)
         benchmark_table = self._build_benchmark_table()
         observation_table = self._build_observation_table()
         limitations_table = self._build_limitations_table()
@@ -1656,6 +2285,7 @@ class FinalValidationPackageService:
         interpretation_path = self._write_interpretation_memo()
         summary_path = self._write_summary(headlines, recommendation)
         final_output_export = self._build_mindoro_final_output_export(confirmation)
+        dwh_final_output_export = self._build_dwh_final_output_export()
 
         manifest = {
             "phase": PHASE,
@@ -1671,11 +2301,16 @@ class FinalValidationPackageService:
                 "final_validation_chapter_sync_memo": str(chapter_sync_path),
                 "final_validation_interpretation_memo": str(interpretation_path),
                 "final_validation_summary": str(summary_path),
+                "dwh_phase3c_final_note": str(DWH_PHASE3C_FINAL_NOTE_PATH),
                 "phase3b_march13_14_final_output_readme": final_output_export["readme_path"],
                 "phase3b_march13_14_final_output_manifest": final_output_export["manifest_path"],
                 "phase3b_march13_14_final_output_manifest_legacy_alias": final_output_export["root_manifest_path"],
                 "phase3b_march13_14_final_output_registry_csv": final_output_export["registry_csv_path"],
                 "phase3b_march13_14_final_output_registry_json": final_output_export["registry_json_path"],
+                "phase3c_dwh_final_output_readme": dwh_final_output_export["readme_path"],
+                "phase3c_dwh_final_output_manifest": dwh_final_output_export["manifest_path"],
+                "phase3c_dwh_final_output_registry_csv": dwh_final_output_export["registry_csv_path"],
+                "phase3c_dwh_final_output_registry_json": dwh_final_output_export["registry_json_path"],
             },
             "headlines": headlines,
             "final_recommendation": recommendation,
@@ -1693,10 +2328,26 @@ class FinalValidationPackageService:
                 "dual_provenance_confirmation": confirmation,
                 "final_output_export_dir": final_output_export["output_dir"],
             },
+            "dwh_phase3c_freeze": {
+                "base_case_definition_path": str(DWH_BASE_CASE_CONFIG_PATH),
+                "final_note_path": str(DWH_PHASE3C_FINAL_NOTE_PATH),
+                "track_id_deterministic": DWH_PHASE3C_TRACK_ID_DETERMINISTIC,
+                "track_id_ensemble": DWH_PHASE3C_TRACK_ID_ENSEMBLE,
+                "track_id_comparator": DWH_PHASE3C_TRACK_ID_COMPARATOR,
+                "track_label_deterministic": DWH_PHASE3C_TRACK_LABEL_DETERMINISTIC,
+                "track_label_ensemble": DWH_PHASE3C_TRACK_LABEL_ENSEMBLE,
+                "track_label_comparator": DWH_PHASE3C_TRACK_LABEL_COMPARATOR,
+                "thesis_phase_title": DWH_PHASE3C_THESIS_PHASE_TITLE,
+                "thesis_phase_subtitle": DWH_PHASE3C_THESIS_SUBTITLE,
+                "forcing_stack": DWH_PHASE3C_FORCING_STACK,
+                "date_composite_note": DWH_PHASE3C_DATE_COMPOSITE_NOTE,
+                "final_recommendation": DWH_PHASE3C_FINAL_RECOMMENDATION,
+                "final_output_export_dir": dwh_final_output_export["output_dir"],
+            },
             "recommended_final_chapter_structure": [
                 "Phase 1 = Transport Validation and Baseline Configuration Selection",
                 "Phase 2 = Standardized Machine-Readable Forecast Product Generation",
-                "Phase 3A = Mindoro March 13 -> March 14 Cross-Model Comparator",
+                "Phase 3A = Mindoro March 13 -> March 14 Same-Case Comparator Support Track",
                 "Phase 3B1 = Mindoro March 13 -> March 14 NOAA Reinit Primary Validation",
                 "Phase 3B2 = Mindoro Legacy March 6 Sparse Strict Reference",
                 "Phase 3B3 = Mindoro Legacy March 3-6 Broader-Support Reference",
@@ -1705,6 +2356,7 @@ class FinalValidationPackageService:
                 "Phase 5 = Reproducibility, Packaging, and Deliverables",
             ],
             "phase3b_march13_14_final_output": final_output_export,
+            "phase3c_dwh_final_output": dwh_final_output_export,
         }
         _write_json(self.output_dir / "final_validation_manifest.json", manifest)
         return manifest

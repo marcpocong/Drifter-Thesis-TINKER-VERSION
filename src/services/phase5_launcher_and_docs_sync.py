@@ -23,6 +23,12 @@ from src.services.mindoro_primary_validation_metadata import (
     MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE,
     MINDORO_SHARED_IMAGERY_CAVEAT,
 )
+from src.services.dwh_phase3c_metadata import (
+    DWH_BASE_CASE_CONFIG_PATH,
+    DWH_PHASE3C_FINAL_NOTE_PATH,
+    DWH_PHASE3C_FINAL_OUTPUT_DIR,
+    DWH_PHASE3C_FORCING_STACK,
+)
 
 PHASE = "phase5_launcher_and_docs_sync"
 OUTPUT_DIR = Path("output") / "final_reproducibility_package"
@@ -45,6 +51,7 @@ DOC_PATHS = [
     Path("docs") / "COMMAND_MATRIX.md",
     Path("docs") / "LAUNCHER_USER_GUIDE.md",
     Path("docs") / "MINDORO_PRIMARY_VALIDATION_MIGRATION.md",
+    Path("docs") / "DWH_PHASE3C_FINAL.md",
     Path("docs") / "UI_GUIDE.md",
 ]
 
@@ -317,6 +324,8 @@ class Phase5LauncherAndDocsSyncService:
                     "case_freeze_amendment_path": (
                         str(MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH)
                         if case_id == "CASE_MINDORO_RETRO_2023"
+                        else str(DWH_PHASE3C_FINAL_NOTE_PATH)
+                        if case_id == "CASE_DWH_RETRO_2010_72H"
                         else ""
                     ),
                     "primary_launcher_entry_id": (
@@ -334,7 +343,12 @@ class Phase5LauncherAndDocsSyncService:
                     "primary_output_root": f"output/{case_id}",
                     "reportable_track_ids": ";".join(track_ids),
                     "appendix_or_support_track_ids": ";".join(appendix_ids),
-                    "notes": _coerce_text((config.get("notes") or [""])[0] if isinstance(config.get("notes"), list) else ""),
+                    "notes": (
+                        (
+                            _coerce_text((config.get("notes") or [""])[0] if isinstance(config.get("notes"), list) else "")
+                            + (" | Curated final output: output/Phase 3C DWH Final Output" if case_id == "CASE_DWH_RETRO_2010_72H" else "")
+                        ).strip(" |")
+                    ),
                 }
             )
         return rows
@@ -683,9 +697,9 @@ class Phase5LauncherAndDocsSyncService:
                 "track_label": dwh_deterministic.label,
                 "readiness_status": "scientifically_reportable_transfer_validation",
                 "scientifically_reportable": True,
-                "scientifically_frozen": False,
-                "inherited_provisional": True,
-                "main_blocker": upstream_blocker or "Transport model still marked provisional in the official manifests.",
+                "scientifically_frozen": True,
+                "inherited_provisional": False,
+                "main_blocker": "",
                 "reportable_now": True,
                 "reportability_scope": "external_rich_data_transfer_validation",
                 "summary": _headline_note(
@@ -700,9 +714,9 @@ class Phase5LauncherAndDocsSyncService:
                 "track_label": dwh_ensemble.label,
                 "readiness_status": "scientifically_reportable_transfer_validation",
                 "scientifically_reportable": True,
-                "scientifically_frozen": False,
-                "inherited_provisional": True,
-                "main_blocker": upstream_blocker or "Transport model still marked provisional in the official manifests.",
+                "scientifically_frozen": True,
+                "inherited_provisional": False,
+                "main_blocker": "",
                 "reportable_now": True,
                 "reportability_scope": "external_rich_data_transfer_validation",
                 "summary": _headline_note(
@@ -717,9 +731,9 @@ class Phase5LauncherAndDocsSyncService:
                 "track_label": dwh_comparator.label,
                 "readiness_status": "scientifically_reportable_comparator",
                 "scientifically_reportable": True,
-                "scientifically_frozen": False,
-                "inherited_provisional": True,
-                "main_blocker": "Comparator-only track; PyGNOME is not truth and remains below OpenDrift on the current DWH case.",
+                "scientifically_frozen": True,
+                "inherited_provisional": False,
+                "main_blocker": "",
                 "reportable_now": True,
                 "reportability_scope": "cross_model_comparator",
                 "summary": _headline_note(
@@ -865,6 +879,20 @@ class Phase5LauncherAndDocsSyncService:
                     "Read-only curated export of the promoted B1 family for thesis-facing Phase 3B delivery.",
                     _relative_to_repo(self.repo_root, self.repo_root / FINAL_VALIDATION_MANIFEST_JSON),
                 )
+        dwh_final_output_dir = self.repo_root / DWH_PHASE3C_FINAL_OUTPUT_DIR
+        if dwh_final_output_dir.exists():
+            for output_path in sorted(dwh_final_output_dir.rglob("*")):
+                if output_path.is_dir():
+                    continue
+                add_row(
+                    "phase3c",
+                    "C1/C2/C3",
+                    "phase3c_dwh_final_output",
+                    output_path.name,
+                    output_path,
+                    "Read-only curated export of the frozen DWH Phase 3C external transfer-validation family.",
+                    _relative_to_repo(self.repo_root, self.repo_root / FINAL_VALIDATION_MANIFEST_JSON),
+                )
         for prototype_dir_rel, track_id, artifact_group, description in PROTOTYPE_OUTPUT_DIRS:
             prototype_similarity_dir = self.repo_root / prototype_dir_rel
             if prototype_similarity_dir.exists():
@@ -955,6 +983,11 @@ class Phase5LauncherAndDocsSyncService:
                     f"- The curated read-only B1 export now lives under `{final_output_dir or MINDORO_PRIMARY_VALIDATION_FINAL_OUTPUT_DIR.as_posix()}` "
                     "and packages the publication figures, canonical scientific source PNGs, summary CSV, decision note, and local manifest."
                 ),
+                (
+                    f"- The curated read-only DWH export now lives under `{DWH_PHASE3C_FINAL_OUTPUT_DIR.as_posix()}` and packages "
+                    "the Phase 3C observation context figures, deterministic baseline figures, ensemble extension figures, "
+                    "PyGNOME comparator figures, canonical scientific source PNGs, and summary/manifests without rerunning science."
+                ),
                 "- `prototype_2016` is cataloged here as a legacy Phase 1 / 2 / 3A / 4 support lane, with Phase 5 available only through the separate read-only sync entry.",
                 "- Mindoro Phase 4 now participates in the reproducibility/package layer via the current `phase4_run_manifest.json` and verdict bundle.",
                 "- The static `output/trajectory_gallery/` bundle now participates in the reproducibility/package layer as a read-only technical figure set.",
@@ -973,6 +1006,7 @@ class Phase5LauncherAndDocsSyncService:
                 "- Panel gallery manifest: `output/trajectory_gallery_panel/panel_figure_manifest.json`",
                 "- Publication figure manifest: `output/figure_package_publication/publication_figure_manifest.json`",
                 f"- Curated B1 final-output export: `{final_output_dir or MINDORO_PRIMARY_VALIDATION_FINAL_OUTPUT_DIR.as_posix()}`",
+                f"- Curated DWH final-output export: `{DWH_PHASE3C_FINAL_OUTPUT_DIR.as_posix()}`",
             ]
         )
         return "\n".join(lines)
@@ -998,6 +1032,8 @@ class Phase5LauncherAndDocsSyncService:
             f"- Mindoro primary-validation amendment file: `{MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH.as_posix()}`",
             f"- Mindoro drifter-confirmation candidate baseline: `{MINDORO_PHASE1_CONFIRMATION_CANDIDATE_BASELINE_PATH.as_posix()}`",
             f"- Mindoro curated final-output export: `{MINDORO_PRIMARY_VALIDATION_FINAL_OUTPUT_DIR.as_posix()}`",
+            f"- DWH Phase 3C final-governance note: `{DWH_PHASE3C_FINAL_NOTE_PATH.as_posix()}`",
+            f"- DWH curated final-output export: `{DWH_PHASE3C_FINAL_OUTPUT_DIR.as_posix()}`",
             "- Existing trajectory gallery outputs under `output/trajectory_gallery/` when present.",
             "- Existing polished panel gallery outputs under `output/trajectory_gallery_panel/` when present.",
             "- Existing publication-grade figure package outputs under `output/figure_package_publication/` when present.",
@@ -1009,6 +1045,7 @@ class Phase5LauncherAndDocsSyncService:
             "- No finished Mindoro or DWH scientific outputs were overwritten.",
             "- The March 3 -> March 6 Mindoro base case YAML remains frozen; the promoted March 13 -> March 14 row is recorded as an amendment rather than a silent rewrite.",
             f"- `{MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE}` remains tied to B1, and {MINDORO_SHARED_IMAGERY_CAVEAT.lower()}",
+            f"- DWH Phase 3C remains a separate external transfer-validation lane under `{DWH_BASE_CASE_CONFIG_PATH.as_posix()}` with forcing fixed to `{DWH_PHASE3C_FORCING_STACK}` and no thesis-facing drifter baseline.",
             "- The separate focused 2016-2023 Mindoro drifter rerun now supplies the active B1 recipe-provenance story, not the raw generation history of the stored March 13 -> March 14 science bundle.",
             "- The legacy `prototype_2016` lane is framed as Phase 1 / 2 / 3A / 4 only; it has no thesis-facing Phase 3B or Phase 3C.",
             "- The launcher/menu is now organized around current track categories instead of the older monolithic Mindoro full-chain story.",
@@ -1207,6 +1244,7 @@ class Phase5LauncherAndDocsSyncService:
         overall_verdict: dict[str, Any],
     ) -> dict[str, Any]:
         promotion = self.final_validation_manifest.get("mindoro_primary_validation_promotion") or {}
+        dwh_freeze = self.final_validation_manifest.get("dwh_phase3c_freeze") or {}
         return {
             "phase": PHASE,
             "generated_at_utc": generated_at_utc,
@@ -1245,6 +1283,13 @@ class Phase5LauncherAndDocsSyncService:
                 "dual_provenance_confirmation": promotion.get("dual_provenance_confirmation") or {},
                 "final_output_export_dir": _coerce_text(promotion.get("final_output_export_dir"))
                 or _coerce_text(self.final_validation_manifest.get("phase3b_march13_14_final_output", {}).get("output_dir")),
+            },
+            "dwh_phase3c_freeze": {
+                "base_case_definition_path": _coerce_text(dwh_freeze.get("base_case_definition_path")) or DWH_BASE_CASE_CONFIG_PATH.as_posix(),
+                "final_note_path": _coerce_text(dwh_freeze.get("final_note_path")) or DWH_PHASE3C_FINAL_NOTE_PATH.as_posix(),
+                "forcing_stack": _coerce_text(dwh_freeze.get("forcing_stack")) or DWH_PHASE3C_FORCING_STACK,
+                "final_output_export_dir": _coerce_text(dwh_freeze.get("final_output_export_dir"))
+                or DWH_PHASE3C_FINAL_OUTPUT_DIR.as_posix(),
             },
             "docs_updated": [
                 _relative_to_repo(self.repo_root, self.repo_root / path) for path in self.docs_updated

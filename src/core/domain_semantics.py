@@ -3,7 +3,8 @@ Helpers for thesis-facing domain semantics.
 
 The repo now treats three geographic concepts as distinct:
 - phase1_validation_box: Chapter 3 historical/regional transport-validation box
-- mindoro_case_domain: official Mindoro spill-case transport/scoring domain
+- mindoro_case_domain: broad official Mindoro spill-case fallback transport/forcing domain
+  and overview extent, not the canonical scoring-grid display bounds
 - legacy_prototype_display_domain: prototype/debug plotting extent
 
 `region` remains only as a backward-compatible alias for stale configs and code.

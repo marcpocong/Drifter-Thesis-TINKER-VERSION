@@ -26,7 +26,7 @@ from rasterio.plot import show
 from rasterio.warp import transform_bounds
 from shapely.geometry import MultiPoint
 
-from src.core.artifact_status import artifact_status_columns
+from src.core.artifact_status import artifact_status_columns, artifact_status_columns_for_key
 from src.services.mindoro_primary_validation_metadata import (
     MINDORO_PHASE1_CONFIRMATION_CANDIDATE_BASELINE_PATH,
     MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE,
@@ -1347,18 +1347,22 @@ class FigurePackagePublicationService:
         pixel_height: int,
     ) -> PublicationFigureRecord:
         relative_path = _relative_to_repo(self.repo_root, path)
-        status = artifact_status_columns(
-            {
-                "case_id": str(spec["case_id"]),
-                "phase_or_track": str(spec["phase_or_track"]),
-                "run_type": str(spec["run_type"]),
-                "figure_slug": str(spec.get("figure_slug") or ""),
-                "relative_path": relative_path,
-                "notes": str(spec.get("notes") or ""),
-                "short_plain_language_interpretation": str(spec["short_plain_language_interpretation"]),
-                "legacy_debug_only": bool(spec.get("legacy_debug_only")),
-            }
-        )
+        status_override = str(spec.get("status_key_override") or "").strip()
+        if status_override:
+            status = artifact_status_columns_for_key(status_override)
+        else:
+            status = artifact_status_columns(
+                {
+                    "case_id": str(spec["case_id"]),
+                    "phase_or_track": str(spec["phase_or_track"]),
+                    "run_type": str(spec["run_type"]),
+                    "figure_slug": str(spec.get("figure_slug") or ""),
+                    "relative_path": relative_path,
+                    "notes": str(spec.get("notes") or ""),
+                    "short_plain_language_interpretation": str(spec["short_plain_language_interpretation"]),
+                    "legacy_debug_only": bool(spec.get("legacy_debug_only")),
+                }
+            )
         record = PublicationFigureRecord(
             figure_id=path.stem,
             figure_family_code=str(spec["figure_family_code"]),
@@ -1554,6 +1558,7 @@ class FigurePackagePublicationService:
         include_source_in_crop: bool = True,
         include_init_in_crop: bool = False,
         include_validation_in_crop: bool = False,
+        status_key_override: str = "",
     ) -> dict[str, Any]:
         return {
             "spec_id": spec_id,
@@ -1585,6 +1590,7 @@ class FigurePackagePublicationService:
             "include_source_in_crop": include_source_in_crop,
             "include_init_in_crop": include_init_in_crop,
             "include_validation_in_crop": include_validation_in_crop,
+            "status_key_override": status_key_override,
         }
 
     def _track_spec(
@@ -1612,6 +1618,7 @@ class FigurePackagePublicationService:
         model_kind: str = "opendrift",
         member_sample_count: int = 12,
         raster_layers: list[dict[str, Any]] | None = None,
+        status_key_override: str = "",
     ) -> dict[str, Any]:
         payload = {
             "spec_id": spec_id,
@@ -1638,6 +1645,7 @@ class FigurePackagePublicationService:
             "model_kind": model_kind,
             "member_sample_count": member_sample_count,
             "raster_layers": raster_layers or [],
+            "status_key_override": status_key_override,
         }
         if track_path:
             payload["track_path"] = track_path
@@ -1811,6 +1819,7 @@ class FigurePackagePublicationService:
         scenario_id: str = "",
         recommended_for_main_defense: bool = True,
         recommended_for_paper: bool = False,
+        status_key_override: str = "",
     ) -> dict[str, Any]:
         return {
             "spec_id": spec_id,
@@ -1833,6 +1842,7 @@ class FigurePackagePublicationService:
             "recommended_for_paper": recommended_for_paper,
             "notes": notes,
             "panels": panels,
+            "status_key_override": status_key_override,
         }
 
     def _normalize_date_token(self, value: Any) -> str:
@@ -3560,6 +3570,7 @@ class FigurePackagePublicationService:
                 legend_keys=["observed_mask"],
                 raster_layers=[{"path": event_obs, "legend_key": "observed_mask", "alpha": 0.42, "zorder": 5}],
                 show_source=False,
+                status_key_override="dwh_observation_truth_context",
             ),
             self._spatial_spec(
                 spec_id="dwh_event_deterministic",
@@ -3584,6 +3595,7 @@ class FigurePackagePublicationService:
                 ],
                 show_source=True,
                 recommended_for_paper=True,
+                status_key_override="dwh_deterministic_transfer",
             ),
             self._spatial_spec(
                 spec_id="dwh_event_p50",
@@ -3608,6 +3620,7 @@ class FigurePackagePublicationService:
                 ],
                 show_source=True,
                 recommended_for_paper=True,
+                status_key_override="dwh_ensemble_transfer",
             ),
             self._spatial_spec(
                 spec_id="dwh_event_p90",
@@ -3632,6 +3645,7 @@ class FigurePackagePublicationService:
                 ],
                 show_source=True,
                 recommended_for_paper=True,
+                status_key_override="dwh_ensemble_transfer",
             ),
             self._spatial_spec(
                 spec_id="dwh_event_pygnome",
@@ -3656,6 +3670,7 @@ class FigurePackagePublicationService:
                 ],
                 show_source=True,
                 recommended_for_paper=True,
+                status_key_override="dwh_crossmodel_comparator",
             ),
             self._track_spec(
                 spec_id="dwh_track_deterministic",

@@ -5,7 +5,7 @@
 - Phase 1: Mindoro-specific recipe provenance is now finalized through the separate focused `2016-2023` drifter rerun selecting `cmems_era5`; the broader `2016-2022` regional rerun remains preserved as a reference/governance lane and currently selects `cmems_gfs`.
 - Phase 2: scientifically usable, not frozen.
 - Mindoro Phase 3: validation-focused and reportable; `Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents` is now carried by the March 13 -> March 14 B1 row, March 6 remains the preserved sparse-reference honesty case, the promotion is tracked by amendment rather than by rewriting the frozen March 3 -> March 6 case file, and B1 now inherits its recipe provenance from the separate focused `2016-2023` Mindoro drifter rerun without claiming direct drifter ingestion inside Phase 3B itself.
-- DWH Phase 3C: validation-only external rich-data transfer case.
+- DWH Phase 3C: validation-only external rich-data transfer case kept separate from drifter-calibration governance.
 - Mindoro `phase4_oiltype_and_shoreline`: implemented as a support/context bundle outside the main thesis phase count; thesis-facing `Phase 4` labeling is reserved for `prototype_2016`.
 - Phase 4 cross-model comparison: deferred; current PyGNOME branches remain comparator-only for transport/spatial work rather than matched Phase 4 fate-and-shoreline outputs.
 - Repo sync, galleries, publication packaging, and dashboard layers: read-only support/explorer surfaces outside the main thesis phase count; thesis-facing `Phase 5` labeling is reserved for `prototype_2016`.
@@ -89,10 +89,12 @@ Promotion and provenance control:
 - Canonical primary launcher entry: `mindoro_phase3b_primary_public_validation`
 - Backward-compatible launcher alias: `mindoro_march13_14_noaa_reinit_stress_test`
 - Shared-imagery guardrail: both NOAA/NESDIS public products cite March 12 WorldView-3 imagery, so the promoted B1 row is reportable as a reinitialization-based public-validation pair, not as an independent day-to-day validation.
+- Track semantics: `B1` is the only main-text primary Mindoro validation row; `A` is the same-case comparator-support track attached to `B1`; `B2` is the March 6 legacy honesty row; `B3` is the March 3-6 broader-support legacy row.
+- Spatial semantics: focused Phase 1 validation box `[118.751, 124.305, 10.620, 16.026]`; broad `mindoro_case_domain` fallback transport/overview extent `[115.0, 122.0, 6.0, 14.5]`; current scoring-grid display bounds `[120.90964677179262, 122.0621541786303, 12.249384840763462, 13.783655303175253]`.
 
-### Phase 3A Benchmark Comparator
+### Phase 3A Benchmark Comparator Support
 
-- Plain-language status: validation-support comparator track built around the promoted March 13 -> March 14 reinit comparison.
+- Plain-language status: validation-support comparator track built around the promoted March 13 -> March 14 reinit comparison and attached to B1 rather than standing as a co-primary row.
 - Reportable: `true`
 - Frozen: `false`
 - Guardrail: PyGNOME is comparator-only and not truth.
@@ -126,17 +128,20 @@ Promotion and provenance control:
 
 - Plain-language status: validation-only external rich-data transfer case.
 - Thesis framing: separate external transfer-validation/support case; Mindoro remains the main Philippine thesis case.
-- Deterministic OpenDrift: reportable transfer-validation result.
-- Ensemble comparison: reportable transfer-validation support/comparative result.
-- PyGNOME comparator: reportable comparator-only result.
+- Deterministic OpenDrift: reportable transfer-validation result and the clean baseline DWH result.
+- Ensemble comparison: reportable transfer-validation support/comparative result; p50 is the preferred probabilistic extension and p90 remains support/comparison only.
+- PyGNOME comparator: reportable comparator-only result and never truth.
 - Frozen: `false`
 - Inherited provisional: `true`
 - Guardrail: DWH observed masks remain truth, and PyGNOME remains comparator-only.
+- No new drifter ingestion: thesis-facing DWH packaging does not ingest new drifter data and does not reopen Phase 1-style recipe competition.
 - Forcing-stack selection rule: readiness-gated historical stack, not Phase 1 drifter-selected baseline logic.
 - Current frozen DWH stack: HYCOM GOFS 3.1 currents + ERA5 winds + CMEMS wave/Stokes.
+- Date-composite truth rule: use the 2010-05-20 initialization composite plus the 2010-05-21, 2010-05-22, and 2010-05-23 validation composites honestly as date labels only; do not invent exact sub-daily observation acquisition times.
 - Forcing-outage policy: strict/reportable by default. Use `FORCING_OUTAGE_POLICY=continue_degraded` only if you intentionally want a provisional readiness result after a temporary forcing-provider outage.
 - Scientific-ready means: not smoke-only, full May 20-23, 2010 coverage, required variables and usable metadata present, OpenDrift reader exposes the required variables, and the assembled stack completes a small reader-check forecast.
 - Drop-in methods note: `docs/DWH_METHODS_NOTE.md`
+- Final governance note: `docs/DWH_PHASE3C_FINAL.md`
 
 ## Phase 4 Support Layer
 

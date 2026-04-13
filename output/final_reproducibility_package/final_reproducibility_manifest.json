@@ -1,6 +1,6 @@
 {
   "phase": "phase5_launcher_and_docs_sync",
-  "generated_at_utc": "2026-04-12T22:25:58.175455+00:00",
+  "generated_at_utc": "2026-04-13T05:36:14.156043+00:00",
   "repo_root": "/app",
   "output_dir": "output/final_reproducibility_package",
   "launcher_catalog": {
@@ -42,12 +42,31 @@
       "posthoc_phase1_confirmation_workflow_mode": "phase1_mindoro_focus_pre_spill_2016_2023",
       "posthoc_phase1_confirmation_candidate_baseline_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml",
       "posthoc_phase1_confirmation_selected_recipe": "cmems_era5",
+      "mindoro_phase1_provenance_workflow_mode": "phase1_mindoro_focus_pre_spill_2016_2023",
+      "mindoro_phase1_provenance_artifact": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml",
+      "mindoro_phase1_provenance_selected_recipe": "cmems_era5",
+      "mindoro_phase1_provenance_recipe_family": [
+        "cmems_era5",
+        "hycom_era5"
+      ],
+      "mindoro_phase1_provenance_gfs_outage_constrained": true,
+      "mindoro_phase1_provenance_accepted_registry_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv",
+      "mindoro_phase1_provenance_accepted_registry_has_2023_segments": false,
+      "mindoro_phase1_provenance_searched_through_early_2023": true,
+      "regional_reference_workflow_mode": "phase1_regional_2016_2022",
+      "regional_reference_candidate_baseline_path": "output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml",
       "matches_stored_b1_recipe": true,
-      "confirmation_interpretation": "The later phase1_mindoro_focus_pre_spill_2016_2023 Mindoro-focused drifter rerun independently selected the same recipe used by the stored B1 run (cmems_era5), so it supports promoting B1 without rewriting the original run provenance.",
+      "confirmation_interpretation": "The separate phase1_mindoro_focus_pre_spill_2016_2023 Mindoro-focused drifter rerun selected the same recipe used by the stored B1 run (cmems_era5). It now serves as the active Mindoro-specific recipe-provenance lane for B1 without rewriting the original March 13 -> March 14 raw-generation history.",
       "thesis_phase_title": "Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents",
       "thesis_phase_subtitle": "Mindoro March 13 -> March 14 public spill-extent reinitialization validation"
     },
     "final_output_export_dir": "output/Phase 3B March13-14 Final Output"
+  },
+  "dwh_phase3c_freeze": {
+    "base_case_definition_path": "config/case_dwh_retro_2010_72h.yaml",
+    "final_note_path": "docs/DWH_PHASE3C_FINAL.md",
+    "forcing_stack": "HYCOM GOFS 3.1 currents + ERA5 winds + CMEMS wave/Stokes",
+    "final_output_export_dir": "output/Phase 3C DWH Final Output"
   },
   "docs_updated": [
     "README.md",
@@ -59,6 +78,7 @@
     "docs/COMMAND_MATRIX.md",
     "docs/LAUNCHER_USER_GUIDE.md",
     "docs/MINDORO_PRIMARY_VALIDATION_MIGRATION.md",
+    "docs/DWH_PHASE3C_FINAL.md",
     "docs/UI_GUIDE.md"
   ],
   "artifacts": {
@@ -115,7 +135,7 @@
       "main_blocker": "Comparator-only track with a shared-imagery caveat; upstream Mindoro transport baseline is still not frozen.",
       "reportable_now": true,
       "reportability_scope": "comparative_benchmark_discussion",
-      "summary": "Comparator-only lane on the promoted March 14 target. fss_1km=0.0000, fss_3km=0.0441, fss_5km=0.1371, fss_10km=0.2490",
+      "summary": "Same-case comparator-only support track attached to B1 on the promoted March 14 target. fss_1km=0.0000, fss_3km=0.0441, fss_5km=0.1371, fss_10km=0.2490",
       "evidence_path": "output/final_validation_package/final_validation_manifest.json"
     },
     {
@@ -129,7 +149,7 @@
       "main_blocker": "The frozen recipe still comes from three legacy prototype dates, not from a completed 2016-2022 regional drifter-segment study.",
       "reportable_now": true,
       "reportability_scope": "main_text_primary_validation",
-      "summary": "Promoted primary validation; later 2016-2023 drifter rerun confirmed the same cmems_era5 recipe; inherited-provisional; not frozen. fss_1km=0.0000, fss_3km=0.0441, fss_5km=0.1371, fss_10km=0.2490",
+      "summary": "Promoted primary validation; focused 2016-2023 Mindoro drifter rerun selected the same cmems_era5 recipe; reportable now but not fully frozen. fss_1km=0.0000, fss_3km=0.0441, fss_5km=0.1371, fss_10km=0.2490",
       "evidence_path": "output/final_validation_package/final_validation_manifest.json"
     },
     {
@@ -143,7 +163,7 @@
       "main_blocker": "The frozen recipe still comes from three legacy prototype dates, not from a completed 2016-2022 regional drifter-segment study.",
       "reportable_now": true,
       "reportability_scope": "legacy_sparse_reference",
-      "summary": "Legacy honesty reference; not the promoted primary row. fss_1km=0.0000, fss_3km=0.0000, fss_5km=0.0000, fss_10km=0.0000",
+      "summary": "B2 legacy honesty reference; not the promoted primary row. fss_1km=0.0000, fss_3km=0.0000, fss_5km=0.0000, fss_10km=0.0000",
       "evidence_path": "output/final_validation_package/final_validation_manifest.json"
     },
     {
@@ -157,7 +177,7 @@
       "main_blocker": "The frozen recipe still comes from three legacy prototype dates, not from a completed 2016-2022 regional drifter-segment study.",
       "reportable_now": true,
       "reportability_scope": "legacy_broader_support_reference",
-      "summary": "Legacy broader-support context; not a primary row. fss_1km=0.1722, fss_3km=0.2004, fss_5km=0.2166, fss_10km=0.2438",
+      "summary": "B3 legacy broader-support context; not a primary row. fss_1km=0.1722, fss_3km=0.2004, fss_5km=0.2166, fss_10km=0.2438",
       "evidence_path": "output/final_validation_package/final_validation_manifest.json"
     },
     {
@@ -166,37 +186,37 @@
       "track_label": "DWH deterministic external transfer validation",
       "readiness_status": "scientifically_reportable_transfer_validation",
       "scientifically_reportable": true,
-      "scientifically_frozen": false,
-      "inherited_provisional": true,
-      "main_blocker": "The frozen recipe still comes from three legacy prototype dates, not from a completed 2016-2022 regional drifter-segment study.",
+      "scientifically_frozen": true,
+      "inherited_provisional": false,
+      "main_blocker": "",
       "reportable_now": true,
       "reportability_scope": "external_rich_data_transfer_validation",
-      "summary": "Main DWH transfer-validation track. fss_1km=0.5033, fss_3km=0.5523, fss_5km=0.5700, fss_10km=0.6018",
+      "summary": "Main DWH deterministic transfer-validation track. fss_1km=0.5033, fss_3km=0.5523, fss_5km=0.5700, fss_10km=0.6018",
       "evidence_path": "output/final_validation_package/final_validation_manifest.json"
     },
     {
       "phase_id": "phase3c",
       "track_id": "C2",
-      "track_label": "DWH ensemble external transfer validation",
+      "track_label": "DWH ensemble extension and deterministic-vs-ensemble comparison",
       "readiness_status": "scientifically_reportable_transfer_validation",
       "scientifically_reportable": true,
-      "scientifically_frozen": false,
-      "inherited_provisional": true,
-      "main_blocker": "The frozen recipe still comes from three legacy prototype dates, not from a completed 2016-2022 regional drifter-segment study.",
+      "scientifically_frozen": true,
+      "inherited_provisional": false,
+      "main_blocker": "",
       "reportable_now": true,
       "reportability_scope": "external_rich_data_transfer_validation",
-      "summary": "DWH ensemble comparison on the same truth masks. fss_1km=0.4997, fss_3km=0.5299, fss_5km=0.5467, fss_10km=0.5790",
+      "summary": "DWH ensemble extension on the same truth masks; p50 preferred, p90 support-only. fss_1km=0.4997, fss_3km=0.5299, fss_5km=0.5467, fss_10km=0.5790",
       "evidence_path": "output/final_validation_package/final_validation_manifest.json"
     },
     {
       "phase_id": "phase3c",
       "track_id": "C3",
-      "track_label": "DWH PyGNOME comparator",
+      "track_label": "DWH PyGNOME comparator-only",
       "readiness_status": "scientifically_reportable_comparator",
       "scientifically_reportable": true,
-      "scientifically_frozen": false,
-      "inherited_provisional": true,
-      "main_blocker": "Comparator-only track; PyGNOME is not truth and remains below OpenDrift on the current DWH case.",
+      "scientifically_frozen": true,
+      "inherited_provisional": false,
+      "main_blocker": "",
       "reportable_now": true,
       "reportability_scope": "cross_model_comparator",
       "summary": "DWH cross-model comparator; PyGNOME not truth. fss_1km=0.3197, fss_3km=0.3495, fss_5km=0.3689, fss_10km=0.4068",
@@ -246,7 +266,7 @@
     }
   ],
   "manifest_index_summary": {
-    "row_count": 125,
+    "row_count": 132,
     "missing_optional_artifacts": [
       "output/phase4/CASE_DWH_RETRO_2010_72H/phase4_run_manifest.json"
     ]

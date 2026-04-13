@@ -83,7 +83,7 @@
       "service_profile": "pipeline_only",
       "rerun_cost": "expensive",
       "safe_default": false,
-      "notes": "Canonical B1 builder. This does not delete or relabel the March 6 B2 legacy honesty row, and the same-case PyGNOME comparator lane stays separate and comparator-only.",
+      "notes": "Canonical B1 builder. This does not delete or relabel the March 6 B2 legacy honesty row, and the same-case A comparator-support lane stays separate and comparator-only.",
       "steps": [
         {
           "phase": "phase3b_extended_public",
@@ -217,7 +217,7 @@
         {
           "phase": "phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison",
           "service": "gnome",
-          "description": "March 13 -> March 14 comparator-only cross-model lane"
+          "description": "March 13 -> March 14 same-case comparator-support A lane"
         },
         {
           "phase": "horizon_survival_audit",
@@ -357,11 +357,11 @@
       "category_id": "sensitivity_appendix_tracks",
       "workflow_mode": "mindoro_retro_2023",
       "label": "Legacy alias: Mindoro March 13-14 primary validation bundle",
-      "description": "Backward-compatible alias for the promoted March 13 -> March 14 B1 public-validation row plus the comparator-only March 14 cross-model lane.",
+      "description": "Backward-compatible alias for the promoted March 13 -> March 14 B1 public-validation row plus the same-case comparator-support March 14 A lane.",
       "service_profile": "mixed_pipeline_and_gnome",
       "rerun_cost": "expensive",
       "safe_default": false,
-      "notes": "Compatibility alias retained for older scripts. B1 is primary, B2 is legacy honesty-only, PyGNOME remains comparator-only, and the support-side B1 rebuild uses degraded forcing continuation if a temporary provider outage blocks only forcing acquisition.",
+      "notes": "Compatibility alias retained for older scripts. B1 is the only main-text primary row, B2 is legacy honesty-only, B3 is broader-support legacy context, PyGNOME remains comparator-only, and the support-side B1 rebuild uses degraded forcing continuation if a temporary provider outage blocks only forcing acquisition.",
       "steps": [
         {
           "phase": "phase3b_extended_public",
@@ -379,7 +379,7 @@
         {
           "phase": "phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison",
           "service": "gnome",
-          "description": "March 13 -> March 14 comparator-only cross-model lane"
+          "description": "March 13 -> March 14 same-case comparator-support A lane"
         }
       ]
     },

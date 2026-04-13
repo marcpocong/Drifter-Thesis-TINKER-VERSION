@@ -281,6 +281,40 @@ Interpretation:
 - GFS-backed recipes were excluded in the focused rerun while archived NOAA/NCEI GFS access remained unavailable
 - the shared-imagery caveat remains explicit; do not describe March 13 -> March 14 as independent day-to-day validation
 
+## Curated DWH Phase 3C Final Output Export
+
+### `output/Phase 3C DWH Final Output/`
+
+Purpose:
+Read-only curated export of the frozen DWH Phase 3C family for thesis-facing delivery as a separate external transfer-validation lane.
+
+Expected files:
+
+- `README.md`
+- `publication/observations/*.png`
+- `publication/opendrift_deterministic/*.png`
+- `publication/opendrift_ensemble/*.png`
+- `publication/comparator_pygnome/*.png`
+- `publication/context_optional/*.png` only when a clearly labeled context-only trajectory figure exists
+- `scientific_source_pngs/deterministic/*.png`
+- `scientific_source_pngs/ensemble/*.png`
+- `scientific_source_pngs/comparator_pygnome/*.png`
+- `summary/deterministic/*`
+- `summary/ensemble/*`
+- `summary/comparator_pygnome/*`
+- `manifests/phase3c_final_output_manifest.json`
+- `manifests/phase3c_final_output_registry.csv`
+- `manifests/phase3c_final_output_registry.json`
+
+Interpretation:
+
+- this directory is an alias/export layer, not the canonical scientific directory
+- it packages the DWH observation-context figures, deterministic baseline figures, ensemble extension figures, PyGNOME comparator figures, canonical scientific source PNGs, and stored summary artifacts in one thesis-facing location
+- DWH remains a separate Phase 3C external transfer-validation lane; do not read this folder as a second local Phase 1 or drifter-calibration study
+- the authoritative forcing stack remains `HYCOM GOFS 3.1 currents + ERA5 winds + CMEMS wave/Stokes`
+- deterministic remains the clean baseline transfer-validation result, p50 is the preferred probabilistic extension, p90 is support/comparison only, and PyGNOME is comparator-only
+- the public DWH masks remain truth and the folder keeps date-composite honesty rather than implying exact sub-daily observation acquisition times
+
 ## Final Reproducibility Package
 
 ### `output/final_reproducibility_package/`

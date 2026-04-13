@@ -2,7 +2,8 @@
 
 # Thesis-facing geographic semantics. Keep these concepts separate:
 # - phase1_validation_box: Chapter 3 historical/regional transport-validation box
-# - mindoro_case_domain: official Mindoro spill-case transport/scoring domain
+# - mindoro_case_domain: broad official Mindoro spill-case fallback transport/forcing
+#   domain and overview extent, not the canonical scoring-grid display bounds
 # - legacy_prototype_display_domain: prototype/debug plotting extent only
 # [min_lon, max_lon, min_lat, max_lat]
 phase1_validation_box: [119.5, 124.5, 11.5, 16.5]
@@ -32,7 +33,8 @@ phase1_baseline_selection_path: config/phase1_baseline_selection.yaml
 
 # Official Phase 1 historical/regional audit metadata. This is intentionally
 # separate from the Mindoro spill-case domain and any prototype display extent
-# so audit alignment does not silently change other workflow semantics.
+# so audit alignment does not silently change the broader fallback case domain
+# or the narrower scoring-grid display semantics.
 phase1_official_audit:
   historical_window:
     start_date: "2016-01-01"

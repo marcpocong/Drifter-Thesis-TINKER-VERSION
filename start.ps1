@@ -793,6 +793,7 @@ function Show-Help {
     Write-Host "  - Drifter truth and ArcGIS/observation truth inputs stay hard requirements even when degraded forcing continuation is enabled." -ForegroundColor White
     Write-Host "  - Phase 2 is scientifically usable, but not scientifically frozen." -ForegroundColor White
     Write-Host "  - Phase 3B and Phase 3C are validation-only lanes: public-observation validation for Mindoro and external transfer validation for DWH." -ForegroundColor White
+    Write-Host "  - Mindoro track semantics are locked as B1=only main-text primary row, A=same-case comparator-support, B2=March 6 legacy honesty, and B3=March 3-6 broader-support legacy context." -ForegroundColor White
     Write-Host "  - The Mindoro-focused Phase 1 rerun is confirmation-only for the recipe story and stays separate from canonical baseline governance and stored B1 provenance." -ForegroundColor White
     Write-Host "  - Outside prototype_2016, phase4_oiltype_and_shoreline, phase5_sync, the galleries, and the dashboard are support layers rather than main thesis phases." -ForegroundColor White
     Write-Host "  - DWH Phase 3C stays a separate external transfer-validation story with readiness-gated HYCOM GOFS 3.1 + ERA5 + CMEMS wave/Stokes forcing; observed masks remain truth and PyGNOME remains comparator-only." -ForegroundColor White

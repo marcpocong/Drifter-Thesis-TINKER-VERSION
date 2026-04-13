@@ -19,7 +19,7 @@
 | `dwh_reportable_bundle` | scientific/reportable | `dwh_retro_2010` | intentional rerun of the DWH Phase 3C transfer-validation bundle | expensive | `.\start.ps1 -Entry dwh_reportable_bundle -NoPause` |
 | `mindoro_appendix_sensitivity_bundle` | sensitivity/appendix | `mindoro_retro_2023` | rerun appendix and sensitivity branches | expensive | `.\start.ps1 -Entry mindoro_appendix_sensitivity_bundle -NoPause` |
 | `phase1_mindoro_focus_pre_spill_experiment` | sensitivity/appendix | `phase1_mindoro_focus_pre_spill_2016_2023` | separate Mindoro-focused Phase 1 provenance rerun that now supplies the active B1 recipe-provenance story | expensive | `.\start.ps1 -Entry phase1_mindoro_focus_pre_spill_experiment` |
-| `mindoro_march13_14_noaa_reinit_stress_test` | sensitivity/appendix | `mindoro_retro_2023` | backward-compatible alias that still resolves to the promoted March 13 -> March 14 bundle and comparator lane | expensive | `.\start.ps1 -Entry mindoro_march13_14_noaa_reinit_stress_test -NoPause` |
+| `mindoro_march13_14_noaa_reinit_stress_test` | sensitivity/appendix | `mindoro_retro_2023` | backward-compatible alias that still resolves to the promoted March 13 -> March 14 bundle and the same-case comparator-support A lane | expensive | `.\start.ps1 -Entry mindoro_march13_14_noaa_reinit_stress_test -NoPause` |
 | `prototype_2021_bundle` | legacy prototype | `prototype_2021` | preferred accepted-segment debug/demo path; exact 2021 drifter windows, official Phase 1 recipe family only, and transport-core bundle only | moderate | `.\start.ps1 -Entry prototype_2021_bundle -NoPause` |
 | `prototype_legacy_bundle` | legacy prototype | `prototype_2016` | legacy debug/regression only; visible thesis-facing support flow is `Phase 1 -> Phase 2 -> Phase 3A -> Phase 4 -> Phase 5`, with best-effort GFS prep, deterministic plus `p50`/`p90` comparator outputs, and no thesis-facing 3B/3C lane | moderate | `.\start.ps1 -Entry prototype_legacy_bundle -NoPause` |
 
@@ -131,4 +131,5 @@ For `prototype_2016`, the release origin is the selected drifter-of-record start
 - Keep the Mindoro-focused Phase 1 rerun as the active Mindoro-specific recipe-provenance path for B1; it does not rewrite stored B1 raw-generation history or claim direct drifter ingestion inside Phase 3B.
 - `mindoro_march13_14_noaa_reinit_stress_test` is now an alias, not the authoritative scientific label.
 - Thesis-facing Mindoro sequencing is separate focused Phase 1 confirmation -> Phase 2 -> Phase 3B primary validation.
+- Mindoro track semantics are locked as B1 only-primary, A same-case comparator-support, B2 March 6 legacy honesty, and B3 March 3-6 broader-support legacy context.
 - Do not claim independent day-to-day validation for March 13 -> March 14 while the shared-imagery caveat still applies, and do not treat PyGNOME as anything other than same-case comparator evidence.

@@ -2,6 +2,11 @@ workflow_mode: mindoro_retro_2023
 case_id: CASE_MINDORO_RETRO_2023
 description: "Official thesis-facing Mindoro spill-case Phase 2 -> Phase 3B validation workflow anchored on the frozen March 3 -> March 6 base case and the separate focused Mindoro Phase 1 recipe-provenance lane"
 mode_label: "Official Mindoro spill-case workflow"
+
+# Broad official spill-case fallback transport/forcing domain and overview extent.
+# This is not the focused Phase 1 validation box and not identical to the
+# narrower canonical scoring-grid display bounds used when the stored scoring
+# grid artifact is present.
 mindoro_case_domain: [115.0, 122.0, 6.0, 14.5]
 phase3b_primary_validation_amendment_path: config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml
 
@@ -58,7 +63,10 @@ arcgis:
 notes:
   - The frozen base spill-case definition remains the March 3 -> March 6 official replay in this file.
   - March 13 -> March 14 Phase 3B public-validation promotion is recorded separately in the amendment file above.
+  - Mindoro track semantics are locked as A=comparator-support only, B1=only main-text primary validation row, B2=March 6 legacy honesty row, and B3=March 3-6 broader-support legacy row.
   - March 6 legacy outputs remain visible for methods honesty and are not silently rewritten by the promotion.
   - The separate phase1_mindoro_focus_pre_spill_2016_2023 rerun now provides the active Mindoro-specific recipe-provenance story for B1, but it does not rewrite this frozen base case or claim direct drifter ingestion inside Phase 3B itself.
   - The broader phase1_regional_2016_2022 rerun remains preserved as a broader reference/governance lane and is not the active provenance for Mindoro B1.
+  - The focused Phase 1 validation box remains `118.751-124.305E / 10.620-16.026N` in `config/phase1_mindoro_focus_pre_spill_2016_2023.yaml`.
+  - The canonical scoring grid display bounds currently come from `data_processed/grids/scoring_grid.yaml` and are narrower than `mindoro_case_domain`.
   - Same-case March 13 -> March 14 PyGNOME work remains comparator-only support evidence rather than truth.

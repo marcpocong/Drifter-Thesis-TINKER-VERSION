@@ -1,6 +1,10 @@
 import unittest
 
-from src.core.artifact_status import artifact_status_columns, record_matches_artifact_status
+from src.core.artifact_status import (
+    artifact_status_columns,
+    artifact_status_columns_for_key,
+    record_matches_artifact_status,
+)
 
 
 class ArtifactStatusTests(unittest.TestCase):
@@ -29,6 +33,20 @@ class ArtifactStatusTests(unittest.TestCase):
 
         self.assertEqual(status["status_key"], "dwh_ensemble_transfer")
 
+    def test_mindoro_crossmodel_record_maps_to_comparator_support_status(self):
+        status = artifact_status_columns(
+            {
+                "case_id": "CASE_MINDORO_RETRO_2023",
+                "phase_or_track": "phase3a_reinit_crossmodel",
+                "run_type": "comparison_board",
+                "figure_slug": "mindoro_crossmodel_board",
+            }
+        )
+
+        self.assertEqual(status["status_key"], "mindoro_crossmodel_comparator")
+        self.assertEqual(status["status_role"], "comparator_only")
+        self.assertIn("support", status["status_dashboard_summary"].lower())
+
     def test_dwh_trajectory_artifact_does_not_inherit_deterministic_status(self):
         record = {
             "case_id": "CASE_DWH_RETRO_2010_72H",
@@ -53,6 +71,12 @@ class ArtifactStatusTests(unittest.TestCase):
 
         self.assertEqual(status["status_key"], "prototype_2016_support")
         self.assertIn("legacy debug support", status["status_label"].lower())
+
+    def test_dwh_observation_truth_context_status_is_available_for_explicit_override(self):
+        status = artifact_status_columns_for_key("dwh_observation_truth_context")
+
+        self.assertEqual(status["status_key"], "dwh_observation_truth_context")
+        self.assertIn("truth context", status["status_label"].lower())
 
 
 if __name__ == "__main__":

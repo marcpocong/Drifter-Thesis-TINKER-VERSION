@@ -6,7 +6,7 @@ Recommended revised structure:
 
 1. Phase 1 = Transport Validation and Baseline Configuration Selection
 2. Phase 2 = Standardized Machine-Readable Forecast Product Generation
-3. Phase 3A = Mindoro March 13 -> March 14 Cross-Model Comparator
+3. Phase 3A = Mindoro March 13 -> March 14 Same-Case Comparator Support Track
 4. Phase 3B1 = Mindoro March 13 -> March 14 NOAA Reinit Primary Validation
 5. Phase 3B2 = Mindoro Legacy March 6 Sparse Strict Reference
 6. Phase 3B3 = Mindoro Legacy March 3-6 Broader-Support Reference
@@ -17,10 +17,11 @@ Recommended revised structure:
 Packaging guidance:
 
 - Keep Mindoro as the main Philippine case.
-- Keep DWH as the rich-data external transfer-validation branch.
-- Present Phase 3A as comparator-only benchmarking, not as a truth-source replacement.
+- Keep DWH as the separate Phase 3C external rich-data transfer-validation branch, with no new drifter ingestion in the thesis-facing lane.
+- Present Phase 3A as same-case comparator-only support attached to B1, not as a co-primary claim or truth-source replacement.
 - Preserve `config/case_mindoro_retro_2023.yaml` as the frozen March 3 -> March 6 case definition and carry the Phase 3B promotion through the amendment file instead.
 - Present March 13 -> March 14 as the canonical Mindoro validation with the shared-imagery caveat stated explicitly.
 - State that the separate focused 2016-2023 Mindoro drifter rerun now supplies the active cmems_era5 recipe provenance used by the stored B1 story without rewriting the original run provenance.
 - State that the broader 2016-2022 regional rerun is preserved as reference/governance context rather than as the active B1 provenance lane.
 - Keep March 6 and March 3-6 visible as legacy/reference material rather than deleting or hiding them.
+- State that DWH uses the readiness-gated historical forcing stack rather than a Phase 1 drifter-ranked recipe, and that deterministic stays the baseline while p50 is the preferred probabilistic extension.

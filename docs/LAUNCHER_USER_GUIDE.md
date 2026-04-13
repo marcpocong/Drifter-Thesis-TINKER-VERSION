@@ -82,14 +82,14 @@ Intentional scientific reruns:
 - `dwh_reportable_bundle`
 
 `phase1_production_rerun` is intentionally expensive and stages `output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml` only. It does not auto-overwrite `config/phase1_baseline_selection.yaml`.
-`mindoro_phase3b_primary_public_validation` is the canonical March 13 -> March 14 Phase 3B public-validation entry. It preserves the original March 3 -> March 6 case YAML and relies on the separate amendment file `config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml`.
+`mindoro_phase3b_primary_public_validation` is the canonical March 13 -> March 14 Phase 3B public-validation entry. It preserves the original March 3 -> March 6 case YAML and relies on the separate amendment file `config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml`. Track `A` remains outside this builder as same-case comparator-support only.
 `mindoro_reportable_core` rebuilds the main Mindoro spill-case validation chain around official Phase 2 and the B1 primary-validation row while keeping B2/B3 visible and the support-only Mindoro Phase 4 layer explicit. The separate `phase1_mindoro_focus_pre_spill_experiment` Mindoro-specific provenance lane stays outside this entry by design.
 
 Appendix and sensitivity:
 
 - `mindoro_appendix_sensitivity_bundle`
 - `phase1_mindoro_focus_pre_spill_experiment`
-- `mindoro_march13_14_noaa_reinit_stress_test` remains available only as a backward-compatible alias for the promoted B1 bundle plus the comparator lane.
+- `mindoro_march13_14_noaa_reinit_stress_test` remains available only as a backward-compatible alias for the promoted B1 bundle plus the same-case comparator-support A lane.
 
 `phase1_mindoro_focus_pre_spill_experiment` is the preferred interactive path for the separate Mindoro-focused Phase 1 provenance rerun. Use `.\start.ps1 -Entry phase1_mindoro_focus_pre_spill_experiment` if you want the launcher to ask once about cache reuse and forcing wait budget, or run `docker-compose exec -e WORKFLOW_MODE=phase1_mindoro_focus_pre_spill_2016_2023 -e PIPELINE_PHASE=phase1_production_rerun pipeline python -m src` if you want the same prompt flow directly in the container. This lane now supplies the active Mindoro-specific B1 recipe-provenance story, stays separate from the broader regional reference lane, and does not rewrite the stored March 13 -> March 14 B1 raw-generation history.
 
@@ -126,6 +126,7 @@ docker-compose exec -T -e WORKFLOW_MODE=prototype_2016 -e PIPELINE_PHASE=prototy
 - Outside `prototype_2016`, `phase4_oiltype_and_shoreline`, `phase5_sync`, the galleries, and the UI are support layers rather than main thesis phases.
 - The frozen Mindoro base case remains `config/case_mindoro_retro_2023.yaml`; promoting March 13 -> March 14 does not silently rewrite March 3 -> March 6 provenance.
 - Thesis-facing Mindoro sequencing is separate focused drifter-based Phase 1 provenance -> Phase 2 -> Phase 3B primary validation.
+- Mindoro track semantics are locked as B1 only-primary, A same-case comparator-support, B2 March 6 legacy honesty, and B3 March 3-6 broader-support legacy context.
 - March 6 remains a legacy honesty-only row and should never be called the primary Mindoro validation row.
 - March 13 -> March 14 must keep the shared-imagery caveat explicit, and the same-case PyGNOME lane remains comparator-only support evidence rather than truth or the main validation claim.
 - `prototype_2021` is the preferred accepted-segment debug lane, but it is still not the final Phase 1 study.

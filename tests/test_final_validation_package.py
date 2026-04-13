@@ -6,6 +6,11 @@ import json
 import pandas as pd
 
 from src.services.final_validation_package import (
+    DWH_FINAL_OUTPUT_DIR,
+    DWH_OBSERVATION_SOURCE_MASKS,
+    DWH_PUBLICATION_EXPORTS,
+    DWH_SCIENTIFIC_SOURCE_EXPORTS,
+    DWH_SUMMARY_EXPORTS,
     FinalValidationPackageService,
     MINDORO_B1_FINAL_OUTPUT_DIR,
     MINDORO_B1_PUBLICATION_EXPORTS,
@@ -15,6 +20,7 @@ from src.services.final_validation_package import (
     decide_final_structure,
     mean_fss,
 )
+from src.services.dwh_phase3c_metadata import DWH_BASE_CASE_CONFIG_PATH, DWH_PHASE3C_FINAL_NOTE_PATH
 
 
 class FinalValidationPackageTests(unittest.TestCase):
@@ -49,6 +55,8 @@ class FinalValidationPackageTests(unittest.TestCase):
         service._mindoro_crossmodel_top_row = FinalValidationPackageService._mindoro_crossmodel_top_row.__get__(service, FinalValidationPackageService)
         service._mindoro_dual_provenance_confirmation = FinalValidationPackageService._mindoro_dual_provenance_confirmation.__get__(service, FinalValidationPackageService)
         service._build_main_table = FinalValidationPackageService._build_main_table.__get__(service, FinalValidationPackageService)
+        service._build_case_registry = FinalValidationPackageService._build_case_registry.__get__(service, FinalValidationPackageService)
+        service._assert_mindoro_primary_semantics = FinalValidationPackageService._assert_mindoro_primary_semantics.__get__(service, FinalValidationPackageService)
         service._build_benchmark_table = FinalValidationPackageService._build_benchmark_table.__get__(service, FinalValidationPackageService)
         service._build_headlines = FinalValidationPackageService._build_headlines.__get__(service, FinalValidationPackageService)
         service.repo_root = Path(".").resolve()
@@ -197,9 +205,22 @@ class FinalValidationPackageTests(unittest.TestCase):
         service.dwh_cross_model_event = service.dwh_cross_model_summary.copy()
 
         main_table = service._build_main_table()
+        case_registry = service._build_case_registry()
+        service._assert_mindoro_primary_semantics(main_table, case_registry)
         benchmark_table = service._build_benchmark_table()
         headlines = service._build_headlines(main_table)
 
+        a_rows = main_table.loc[main_table["track_id"] == "A"].copy()
+        self.assertFalse(a_rows.empty)
+        self.assertTrue((a_rows["row_role"].astype(str) == "comparator_only").all())
+        self.assertTrue((a_rows["result_scope"].astype(str) == "same_case_cross_model_comparator_support").all())
+        a_registry = case_registry.loc[case_registry["track_id"] == "A"].iloc[0]
+        self.assertEqual(a_registry["main_text_priority"], "secondary")
+        mindoro_primary_rows = case_registry.loc[
+            (case_registry["case_id"] == "CASE_MINDORO_RETRO_2023")
+            & (case_registry["main_text_priority"] == "primary")
+        ]
+        self.assertEqual(mindoro_primary_rows["track_id"].tolist(), ["B1"])
         b1 = main_table.loc[main_table["track_id"] == "B1"].iloc[0]
         self.assertEqual(b1["track_label"], "Mindoro March 13 -> March 14 NOAA reinit primary validation")
         self.assertAlmostEqual(float(b1["mean_fss"]), 0.1075, places=4)
@@ -221,6 +242,15 @@ class FinalValidationPackageTests(unittest.TestCase):
         self.assertIn("mindoro_crossmodel_top", headlines)
         self.assertIn("mindoro_legacy_march6", headlines)
         self.assertIn("mindoro_legacy_broader_support", headlines)
+        c1_registry = case_registry.loc[case_registry["track_id"] == "C1"].iloc[0]
+        c2_registry = case_registry.loc[case_registry["track_id"] == "C2"].iloc[0]
+        c3_registry = case_registry.loc[case_registry["track_id"] == "C3"].iloc[0]
+        self.assertEqual(c1_registry["case_definition_path"], str(DWH_BASE_CASE_CONFIG_PATH))
+        self.assertEqual(c1_registry["case_freeze_amendment_path"], str(DWH_PHASE3C_FINAL_NOTE_PATH))
+        self.assertEqual(c1_registry["main_text_priority"], "primary")
+        self.assertEqual(c2_registry["main_text_priority"], "secondary")
+        self.assertIn("preferred probabilistic extension", str(c2_registry["notes"]))
+        self.assertIn("comparator-only", str(c3_registry["track_label"]).lower())
 
     def test_build_mindoro_final_output_export_writes_nested_tree_and_registry(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -285,6 +315,63 @@ class FinalValidationPackageTests(unittest.TestCase):
             manifest = json.loads((export_root / "manifests" / "final_output_manifest.json").read_text(encoding="utf-8"))
             self.assertEqual(manifest["registry_path"], "output/Phase 3B March13-14 Final Output/manifests/phase3b_final_output_registry.csv")
             self.assertEqual(export["manifest_path"], "output/Phase 3B March13-14 Final Output/manifests/final_output_manifest.json")
+
+    def test_build_dwh_final_output_export_writes_curated_tree_and_registry(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            for exports in DWH_PUBLICATION_EXPORTS.values():
+                for source in exports.values():
+                    path = root / source
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_text("png\n", encoding="utf-8")
+            for exports in DWH_SCIENTIFIC_SOURCE_EXPORTS.values():
+                for source in exports.values():
+                    path = root / source
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_text("png\n", encoding="utf-8")
+            for exports in DWH_SUMMARY_EXPORTS.values():
+                for source in exports.values():
+                    path = root / source
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_text("summary\n", encoding="utf-8")
+            for source in DWH_OBSERVATION_SOURCE_MASKS.values():
+                path = root / source
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("tif\n", encoding="utf-8")
+
+            service = object.__new__(FinalValidationPackageService)
+            service.repo_root = root
+            service._dwh_final_output_readme = (
+                FinalValidationPackageService._dwh_final_output_readme.__get__(service, FinalValidationPackageService)
+            )
+            service._build_dwh_final_output_export = (
+                FinalValidationPackageService._build_dwh_final_output_export.__get__(service, FinalValidationPackageService)
+            )
+            service._render_dwh_observation_context_png = (
+                lambda source_relative_path, destination, **kwargs: destination.write_text("generated png\n", encoding="utf-8")
+            )
+
+            export = service._build_dwh_final_output_export()
+
+            export_root = root / DWH_FINAL_OUTPUT_DIR
+            self.assertTrue((export_root / "publication" / "observations" / "dwh_2010-05-21_observation_context.png").exists())
+            self.assertTrue((export_root / "publication" / "opendrift_deterministic" / "dwh_daily_deterministic_board.png").exists())
+            self.assertTrue((export_root / "publication" / "opendrift_ensemble" / "dwh_deterministic_vs_ensemble_board.png").exists())
+            self.assertTrue((export_root / "publication" / "comparator_pygnome" / "dwh_opendrift_vs_pygnome_board.png").exists())
+            self.assertTrue((export_root / "publication" / "context_optional" / "dwh_ensemble_sampled_trajectory_context.png").exists())
+            self.assertTrue((export_root / "scientific_source_pngs" / "deterministic" / "qa_phase3c_eventcorridor_overlay.png").exists())
+            self.assertTrue((export_root / "scientific_source_pngs" / "ensemble" / "qa_phase3c_ensemble_eventcorridor_overlay.png").exists())
+            self.assertTrue((export_root / "scientific_source_pngs" / "comparator_pygnome" / "qa_phase3c_dwh_pygnome_eventcorridor_overlay.png").exists())
+            self.assertTrue((export_root / "summary" / "deterministic" / "phase3c_run_manifest.json").exists())
+            self.assertTrue((export_root / "summary" / "ensemble" / "phase3c_ensemble_run_manifest.json").exists())
+            self.assertTrue((export_root / "summary" / "comparator_pygnome" / "phase3c_dwh_pygnome_run_manifest.json").exists())
+            self.assertTrue((export_root / "manifests" / "phase3c_final_output_manifest.json").exists())
+            self.assertTrue((export_root / "manifests" / "phase3c_final_output_registry.csv").exists())
+            self.assertTrue((export_root / "manifests" / "phase3c_final_output_registry.json").exists())
+            manifest = json.loads((export_root / "manifests" / "phase3c_final_output_manifest.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["registry_path"], "output/Phase 3C DWH Final Output/manifests/phase3c_final_output_registry.csv")
+            self.assertFalse(manifest["scientific_rerun_triggered"])
+            self.assertEqual(export["manifest_path"], "output/Phase 3C DWH Final Output/manifests/phase3c_final_output_manifest.json")
 
 
 if __name__ == "__main__":

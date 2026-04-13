@@ -33,7 +33,7 @@ def render(state: dict, ui_state: dict) -> None:
 
     render_page_intro(
         "Mindoro Validation",
-        "This page leads with the promoted March 13 -> March 14 primary validation, keeps the March 14 cross-model comparator explicit, retains March 6 as an honesty reference, and uses trajectory figures as transport context.",
+        "This page leads with the promoted March 13 -> March 14 primary validation, keeps the March 14 same-case cross-model comparator support track explicit, retains March 6 as an honesty reference, and uses trajectory figures as transport context.",
         badge="Mindoro | promoted primary validation first",
     )
 
@@ -77,7 +77,7 @@ def render(state: dict, ui_state: dict) -> None:
     tabs = st.tabs(
         [
             "Primary Validation",
-            "Cross-Model Comparator",
+            "Comparator Support",
             "Legacy March 6",
             "Broader Support",
             "Trajectories",
@@ -102,7 +102,7 @@ def render(state: dict, ui_state: dict) -> None:
         render_figure_cards(
             comparator_figures,
             title=comparator_status.panel_label,
-            caption="These figures answer the OpenDrift-versus-PyGNOME question on the promoted March 14 target without treating PyGNOME as truth.",
+            caption="These figures answer the OpenDrift-versus-PyGNOME question on the promoted March 14 target without treating PyGNOME as truth or letting Track A drift into the main validation claim.",
             limit=None if ui_state["advanced"] else 4,
         )
 

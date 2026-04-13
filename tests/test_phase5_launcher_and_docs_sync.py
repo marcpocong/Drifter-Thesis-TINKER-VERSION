@@ -293,6 +293,14 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
             (final_output_dir / "README.md").write_text("final output readme\n", encoding="utf-8")
             (final_output_dir / "final_output_manifest.json").write_text("{}\n", encoding="utf-8")
             (final_output_dir / "publication" / "mindoro_primary_validation_board.png").write_text("png\n", encoding="utf-8")
+            dwh_final_output_dir = root / "output" / "Phase 3C DWH Final Output"
+            (dwh_final_output_dir / "publication" / "observations").mkdir(parents=True, exist_ok=True)
+            (dwh_final_output_dir / "manifests").mkdir(parents=True, exist_ok=True)
+            (dwh_final_output_dir / "README.md").write_text("dwh final output readme\n", encoding="utf-8")
+            (dwh_final_output_dir / "publication" / "observations" / "dwh_2010-05-21_observation_context.png").write_text(
+                "png\n", encoding="utf-8"
+            )
+            (dwh_final_output_dir / "manifests" / "phase3c_final_output_manifest.json").write_text("{}\n", encoding="utf-8")
 
             _write_json(
                 final_validation_dir / "final_validation_manifest.json",
@@ -303,6 +311,8 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
                         "final_validation_main_table": "output/final_validation_package/final_validation_main_table.csv",
                         "phase3b_march13_14_final_output_readme": "output/Phase 3B March13-14 Final Output/README.md",
                         "phase3b_march13_14_final_output_manifest": "output/Phase 3B March13-14 Final Output/final_output_manifest.json",
+                        "phase3c_dwh_final_output_readme": "output/Phase 3C DWH Final Output/README.md",
+                        "phase3c_dwh_final_output_manifest": "output/Phase 3C DWH Final Output/manifests/phase3c_final_output_manifest.json",
                     },
                     "inputs_preserved": [
                         "output/CASE_MINDORO_RETRO_2023/phase3b/phase3b_summary.csv",
@@ -331,13 +341,19 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
                     "phase3b_march13_14_final_output": {
                         "output_dir": "output/Phase 3B March13-14 Final Output",
                     },
+                    "dwh_phase3c_freeze": {
+                        "base_case_definition_path": "config/case_dwh_retro_2010_72h.yaml",
+                        "final_note_path": "docs/DWH_PHASE3C_FINAL.md",
+                        "forcing_stack": "HYCOM GOFS 3.1 currents + ERA5 winds + CMEMS wave/Stokes",
+                        "final_output_export_dir": "output/Phase 3C DWH Final Output",
+                    },
                 },
             )
             (final_validation_dir / "final_validation_case_registry.csv").write_text(
                 "\n".join(
                     [
                         "case_id,track_id,track_label,status,truth_source,primary_output_dir,reporting_role,main_text_priority,notes",
-                        "CASE_MINDORO_RETRO_2023,A,Mindoro March 13 -> March 14 cross-model comparator,complete,March 14 NOAA mask,output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison,comparative discussion,primary,Comparator only",
+                        "CASE_MINDORO_RETRO_2023,A,Mindoro March 13 -> March 14 cross-model comparator,complete,March 14 NOAA mask,output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison,comparative discussion,secondary,Same-case comparator-support only",
                         "CASE_MINDORO_RETRO_2023,B1,Mindoro March 13 -> March 14 NOAA reinit primary validation,complete,March 14 NOAA mask with March 13 seed polygon,output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit,main-text primary validation,primary,Promoted primary row with March 12 imagery caveat",
                         "CASE_MINDORO_RETRO_2023,B2,Mindoro legacy March 6 sparse strict reference,complete,WWF March 6 mask,output/CASE_MINDORO_RETRO_2023/phase3b,legacy reference,secondary,Legacy sparse reference",
                         "CASE_MINDORO_RETRO_2023,B3,Mindoro legacy March 3-6 broader-support reference,complete,public union,output/CASE_MINDORO_RETRO_2023/public_obs_appendix,legacy reference,secondary,Legacy broader-support reference",
@@ -483,6 +499,9 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
                 phase_status_by_track.loc["C1", "track_label"],
                 "DWH deterministic external transfer validation",
             )
+            self.assertTrue(bool(phase_status_by_track.loc["C1", "scientifically_frozen"]))
+            self.assertFalse(bool(phase_status_by_track.loc["C1", "inherited_provisional"]))
+            self.assertTrue(pd.isna(phase_status_by_track.loc["C1", "main_blocker"]))
 
             case_registry_df = pd.read_csv(results["final_case_registry_csv"])
             prototype_2021 = case_registry_df[case_registry_df["case_id"] == "prototype_2021"].iloc[0]
@@ -532,6 +551,20 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
             )
             self.assertTrue(
                 (
+                    (output_catalog_df["track_id"] == "C1/C2/C3")
+                    & (output_catalog_df["artifact_group"] == "phase3c_dwh_final_output")
+                    & (output_catalog_df["relative_path"] == "output/Phase 3C DWH Final Output/manifests/phase3c_final_output_manifest.json")
+                ).any()
+            )
+            self.assertTrue(
+                (
+                    (output_catalog_df["track_id"] == "C1/C2/C3")
+                    & (output_catalog_df["artifact_group"] == "phase3c_dwh_final_output")
+                    & (output_catalog_df["relative_path"] == "output/Phase 3C DWH Final Output/publication/observations/dwh_2010-05-21_observation_context.png")
+                ).any()
+            )
+            self.assertTrue(
+                (
                     (output_catalog_df["track_id"] == "prototype_legacy_phase3a")
                     & (output_catalog_df["artifact_type"] == "prototype_pygnome_similarity_manifest.json")
                 ).any()
@@ -566,6 +599,10 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
             )
             self.assertTrue(
                 final_manifest["mindoro_primary_validation_promotion"]["dual_provenance_confirmation"]["matches_stored_b1_recipe"]
+            )
+            self.assertEqual(
+                final_manifest["dwh_phase3c_freeze"]["final_output_export_dir"],
+                "output/Phase 3C DWH Final Output",
             )
             self.assertIn(
                 "output/phase4/CASE_DWH_RETRO_2010_72H/phase4_run_manifest.json",
