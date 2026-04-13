@@ -22,7 +22,7 @@ import streamlit as st
 from src.core.artifact_status import get_artifact_status
 from ui.pages.common import (
     render_export_note,
-    render_figure_cards,
+    render_figure_gallery,
     render_markdown_block,
     render_page_intro,
     render_status_callout,
@@ -64,14 +64,14 @@ def render(state: dict, ui_state: dict) -> None:
         "warning",
     )
 
-    render_figure_cards(
+    render_figure_gallery(
         figures,
         title=comparator_status.panel_label,
-        caption="These figures come from the curated comparator subgroup in the March13-14 final package.",
+        caption="These figures come from the curated comparator subgroup in the March13-14 final package. Click any figure to enlarge it and read the fuller context there.",
         limit=2 if export_mode else (None if ui_state["advanced"] else 4),
-        compact_selector=not ui_state["advanced"] and not export_mode,
-        selector_key="mindoro_comparator_figures",
+        columns_per_row=1 if export_mode else 2,
         export_mode=export_mode,
+        overlay_label="Click to enlarge",
     )
 
     if export_mode:

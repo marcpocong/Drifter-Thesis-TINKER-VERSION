@@ -22,7 +22,7 @@ import streamlit as st
 from src.core.artifact_status import get_artifact_status
 from ui.pages.common import (
     render_export_note,
-    render_figure_cards,
+    render_figure_gallery,
     render_markdown_block,
     render_metric_row,
     render_page_intro,
@@ -169,14 +169,14 @@ def render(state: dict, ui_state: dict) -> None:
         render_markdown_block("Legacy package README", state["legacy_2016_final_readme"], collapsed=False, export_mode=export_mode)
 
     def _phase3a_publication() -> None:
-        render_figure_cards(
+        render_figure_gallery(
             phase3a_figures,
             title="Phase 3A publication figures",
-            caption="These figures come from the curated legacy package and keep the Phase 3A comparator-only OpenDrift vs deterministic PyGNOME framing explicit.",
+            caption="These figures come from the curated legacy package and keep the Phase 3A comparator-only OpenDrift vs deterministic PyGNOME framing explicit. Click any figure to enlarge it.",
             limit=3 if export_mode else (None if ui_state["advanced"] else 6),
-            compact_selector=not ui_state["advanced"] and not export_mode,
-            selector_key="legacy_phase3a_figures",
+            columns_per_row=1 if export_mode else 2,
             export_mode=export_mode,
+            overlay_label="Click to enlarge",
         )
         render_table(
             "Phase 3A similarity by case",
@@ -188,14 +188,14 @@ def render(state: dict, ui_state: dict) -> None:
         )
 
     def _phase4_publication() -> None:
-        render_figure_cards(
+        render_figure_gallery(
             phase4_figures,
             title="Phase 4 publication figures",
             caption="These figures reuse the stored weathering/fate outputs and shoreline summaries derived from stored CSVs only.",
             limit=3 if export_mode else (None if ui_state["advanced"] else 6),
-            compact_selector=not ui_state["advanced"] and not export_mode,
-            selector_key="legacy_phase4_figures",
+            columns_per_row=1 if export_mode else 2,
             export_mode=export_mode,
+            overlay_label="Click to enlarge",
         )
         render_table(
             "Phase 4 registry",
@@ -217,14 +217,14 @@ def render(state: dict, ui_state: dict) -> None:
             "Some cross-model budget differences are large, so this pilot remains support-only and should be discussed as legacy comparator context rather than validation evidence.",
             "warning",
         )
-        render_figure_cards(
+        render_figure_gallery(
             phase4_comparator_figures,
             title="Phase 4 comparator figures",
             caption="These figures stay support-only and comparator-only. They describe cross-model budget differences from the stored prototype_2016 Phase 4 PyGNOME pilot; they are not observational skill products.",
             limit=4 if export_mode else (None if ui_state["advanced"] else 6),
-            compact_selector=not ui_state["advanced"] and not export_mode,
-            selector_key="legacy_phase4_comparator_figures",
+            columns_per_row=1 if export_mode else 2,
             export_mode=export_mode,
+            overlay_label="Click to enlarge",
         )
         render_table(
             "Phase 4 comparator registry",

@@ -21,7 +21,7 @@ import streamlit as st
 
 from ui.pages.common import (
     render_export_note,
-    render_figure_cards,
+    render_figure_gallery,
     render_markdown_block,
     render_package_cards,
     render_page_intro,
@@ -122,16 +122,14 @@ def render(state: dict, ui_state: dict) -> None:
         export_mode=export_mode,
     )
 
-    render_figure_cards(
+    render_figure_gallery(
         recommended,
         title="Featured publication figures",
-        caption="Home shows the full curated featured set in both Panel-friendly and Advanced browsing. Hover over any figure image to open a larger preview; export mode stays smaller and static for cleaner PDF snapshots.",
+        caption="Home shows the full curated featured set in both Panel-friendly and Advanced browsing. Click any figure to open a larger preview; export mode stays smaller and static for cleaner PDF snapshots.",
         limit=2 if export_mode else None,
         columns_per_row=1 if export_mode else 2,
-        compact_selector=False,
         export_mode=export_mode,
-        image_interaction="hover_lightbox" if not export_mode else "none",
-        image_overlay_label="View larger",
+        overlay_label="Click to enlarge",
     )
 
     if ui_state["advanced"] and not export_mode:

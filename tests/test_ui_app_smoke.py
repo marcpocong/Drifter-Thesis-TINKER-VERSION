@@ -51,6 +51,42 @@ def _phase4_wrapper_for_test() -> None:
     phase4_oiltype_and_shoreline.render(state, panel_state)
 
 
+def _mindoro_validation_wrapper_for_test() -> None:
+    from ui.data_access import build_dashboard_state
+    from ui.pages import mindoro_validation
+
+    state = build_dashboard_state()
+    panel_state = {"advanced": False, "mode_label": "Panel-friendly", "visual_layer": "publication", "export_mode": False}
+    mindoro_validation.render(state, panel_state)
+
+
+def _cross_model_wrapper_for_test() -> None:
+    from ui.data_access import build_dashboard_state
+    from ui.pages import cross_model_comparison
+
+    state = build_dashboard_state()
+    panel_state = {"advanced": False, "mode_label": "Panel-friendly", "visual_layer": "publication", "export_mode": False}
+    cross_model_comparison.render(state, panel_state)
+
+
+def _dwh_wrapper_for_test() -> None:
+    from ui.data_access import build_dashboard_state
+    from ui.pages import dwh_transfer_validation
+
+    state = build_dashboard_state()
+    panel_state = {"advanced": False, "mode_label": "Panel-friendly", "visual_layer": "publication", "export_mode": False}
+    dwh_transfer_validation.render(state, panel_state)
+
+
+def _legacy_wrapper_for_test() -> None:
+    from ui.data_access import build_dashboard_state
+    from ui.pages import legacy_2016_support
+
+    state = build_dashboard_state()
+    panel_state = {"advanced": False, "mode_label": "Panel-friendly", "visual_layer": "publication", "export_mode": False}
+    legacy_2016_support.render(state, panel_state)
+
+
 def _home_panel_wrapper_for_test() -> None:
     from ui.data_access import build_dashboard_state
     from ui.pages import home
@@ -85,6 +121,41 @@ def _phase1_export_wrapper_for_test() -> None:
     state = build_dashboard_state()
     export_state = {"advanced": False, "mode_label": "Export", "visual_layer": "publication", "export_mode": True}
     phase1_recipe_selection.render(state, export_state)
+
+
+def _missing_image_gallery_wrapper_for_test() -> None:
+    import pandas as pd
+
+    from ui.data_access import build_dashboard_state
+    from ui.pages.common import render_figure_gallery
+
+    state = build_dashboard_state()
+    existing = state["curated_recommended_figures"].head(1).copy()
+    if existing.empty:
+        existing = pd.DataFrame(
+            [
+                {
+                    "figure_id": "existing_gallery_test",
+                    "display_title": "Existing gallery test figure",
+                    "relative_path": "",
+                    "notes": "Fallback gallery test figure.",
+                }
+            ]
+        )
+    missing = existing.iloc[[0]].copy()
+    missing["figure_id"] = "missing_gallery_test"
+    missing["display_title"] = "Missing gallery test figure"
+    missing["relative_path"] = "output/figure_package_publication/definitely_missing_gallery_test.png"
+    if "resolved_path" in missing.columns:
+        missing["resolved_path"] = ""
+    gallery_df = pd.concat([existing, missing], ignore_index=True)
+    render_figure_gallery(
+        gallery_df,
+        title="Missing image gallery smoke",
+        caption="This gallery intentionally mixes one available figure with one missing file.",
+        columns_per_row=2,
+        overlay_label="Click to enlarge",
+    )
 
 
 def _probe_script_style_import(path: Path) -> subprocess.CompletedProcess[str]:
@@ -148,6 +219,9 @@ class UiImportBootstrapTests(unittest.TestCase):
 
 @unittest.skipIf(AppTest is None, "streamlit.testing is not available")
 class UiAppSmokeTests(unittest.TestCase):
+    def _gallery_tile_count(self, at: AppTest) -> int:
+        return sum("figure-gallery-card__title" in element.value for element in at.markdown)
+
     def test_app_home_renders_without_exceptions(self):
         at = AppTest.from_file(str(APP_PATH), default_timeout=60)
         at.run()
@@ -161,6 +235,10 @@ class UiAppSmokeTests(unittest.TestCase):
         for wrapper, expected_title in (
             (_home_panel_wrapper_for_test, "Home / Overview"),
             (_home_advanced_wrapper_for_test, "Home / Overview"),
+            (_mindoro_validation_wrapper_for_test, "Mindoro B1 Primary Validation"),
+            (_cross_model_wrapper_for_test, "Mindoro Cross-Model Comparator"),
+            (_dwh_wrapper_for_test, "DWH Phase 3C Transfer Validation"),
+            (_legacy_wrapper_for_test, "Legacy 2016 Support Package"),
             (_phase1_wrapper_for_test, "Phase 1 Recipe Selection"),
             (_phase4_wrapper_for_test, "Phase 4 Oil-Type and Shoreline Context"),
             (_home_export_wrapper_for_test, "Home / Overview"),
@@ -172,7 +250,7 @@ class UiAppSmokeTests(unittest.TestCase):
             titles = [element.value for element in at.title]
             self.assertIn(expected_title, titles)
 
-    def test_home_panel_gallery_uses_hover_preview_without_dropdown(self):
+    def test_home_panel_gallery_surfaces_multiple_tiles_without_dropdown(self):
         at = AppTest.from_function(_home_panel_wrapper_for_test, default_timeout=60)
         at.run()
         self.assertFalse(at.exception)
@@ -181,8 +259,7 @@ class UiAppSmokeTests(unittest.TestCase):
         button_labels = [element.label for element in at.button]
         self.assertNotIn("Enlarge figure", button_labels)
         expected_count = len(build_dashboard_state(REPO_ROOT)["curated_recommended_figures"])
-        download_buttons = [element for element in at.download_button if element.label == "Download PNG"]
-        self.assertEqual(len(download_buttons), expected_count)
+        self.assertEqual(self._gallery_tile_count(at), expected_count)
         text_blocks = " ".join(element.value for element in at.markdown)
         self.assertNotIn("keyboard_double", text_blocks)
 
@@ -195,8 +272,23 @@ class UiAppSmokeTests(unittest.TestCase):
         button_labels = [element.label for element in at.button]
         self.assertNotIn("Enlarge figure", button_labels)
         expected_count = len(build_dashboard_state(REPO_ROOT)["curated_recommended_figures"])
-        download_buttons = [element for element in at.download_button if element.label == "Download PNG"]
-        self.assertEqual(len(download_buttons), expected_count)
+        self.assertEqual(self._gallery_tile_count(at), expected_count)
+
+    def test_publication_package_pages_use_panel_gallery_without_figure_dropdowns(self):
+        for wrapper, minimum_tiles in (
+            (_mindoro_validation_wrapper_for_test, 4),
+            (_cross_model_wrapper_for_test, 2),
+            (_dwh_wrapper_for_test, 4),
+            (_legacy_wrapper_for_test, 4),
+            (_phase4_wrapper_for_test, 2),
+        ):
+            with self.subTest(wrapper=wrapper.__name__):
+                at = AppTest.from_function(wrapper, default_timeout=60)
+                at.run()
+                self.assertFalse(at.exception)
+                selectbox_labels = [element.label for element in at.selectbox]
+                self.assertNotIn("Featured figure", selectbox_labels)
+                self.assertGreaterEqual(self._gallery_tile_count(at), minimum_tiles)
 
     def test_export_mode_renders_note_cards_without_sidebar_controls(self):
         at = AppTest.from_function(_home_export_wrapper_for_test, default_timeout=60)
@@ -206,6 +298,15 @@ class UiAppSmokeTests(unittest.TestCase):
         self.assertIn("Export mode converts the dashboard into a print-friendly snapshot", text_blocks)
         button_labels = [element.label for element in at.button]
         self.assertNotIn("Enlarge figure", button_labels)
+        self.assertEqual(self._gallery_tile_count(at), 2)
+
+    def test_missing_image_gallery_degrades_gracefully(self):
+        at = AppTest.from_function(_missing_image_gallery_wrapper_for_test, default_timeout=60)
+        at.run()
+        self.assertFalse(at.exception)
+        self.assertEqual(self._gallery_tile_count(at), 2)
+        markdown_text = " ".join(element.value for element in at.markdown)
+        self.assertIn("Missing gallery test figure", markdown_text)
 
     def test_phase1_page_degrades_gracefully_when_focused_artifacts_are_missing(self):
         at = AppTest.from_function(_phase1_wrapper_missing_focused_for_test, default_timeout=60)

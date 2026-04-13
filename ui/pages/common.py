@@ -337,6 +337,54 @@ def _figure_download_key(row: pd.Series, figure_path: Path | None, *, namespace:
     return f"download::{namespace}::{base_key}"
 
 
+def _truncate_text(value: Any, *, limit: int = 140) -> str:
+    text = " ".join(str(value or "").split())
+    if len(text) <= limit:
+        return text
+    truncated = text[: max(1, limit - 1)].rstrip()
+    if " " in truncated:
+        truncated = truncated.rsplit(" ", 1)[0]
+    return f"{truncated}..."
+
+
+def _gallery_tile_subtitle(row: pd.Series, subtitle: str) -> str:
+    if subtitle.strip():
+        return _truncate_text(subtitle, limit=110)
+    status_summary, _ = _status_summary_text(row)
+    if status_summary:
+        return _truncate_text(status_summary, limit=110)
+    interpretation = str(
+        row.get("short_plain_language_interpretation")
+        or row.get("plain_language_interpretation")
+        or row.get("notes")
+        or ""
+    ).strip()
+    return _truncate_text(interpretation, limit=110)
+
+
+def _modal_copy_blocks(row: pd.Series, subtitle: str) -> list[tuple[str, str]]:
+    status_summary, provenance = _status_summary_text(row)
+    interpretation = str(
+        row.get("short_plain_language_interpretation")
+        or row.get("plain_language_interpretation")
+        or row.get("notes")
+        or ""
+    ).strip()
+    notes = str(row.get("notes") or "").strip()
+
+    blocks: list[tuple[str, str]] = []
+    caption = status_summary or interpretation or subtitle
+    if caption:
+        blocks.append(("Caption", caption))
+    if interpretation and interpretation not in {caption}:
+        blocks.append(("Interpretation", interpretation))
+    if notes and notes not in {caption, interpretation}:
+        blocks.append(("Notes", notes))
+    if provenance and provenance not in {caption, interpretation, notes}:
+        blocks.append(("Provenance", provenance))
+    return blocks
+
+
 @st.cache_data(show_spinner=False)
 def _image_data_uri(path_text: str, max_width: int = 0) -> str:
     path = Path(path_text)
@@ -358,32 +406,147 @@ def _hover_lightbox_markup(
     *,
     overlay_label: str,
 ) -> str:
+    return _click_lightbox_markup(row, figure_path, overlay_label=overlay_label)
+
+
+def _click_lightbox_markup(
+    row: pd.Series,
+    figure_path: Path,
+    *,
+    overlay_label: str,
+) -> str:
     figure_key = str(row.get("figure_id") or figure_path)
     token = hashlib.sha1(figure_key.encode("utf-8")).hexdigest()[:12]
     anchor_id = f"figure-preview-{token}"
     modal_id = f"figure-lightbox-{token}"
     title_text, _ = _figure_header(row)
+    subtitle = _gallery_tile_subtitle(row, _figure_header(row)[1])
+    badges = _figure_badges(row)[:3]
+    copy_blocks = _modal_copy_blocks(row, subtitle)
     alt_text = html.escape(title_text, quote=True)
     overlay_text = html.escape(overlay_label, quote=False)
     title_html = html.escape(title_text, quote=False)
-    thumbnail_uri = _image_data_uri(str(figure_path), max_width=1100)
-    full_uri = _image_data_uri(str(figure_path), max_width=2200)
+    subtitle_html = html.escape(subtitle, quote=False)
+    thumbnail_uri = _image_data_uri(str(figure_path), max_width=900)
+    full_uri = _image_data_uri(str(figure_path), max_width=1800)
+    badge_html = (
+        "<div class='figure-gallery-card__modal-badges'>"
+        + "".join(
+            f"<span class='figure-gallery-card__modal-badge'>{html.escape(label, quote=False)}</span>"
+            for label in badges
+        )
+        + "</div>"
+        if badges
+        else ""
+    )
+    copy_html = "".join(
+        (
+            "<div class='figure-gallery-card__modal-copy-block'>"
+            f"<div class='figure-gallery-card__modal-copy-label'>{html.escape(label, quote=False)}</div>"
+            f"<div class='figure-gallery-card__modal-copy-text'>{html.escape(text, quote=False)}</div>"
+            "</div>"
+        )
+        for label, text in copy_blocks
+        if text
+    )
+    modal_subtitle = (
+        f"<div class='figure-gallery-card__modal-subtitle'>{subtitle_html}</div>"
+        if subtitle
+        else ""
+    )
+    modal_actions = (
+        "<div class='figure-gallery-card__modal-actions'>"
+        f"<a class='figure-gallery-card__modal-download' href='{full_uri}' download='{html.escape(figure_path.name, quote=True)}'>Download preview PNG</a>"
+        "</div>"
+    )
     return (
-        f"<div class='figure-hover-lightbox' id='{anchor_id}'>"
-        f"<a class='figure-hover-lightbox__trigger' href='#{modal_id}' aria-label='View larger: {alt_text}'>"
-        f"<img class='figure-hover-lightbox__thumb' src='{thumbnail_uri}' alt='{alt_text}' />"
-        f"<span class='figure-hover-lightbox__overlay'>{overlay_text}</span>"
+        f"<div class='figure-gallery-card__lightbox' id='{anchor_id}'>"
+        f"<a class='figure-gallery-card__trigger' href='#{modal_id}' aria-label='Open larger preview: {alt_text}'>"
+        f"<img class='figure-gallery-card__thumb' src='{thumbnail_uri}' alt='{alt_text}' loading='lazy' />"
+        f"<span class='figure-gallery-card__overlay'>{overlay_text}</span>"
         "</a>"
-        f"<div class='figure-hover-lightbox__modal' id='{modal_id}'>"
-        f"<a class='figure-hover-lightbox__backdrop' href='#{anchor_id}' aria-label='Close preview'></a>"
-        "<div class='figure-hover-lightbox__panel' role='dialog' aria-modal='true'>"
-        f"<a class='figure-hover-lightbox__close' href='#{anchor_id}' aria-label='Close preview'>Close</a>"
-        f"<div class='figure-hover-lightbox__title'>{title_html}</div>"
-        f"<img class='figure-hover-lightbox__full' src='{full_uri}' alt='{alt_text}' />"
+        f"<div class='figure-gallery-card__modal' id='{modal_id}'>"
+        f"<a class='figure-gallery-card__backdrop' href='#{anchor_id}' aria-label='Close preview'></a>"
+        "<div class='figure-gallery-card__panel' role='dialog' aria-modal='true'>"
+        f"<a class='figure-gallery-card__close' href='#{anchor_id}' aria-label='Close preview'>Close</a>"
+        f"<div class='figure-gallery-card__modal-title'>{title_html}</div>"
+        f"{modal_subtitle}"
+        f"{badge_html}"
+        f"<img class='figure-gallery-card__full' src='{full_uri}' alt='{alt_text}' loading='lazy' />"
+        f"<div class='figure-gallery-card__modal-copy'>{copy_html}</div>"
+        f"{modal_actions}"
         "</div>"
         "</div>"
         "</div>"
     )
+
+
+def render_figure_gallery(
+    df: pd.DataFrame,
+    *,
+    title: str,
+    caption: str = "",
+    limit: int | None = None,
+    columns_per_row: int = 2,
+    export_mode: bool = False,
+    overlay_label: str = "Click to enlarge",
+    show_download: bool = True,
+) -> None:
+    st.subheader(title)
+    if caption:
+        st.caption(caption)
+    if df.empty:
+        st.info("No figures are available for this selection.")
+        return
+
+    records = df.head(limit).to_dict(orient="records") if limit else df.to_dict(orient="records")
+    columns_per_row = 1 if export_mode else max(1, columns_per_row)
+
+    for start in range(0, len(records), columns_per_row):
+        columns = st.columns(columns_per_row)
+        for column, record in zip(columns, records[start : start + columns_per_row]):
+            row = pd.Series(record)
+            figure_path = resolve_repo_path(row.get("resolved_path") or row.get("file_path") or row.get("relative_path"))
+            title_text, subtitle = _figure_header(row)
+            tile_subtitle = _gallery_tile_subtitle(row, subtitle)
+            with column:
+                with st.container(border=not export_mode):
+                    if figure_path and figure_path.exists():
+                        try:
+                            if export_mode:
+                                st.image(str(figure_path), width="stretch")
+                            else:
+                                st.html(
+                                    _click_lightbox_markup(
+                                        row,
+                                        figure_path,
+                                        overlay_label=overlay_label,
+                                    ),
+                                    width="stretch",
+                                )
+                        except OSError:
+                            st.info("The packaged figure exists, but the image could not be opened in this gallery view.")
+                    else:
+                        st.warning("Figure file is missing on disk.")
+
+                    st.markdown(
+                        f"<div class='figure-gallery-card__title'>{html.escape(title_text)}</div>",
+                        unsafe_allow_html=True,
+                    )
+                    render_badge_strip(_figure_badges(row)[:3])
+                    if tile_subtitle:
+                        st.markdown(
+                            f"<div class='figure-gallery-card__subtitle'>{html.escape(tile_subtitle)}</div>",
+                            unsafe_allow_html=True,
+                        )
+                    if not export_mode and show_download and figure_path and figure_path.exists():
+                        st.download_button(
+                            "Download PNG",
+                            figure_path.read_bytes(),
+                            file_name=figure_path.name,
+                            mime="image/png",
+                            key=_figure_download_key(row, figure_path, namespace="gallery"),
+                        )
 
 
 def _render_figure_details(

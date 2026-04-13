@@ -23,7 +23,7 @@ from src.core.artifact_status import get_artifact_status
 from ui.data_access import figure_subset
 from ui.pages.common import (
     render_export_note,
-    render_figure_cards,
+    render_figure_gallery,
     render_markdown_block,
     render_page_intro,
     render_section_stack,
@@ -99,14 +99,14 @@ def render(state: dict, ui_state: dict) -> None:
     )
 
     def _primary_package() -> None:
-        render_figure_cards(
+        render_figure_gallery(
             primary_figures,
             title="B1 curated primary-validation figures",
-            caption="These figures come from the curated Phase 3B March13-14 final package and should be used first for thesis-facing Mindoro discussion.",
+            caption="These figures come from the curated Phase 3B March13-14 final package and should be used first for thesis-facing Mindoro discussion. Click any figure to enlarge it and read the fuller interpretation there.",
             limit=2 if export_mode else (None if ui_state["advanced"] else 5),
-            compact_selector=not ui_state["advanced"] and not export_mode,
-            selector_key="mindoro_primary_figures",
+            columns_per_row=1 if export_mode else 2,
             export_mode=export_mode,
+            overlay_label="Click to enlarge",
         )
         render_table(
             "B1 summary",
@@ -123,14 +123,14 @@ def render(state: dict, ui_state: dict) -> None:
             "Track A is attached to B1 as same-case comparator support. PyGNOME is comparator-only and never truth.",
             "warning",
         )
-        render_figure_cards(
+        render_figure_gallery(
             comparator_figures,
             title="A comparator-only figures",
-            caption="These figures come from the curated comparator subgroup under the final March13-14 package and remain separate from the primary B1 claim.",
+            caption="These figures come from the curated comparator subgroup under the final March13-14 package and remain separate from the primary B1 claim. Click any figure to enlarge it.",
             limit=2 if export_mode else (None if ui_state["advanced"] else 4),
-            compact_selector=not ui_state["advanced"] and not export_mode,
-            selector_key="mindoro_comparator_support_figures",
+            columns_per_row=1 if export_mode else 2,
             export_mode=export_mode,
+            overlay_label="Click to enlarge",
         )
         render_table(
             "Comparator model ranking",
@@ -143,37 +143,37 @@ def render(state: dict, ui_state: dict) -> None:
 
     def _legacy_reference() -> None:
         render_status_callout("Legacy reference rule", "B2 remains visible as a legacy reference and limitations row, but it is not the main Mindoro validation claim.", "warning")
-        render_figure_cards(
+        render_figure_gallery(
             legacy_figures,
             title=legacy_status.panel_label,
-            caption="B2 remains visible for legacy reference and limitations. It is not the promoted primary result.",
+            caption="B2 remains visible for legacy reference and limitations. It is not the promoted primary result, but the figures are still shown directly for quick comparison.",
             limit=2 if export_mode else (None if ui_state["advanced"] else 4),
-            compact_selector=not ui_state["advanced"] and not export_mode,
-            selector_key="mindoro_legacy_figures",
+            columns_per_row=1 if export_mode else 2,
             export_mode=export_mode,
+            overlay_label="Click to enlarge",
         )
 
     def _broader_support() -> None:
         render_status_callout("Support-only rule", support_status.panel_text, "info")
-        render_figure_cards(
+        render_figure_gallery(
             support_figures,
             title=support_status.panel_label,
-            caption="B3 remains broader support / appendix context only and should not be presented as the main validation row.",
+            caption="B3 remains broader support / appendix context only and should not be presented as the main validation row, but the gallery keeps the packaged figures visible without a selector.",
             limit=2 if export_mode else (None if ui_state["advanced"] else 4),
-            compact_selector=not ui_state["advanced"] and not export_mode,
-            selector_key="mindoro_support_figures",
+            columns_per_row=1 if export_mode else 2,
             export_mode=export_mode,
+            overlay_label="Click to enlarge",
         )
 
     def _trajectory_context() -> None:
-        render_figure_cards(
+        render_figure_gallery(
             trajectory_figures,
             title=trajectory_status.panel_label,
-            caption="These figures give transport context from stored outputs only. Publication mode stays compact; advanced mode can open lower-level layers.",
+            caption="These figures give transport context from stored outputs only. Panel mode now keeps them as a direct gallery while the surrounding notes stay concise.",
             limit=2 if export_mode else (None if ui_state["advanced"] else 4),
-            compact_selector=not ui_state["advanced"] and not export_mode,
-            selector_key="mindoro_trajectory_figures",
+            columns_per_row=1 if export_mode else 2,
             export_mode=export_mode,
+            overlay_label="Click to enlarge",
         )
 
     def _tables_and_notes() -> None:

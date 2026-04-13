@@ -108,24 +108,34 @@ class UiReadonlySemanticsTests(unittest.TestCase):
                 self.assertIn("render_section_stack(", text)
                 self.assertNotIn("st.tabs(", text)
 
-    def test_home_featured_figure_source_uses_hover_lightbox_gallery(self):
+    def test_publication_pages_use_uniform_click_gallery_renderer(self):
         common_text = (REPO_ROOT / "ui" / "pages" / "common.py").read_text(encoding="utf-8")
-        home_text = (REPO_ROOT / "ui" / "pages" / "home.py").read_text(encoding="utf-8")
+        publication_pages = (
+            REPO_ROOT / "ui" / "pages" / "home.py",
+            REPO_ROOT / "ui" / "pages" / "mindoro_validation.py",
+            REPO_ROOT / "ui" / "pages" / "cross_model_comparison.py",
+            REPO_ROOT / "ui" / "pages" / "dwh_transfer_validation.py",
+            REPO_ROOT / "ui" / "pages" / "legacy_2016_support.py",
+            REPO_ROOT / "ui" / "pages" / "phase4_oiltype_and_shoreline.py",
+        )
 
-        self.assertIn('image_interaction: str = "none"', common_text)
-        self.assertIn('image_overlay_label: str = "View larger"', common_text)
-        self.assertIn("_hover_lightbox_markup(", common_text)
-        self.assertIn("limit=2 if export_mode else None", home_text)
-        self.assertIn("compact_selector=False", home_text)
-        self.assertIn('image_interaction="hover_lightbox" if not export_mode else "none"', home_text)
-        self.assertNotIn("enable_enlarge_dialog", home_text)
-        self.assertNotIn("Enlarge figure", home_text)
+        self.assertIn("def render_figure_gallery(", common_text)
+        self.assertIn('overlay_label: str = "Click to enlarge"', common_text)
+        self.assertIn("_click_lightbox_markup(", common_text)
+        for path in publication_pages:
+            text = path.read_text(encoding="utf-8")
+            with self.subTest(path=path.name):
+                self.assertIn("render_figure_gallery(", text)
+                self.assertNotIn('compact_selector=not ui_state["advanced"] and not export_mode', text)
+                self.assertNotIn("selector_key=", text)
+                self.assertNotIn("Featured figure", text)
 
     def test_ui_stylesheet_uses_ideal_sans_fallback_without_broad_icon_override(self):
         style_text = (REPO_ROOT / "ui" / "assets" / "style.css").read_text(encoding="utf-8")
         self.assertIn('--ui-font-family: "Ideal Sans", Arial, Helvetica, sans-serif;', style_text)
         self.assertIn(".sidebar-brand__logo", style_text)
-        self.assertIn(".figure-hover-lightbox__overlay", style_text)
+        self.assertIn(".figure-gallery-card__title", style_text)
+        self.assertIn(".figure-gallery-card__overlay", style_text)
         self.assertNotIn("span,", style_text)
         self.assertNotIn("div,", style_text)
 

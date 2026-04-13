@@ -22,7 +22,7 @@ import streamlit as st
 from src.core.artifact_status import get_artifact_status
 from ui.pages.common import (
     render_export_note,
-    render_figure_cards,
+    render_figure_gallery,
     render_markdown_block,
     render_page_intro,
     render_section_stack,
@@ -84,14 +84,14 @@ def render(state: dict, ui_state: dict) -> None:
 
     def _c1_deterministic() -> None:
         render_status_callout("C1 framing", deterministic_status.panel_text, "info")
-        render_figure_cards(
+        render_figure_gallery(
             deterministic_figures,
             title=deterministic_status.panel_label,
-            caption="These curated figures are the clean baseline transfer-validation visuals for DWH.",
+            caption="These curated figures are the clean baseline transfer-validation visuals for DWH. Click any figure to enlarge it for the longer caption and provenance.",
             limit=2 if export_mode else (None if ui_state["advanced"] else 5),
-            compact_selector=not ui_state["advanced"] and not export_mode,
-            selector_key="dwh_c1_figures",
+            columns_per_row=1 if export_mode else 2,
             export_mode=export_mode,
+            overlay_label="Click to enlarge",
         )
         render_table(
             "C1 deterministic summary",
@@ -104,14 +104,14 @@ def render(state: dict, ui_state: dict) -> None:
 
     def _c2_ensemble() -> None:
         render_status_callout("C2 framing", ensemble_status.panel_text, "info")
-        render_figure_cards(
+        render_figure_gallery(
             ensemble_figures,
             title=ensemble_status.panel_label,
             caption="These curated figures show the ensemble extension and deterministic-vs-ensemble comparison. P50 is preferred; p90 remains support/comparison only.",
             limit=2 if export_mode else (None if ui_state["advanced"] else 4),
-            compact_selector=not ui_state["advanced"] and not export_mode,
-            selector_key="dwh_c2_figures",
+            columns_per_row=1 if export_mode else 2,
             export_mode=export_mode,
+            overlay_label="Click to enlarge",
         )
         render_table(
             "C2 ensemble summary",
@@ -124,14 +124,14 @@ def render(state: dict, ui_state: dict) -> None:
 
     def _c3_comparator() -> None:
         render_status_callout("C3 framing", comparator_status.panel_text, "warning")
-        render_figure_cards(
+        render_figure_gallery(
             comparator_figures,
             title=comparator_status.panel_label,
-            caption="These curated figures keep PyGNOME in its comparator-only role on the DWH lane.",
+            caption="These curated figures keep PyGNOME in its comparator-only role on the DWH lane while staying visible as a direct gallery.",
             limit=2 if export_mode else (None if ui_state["advanced"] else 4),
-            compact_selector=not ui_state["advanced"] and not export_mode,
-            selector_key="dwh_c3_figures",
+            columns_per_row=1 if export_mode else 2,
             export_mode=export_mode,
+            overlay_label="Click to enlarge",
         )
         render_table(
             "C3 comparator summary",
@@ -144,14 +144,14 @@ def render(state: dict, ui_state: dict) -> None:
 
     def _truth_context() -> None:
         render_status_callout("Observation context", truth_status.panel_text, "info")
-        render_figure_cards(
+        render_figure_gallery(
             truth_figures,
             title=truth_status.panel_label,
             caption="These observation-context figures establish the public daily masks and event corridor before any model comparison is discussed.",
             limit=2 if export_mode else (None if ui_state["advanced"] else 4),
-            compact_selector=not ui_state["advanced"] and not export_mode,
-            selector_key="dwh_truth_figures",
+            columns_per_row=1 if export_mode else 2,
             export_mode=export_mode,
+            overlay_label="Click to enlarge",
         )
 
     def _tables_and_notes() -> None:

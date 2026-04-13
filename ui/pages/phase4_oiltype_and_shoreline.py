@@ -21,7 +21,7 @@ import streamlit as st
 
 from src.core.artifact_status import get_artifact_status
 from ui.data_access import figure_subset
-from ui.pages.common import render_export_note, render_figure_cards, render_page_intro, render_section_stack, render_status_callout, render_table
+from ui.pages.common import render_export_note, render_figure_gallery, render_page_intro, render_section_stack, render_status_callout, render_table
 from ui.plots import phase4_budget_summary_figure
 
 
@@ -70,14 +70,14 @@ def render(state: dict, ui_state: dict) -> None:
     st.pyplot(phase4_budget_summary_figure(state["phase4_budget_summary"]), width="stretch")
 
     def _publication_figures() -> None:
-        render_figure_cards(
+        render_figure_gallery(
             figures,
             title="Mindoro Phase 4 figures",
-            caption="Panel-friendly mode leads with the oil-budget and shoreline boards, then exposes scenario-specific singles as needed.",
+            caption="Panel-friendly mode now shows the oil-budget and shoreline boards directly as a gallery. Click any figure to enlarge it and read the fuller context there.",
             limit=2 if export_mode else (None if ui_state["advanced"] else 5),
-            compact_selector=not ui_state["advanced"] and not export_mode,
-            selector_key="mindoro_phase4_figures",
+            columns_per_row=1 if export_mode else 2,
             export_mode=export_mode,
+            overlay_label="Click to enlarge",
         )
 
     def _budget_tables() -> None:
