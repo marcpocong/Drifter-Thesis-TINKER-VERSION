@@ -87,7 +87,7 @@ Safe utilities that summarize or audit the current repo state without rerunning 
   Note: Builds output/figure_package_publication without rerunning expensive scientific branches.
   Run with: `./start.ps1 -Entry figure_package_publication -NoPause`
 - `prototype_legacy_final_figures`: Prototype 2016 final paper figures. Workflow mode = `prototype_2016`. Cost = `cheap_read_only`. Safe read-only default = `true`. Phases = prototype_legacy_final_figures.
-  Note: Builds output/2016 Legacy Runs FINAL Figures as the authoritative curated prototype_2016 legacy support package without rerunning the scientific workflow. The structured package now includes publication/phase3a, publication/phase4, scientific_source_pngs, summary, manifests, and phase5 notes; output/figure_package_publication remains the generic repo-wide publication package and is not the authoritative 2016 Phase 4 package.
+  Note: Builds output/2016 Legacy Runs FINAL Figures as the authoritative curated prototype_2016 legacy support package without rerunning the scientific workflow. The structured package now includes publication/phase3a, publication/phase4, publication/phase4_comparator when stored comparator outputs exist, scientific_source_pngs, summary, manifests, and phase5 notes; output/figure_package_publication remains the generic repo-wide publication package and is not the authoritative 2016 Phase 4 package.
   Run with: `./start.ps1 -Entry prototype_legacy_final_figures -NoPause`
 
 ### Legacy prototype tracks

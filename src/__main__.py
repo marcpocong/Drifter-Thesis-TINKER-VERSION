@@ -45,6 +45,7 @@ Container routing via the PIPELINE_PHASE environment variable:
   PIPELINE_PHASE=prototype_legacy_final_figures -> Read-only curated prototype_2016 legacy Phase 5 final paper-figure export
   PIPELINE_PHASE=prototype_2016_display_review -> Read-only prototype_2016 review-only display refinement export from stored outputs
   PIPELINE_PHASE=prototype_legacy_phase4_weathering -> Prototype 2016 legacy Phase 4 oil weathering and fate analysis
+  PIPELINE_PHASE=prototype_legacy_phase4_pygnome_comparator -> Prototype 2016 legacy deterministic PyGNOME Phase 4 budget-only comparator pilot
   PIPELINE_PHASE=3               -> Legacy compatibility alias (prototype_2016 Phase 4; otherwise legacy Phase 3 weathering path)
   PIPELINE_PHASE=benchmark       -> Phase 3A cross-model benchmark
   PIPELINE_PHASE=3b              -> Legacy compatibility alias (prototype_2016 appendix-only hidden path)
@@ -708,6 +709,37 @@ def run_prototype_legacy_phase4_weathering(*, deprecated_alias: str | None = Non
         refined_stage_label="Legacy refined oil appendix",
         include_gnome_comparison=False,
     )
+
+
+def run_prototype_legacy_phase4_pygnome_comparator_phase():
+    from src.core.case_context import get_case_context
+    from src.services.prototype_legacy_phase4_pygnome_comparator import (
+        run_prototype_legacy_phase4_pygnome_comparator,
+    )
+
+    case = get_case_context()
+    if case.workflow_mode != "prototype_2016":
+        print("prototype_legacy_phase4_pygnome_comparator is only supported for the prototype_2016 workflow.")
+        sys.exit(1)
+
+    print("Starting prototype_2016 Phase 4 PyGNOME comparator pilot...")
+    print(
+        "This support-only phase runs a deterministic, budget-only PyGNOME Phase 4 comparator for the stored "
+        "2016 legacy cases. It keeps the drifter-of-record point start and reuses the selected case-specific grid "
+        "wind/current forcing without rerunning the full 2016 workflow."
+    )
+    print(
+        "Scope is intentionally limited: descriptive budget differences only. Shoreline comparison remains unavailable "
+        "unless matched PyGNOME shoreline products exist."
+    )
+
+    results = run_prototype_legacy_phase4_pygnome_comparator()
+
+    print("\nPrototype 2016 Phase 4 PyGNOME comparator pilot complete.")
+    print(f"Budget-only feasible: {results['budget_only_feasible']}")
+    print(f"Shoreline comparison feasible: {results['shoreline_comparison_feasible']}")
+    for case_result in results["case_results"]:
+        print(f"  - {case_result['case_id']}: {case_result['output_dir']}")
 
 
 def run_benchmark():
@@ -2290,6 +2322,9 @@ def main():
     if phase == "prototype_legacy_final_figures":
         run_prototype_legacy_final_figures_phase()
         return
+    if phase == "prototype_legacy_phase4_pygnome_comparator":
+        run_prototype_legacy_phase4_pygnome_comparator_phase()
+        return
     if phase == "prototype_2016_display_review":
         run_prototype_2016_display_review_phase()
         return
@@ -2411,6 +2446,8 @@ def main():
         run_trajectory_gallery_build_phase()
     elif phase == "prototype_legacy_final_figures":
         run_prototype_legacy_final_figures_phase()
+    elif phase == "prototype_legacy_phase4_pygnome_comparator":
+        run_prototype_legacy_phase4_pygnome_comparator_phase()
     elif phase == "prototype_2016_display_review":
         run_prototype_2016_display_review_phase()
     elif phase == "trajectory_gallery_panel_polish":

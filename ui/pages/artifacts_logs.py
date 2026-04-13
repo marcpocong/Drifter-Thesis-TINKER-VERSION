@@ -24,18 +24,36 @@ from ui.pages.common import preview_artifact, render_markdown_block, render_page
 
 def render(state: dict, ui_state: dict) -> None:
     render_page_intro(
-        "Artifacts / Logs",
-        "This page exposes the synced reproducibility indexes, manifest inventory, and log inventory in a read-only way. Panel-friendly mode stays high-level; advanced mode allows direct artifact preview and download.",
+        "Artifacts / Logs / Registries",
+        "This page exposes the synced reproducibility indexes, manifest inventory, final case registry, and log inventory in a read-only way. Panel-friendly mode stays high-level; advanced mode allows direct artifact preview and download.",
         badge="Read-only artifact browser",
     )
 
     catalog = state["final_output_catalog"]
+    case_registry = state["final_case_registry"]
     manifests = state["final_manifest_index"]
     logs = state["final_log_index"]
 
-    tabs = st.tabs(["Output catalog", "Manifest index", "Log index", "Package notes"])
+    tabs = st.tabs(["Case registry", "Output catalog", "Manifest index", "Log index", "Package notes"])
 
     with tabs[0]:
+        render_table(
+            "Final case registry",
+            case_registry,
+            download_name="final_case_registry.csv",
+            caption="This registry exposes the main workflow lanes and their authoritative curated package roots.",
+            height=280,
+            max_rows=None if ui_state["advanced"] else 20,
+        )
+        if ui_state["advanced"] and not case_registry.empty:
+            selected = st.selectbox(
+                "Preview primary output root",
+                case_registry["primary_output_root"].astype(str).tolist(),
+                key="case_root_preview",
+            )
+            preview_artifact(selected)
+
+    with tabs[1]:
         render_table(
             "Final output catalog",
             catalog,
@@ -48,7 +66,7 @@ def render(state: dict, ui_state: dict) -> None:
             selected = st.selectbox("Preview output artifact", catalog["relative_path"].astype(str).tolist(), key="catalog_preview")
             preview_artifact(selected)
 
-    with tabs[1]:
+    with tabs[2]:
         render_table(
             "Final manifest index",
             manifests,
@@ -61,7 +79,7 @@ def render(state: dict, ui_state: dict) -> None:
             selected = st.selectbox("Preview manifest", manifests["relative_path"].astype(str).tolist(), key="manifest_preview")
             preview_artifact(selected)
 
-    with tabs[2]:
+    with tabs[3]:
         render_table(
             "Final log index",
             logs,
@@ -74,6 +92,7 @@ def render(state: dict, ui_state: dict) -> None:
             selected = st.selectbox("Preview log", logs["relative_path"].astype(str).tolist(), key="log_preview")
             preview_artifact(selected)
 
-    with tabs[3]:
+    with tabs[4]:
+        render_markdown_block("Final reproducibility summary", state["final_reproducibility_summary"], collapsed=True)
         render_markdown_block("Publication captions", state["publication_captions"], collapsed=True)
         render_markdown_block("Publication talking points", state["publication_talking_points"], collapsed=True)

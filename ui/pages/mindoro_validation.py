@@ -1,4 +1,4 @@
-"""Mindoro validation page."""
+"""Mindoro B1 primary-validation page."""
 
 from __future__ import annotations
 
@@ -21,42 +21,49 @@ import streamlit as st
 
 from src.core.artifact_status import get_artifact_status
 from ui.data_access import figure_subset
-from ui.pages.common import render_figure_cards, render_page_intro, render_status_callout, render_table
+from ui.pages.common import render_figure_cards, render_markdown_block, render_page_intro, render_status_callout, render_table
+
+
+def _mindoro_final_subset(df, artifact_groups: set[str]) -> object:
+    if df.empty:
+        return df
+    if "artifact_group" not in df.columns:
+        return df
+    return df.loc[df.get("artifact_group", "").astype(str).isin(sorted(artifact_groups))].reset_index(drop=True)
 
 
 def render(state: dict, ui_state: dict) -> None:
     primary_status = get_artifact_status("mindoro_primary_validation")
-    comparator_status = get_artifact_status("mindoro_crossmodel_comparator")
     legacy_status = get_artifact_status("mindoro_legacy_march6")
     support_status = get_artifact_status("mindoro_legacy_support")
     trajectory_status = get_artifact_status("mindoro_trajectory_context")
 
     render_page_intro(
-        "Mindoro Validation",
-        "This page leads with the promoted March 13 -> March 14 primary validation, keeps the March 14 same-case cross-model comparator support track explicit, retains March 6 as an honesty reference, and uses trajectory figures as transport context.",
-        badge="Mindoro | promoted primary validation first",
+        "Mindoro B1 Primary Validation",
+        "This page leads with the promoted March 13 -> March 14 B1 family, keeps the shared-imagery caveat visible, and treats all other Mindoro rows as comparator or support material rather than co-primary evidence.",
+        badge="Mindoro B1 | primary validation row",
     )
 
+    render_status_callout("Primary validation", primary_status.panel_text, "info")
     render_status_callout(
-        "Interpretation guardrail",
-        primary_status.panel_text,
-        "info",
-    )
-    render_status_callout(
-        "Legacy reference",
-        legacy_status.panel_text,
+        "Shared-imagery caveat",
+        "The March 13 and March 14 public products share March 12 WorldView-3 imagery provenance, so this row is a reinitialization-based public-validation pair rather than an independent day-to-day validation claim.",
         "warning",
     )
-
-    primary_figures = figure_subset(
-        ui_state["visual_layer"],
-        case_id="CASE_MINDORO_RETRO_2023",
-        status_keys=[primary_status.key],
+    render_status_callout(
+        "Recipe provenance",
+        "B1 inherits the cmems_era5 recipe selected by the separate focused 2016-2023 Mindoro Phase 1 rerun. Phase 3B itself does not directly ingest drifters.",
+        "info",
     )
-    comparator_figures = figure_subset(
-        ui_state["visual_layer"],
-        case_id="CASE_MINDORO_RETRO_2023",
-        status_keys=[comparator_status.key],
+
+    mindoro_final_registry = state["mindoro_final_registry"]
+    primary_figures = _mindoro_final_subset(
+        mindoro_final_registry,
+        {"publication/observations", "publication/opendrift_primary"},
+    )
+    comparator_figures = _mindoro_final_subset(
+        mindoro_final_registry,
+        {"publication/comparator_pygnome"},
     )
     legacy_figures = figure_subset(
         ui_state["visual_layer"],
@@ -76,82 +83,97 @@ def render(state: dict, ui_state: dict) -> None:
 
     tabs = st.tabs(
         [
-            "Primary Validation",
-            "Comparator Support",
-            "Legacy March 6",
-            "Broader Support",
-            "Trajectories",
-            "Tables",
+            "B1 primary package",
+            "A comparator support",
+            "B2 legacy reference",
+            "B3 broader support",
+            "Trajectory context",
+            "Tables and notes",
         ]
     )
 
     with tabs[0]:
         render_figure_cards(
             primary_figures,
-            title=primary_status.panel_label,
-            caption="These figures keep the March 13 seed, March 14 target, and promoted OpenDrift reinit result together without losing the shared-imagery provenance note.",
-            limit=None if ui_state["advanced"] else 4,
+            title="B1 curated primary-validation figures",
+            caption="These figures come from the curated Phase 3B March13-14 final package and should be used first for thesis-facing Mindoro discussion.",
+            limit=None if ui_state["advanced"] else 5,
+            compact_selector=not ui_state["advanced"],
+            selector_key="mindoro_primary_figures",
+        )
+        render_table(
+            "B1 summary",
+            state["mindoro_b1_summary"],
+            download_name="march13_14_reinit_summary.csv",
+            caption="Curated B1 summary table from the final March13-14 package.",
+            height=250,
         )
 
     with tabs[1]:
         render_status_callout(
-            "Comparator framing",
-            comparator_status.panel_text,
-            "info",
+            "Comparator-only rule",
+            "Track A is attached to B1 as same-case comparator support. PyGNOME is comparator-only and never truth.",
+            "warning",
         )
         render_figure_cards(
             comparator_figures,
-            title=comparator_status.panel_label,
-            caption="These figures answer the OpenDrift-versus-PyGNOME question on the promoted March 14 target without treating PyGNOME as truth or letting Track A drift into the main validation claim.",
+            title="A comparator-only figures",
+            caption="These figures come from the curated comparator subgroup under the final March13-14 package and remain separate from the primary B1 claim.",
             limit=None if ui_state["advanced"] else 4,
+        )
+        render_table(
+            "Comparator model ranking",
+            state["mindoro_comparator_ranking"],
+            download_name="march13_14_reinit_crossmodel_model_ranking.csv",
+            caption="Curated cross-model ranking table for the same-case March 14 comparator lane.",
+            height=240,
         )
 
     with tabs[2]:
+        render_status_callout("Legacy reference rule", "B2 remains visible as a legacy reference and limitations row, but it is not the main Mindoro validation claim.", "warning")
         render_figure_cards(
             legacy_figures,
             title=legacy_status.panel_label,
-            caption="These figures preserve the March 6 sparse-reference record for honesty and limitations rather than presenting it as the main result.",
+            caption="B2 remains visible for legacy reference and limitations. It is not the promoted primary result.",
             limit=None if ui_state["advanced"] else 4,
+            compact_selector=not ui_state["advanced"],
+            selector_key="mindoro_legacy_figures",
         )
 
     with tabs[3]:
-        render_status_callout(
-            "Support-only framing",
-            support_status.panel_text,
-            "info",
-        )
+        render_status_callout("Support-only rule", support_status.panel_text, "info")
         render_figure_cards(
             support_figures,
             title=support_status.panel_label,
-            caption="These figures keep the March 3-6 broader-support context visible without letting it drift into primary-result language.",
+            caption="B3 remains broader support / appendix context only and should not be presented as the main validation row.",
             limit=None if ui_state["advanced"] else 4,
+            compact_selector=not ui_state["advanced"],
+            selector_key="mindoro_support_figures",
         )
 
     with tabs[4]:
         render_figure_cards(
             trajectory_figures,
             title=trajectory_status.panel_label,
-            caption="These figures provide transport context from stored deterministic, ensemble, and corridor products before the panel gets into score tables.",
+            caption="These figures give transport context from stored outputs only. Publication mode stays compact; advanced mode can open lower-level layers.",
             limit=None if ui_state["advanced"] else 4,
+            compact_selector=not ui_state["advanced"],
+            selector_key="mindoro_trajectory_figures",
         )
 
     with tabs[5]:
-        render_status_callout(
-            "Broader-support record",
-            support_status.panel_text,
-            "info",
+        render_table(
+            "B1 FSS by window",
+            state["mindoro_b1_fss"],
+            download_name="march13_14_reinit_fss_by_window.csv",
+            caption="Curated FSS table from the primary March13-14 package.",
+            height=220,
         )
         render_table(
-            "Mindoro Phase 3B summary table",
-            state["mindoro_phase3b_summary"],
-            download_name="mindoro_phase3b_summary.csv",
-            caption="This table comes from the stored Mindoro Phase 3B summary and keeps the promoted and legacy machine-readable slices visible.",
-            height=310,
+            "Comparator summary",
+            state["mindoro_comparator_summary"],
+            download_name="march13_14_reinit_crossmodel_summary.csv",
+            caption="Curated summary for the March14 comparator-only subgroup.",
+            height=220,
         )
-        render_table(
-            "Mindoro comparator ranking table",
-            state["mindoro_model_ranking"],
-            download_name="mindoro_model_ranking.csv",
-            caption="Stored March 14 comparator ranking table for the promoted cross-model lane.",
-            height=260,
-        )
+        render_markdown_block("Mindoro B1 final-package note", state["mindoro_final_readme"], collapsed=True)

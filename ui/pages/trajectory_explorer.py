@@ -38,7 +38,7 @@ def _summarize_source(path) -> dict:
 def render(state: dict, ui_state: dict) -> None:
     render_page_intro(
         "Trajectory Explorer",
-        "This page keeps the trajectory view readable by favoring deterministic paths, sampled ensemble members, centroid or corridor views, and PyGNOME paths where available instead of plotting every particle by default.",
+        "This page keeps the trajectory view readable by favoring deterministic paths, sampled ensemble members, centroid or corridor views, and PyGNOME paths where available instead of plotting every particle by default. The dedicated legacy 2016 package has its own page and is not mixed into this main-case explorer.",
         badge="Read-only explorer | no particle flood",
     )
 

@@ -30,8 +30,8 @@ def render(state: dict, ui_state: dict) -> None:
 
     render_page_intro(
         "Phase 4 Cross-Model Status",
-        "This page makes the current Phase 4 cross-model status explicit. It shows the audit verdict, the per-quantity comparability matrix, and the minimal next-step plan without pretending the missing PyGNOME fate outputs already exist.",
-        badge="Honesty page | no fake comparison figures",
+        "This page makes the current Mindoro Phase 4 comparator decision explicit. It shows why the repo does not yet package a matched PyGNOME Phase 4 comparison and keeps the current Phase 4 results clearly framed as OpenDrift/OpenOil scenario outputs only.",
+        badge="Read-only honesty page | no forced Phase 4 comparator",
     )
 
     verdict_text = state["phase4_crossmodel_verdict"]
@@ -41,7 +41,7 @@ def render(state: dict, ui_state: dict) -> None:
 
     render_status_callout(
         "Current verdict",
-        "Deferred. No requested Phase 4 quantities are honestly comparable now.",
+        "No matched Phase 4 PyGNOME comparison is packaged yet.",
         "error",
     )
     render_status_callout(
@@ -59,8 +59,8 @@ def render(state: dict, ui_state: dict) -> None:
     )
     render_figure_cards(
         deferred_note,
-        title="Phase 4 deferred-comparison note figure",
-        caption="This figure is the recommended panel-facing way to explain why Phase 4 cross-model comparison is not shown yet.",
+        title="Phase 4 no-matched-PyGNOME note figure",
+        caption="This figure is the recommended panel-facing way to explain why no matched Phase 4 PyGNOME comparison is packaged yet.",
         limit=1,
         columns_per_row=1,
     )
@@ -69,7 +69,7 @@ def render(state: dict, ui_state: dict) -> None:
         "Comparability matrix",
         matrix,
         download_name="phase4_crossmodel_comparability_matrix.csv",
-        caption="All requested quantities are currently classified as not comparable honestly.",
+        caption="Each requested quantity currently resolves to no matched Phase 4 PyGNOME package yet.",
         height=320,
     )
 

@@ -1,7 +1,7 @@
 {
   "phase": "prototype_legacy_final_figures",
   "workflow_mode": "prototype_2016",
-  "generated_at_utc": "2026-04-13T13:57:44Z",
+  "generated_at_utc": "2026-04-13T18:38:54Z",
   "output_dir": "output/2016 Legacy Runs FINAL Figures",
   "configured_case_ids": [
     "CASE_2016-09-01",
@@ -697,6 +697,9 @@
   "missing_figures_csv": "output/2016 Legacy Runs FINAL Figures/missing_figures.csv",
   "missing_figures": [],
   "curated_package_readme": "output/2016 Legacy Runs FINAL Figures/README.md",
+  "publication_phase4_comparator_dir": "output/2016 Legacy Runs FINAL Figures/publication/phase4_comparator",
+  "scientific_source_phase4_comparator_dir": "output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase4_comparator",
+  "summary_phase4_comparator_dir": "output/2016 Legacy Runs FINAL Figures/summary/phase4_comparator",
   "legacy_final_output_manifest_json": "output/2016 Legacy Runs FINAL Figures/manifests/legacy_final_output_manifest.json",
   "legacy_final_output_registry_csv": "output/2016 Legacy Runs FINAL Figures/manifests/prototype_2016_final_output_registry.csv",
   "legacy_final_output_registry_json": "output/2016 Legacy Runs FINAL Figures/manifests/prototype_2016_final_output_registry.json",
@@ -705,6 +708,7 @@
     "Forecast figures use exact stored raster cells and exact stored footprint geometry only; empty stored layers are omitted.",
     "prototype_2016 p50/p90 products are exact valid-time member-occupancy footprints.",
     "This folder is the authoritative curated prototype_2016 legacy support package and does not replace the final regional Phase 1 study.",
-    "PyGNOME remains comparator-only; matched grid wind/current forcing is used when available and degraded mode is surfaced explicitly otherwise."
+    "PyGNOME remains comparator-only; matched grid wind/current forcing is used when available and degraded mode is surfaced explicitly otherwise.",
+    "The optional prototype_2016 Phase 4 PyGNOME comparator pilot is budget-only and descriptive; no shoreline comparison is claimed unless matched shoreline products exist."
   ]
 }

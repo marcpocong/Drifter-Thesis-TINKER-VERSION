@@ -83,16 +83,24 @@ class UiAppSmokeTests(unittest.TestCase):
         self.assertFalse(at.exception)
 
         for label, expected_title in (
-            ("Mindoro Validation", "Mindoro Validation"),
-            ("DWH Transfer Validation", "DWH Transfer Validation"),
-            ("Phase 4 Oil-Type & Shoreline", "Phase 4 Oil-Type & Shoreline"),
-            ("Phase 4 Cross-Model Status", "Phase 4 Cross-Model Status"),
-            ("Trajectory Explorer", "Trajectory Explorer"),
+            ("Phase 1 Recipe Selection", "Phase 1 Recipe Selection"),
+            ("Mindoro B1 Primary Validation", "Mindoro B1 Primary Validation"),
+            ("Mindoro Cross-Model Comparator", "Mindoro Cross-Model Comparator"),
+            ("DWH Phase 3C Transfer Validation", "DWH Phase 3C Transfer Validation"),
+            ("Legacy 2016 Support Package", "Legacy 2016 Support Package"),
+            ("Phase 4 Oil-Type and Shoreline Context", "Phase 4 Oil-Type and Shoreline Context"),
+            ("Artifacts / Logs / Registries", "Artifacts / Logs / Registries"),
         ):
             at.sidebar.selectbox[1].set_value(label).run()
             self.assertFalse(at.exception, msg=f"App raised an exception while loading {label}")
             titles = [element.value for element in at.title]
             self.assertIn(expected_title, titles)
+
+        at.sidebar.radio[0].set_value("Advanced").run()
+        at.sidebar.selectbox[1].set_value("Trajectory Explorer").run()
+        self.assertFalse(at.exception, msg="App raised an exception while loading Trajectory Explorer in advanced mode")
+        titles = [element.value for element in at.title]
+        self.assertIn("Trajectory Explorer", titles)
 
 
 if __name__ == "__main__":

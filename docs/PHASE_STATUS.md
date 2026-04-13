@@ -7,7 +7,7 @@
 - Mindoro Phase 3: validation-focused and reportable; `Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents` is now carried by the March 13 -> March 14 B1 row, March 6 remains the preserved sparse-reference honesty case, the promotion is tracked by amendment rather than by rewriting the frozen March 3 -> March 6 case file, and B1 now inherits its recipe provenance from the separate focused `2016-2023` Mindoro drifter rerun without claiming direct drifter ingestion inside Phase 3B itself.
 - DWH Phase 3C: frozen validation-only external rich-data transfer case kept separate from drifter-calibration governance.
 - Mindoro `phase4_oiltype_and_shoreline`: implemented as a support/context bundle outside the main thesis phase count; thesis-facing `Phase 4` labeling is reserved for `prototype_2016`.
-- Phase 4 cross-model comparison: deferred; current PyGNOME branches remain comparator-only for transport/spatial work rather than matched Phase 4 fate-and-shoreline outputs.
+- Phase 4 cross-model comparison: no matched Mindoro Phase 4 PyGNOME package is stored yet; current PyGNOME branches remain comparator-only for transport/spatial work rather than matched Phase 4 fate-and-shoreline outputs.
 - Repo sync, galleries, publication packaging, and dashboard layers: read-only support/explorer surfaces outside the main thesis phase count; thesis-facing `Phase 5` labeling is reserved for `prototype_2016`.
 - Trajectory gallery: read-only technical figure set built from existing outputs only.
 - Trajectory gallery panel pack: read-only polished board layer for non-technical review, built from existing outputs only.
@@ -78,6 +78,7 @@ What remains provisional:
 - Phase 3A package scope: deterministic plus support-only `p50`/`p90` OpenDrift tracks against deterministic PyGNOME.
 - Comparator interpretation: the Phase 3A OpenDrift-versus-deterministic-PyGNOME check is support-only. A non-zero fraction skill score means the ensemble footprint was not completely disjoint from the deterministic PyGNOME forecast; it does not make PyGNOME truth or elevate this lane into final Chapter 3 evidence.
 - Phase 4 legacy weathering scope: drifter-of-record point seeding, preserved as honesty-support/debug context rather than as official Phase 4 validation.
+- Phase 4 PyGNOME pilot scope: budget-only deterministic comparator support using matched case-specific grid wind/current forcing where available; shoreline comparison is not packaged because the pilot does not emit matched shoreline-arrival or shoreline-segment outputs.
 - Release-origin note: the authoritative `prototype_2016` release lat/lon/time comes from the selected drifter-of-record start in `data/drifters/CASE_2016-*/drifters_noaa.csv`. Some stored compatibility fields may still mention `data/arcgis/CASE_2016-*/source_point_metadata.geojson`, but that file is not the actual spill origin for the 2016 runs.
 
 ## Mindoro Phase 3
@@ -172,7 +173,7 @@ What remains provisional:
 
 ## Phase 4 Cross-Model Comparability Audit
 
-- Plain-language status: deferred; no scientifically defensible Phase 4 OpenDrift-versus-PyGNOME comparison is available from the current stored outputs.
+- Plain-language status: no matched Mindoro Phase 4 PyGNOME comparison is packaged yet; no scientifically defensible Phase 4 OpenDrift-versus-PyGNOME comparison is available from the current stored outputs.
 - Scientifically reportable: `false`
 - Reportable now: `true` for the audit verdict itself, `false` for a Phase 4 cross-model result
 - Scientifically frozen: `false`
@@ -185,8 +186,9 @@ What is already in place:
 - Mindoro and DWH PyGNOME Phase 3 comparator tracks already exist as spatial transport comparators
 - helper code exists for parsing PyGNOME mass budgets and plotting OpenOil-versus-PyGNOME overlays
 - explicit read-only audit outputs now live under `output/phase4_crossmodel_comparability_audit/`
+- final decision note: `docs/PHASE4_COMPARATOR_DECISION.md`
 
-Why comparison is still deferred:
+Why no matched PyGNOME Phase 4 package is published yet:
 
 - Mindoro PyGNOME benchmark metadata explicitly records `weathering_enabled=false`
 - current stored PyGNOME NetCDF diagnostics collapse to 100% surface and 0% evaporated/dispersed/beached, which is not a defensible Phase 4 fate comparator

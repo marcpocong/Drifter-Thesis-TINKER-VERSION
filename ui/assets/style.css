@@ -28,3 +28,56 @@
   margin-top: 0.55rem;
   max-width: 70rem;
 }
+
+.page-hero {
+  background: linear-gradient(135deg, #f4f7fb 0%, #ffffff 100%);
+  border: 1px solid rgba(31, 106, 165, 0.18);
+  border-radius: 18px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1rem;
+}
+
+.page-hero__badge {
+  display: inline-block;
+  background: rgba(15, 53, 87, 0.08);
+  color: #0f3557;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 0.18rem 0.65rem;
+  margin-bottom: 0.5rem;
+}
+
+.page-hero__title {
+  color: #0f3557;
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.page-hero__body {
+  color: #324f68;
+  font-size: 0.98rem;
+  line-height: 1.55;
+  margin-top: 0.45rem;
+  max-width: 70rem;
+}
+
+.ui-badge-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.25rem 0 0.55rem;
+}
+
+.ui-badge {
+  background: #eef5fb;
+  border: 1px solid rgba(31, 106, 165, 0.16);
+  border-radius: 999px;
+  color: #0f3557;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 0.15rem 0.55rem;
+}

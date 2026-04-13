@@ -28,14 +28,17 @@ http://localhost:8501
 
 The UI reads existing artifacts only:
 
+- `output/Phase 3B March13-14 Final Output/`
+- `output/Phase 3C DWH Final Output/`
+- `output/2016 Legacy Runs FINAL Figures/`
 - `output/final_validation_package/`
 - `output/final_reproducibility_package/`
-- `output/trajectory_gallery/`
-- `output/trajectory_gallery_panel/`
 - `output/figure_package_publication/`
 - `output/phase4/CASE_MINDORO_RETRO_2023/`
 - `output/phase4_crossmodel_comparability_audit/`
-- relevant Mindoro and DWH manifests, score tables, rasters, and NetCDF-backed figure sources
+- `output/trajectory_gallery_panel/`
+- `output/trajectory_gallery/`
+- raw `CASE_*` trees only as advanced fallback when a curated package or synced registry does not already provide the needed browse surface
 
 Missing optional files are tolerated. The UI shows a gentle notice instead of failing where practical.
 
@@ -44,20 +47,20 @@ Missing optional files are tolerated. The UI shows a gentle notice instead of fa
 This is the default mode. It prioritizes:
 
 - publication-grade figures
-- plain-language interpretations from the publication registry
+- plain-language study structure cards
+- curated final packages
 - recommended defense figures
 - simplified summary tables
-- the current phase-status registry
-
-The phase-status display is driven by generated reproducibility artifacts. In this docs-only sync pass, that generated registry may temporarily lag the source docs until the read-only audit/sync bundles are refreshed.
+- soft-fail messaging instead of debug-style missing-file errors
 
 Recommended first stops:
 
 - `Home / Overview`
-- `Mindoro Validation`
-- `Phase 4 Oil-Type & Shoreline`
-- `Phase 4 Cross-Model Status`
-- `DWH Transfer Validation`
+- `Phase 1 Recipe Selection`
+- `Mindoro B1 Primary Validation`
+- `DWH Phase 3C Transfer Validation`
+- `Legacy 2016 Support Package`
+- `Phase 4 Oil-Type and Shoreline Context`
 
 ## Advanced Mode
 
@@ -74,23 +77,41 @@ This mode is still read-only.
 ## Pages
 
 - `Home / Overview`
-- `Mindoro Validation`
-- `DWH Transfer Validation`
-- `Cross-Model Comparison`
-- `Phase 4 Oil-Type & Shoreline`
-- `Phase 4 Cross-Model Status`
-- `Trajectory Explorer`
-- `Artifacts / Logs`
+- `Phase 1 Recipe Selection`
+- `Mindoro B1 Primary Validation`
+- `Mindoro Cross-Model Comparator`
+- `DWH Phase 3C Transfer Validation`
+- `Phase 4 Oil-Type and Shoreline Context`
+- `Legacy 2016 Support Package`
+- `Artifacts / Logs / Registries`
+- `Trajectory Explorer` in advanced mode
 
 ## Honesty Rules Surfaced In The UI
 
-- Phase 1 dedicated `2016-2022` rerun outputs now exist and stage a candidate baseline, but the default spill-case baseline has not been manually replaced yet.
-- Phase 2 is scientifically usable, but not scientifically frozen.
-- `Phase 3B` and `Phase 3C` are validation-only pages in the thesis-facing story.
-- Outside `prototype_2016`, the Mindoro Phase 4 pages are support/context views rather than additional thesis phases, and they inherit upstream Phase 1/2 provisional status.
-- Phase 4 OpenDrift-versus-PyGNOME comparison is currently deferred.
-- The current blocker is that the stored Mindoro PyGNOME benchmark is transport-only with `weathering_enabled=false`, so it does not expose matched Phase 4 fate or shoreline semantics.
+- Mindoro `B1` is the only primary validation row.
+- Mindoro `A` is comparator-only support attached to B1 and never truth.
+- Mindoro `B2` remains the legacy reference row.
+- Mindoro `B3` remains broader support / appendix context only.
+- `prototype_2016` is always support-only / legacy in the UI and has its own dedicated page.
+- The dedicated Mindoro-focused Phase 1 provenance rerun selects the recipe that B1 inherits.
+- `Phase 3B` and `Phase 3C` remain the main validation pages in the thesis-facing story.
+- Mindoro B1 inherits recipe provenance from the separate focused Phase 1 rerun; Phase 3B itself does not directly ingest drifters.
+- DWH stays separate from the Phase 1 drifter-baseline story and explicitly uses no drifter baseline.
+- Mindoro Phase 4 is presented in plain language as OpenDrift/OpenOil scenario context only.
+- No matched Mindoro Phase 4 PyGNOME package is currently shown.
+- The legacy 2016 page includes a budget-only deterministic PyGNOME Phase 4 pilot, but shoreline comparison is still unavailable there.
 
 ## No Run Buttons Yet
 
 The first dashboard version is intentionally read-only. It does not expose scientific rerun controls, write actions, or packaging rebuild buttons.
+
+## Branding
+
+- Preferred logo files:
+  - `ui/assets/logo.svg`
+  - `ui/assets/logo.png`
+- Optional icon files:
+  - `ui/assets/logo_icon.png`
+  - `ui/assets/logo_icon.svg`
+- If no logo is present, the UI falls back to text-only branding without breaking.
+- See `docs/UI_BRANDING.md` for the supported filenames, recommendations, and replacement steps.

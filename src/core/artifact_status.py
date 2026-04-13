@@ -123,15 +123,21 @@ STATUS_REGISTRY: dict[str, ArtifactStatus] = {
     ),
     "mindoro_phase4_deferred": ArtifactStatus(
         key="mindoro_phase4_deferred",
-        label="Mindoro Phase 4 cross-model deferred note",
-        panel_label="Mindoro Phase 4 cross-model deferred note",
+        label="Mindoro Phase 4 no-matched-PyGNOME note",
+        panel_label="Mindoro Phase 4: no matched PyGNOME package yet",
         role="deferred_honesty_note",
-        reportability="deferred_not_comparable",
-        official_status="no_cross_model_claim",
+        reportability="no_matched_phase4_pygnome_package_yet",
+        official_status="opendrift_openoil_only_no_matched_pygnome_phase4_package",
         frozen_status="not_applicable",
-        provenance_label="Matched PyGNOME Phase 4 fate outputs do not exist yet.",
-        panel_text="Use this note to explain why no honest Phase 4 OpenDrift-versus-PyGNOME comparison is shown.",
-        dashboard_summary="Phase 4 cross-model comparison deferred.",
+        provenance_label=(
+            "No matched Mindoro Phase 4 PyGNOME package is stored yet; the current PyGNOME branch is "
+            "transport-only, keeps weathering disabled, and does not export matched shoreline tables."
+        ),
+        panel_text=(
+            "No matched Phase 4 PyGNOME comparison is packaged yet. Current Phase 4 results are "
+            "OpenDrift/OpenOil scenario outputs only."
+        ),
+        dashboard_summary="No matched Mindoro Phase 4 PyGNOME package is packaged yet.",
     ),
     "dwh_deterministic_transfer": ArtifactStatus(
         key="dwh_deterministic_transfer",
@@ -231,9 +237,9 @@ STATUS_REGISTRY: dict[str, ArtifactStatus] = {
         reportability="support_only_not_final_evidence",
         official_status="legacy_support_only_not_official",
         frozen_status="not_final_phase1_study",
-        provenance_label="Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
-        panel_text="Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
-        dashboard_summary="Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence.",
+        provenance_label="Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only, including a budget-only deterministic Phase 4 PyGNOME comparator pilot when stored outputs are present.",
+        panel_text="Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only, a budget-only Phase 4 PyGNOME pilot when packaged, and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+        dashboard_summary="Legacy debug support lane with a dedicated curated Phase 5 package and an optional budget-only Phase 4 PyGNOME pilot; not the preferred prototype lane or final Phase 1 evidence.",
     ),
 }
 

@@ -1,10 +1,10 @@
 {
   "phase": "figure_package_publication",
-  "generated_at_utc": "2026-04-13T05:30:31.509373+00:00",
+  "generated_at_utc": "2026-04-13T17:28:46.157518+00:00",
   "output_dir": "output/figure_package_publication",
   "publication_package_built_from_existing_outputs_only": true,
   "expensive_scientific_reruns_triggered": false,
-  "phase4_crossmodel_comparison_status": "deferred",
+  "phase4_crossmodel_comparison_status": "no_matched_pygnome_package_yet",
   "phase4_deferred_comparison_note_figure_produced": true,
   "phase4_deferred_comparison_note_figure_ids": [
     "case_mindoro_retro_2023__phase4_crossmodel_comparability_audit__openoil_only__single_note__2023_03_03_to_2023_03_06__single__paper__crossmodel_comparison_deferred"
@@ -591,7 +591,7 @@
     {
       "figure_id": "case_mindoro_retro_2023__phase4_crossmodel_comparability_audit__openoil_only__single_note__2023_03_03_to_2023_03_06__single__paper__crossmodel_comparison_deferred",
       "figure_family_code": "F",
-      "figure_family_label": "Mindoro Phase 4 cross-model deferred note package",
+      "figure_family_label": "Mindoro Phase 4 no-matched-PyGNOME note package",
       "case_id": "CASE_MINDORO_RETRO_2023",
       "phase_or_track": "phase4_crossmodel_comparability_audit",
       "date_token": "2023-03-03_to_2023-03-06",
@@ -610,14 +610,14 @@
       "source_paths": "output/phase4_crossmodel_comparability_audit/phase4_crossmodel_comparability_matrix.csv | output/phase4_crossmodel_comparability_audit/phase4_crossmodel_final_verdict.md | output/phase4_crossmodel_comparability_audit/phase4_crossmodel_blockers.md",
       "notes": "Built from the stored Phase 4 cross-model comparability audit only.",
       "status_key": "mindoro_phase4_deferred",
-      "status_label": "Mindoro Phase 4 cross-model deferred note",
+      "status_label": "Mindoro Phase 4 no-matched-PyGNOME note",
       "status_role": "deferred_honesty_note",
-      "status_reportability": "deferred_not_comparable",
-      "status_official_status": "no_cross_model_claim",
+      "status_reportability": "no_matched_phase4_pygnome_package_yet",
+      "status_official_status": "opendrift_openoil_only_no_matched_pygnome_phase4_package",
       "status_frozen_status": "not_applicable",
-      "status_provenance": "Matched PyGNOME Phase 4 fate outputs do not exist yet.",
-      "status_panel_text": "Use this note to explain why no honest Phase 4 OpenDrift-versus-PyGNOME comparison is shown.",
-      "status_dashboard_summary": "Phase 4 cross-model comparison deferred."
+      "status_provenance": "No matched Mindoro Phase 4 PyGNOME package is stored yet; the current PyGNOME branch is transport-only, keeps weathering disabled, and does not export matched shoreline tables.",
+      "status_panel_text": "No matched Phase 4 PyGNOME comparison is packaged yet. Current Phase 4 results are OpenDrift/OpenOil scenario outputs only.",
+      "status_dashboard_summary": "No matched Mindoro Phase 4 PyGNOME package is packaged yet."
     },
     {
       "figure_id": "case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__single_overlay__2010_05_21__zoom__paper__forecast_vs_observation",
@@ -643,12 +643,12 @@
       "status_key": "dwh_deterministic_transfer",
       "status_label": "DWH deterministic external transfer validation",
       "status_role": "transfer_validation",
-      "status_reportability": "reportable_now_inherited_provisional",
+      "status_reportability": "reportable_now_frozen",
       "status_official_status": "reportable_external_transfer_validation",
-      "status_frozen_status": "not_frozen",
-      "status_provenance": "DWH public masks remain truth under the stored historical forcing stack.",
+      "status_frozen_status": "frozen",
+      "status_provenance": "DWH public masks remain truth under the frozen readiness-gated HYCOM GOFS 3.1 + ERA5 + CMEMS wave/Stokes stack.",
       "status_panel_text": "Use this as the clean baseline DWH transfer-validation view; it supports the external-case success story but does not replace the Mindoro main case.",
-      "status_dashboard_summary": "Main DWH deterministic transfer-validation track."
+      "status_dashboard_summary": "Frozen DWH deterministic transfer-validation baseline."
     },
     {
       "figure_id": "case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__single_overlay__2010_05_22__zoom__paper__forecast_vs_observation",
@@ -674,12 +674,12 @@
       "status_key": "dwh_deterministic_transfer",
       "status_label": "DWH deterministic external transfer validation",
       "status_role": "transfer_validation",
-      "status_reportability": "reportable_now_inherited_provisional",
+      "status_reportability": "reportable_now_frozen",
       "status_official_status": "reportable_external_transfer_validation",
-      "status_frozen_status": "not_frozen",
-      "status_provenance": "DWH public masks remain truth under the stored historical forcing stack.",
+      "status_frozen_status": "frozen",
+      "status_provenance": "DWH public masks remain truth under the frozen readiness-gated HYCOM GOFS 3.1 + ERA5 + CMEMS wave/Stokes stack.",
       "status_panel_text": "Use this as the clean baseline DWH transfer-validation view; it supports the external-case success story but does not replace the Mindoro main case.",
-      "status_dashboard_summary": "Main DWH deterministic transfer-validation track."
+      "status_dashboard_summary": "Frozen DWH deterministic transfer-validation baseline."
     },
     {
       "figure_id": "case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__single_overlay__2010_05_23__zoom__paper__forecast_vs_observation",
@@ -705,12 +705,12 @@
       "status_key": "dwh_deterministic_transfer",
       "status_label": "DWH deterministic external transfer validation",
       "status_role": "transfer_validation",
-      "status_reportability": "reportable_now_inherited_provisional",
+      "status_reportability": "reportable_now_frozen",
       "status_official_status": "reportable_external_transfer_validation",
-      "status_frozen_status": "not_frozen",
-      "status_provenance": "DWH public masks remain truth under the stored historical forcing stack.",
+      "status_frozen_status": "frozen",
+      "status_provenance": "DWH public masks remain truth under the frozen readiness-gated HYCOM GOFS 3.1 + ERA5 + CMEMS wave/Stokes stack.",
       "status_panel_text": "Use this as the clean baseline DWH transfer-validation view; it supports the external-case success story but does not replace the Mindoro main case.",
-      "status_dashboard_summary": "Main DWH deterministic transfer-validation track."
+      "status_dashboard_summary": "Frozen DWH deterministic transfer-validation baseline."
     },
     {
       "figure_id": "case_dwh_retro_2010_72h__phase3c_external_case_run__observation__single_observation__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_observation",
@@ -736,12 +736,12 @@
       "status_key": "dwh_observation_truth_context",
       "status_label": "DWH observation-derived truth context",
       "status_role": "observation_truth_context",
-      "status_reportability": "reportable_now_inherited_provisional",
+      "status_reportability": "reportable_now_frozen",
       "status_official_status": "truth_context_for_transfer_validation",
-      "status_frozen_status": "not_frozen",
+      "status_frozen_status": "frozen",
       "status_provenance": "DWH public masks remain truth and are used as date-composite daily or event-corridor context without claiming exact sub-daily acquisition times.",
       "status_panel_text": "Use this to establish the DWH observation-derived truth masks before any deterministic, ensemble, or PyGNOME comparison is shown.",
-      "status_dashboard_summary": "Observation-derived truth context for the DWH external transfer-validation lane."
+      "status_dashboard_summary": "Frozen observation-derived truth context for the DWH external transfer-validation lane."
     },
     {
       "figure_id": "case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__single_model__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_deterministic",
@@ -767,12 +767,12 @@
       "status_key": "dwh_deterministic_transfer",
       "status_label": "DWH deterministic external transfer validation",
       "status_role": "transfer_validation",
-      "status_reportability": "reportable_now_inherited_provisional",
+      "status_reportability": "reportable_now_frozen",
       "status_official_status": "reportable_external_transfer_validation",
-      "status_frozen_status": "not_frozen",
-      "status_provenance": "DWH public masks remain truth under the stored historical forcing stack.",
+      "status_frozen_status": "frozen",
+      "status_provenance": "DWH public masks remain truth under the frozen readiness-gated HYCOM GOFS 3.1 + ERA5 + CMEMS wave/Stokes stack.",
       "status_panel_text": "Use this as the clean baseline DWH transfer-validation view; it supports the external-case success story but does not replace the Mindoro main case.",
-      "status_dashboard_summary": "Main DWH deterministic transfer-validation track."
+      "status_dashboard_summary": "Frozen DWH deterministic transfer-validation baseline."
     },
     {
       "figure_id": "case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__single_model__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_p50",
@@ -798,12 +798,12 @@
       "status_key": "dwh_ensemble_transfer",
       "status_label": "DWH ensemble extension and deterministic-vs-ensemble comparison",
       "status_role": "transfer_validation_comparison",
-      "status_reportability": "reportable_now_inherited_provisional",
+      "status_reportability": "reportable_now_frozen",
       "status_official_status": "reportable_ensemble_comparison",
-      "status_frozen_status": "not_frozen",
-      "status_provenance": "Same DWH truth masks as the deterministic track.",
+      "status_frozen_status": "frozen",
+      "status_provenance": "Same frozen DWH truth masks and forcing stack as the deterministic track; p50 is the preferred probabilistic extension and p90 remains support/comparison only.",
       "status_panel_text": "Use this to explain deterministic, p50, and p90 differences without overstating ensemble benefit as universal; p50 is the preferred probabilistic extension and p90 is support/comparison only.",
-      "status_dashboard_summary": "DWH ensemble extension on the same truth masks; p50 preferred, p90 support-only."
+      "status_dashboard_summary": "Frozen DWH ensemble extension on the same truth masks; p50 preferred, p90 support-only."
     },
     {
       "figure_id": "case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__single_model__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_p90",
@@ -829,12 +829,12 @@
       "status_key": "dwh_ensemble_transfer",
       "status_label": "DWH ensemble extension and deterministic-vs-ensemble comparison",
       "status_role": "transfer_validation_comparison",
-      "status_reportability": "reportable_now_inherited_provisional",
+      "status_reportability": "reportable_now_frozen",
       "status_official_status": "reportable_ensemble_comparison",
-      "status_frozen_status": "not_frozen",
-      "status_provenance": "Same DWH truth masks as the deterministic track.",
+      "status_frozen_status": "frozen",
+      "status_provenance": "Same frozen DWH truth masks and forcing stack as the deterministic track; p50 is the preferred probabilistic extension and p90 remains support/comparison only.",
       "status_panel_text": "Use this to explain deterministic, p50, and p90 differences without overstating ensemble benefit as universal; p50 is the preferred probabilistic extension and p90 is support/comparison only.",
-      "status_dashboard_summary": "DWH ensemble extension on the same truth masks; p50 preferred, p90 support-only."
+      "status_dashboard_summary": "Frozen DWH ensemble extension on the same truth masks; p50 preferred, p90 support-only."
     },
     {
       "figure_id": "case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__pygnome__single_model__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_pygnome",
@@ -860,12 +860,12 @@
       "status_key": "dwh_crossmodel_comparator",
       "status_label": "DWH PyGNOME comparator-only",
       "status_role": "comparator_only",
-      "status_reportability": "reportable_comparator_inherited_provisional",
+      "status_reportability": "reportable_comparator_frozen",
       "status_official_status": "comparator_only_not_truth",
-      "status_frozen_status": "not_frozen",
-      "status_provenance": "DWH observed masks remain truth; PyGNOME is comparator-only.",
+      "status_frozen_status": "frozen",
+      "status_provenance": "DWH observed masks remain truth; PyGNOME is a frozen comparator-only track and never truth.",
       "status_panel_text": "Use this for cross-model comparison only; PyGNOME is not truth and does not replace the OpenDrift DWH story.",
-      "status_dashboard_summary": "DWH cross-model comparator; PyGNOME not truth."
+      "status_dashboard_summary": "Frozen DWH cross-model comparator; PyGNOME not truth."
     },
     {
       "figure_id": "case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__single_trajectory__2010_05_20_to_2010_05_23__zoom__paper__deterministic_trajectory",
@@ -987,9 +987,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_01__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_02__single__paper__case_2016_09_01_prototype_2016_24h_opendrift_single",
@@ -1018,9 +1018,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_01__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_02__single__paper__case_2016_09_01_prototype_2016_24h_opendrift_p50_single",
@@ -1049,9 +1049,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_01__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_02__single__paper__case_2016_09_01_prototype_2016_24h_opendrift_p90_single",
@@ -1080,9 +1080,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_01__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_02__single__paper__case_2016_09_01_prototype_2016_24h_pygnome_single",
@@ -1111,9 +1111,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_01__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_03__single__paper__case_2016_09_01_prototype_2016_48h_opendrift_single",
@@ -1142,9 +1142,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_01__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_03__single__paper__case_2016_09_01_prototype_2016_48h_opendrift_p50_single",
@@ -1173,9 +1173,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_01__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_03__single__paper__case_2016_09_01_prototype_2016_48h_opendrift_p90_single",
@@ -1204,9 +1204,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_01__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_03__single__paper__case_2016_09_01_prototype_2016_48h_pygnome_single",
@@ -1235,9 +1235,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_01__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_04__single__paper__case_2016_09_01_prototype_2016_72h_opendrift_single",
@@ -1266,9 +1266,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_01__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_04__single__paper__case_2016_09_01_prototype_2016_72h_opendrift_p50_single",
@@ -1297,9 +1297,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_01__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_04__single__paper__case_2016_09_01_prototype_2016_72h_opendrift_p90_single",
@@ -1328,9 +1328,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_01__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_04__single__paper__case_2016_09_01_prototype_2016_72h_pygnome_single",
@@ -1359,9 +1359,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_06__prototype_pygnome_similarity_summary__opendrift_vs_pygnome__comparison_board__2016_09_07_to_2016_09_09__board__slide__case_2016_09_06_prototype_2016_24_48_72h_opendrift_vs_pygnome_board",
@@ -1390,9 +1390,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_06__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_07__single__paper__case_2016_09_06_prototype_2016_24h_opendrift_single",
@@ -1421,9 +1421,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_06__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_07__single__paper__case_2016_09_06_prototype_2016_24h_opendrift_p50_single",
@@ -1452,9 +1452,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_06__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_07__single__paper__case_2016_09_06_prototype_2016_24h_opendrift_p90_single",
@@ -1483,9 +1483,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_06__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_07__single__paper__case_2016_09_06_prototype_2016_24h_pygnome_single",
@@ -1514,9 +1514,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_06__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_08__single__paper__case_2016_09_06_prototype_2016_48h_opendrift_single",
@@ -1545,9 +1545,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_06__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_08__single__paper__case_2016_09_06_prototype_2016_48h_opendrift_p50_single",
@@ -1576,9 +1576,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_06__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_08__single__paper__case_2016_09_06_prototype_2016_48h_opendrift_p90_single",
@@ -1607,9 +1607,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_06__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_08__single__paper__case_2016_09_06_prototype_2016_48h_pygnome_single",
@@ -1638,9 +1638,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_06__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_09__single__paper__case_2016_09_06_prototype_2016_72h_opendrift_single",
@@ -1669,9 +1669,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_06__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_09__single__paper__case_2016_09_06_prototype_2016_72h_opendrift_p50_single",
@@ -1700,9 +1700,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_06__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_09__single__paper__case_2016_09_06_prototype_2016_72h_opendrift_p90_single",
@@ -1731,9 +1731,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_06__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_09__single__paper__case_2016_09_06_prototype_2016_72h_pygnome_single",
@@ -1762,9 +1762,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_17__prototype_pygnome_similarity_summary__opendrift_vs_pygnome__comparison_board__2016_09_18_to_2016_09_20__board__slide__case_2016_09_17_prototype_2016_24_48_72h_opendrift_vs_pygnome_board",
@@ -1793,9 +1793,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_17__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_18__single__paper__case_2016_09_17_prototype_2016_24h_opendrift_single",
@@ -1824,9 +1824,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_17__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_18__single__paper__case_2016_09_17_prototype_2016_24h_opendrift_p50_single",
@@ -1855,9 +1855,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_17__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_18__single__paper__case_2016_09_17_prototype_2016_24h_opendrift_p90_single",
@@ -1886,9 +1886,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_17__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_18__single__paper__case_2016_09_17_prototype_2016_24h_pygnome_single",
@@ -1917,9 +1917,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_17__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_19__single__paper__case_2016_09_17_prototype_2016_48h_opendrift_single",
@@ -1948,9 +1948,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_17__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_19__single__paper__case_2016_09_17_prototype_2016_48h_opendrift_p50_single",
@@ -1979,9 +1979,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_17__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_19__single__paper__case_2016_09_17_prototype_2016_48h_opendrift_p90_single",
@@ -2010,9 +2010,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_17__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_19__single__paper__case_2016_09_17_prototype_2016_48h_pygnome_single",
@@ -2041,9 +2041,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_17__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_20__single__paper__case_2016_09_17_prototype_2016_72h_opendrift_single",
@@ -2072,9 +2072,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_17__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_20__single__paper__case_2016_09_17_prototype_2016_72h_opendrift_p50_single",
@@ -2103,9 +2103,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_17__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_20__single__paper__case_2016_09_17_prototype_2016_72h_opendrift_p90_single",
@@ -2134,9 +2134,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_2016_09_17__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_20__single__paper__case_2016_09_17_prototype_2016_72h_pygnome_single",
@@ -2165,9 +2165,9 @@
       "status_reportability": "support_only_not_final_evidence",
       "status_official_status": "legacy_support_only_not_official",
       "status_frozen_status": "not_final_phase1_study",
-      "status_provenance": "Legacy/debug regression lane preserved for reproducibility only.",
-      "status_panel_text": "Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-      "status_dashboard_summary": "Legacy debug support lane; not the preferred prototype lane."
+      "status_provenance": "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+      "status_panel_text": "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+      "status_dashboard_summary": "Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence."
     },
     {
       "figure_id": "case_mindoro_retro_2023__phase3b_reinit_primary__opendrift__comparison_board__2023_03_13_to_2023_03_14__board__slide__mindoro_primary_validation_board",
@@ -2348,12 +2348,12 @@
       "status_key": "dwh_deterministic_transfer",
       "status_label": "DWH deterministic external transfer validation",
       "status_role": "transfer_validation",
-      "status_reportability": "reportable_now_inherited_provisional",
+      "status_reportability": "reportable_now_frozen",
       "status_official_status": "reportable_external_transfer_validation",
-      "status_frozen_status": "not_frozen",
-      "status_provenance": "DWH public masks remain truth under the stored historical forcing stack.",
+      "status_frozen_status": "frozen",
+      "status_provenance": "DWH public masks remain truth under the frozen readiness-gated HYCOM GOFS 3.1 + ERA5 + CMEMS wave/Stokes stack.",
       "status_panel_text": "Use this as the clean baseline DWH transfer-validation view; it supports the external-case success story but does not replace the Mindoro main case.",
-      "status_dashboard_summary": "Main DWH deterministic transfer-validation track."
+      "status_dashboard_summary": "Frozen DWH deterministic transfer-validation baseline."
     },
     {
       "figure_id": "case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__deterministic_vs_ensemble_board",
@@ -2379,12 +2379,12 @@
       "status_key": "dwh_ensemble_transfer",
       "status_label": "DWH ensemble extension and deterministic-vs-ensemble comparison",
       "status_role": "transfer_validation_comparison",
-      "status_reportability": "reportable_now_inherited_provisional",
+      "status_reportability": "reportable_now_frozen",
       "status_official_status": "reportable_ensemble_comparison",
-      "status_frozen_status": "not_frozen",
-      "status_provenance": "Same DWH truth masks as the deterministic track.",
+      "status_frozen_status": "frozen",
+      "status_provenance": "Same frozen DWH truth masks and forcing stack as the deterministic track; p50 is the preferred probabilistic extension and p90 remains support/comparison only.",
       "status_panel_text": "Use this to explain deterministic, p50, and p90 differences without overstating ensemble benefit as universal; p50 is the preferred probabilistic extension and p90 is support/comparison only.",
-      "status_dashboard_summary": "DWH ensemble extension on the same truth masks; p50 preferred, p90 support-only."
+      "status_dashboard_summary": "Frozen DWH ensemble extension on the same truth masks; p50 preferred, p90 support-only."
     },
     {
       "figure_id": "case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__opendrift_vs_pygnome__comparison_board__2010_05_21_to_2010_05_23__board__slide__opendrift_vs_pygnome_board",
@@ -2410,12 +2410,12 @@
       "status_key": "dwh_crossmodel_comparator",
       "status_label": "DWH PyGNOME comparator-only",
       "status_role": "comparator_only",
-      "status_reportability": "reportable_comparator_inherited_provisional",
+      "status_reportability": "reportable_comparator_frozen",
       "status_official_status": "comparator_only_not_truth",
-      "status_frozen_status": "not_frozen",
-      "status_provenance": "DWH observed masks remain truth; PyGNOME is comparator-only.",
+      "status_frozen_status": "frozen",
+      "status_provenance": "DWH observed masks remain truth; PyGNOME is a frozen comparator-only track and never truth.",
       "status_panel_text": "Use this for cross-model comparison only; PyGNOME is not truth and does not replace the OpenDrift DWH story.",
-      "status_dashboard_summary": "DWH cross-model comparator; PyGNOME not truth."
+      "status_dashboard_summary": "Frozen DWH cross-model comparator; PyGNOME not truth."
     },
     {
       "figure_id": "case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift_vs_pygnome__trajectory_board__2010_05_20_to_2010_05_23__board__slide__trajectory_board",

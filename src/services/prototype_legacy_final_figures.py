@@ -144,6 +144,7 @@ class PrototypeLegacyFinalFiguresService:
         self.missing_rows: list[dict[str, Any]] = []
         self.package_registry_rows: list[dict[str, Any]] = []
         self.phase4_registry_rows: list[dict[str, Any]] = []
+        self.phase4_comparator_registry_rows: list[dict[str, Any]] = []
         self.extent_mode = PROTOTYPE_2016_EXTENT_MODE_DYNAMIC_FORECAST
 
     def _single_size(self) -> tuple[float, float]:
@@ -1447,6 +1448,9 @@ class PrototypeLegacyFinalFiguresService:
     def _weathering_dir(self, case_id: str) -> Path:
         return self._case_output_dir(case_id) / "weathering"
 
+    def _phase4_comparator_dir(self, case_id: str) -> Path:
+        return self._case_output_dir(case_id) / "phase4_pygnome_comparator"
+
     def _case_slug(self, case_id: str) -> str:
         return str(case_id).lower().replace("-", "_")
 
@@ -1960,6 +1964,145 @@ class PrototypeLegacyFinalFiguresService:
             notes="Aggregate registry for the copied prototype_2016 Phase 4 weathering/fate tables.",
         )
 
+    def _copy_phase4_comparator_package(self) -> None:
+        publication_root = self._package_subdir("publication", "phase4_comparator")
+        scientific_root = self._package_subdir("scientific_source_pngs", "phase4_comparator")
+        summary_root = self._package_subdir("summary", "phase4_comparator")
+        publication_root.mkdir(parents=True, exist_ok=True)
+        scientific_root.mkdir(parents=True, exist_ok=True)
+        summary_root.mkdir(parents=True, exist_ok=True)
+
+        available_cases: list[str] = []
+        for case_id in self.case_ids:
+            comparator_dir = self._phase4_comparator_dir(case_id)
+            manifest_path = comparator_dir / "pygnome_phase4_run_manifest.json"
+            if not manifest_path.exists():
+                continue
+
+            available_cases.append(case_id)
+            publication_case_dir = publication_root / case_id
+            scientific_case_dir = scientific_root / case_id
+            summary_case_dir = summary_root / case_id
+
+            for filename in ("budget_comparison_board.png", "budget_time_series_light.png", "budget_time_series_heavy.png"):
+                source_path = comparator_dir / filename
+                self._copy_and_register(
+                    source_path,
+                    publication_case_dir / filename,
+                    phase_group="phase4_comparator",
+                    artifact_group="publication_phase4_comparator",
+                    scientific_vs_display_only="display_only",
+                    copied_vs_regenerated="copied_from_existing_output",
+                    case_id=case_id,
+                    support_only=True,
+                    comparator_only=True,
+                    notes="Budget-only deterministic PyGNOME Phase 4 comparator figure copied from the stored case-local pilot output.",
+                )
+                self._copy_and_register(
+                    source_path,
+                    scientific_case_dir / filename,
+                    phase_group="phase4_comparator",
+                    artifact_group="scientific_source_phase4_comparator",
+                    scientific_vs_display_only="scientific_source",
+                    copied_vs_regenerated="copied_from_existing_output",
+                    case_id=case_id,
+                    support_only=True,
+                    comparator_only=True,
+                    notes="Exact stored PyGNOME Phase 4 comparator figure used by the curated prototype_2016 legacy package.",
+                )
+
+            for filename in (
+                "phase4_budget_comparison.csv",
+                "phase4_budget_time_series_metrics.csv",
+                "pygnome_budget_light.csv",
+                "pygnome_budget_heavy.csv",
+                "pygnome_phase4_run_manifest.json",
+            ):
+                source_path = comparator_dir / filename
+                self._copy_and_register(
+                    source_path,
+                    summary_case_dir / filename,
+                    phase_group="phase4_comparator",
+                    artifact_group="summary_phase4_comparator",
+                    scientific_vs_display_only="metadata" if filename.endswith(".json") else "scientific_source",
+                    copied_vs_regenerated="copied_from_existing_output",
+                    case_id=case_id,
+                    support_only=True,
+                    comparator_only=True,
+                    notes="Stored per-case Phase 4 PyGNOME comparator budget table or manifest copied into the curated legacy package.",
+                )
+                self.phase4_comparator_registry_rows.append(
+                    {
+                        "case_id": case_id,
+                        "artifact_type": filename,
+                        "scenario_key": "light" if "light" in filename else "heavy" if "heavy" in filename else "",
+                        "source_relative_path": _relative_to_repo(self.repo_root, source_path),
+                        "final_relative_path": _relative_to_repo(self.repo_root, summary_case_dir / filename),
+                        "notes": "Stored Phase 4 comparator case artifact copied into the curated package.",
+                    }
+                )
+
+        decision_note_lines = [
+            "# Prototype 2016 Phase 4 PyGNOME Comparator Decision",
+            "",
+        ]
+        if available_cases:
+            decision_note_lines.extend(
+                [
+                    "A limited deterministic Phase 4 PyGNOME comparator is packaged for the legacy `prototype_2016` lane.",
+                    "",
+                    "- Scope: budget-only descriptive comparison",
+                    "- Cases: " + ", ".join(case_id.replace("CASE_", "") for case_id in available_cases),
+                    "- Scenarios: `light` and `heavy` only; no frozen `base` scenario exists in the stored prototype_2016 Phase 4 weathering package",
+                    "- Forcing: matched case-specific grid wind and grid current when available in the stored 2016 forcing directories",
+                    "- Metrics: absolute percentage-point difference at 24/48/72 h plus MAE/RMSE across the normalized budget-fraction time series",
+                    "- Guardrail: these are comparator-only descriptive cross-model differences, not observational skill metrics",
+                    "- Shoreline comparison: not packaged, because the PyGNOME pilot does not write matched shoreline-arrival or shoreline-segment products",
+                ]
+            )
+        else:
+            decision_note_lines.extend(
+                [
+                    "No matched PyGNOME Phase 4 legacy comparator is packaged yet.",
+                    "",
+                    "Current prototype_2016 Phase 4 results remain OpenDrift/OpenOil weathering outputs only. This curated package will not fabricate a cross-model comparator when the raw Phase 4 PyGNOME comparator outputs are absent.",
+                ]
+            )
+
+        self._write_and_register_text(
+            summary_root / "prototype_2016_phase4_pygnome_decision_note.md",
+            text="\n".join(decision_note_lines),
+            source_relative_path="output/CASE_2016-*/phase4_pygnome_comparator",
+            phase_group="phase4_comparator",
+            artifact_group="summary_phase4_comparator",
+            scientific_vs_display_only="metadata",
+            copied_vs_regenerated="regenerated_from_existing_metadata",
+            support_only=True,
+            comparator_only=True,
+            notes="Plain-language decision note for the prototype_2016 Phase 4 deterministic PyGNOME comparator pilot.",
+        )
+
+        self._write_and_register_csv(
+            summary_root / "prototype_2016_phase4_pygnome_comparator_registry.csv",
+            rows=self.phase4_comparator_registry_rows,
+            columns=[
+                "case_id",
+                "artifact_type",
+                "scenario_key",
+                "source_relative_path",
+                "final_relative_path",
+                "notes",
+            ],
+            source_relative_path="output/CASE_2016-*/phase4_pygnome_comparator",
+            phase_group="phase4_comparator",
+            artifact_group="summary_phase4_comparator",
+            scientific_vs_display_only="metadata",
+            copied_vs_regenerated="regenerated_from_existing_metadata",
+            support_only=True,
+            comparator_only=True,
+            notes="Aggregate registry for the prototype_2016 deterministic Phase 4 PyGNOME comparator pilot.",
+        )
+
     def _write_curated_legacy_readme(self) -> None:
         readme_text = textwrap.dedent(
             """
@@ -1973,6 +2116,7 @@ class PrototypeLegacyFinalFiguresService:
             - The visible legacy support flow here is `Phase 1 -> Phase 2 -> Phase 3A -> Phase 4 -> Phase 5`.
             - `Phase 3A` is comparator-only OpenDrift vs deterministic PyGNOME support.
             - `Phase 4` is the legacy weathering/fate family seeded from the selected drifter-of-record start.
+            - A limited deterministic `Phase 4` PyGNOME budget comparator pilot may also be packaged when stored case-local comparator outputs exist; shoreline comparison remains unavailable unless matched PyGNOME shoreline products are present.
             - `Phase 5` is this read-only packaging/export layer built from stored outputs.
             - There is no thesis-facing `Phase 3B` or `Phase 3C` in this lane.
             - This lane does not replace the final regional Phase 1 study.
@@ -1981,10 +2125,13 @@ class PrototypeLegacyFinalFiguresService:
 
             - `publication/phase3a/`: legacy Phase 3A support figures copied from the stored publication/similarity outputs.
             - `publication/phase4/`: legacy Phase 4 weathering/fate publication figures plus shoreline summary figures derived from stored shoreline CSVs only.
+            - `publication/phase4_comparator/`: budget-only deterministic PyGNOME Phase 4 comparator pilot figures when available.
             - `scientific_source_pngs/phase3a/`: exact stored Phase 3A source PNGs.
             - `scientific_source_pngs/phase4/`: exact stored Phase 4 source PNGs.
+            - `scientific_source_pngs/phase4_comparator/`: exact stored Phase 4 PyGNOME comparator PNGs when available.
             - `summary/phase3a/`: similarity/FSS/KL tables, per-case pairing artifacts, and source-path notes.
             - `summary/phase4/`: copied budget/shoreline CSVs plus a lightweight phase4 registry.
+            - `summary/phase4_comparator/`: copied deterministic PyGNOME budget-comparator tables plus the decision note describing why shoreline comparison is still unavailable.
             - `manifests/`: machine-readable registries for this curated export.
             - `phase5/`: packaging notes describing what was copied vs regenerated.
 
@@ -2009,6 +2156,13 @@ class PrototypeLegacyFinalFiguresService:
     def _write_phase5_packaging_summary(self) -> None:
         copied_count = sum(1 for row in self.package_registry_rows if row["copied_vs_regenerated"].startswith("copied"))
         regenerated_count = sum(1 for row in self.package_registry_rows if row["copied_vs_regenerated"].startswith("regenerated"))
+        comparator_case_ids = sorted(
+            {
+                str(row.get("case_id") or "")
+                for row in self.package_registry_rows
+                if str(row.get("phase_group") or "") == "phase4_comparator" and str(row.get("case_id") or "").strip()
+            }
+        )
         text = textwrap.dedent(
             f"""
             # Prototype 2016 Packaging Summary
@@ -2017,9 +2171,11 @@ class PrototypeLegacyFinalFiguresService:
 
             - Scientific reruns performed here: none
             - What was copied: stored Phase 3A publication figures, stored Phase 3A source PNGs, stored per-case Phase 3A summaries, stored Phase 4 weathering PNGs, and stored Phase 4 budget/shoreline CSVs
+            - What was also copied when present: deterministic PyGNOME Phase 4 budget-comparator PNGs, per-case PyGNOME budget CSVs, and per-case comparator manifests from `output/CASE_2016-*/phase4_pygnome_comparator/`
             - What was lightly regenerated: shoreline summary PNGs from stored shoreline CSVs, package registries, package README, and packaging notes
             - What was retained for compatibility: the flat per-case PNG exports and their root compatibility manifest
             - Relation to repo-wide `phase5_sync`: this package is the dedicated `prototype_2016` Phase 5 legacy deliverable; `phase5_sync` is the broader cross-repo read-only reproducibility layer
+            - Phase 4 comparator note: {"budget-only deterministic PyGNOME comparator copied for " + ", ".join(case_id.replace("CASE_", "") for case_id in comparator_case_ids) if comparator_case_ids else "no matched PyGNOME Phase 4 legacy comparator was present to package"}
 
             Counts:
 
@@ -2096,10 +2252,13 @@ class PrototypeLegacyFinalFiguresService:
             "phase4_case_reruns_performed": [],
             "publication_phase3a_dir": _relative_to_repo(self.repo_root, self._package_subdir("publication", "phase3a")),
             "publication_phase4_dir": _relative_to_repo(self.repo_root, self._package_subdir("publication", "phase4")),
+            "publication_phase4_comparator_dir": _relative_to_repo(self.repo_root, self._package_subdir("publication", "phase4_comparator")),
             "scientific_source_phase3a_dir": _relative_to_repo(self.repo_root, self._package_subdir("scientific_source_pngs", "phase3a")),
             "scientific_source_phase4_dir": _relative_to_repo(self.repo_root, self._package_subdir("scientific_source_pngs", "phase4")),
+            "scientific_source_phase4_comparator_dir": _relative_to_repo(self.repo_root, self._package_subdir("scientific_source_pngs", "phase4_comparator")),
             "summary_phase3a_dir": _relative_to_repo(self.repo_root, self._package_subdir("summary", "phase3a")),
             "summary_phase4_dir": _relative_to_repo(self.repo_root, self._package_subdir("summary", "phase4")),
+            "summary_phase4_comparator_dir": _relative_to_repo(self.repo_root, self._package_subdir("summary", "phase4_comparator")),
             "phase5_dir": _relative_to_repo(self.repo_root, self._package_subdir("phase5")),
             "registry_csv": _relative_to_repo(self.repo_root, registry_csv),
             "registry_json": _relative_to_repo(self.repo_root, registry_json),
@@ -2110,6 +2269,7 @@ class PrototypeLegacyFinalFiguresService:
                 "prototype_2016 remains legacy support-only and does not replace the final regional Phase 1 study.",
                 "Phase 3A is comparator-only OpenDrift vs deterministic PyGNOME support.",
                 "Phase 4 is the legacy weathering/fate family seeded from the selected drifter-of-record start.",
+                "A limited deterministic Phase 4 PyGNOME budget comparator pilot may be packaged when stored case-local comparator outputs exist; shoreline comparison remains unavailable in that pilot.",
                 "Phase 5 is this read-only packaging/export layer built from stored outputs only.",
                 "No Phase 3B or Phase 3C exists in the thesis-facing prototype_2016 lane.",
             ],
@@ -2135,10 +2295,12 @@ class PrototypeLegacyFinalFiguresService:
     def _build_curated_package(self, *, compatibility_manifest: Path, missing_csv: Path) -> dict[str, Path]:
         self.package_registry_rows = []
         self.phase4_registry_rows = []
+        self.phase4_comparator_registry_rows = []
         self._reset_curated_package_dirs()
         self._register_existing_phase5_exports(manifest_json=compatibility_manifest, missing_csv=missing_csv)
         self._copy_phase3a_package()
         self._copy_phase4_package()
+        self._copy_phase4_comparator_package()
         self._write_curated_legacy_readme()
         self._write_phase5_packaging_summary()
         return self._write_curated_package_manifests(
@@ -2196,6 +2358,18 @@ class PrototypeLegacyFinalFiguresService:
             "missing_figures_csv": _relative_to_repo(self.repo_root, missing_csv),
             "missing_figures": self.missing_rows,
             "curated_package_readme": _relative_to_repo(self.repo_root, self.output_dir / "README.md"),
+            "publication_phase4_comparator_dir": _relative_to_repo(
+                self.repo_root,
+                self._package_subdir("publication", "phase4_comparator"),
+            ),
+            "scientific_source_phase4_comparator_dir": _relative_to_repo(
+                self.repo_root,
+                self._package_subdir("scientific_source_pngs", "phase4_comparator"),
+            ),
+            "summary_phase4_comparator_dir": _relative_to_repo(
+                self.repo_root,
+                self._package_subdir("summary", "phase4_comparator"),
+            ),
             "legacy_final_output_manifest_json": _relative_to_repo(
                 self.repo_root,
                 curated_manifest_paths["manifest_json"],
@@ -2214,6 +2388,7 @@ class PrototypeLegacyFinalFiguresService:
                 "prototype_2016 p50/p90 products are exact valid-time member-occupancy footprints.",
                 "This folder is the authoritative curated prototype_2016 legacy support package and does not replace the final regional Phase 1 study.",
                 "PyGNOME remains comparator-only; matched grid wind/current forcing is used when available and degraded mode is surfaced explicitly otherwise.",
+                "The optional prototype_2016 Phase 4 PyGNOME comparator pilot is budget-only and descriptive; no shoreline comparison is claimed unless matched shoreline products exist.",
             ],
         }
         _write_json(manifest_json, manifest_payload)

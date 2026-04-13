@@ -1,4 +1,4 @@
-"""Phase 3 cross-model comparison page."""
+"""Mindoro cross-model comparator page."""
 
 from __future__ import annotations
 
@@ -20,79 +20,60 @@ ensure_repo_root_on_path(__file__)
 import streamlit as st
 
 from src.core.artifact_status import get_artifact_status
-from ui.data_access import figure_subset
-from ui.pages.common import render_figure_cards, render_page_intro, render_status_callout, render_table
+from ui.pages.common import render_figure_cards, render_markdown_block, render_page_intro, render_status_callout, render_table
 
 
 def render(state: dict, ui_state: dict) -> None:
-    mindoro_status = get_artifact_status("mindoro_crossmodel_comparator")
-    dwh_status = get_artifact_status("dwh_crossmodel_comparator")
+    comparator_status = get_artifact_status("mindoro_crossmodel_comparator")
+    registry = state["mindoro_final_registry"]
+    figures = registry.loc[
+        registry.get("artifact_group", "").astype(str).eq("publication/comparator_pygnome")
+    ].reset_index(drop=True)
 
     render_page_intro(
-        "Cross-Model Comparison",
-        "This page keeps the cross-model story focused on the existing Phase 3 comparator products. It does not pretend that Phase 4 fate and shoreline comparison already exists.",
-        badge="Phase 3 comparator views only",
+        "Mindoro Cross-Model Comparator",
+        "This page is the dedicated home for Track A. It stays comparator-only, uses the same March 14 target as B1, and never lets PyGNOME read like truth or a co-primary validation row.",
+        badge="Mindoro A | comparator-only",
     )
 
+    render_status_callout("Comparator-only rule", comparator_status.panel_text, "warning")
+    render_status_callout(
+        "B1 relationship",
+        "Track A is attached to the B1 package as supporting cross-model context. It helps compare model behavior on the same case, but it does not replace the main OpenDrift-versus-observation claim.",
+        "info",
+    )
     render_status_callout(
         "Phase 4 honesty note",
-        "Phase 4 OpenDrift-versus-PyGNOME comparison is deferred. Use the dedicated Phase 4 Cross-Model Status page for the blocker memo and next steps.",
+        "This page stays in Phase 3 spatial-comparator territory only. No matched Mindoro Phase 4 PyGNOME package is shown here; the current Mindoro Phase 4 layer remains OpenDrift/OpenOil scenario context only.",
         "warning",
     )
 
-    mindoro_figures = figure_subset(
-        ui_state["visual_layer"],
-        case_id="CASE_MINDORO_RETRO_2023",
-        status_keys=[mindoro_status.key],
-    )
-    dwh_figures = figure_subset(
-        ui_state["visual_layer"],
-        case_id="CASE_DWH_RETRO_2010_72H",
-        status_keys=[dwh_status.key],
+    render_figure_cards(
+        figures,
+        title=comparator_status.panel_label,
+        caption="These figures come from the curated comparator subgroup in the March13-14 final package.",
+        limit=None if ui_state["advanced"] else 4,
+        compact_selector=not ui_state["advanced"],
+        selector_key="mindoro_comparator_figures",
     )
 
-    tabs = st.tabs(["Mindoro", "DWH", "Comparison tables"])
-
-    with tabs[0]:
-        render_figure_cards(
-            mindoro_figures,
-            title=mindoro_status.panel_label,
-            caption="These are the promoted March 14 comparator figures and should stay separate from any Phase 4 fate-comparison claim.",
-            limit=None if ui_state["advanced"] else 4,
-        )
+    left, right = st.columns(2)
+    with left:
         render_table(
-            "Mindoro model ranking",
-            state["mindoro_model_ranking"],
-            download_name="mindoro_model_ranking.csv",
-            caption="Stored model ranking table from the Mindoro public-comparison outputs.",
+            "Comparator ranking",
+            state["mindoro_comparator_ranking"],
+            download_name="march13_14_reinit_crossmodel_model_ranking.csv",
+            caption="Curated ranking table for the same-case March 14 comparator lane.",
+            height=260,
+        )
+    with right:
+        render_table(
+            "Comparator summary",
+            state["mindoro_comparator_summary"],
+            download_name="march13_14_reinit_crossmodel_summary.csv",
+            caption="Curated summary table for the Mindoro comparator subgroup.",
             height=260,
         )
 
-    with tabs[1]:
-        render_figure_cards(
-            dwh_figures,
-            title=dwh_status.panel_label,
-            caption="These figures help the panel compare model behavior on the richer DWH case without treating PyGNOME as truth.",
-            limit=None if ui_state["advanced"] else 4,
-        )
-        render_table(
-            "DWH cross-model results",
-            state["dwh_all_results"],
-            download_name="dwh_all_results.csv",
-            caption="Stored DWH OpenDrift-versus-PyGNOME results table.",
-            height=280,
-        )
-
-    with tabs[2]:
-        render_table(
-            "Mindoro model ranking",
-            state["mindoro_model_ranking"],
-            download_name="mindoro_model_ranking.csv",
-            height=240,
-        )
-        render_table(
-            "DWH comparator results",
-            state["dwh_all_results"],
-            download_name="dwh_all_results.csv",
-            height=260,
-        )
+    if ui_state["advanced"]:
+        render_markdown_block("Mindoro final-package note", state["mindoro_final_readme"], collapsed=True)

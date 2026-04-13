@@ -1,0 +1,25 @@
+case_id,scenario_key,hours_elapsed,comparison_scope,compartment,opendrift_pct,pygnome_pct,abs_percentage_point_diff,comparable,comparable_reason
+CASE_2016-09-17,light,24,budget_snapshot,surface,2.06,35.58,33.519999999999996,True,Matched budget fraction from stored OpenDrift/OpenOil and deterministic PyGNOME pilot outputs.
+CASE_2016-09-17,light,24,budget_snapshot,evaporated,97.85,45.46,52.38999999999999,True,Matched budget fraction from stored OpenDrift/OpenOil and deterministic PyGNOME pilot outputs.
+CASE_2016-09-17,light,24,budget_snapshot,dispersed,0.09,18.96,18.87,True,Matched budget fraction from stored OpenDrift/OpenOil and deterministic PyGNOME pilot outputs.
+CASE_2016-09-17,light,24,budget_snapshot,beached,0.0,0.0,,False,PyGNOME shoreline/beaching is not mapped to the canonical prototype_2016 shoreline workflow in this pilot.
+CASE_2016-09-17,light,48,budget_snapshot,surface,1.55,29.11,27.56,True,Matched budget fraction from stored OpenDrift/OpenOil and deterministic PyGNOME pilot outputs.
+CASE_2016-09-17,light,48,budget_snapshot,evaporated,74.52,41.35,33.169999999999995,True,Matched budget fraction from stored OpenDrift/OpenOil and deterministic PyGNOME pilot outputs.
+CASE_2016-09-17,light,48,budget_snapshot,dispersed,23.93,29.54,5.609999999999999,True,Matched budget fraction from stored OpenDrift/OpenOil and deterministic PyGNOME pilot outputs.
+CASE_2016-09-17,light,48,budget_snapshot,beached,0.0,0.0,,False,PyGNOME shoreline/beaching is not mapped to the canonical prototype_2016 shoreline workflow in this pilot.
+CASE_2016-09-17,light,72,budget_snapshot,surface,1.52,4.05,2.53,True,Matched budget fraction from stored OpenDrift/OpenOil and deterministic PyGNOME pilot outputs.
+CASE_2016-09-17,light,72,budget_snapshot,evaporated,73.71,6.21,67.5,True,Matched budget fraction from stored OpenDrift/OpenOil and deterministic PyGNOME pilot outputs.
+CASE_2016-09-17,light,72,budget_snapshot,dispersed,24.76,89.74,64.97999999999999,True,Matched budget fraction from stored OpenDrift/OpenOil and deterministic PyGNOME pilot outputs.
+CASE_2016-09-17,light,72,budget_snapshot,beached,0.01,0.0,,False,PyGNOME shoreline/beaching is not mapped to the canonical prototype_2016 shoreline workflow in this pilot.
+CASE_2016-09-17,heavy,24,budget_snapshot,surface,70.36,78.78,8.420000000000002,True,Matched budget fraction from stored OpenDrift/OpenOil and deterministic PyGNOME pilot outputs.
+CASE_2016-09-17,heavy,24,budget_snapshot,evaporated,26.0,21.22,4.780000000000001,True,Matched budget fraction from stored OpenDrift/OpenOil and deterministic PyGNOME pilot outputs.
+CASE_2016-09-17,heavy,24,budget_snapshot,dispersed,3.64,0.0,3.64,True,Matched budget fraction from stored OpenDrift/OpenOil and deterministic PyGNOME pilot outputs.
+CASE_2016-09-17,heavy,24,budget_snapshot,beached,0.0,0.0,,False,PyGNOME shoreline/beaching is not mapped to the canonical prototype_2016 shoreline workflow in this pilot.
+CASE_2016-09-17,heavy,48,budget_snapshot,surface,53.31,77.67,24.36,True,Matched budget fraction from stored OpenDrift/OpenOil and deterministic PyGNOME pilot outputs.
+CASE_2016-09-17,heavy,48,budget_snapshot,evaporated,20.07,22.32,2.25,True,Matched budget fraction from stored OpenDrift/OpenOil and deterministic PyGNOME pilot outputs.
+CASE_2016-09-17,heavy,48,budget_snapshot,dispersed,26.62,0.0,26.62,True,Matched budget fraction from stored OpenDrift/OpenOil and deterministic PyGNOME pilot outputs.
+CASE_2016-09-17,heavy,48,budget_snapshot,beached,0.0,0.0,,False,PyGNOME shoreline/beaching is not mapped to the canonical prototype_2016 shoreline workflow in this pilot.
+CASE_2016-09-17,heavy,72,budget_snapshot,surface,52.35,76.49,24.139999999999993,True,Matched budget fraction from stored OpenDrift/OpenOil and deterministic PyGNOME pilot outputs.
+CASE_2016-09-17,heavy,72,budget_snapshot,evaporated,19.88,23.51,3.6300000000000026,True,Matched budget fraction from stored OpenDrift/OpenOil and deterministic PyGNOME pilot outputs.
+CASE_2016-09-17,heavy,72,budget_snapshot,dispersed,27.46,0.0,27.46,True,Matched budget fraction from stored OpenDrift/OpenOil and deterministic PyGNOME pilot outputs.
+CASE_2016-09-17,heavy,72,budget_snapshot,beached,0.31,0.0,,False,PyGNOME shoreline/beaching is not mapped to the canonical prototype_2016 shoreline workflow in this pilot.

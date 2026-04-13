@@ -25,8 +25,10 @@ DWH_PYGNOME_DIR = Path("output") / "CASE_DWH_RETRO_2010_72H" / "phase3c_dwh_pygn
 CLASSIFICATIONS = {
     "directly_comparable_now",
     "comparable_with_small_adapter",
-    "not_comparable_honestly",
+    "no_matched_phase4_pygnome_package_yet",
 }
+NO_MATCHED_COMPARATOR_CLASSIFICATION = "no_matched_phase4_pygnome_package_yet"
+NO_MATCHED_COMPARATOR_LABEL = "No matched Phase 4 PyGNOME comparison is packaged yet"
 
 
 @dataclass(frozen=True)
@@ -34,6 +36,7 @@ class ComparabilityRow:
     quantity_id: str
     quantity_label: str
     classification: str
+    classification_label: str
     directly_comparable_now: bool
     comparable_with_small_adapter: bool
     pilot_comparison_possible_now: bool
@@ -285,7 +288,8 @@ class Phase4CrossModelComparabilityAuditService:
         row = ComparabilityRow(
             quantity_id=quantity_id,
             quantity_label=quantity_label,
-            classification="not_comparable_honestly",
+            classification=NO_MATCHED_COMPARATOR_CLASSIFICATION,
+            classification_label=NO_MATCHED_COMPARATOR_LABEL,
             directly_comparable_now=False,
             comparable_with_small_adapter=False,
             pilot_comparison_possible_now=False,
@@ -466,7 +470,11 @@ class Phase4CrossModelComparabilityAuditService:
     def _build_verdict(self, rows: list[ComparabilityRow], diagnostics: dict[str, Any]) -> dict[str, Any]:
         directly = [row.quantity_id for row in rows if row.classification == "directly_comparable_now"]
         small_adapter = [row.quantity_id for row in rows if row.classification == "comparable_with_small_adapter"]
-        not_honest = [row.quantity_id for row in rows if row.classification == "not_comparable_honestly"]
+        no_matched_package = [
+            row.quantity_id
+            for row in rows
+            if row.classification == NO_MATCHED_COMPARATOR_CLASSIFICATION
+        ]
         biggest_blocker = self._shared_blocker()
         if diagnostics.get("mindoro_pygnome_weathering_enabled") is False:
             biggest_blocker = (
@@ -477,10 +485,13 @@ class Phase4CrossModelComparabilityAuditService:
             "scientifically_available_now": bool(directly),
             "pilot_only": bool(directly or small_adapter),
             "status": "deferred" if not directly and not small_adapter else "pilot_only",
+            "plain_language_status": NO_MATCHED_COMPARATOR_LABEL
+            if no_matched_package and not directly and not small_adapter
+            else "Pilot-only matched Phase 4 quantities are available",
             "pilot_comparison_produced": False,
             "quantities_directly_comparable_now": directly,
             "quantities_comparable_with_small_adapter": small_adapter,
-            "quantities_not_comparable_honestly": not_honest,
+            "quantities_without_matched_pygnome_package": no_matched_package,
             "biggest_blocker": biggest_blocker,
             "budget_adapter_code_exists_but_is_insufficient": bool(diagnostics.get("budget_adapter_code_available")),
             "requires_new_pygnome_phase4_outputs": True,
@@ -495,7 +506,7 @@ class Phase4CrossModelComparabilityAuditService:
     ) -> str:
         directly = verdict["quantities_directly_comparable_now"]
         small_adapter = verdict["quantities_comparable_with_small_adapter"]
-        not_honest = verdict["quantities_not_comparable_honestly"]
+        no_matched_package = verdict["quantities_without_matched_pygnome_package"]
         scenario_list = ", ".join(diagnostics.get("phase4_scenarios_present") or []) or "none found"
         return "\n".join(
             [
@@ -504,11 +515,12 @@ class Phase4CrossModelComparabilityAuditService:
                 "## Verdict",
                 "",
                 f"- Status: `{verdict['status']}`",
+                f"- Plain-language status: {verdict['plain_language_status']}",
                 f"- Scientifically available now: `{str(verdict['scientifically_available_now']).lower()}`",
                 f"- Pilot comparison produced in this patch: `{str(verdict['pilot_comparison_produced']).lower()}`",
                 f"- Directly comparable now: {', '.join(directly) if directly else 'none'}",
                 f"- Comparable with small adapter: {', '.join(small_adapter) if small_adapter else 'none'}",
-                f"- Not comparable honestly: {', '.join(not_honest) if not_honest else 'none'}",
+                f"- Quantities still lacking a matched PyGNOME package: {', '.join(no_matched_package) if no_matched_package else 'none'}",
                 f"- Biggest blocker: {verdict['biggest_blocker']}",
                 "",
                 "## Key Evidence",
@@ -598,13 +610,14 @@ class Phase4CrossModelComparabilityAuditService:
                     "# Phase 4 Cross-Model Final Verdict",
                     "",
                     f"- Status: `{verdict['status']}`",
+                    f"- Plain-language status: {verdict['plain_language_status']}",
                     f"- Scientifically available now: `{str(verdict['scientifically_available_now']).lower()}`",
                     f"- Pilot comparison figures produced: `{str(verdict['pilot_comparison_produced']).lower()}`",
                     f"- Directly comparable quantities: {', '.join(verdict['quantities_directly_comparable_now']) if verdict['quantities_directly_comparable_now'] else 'none'}",
                     f"- Comparable-with-small-adapter quantities: {', '.join(verdict['quantities_comparable_with_small_adapter']) if verdict['quantities_comparable_with_small_adapter'] else 'none'}",
                     f"- Biggest blocker: {verdict['biggest_blocker']}",
                     "",
-                    "Current Phase 4 OpenDrift outputs are scientifically usable on their own, but the repo does not yet contain matched PyGNOME Phase 4 fate-and-shoreline outputs that would support a defensible cross-model comparison.",
+                    "Current Phase 4 OpenDrift/OpenOil outputs are scientifically usable on their own, but the repo does not yet contain a matched PyGNOME Phase 4 fate-and-shoreline package that would support a defensible cross-model comparison.",
                 ]
             ),
         )

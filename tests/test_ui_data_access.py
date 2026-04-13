@@ -29,19 +29,41 @@ class UiDataAccessTests(unittest.TestCase):
         matrix = data_access.phase4_crossmodel_matrix(REPO_ROOT)
 
         self.assertFalse(matrix.empty)
-        self.assertEqual(set(matrix["classification"].astype(str)), {"not_comparable_honestly"})
+        self.assertEqual(set(matrix["classification"].astype(str)), {"no_matched_phase4_pygnome_package_yet"})
 
     def test_build_dashboard_state_contains_expected_sections(self):
         state = data_access.build_dashboard_state(REPO_ROOT)
 
         for key in (
             "phase_status",
+            "phase1_focused_manifest",
+            "phase1_focused_recipe_ranking",
+            "phase1_reference_recipe_ranking",
             "publication_registry",
             "publication_manifest",
             "phase4_crossmodel_matrix",
             "curated_recommended_figures",
+            "legacy_2016_phase4_comparator_registry",
+            "legacy_2016_phase4_comparator_decision_note",
         ):
             self.assertIn(key, state)
+
+    def test_phase1_focused_artifacts_load(self):
+        manifest = data_access.phase1_focused_manifest(REPO_ROOT)
+        ranking = data_access.phase1_focused_recipe_ranking(REPO_ROOT)
+        accepted = data_access.phase1_focused_accepted_segments(REPO_ROOT)
+
+        self.assertEqual(manifest.get("winning_recipe"), "cmems_era5")
+        self.assertFalse(ranking.empty)
+        self.assertFalse(accepted.empty)
+        self.assertIn("start_time_utc", accepted.columns)
+
+    def test_legacy_2016_phase4_comparator_registry_is_budget_only_light_and_heavy(self):
+        registry = data_access.legacy_2016_phase4_comparator_registry(REPO_ROOT)
+
+        self.assertFalse(registry.empty)
+        scenario_keys = {value for value in registry["scenario_key"].fillna("").astype(str) if value}
+        self.assertEqual(scenario_keys, {"light", "heavy"})
 
     def test_figure_subset_uses_status_keys_for_ambiguous_dwh_rows(self):
         with tempfile.TemporaryDirectory() as tmpdir:

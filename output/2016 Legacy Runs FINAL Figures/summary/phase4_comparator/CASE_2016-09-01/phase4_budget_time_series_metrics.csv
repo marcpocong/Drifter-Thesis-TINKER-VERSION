@@ -1,0 +1,9 @@
+case_id,scenario_key,compartment,comparable,hours_compared,start_hour,end_hour,mae_pct_points,rmse_pct_points,end_horizon_opendrift_pct,end_horizon_pygnome_pct,end_horizon_abs_diff_pct_points,notes
+CASE_2016-09-01,light,surface,True,73,0,72,61.183013698630134,63.7637383531355,34.51,0.0,34.51,Comparator-only descriptive metric. Not an observational skill metric.
+CASE_2016-09-01,light,evaporated,True,73,0,72,18.14739726027397,23.500643651925675,15.58,0.0,15.58,Comparator-only descriptive metric. Not an observational skill metric.
+CASE_2016-09-01,light,dispersed,True,73,0,72,55.43671232876712,64.12720062714395,49.91,100.0,50.09,Comparator-only descriptive metric. Not an observational skill metric.
+CASE_2016-09-01,light,beached,False,0,,72,,,,,,PyGNOME shoreline/beaching is not mapped to the canonical prototype_2016 shoreline workflow in this pilot.
+CASE_2016-09-01,heavy,surface,True,73,0,72,12.13041095890411,13.593166393550097,49.83,74.87,25.040000000000006,Comparator-only descriptive metric. Not an observational skill metric.
+CASE_2016-09-01,heavy,evaporated,True,73,0,72,16.23561643835616,16.418363424356478,10.04,25.13,15.09,Comparator-only descriptive metric. Not an observational skill metric.
+CASE_2016-09-01,heavy,dispersed,True,73,0,72,12.800547945205478,18.31254626437655,40.13,0.0,40.13,Comparator-only descriptive metric. Not an observational skill metric.
+CASE_2016-09-01,heavy,beached,False,0,,72,,,,,,PyGNOME shoreline/beaching is not mapped to the canonical prototype_2016 shoreline workflow in this pilot.

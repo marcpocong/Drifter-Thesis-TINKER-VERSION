@@ -52,6 +52,7 @@ DOC_PATHS = [
     Path("docs") / "COMMAND_MATRIX.md",
     Path("docs") / "LAUNCHER_USER_GUIDE.md",
     Path("docs") / "MINDORO_PRIMARY_VALIDATION_MIGRATION.md",
+    Path("docs") / "PHASE4_COMPARATOR_DECISION.md",
     Path("docs") / "DWH_PHASE3C_FINAL.md",
     Path("docs") / "UI_GUIDE.md",
 ]
@@ -298,7 +299,7 @@ class Phase5LauncherAndDocsSyncService:
                 "launcher_alias_entry_id": "prototype_legacy_final_figures",
                 "primary_output_root": PROTOTYPE_2016_FINAL_OUTPUT_DIR.as_posix(),
                 "reportable_track_ids": "",
-                "appendix_or_support_track_ids": "prototype_legacy_phase3a;prototype_legacy_phase4_weathering;prototype_legacy_phase5_packaging",
+                "appendix_or_support_track_ids": "prototype_legacy_phase3a;prototype_legacy_phase4_weathering;prototype_legacy_phase4_pygnome_comparator;prototype_legacy_phase5_packaging",
                 "notes": prototype_2016_status.panel_text,
             }
         ]
@@ -947,7 +948,7 @@ class Phase5LauncherAndDocsSyncService:
                     "prototype_2016_final_package",
                     output_path.name,
                     output_path,
-                    "Curated prototype_2016 legacy Phase 5 package artifact built from stored Phase 3A/Phase 4 outputs only.",
+                    "Curated prototype_2016 legacy Phase 5 package artifact built from stored Phase 3A outputs, Phase 4 weathering outputs, and the budget-only deterministic Phase 4 PyGNOME pilot when present.",
                 )
 
         for artifact_type, path in sorted(phase5_artifacts.items()):

@@ -30,21 +30,26 @@ def render(state: dict, ui_state: dict) -> None:
     shoreline_status = get_artifact_status("mindoro_phase4_shoreline")
 
     render_page_intro(
-        "Phase 4 Oil-Type & Shoreline",
-        "This page presents the current Mindoro Phase 4 interpretation layer as it exists now: scientifically reportable on the current transport framework, but still inherited-provisional from the upstream Phase 1 and Phase 2 freeze story.",
-        badge="Mindoro Phase 4 | OpenDrift/OpenOil-only",
+        "Phase 4 Oil-Type and Shoreline Context",
+        "This page presents the current Mindoro Phase 4 interpretation layer as it exists now: OpenDrift/OpenOil scenario context for oil-type and shoreline interpretation. It does not present a matched Mindoro Phase 4 PyGNOME package because no such package is currently stored.",
+        badge="Mindoro Phase 4 context | OpenDrift/OpenOil-only",
     )
 
     render_status_callout(
         "Current scope",
-        oil_status.panel_text,
-        "info",
+        "No matched PyGNOME Phase 4 comparison is packaged yet. Current Mindoro Phase 4 results are OpenDrift/OpenOil scenario outputs only.",
+        "warning",
     )
 
     render_status_callout(
         "Follow-up note",
         "The fixed base medium-heavy proxy remains flagged for follow-up because of the recorded mass-balance tolerance exceedance.",
         "warning",
+    )
+    render_status_callout(
+        "Legacy 2016 note",
+        "The only packaged Phase 4 PyGNOME pilot in the repo today is the budget-only deterministic pilot inside the Legacy 2016 Support page. It is support-only and does not change the Mindoro Phase 4 decision.",
+        "info",
     )
 
     figures = figure_subset(
@@ -63,6 +68,8 @@ def render(state: dict, ui_state: dict) -> None:
             title="Mindoro Phase 4 figures",
             caption="Panel-friendly mode leads with the oil-budget and shoreline boards, then exposes scenario-specific singles as needed.",
             limit=None if ui_state["advanced"] else 5,
+            compact_selector=not ui_state["advanced"],
+            selector_key="mindoro_phase4_figures",
         )
 
     with tabs[1]:

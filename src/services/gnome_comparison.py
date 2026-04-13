@@ -261,6 +261,151 @@ class GnomeComparisonService:
         }
         return nc_path, metadata
 
+    def run_matched_phase4_weathering_scenario(
+        self,
+        *,
+        oil_key: str,
+        oil_cfg: dict,
+        start_lat: float,
+        start_lon: float,
+        start_time: str,
+        currents_file: str | Path,
+        winds_file: str | Path,
+        wave_file: str | Path | None = None,
+        output_name: str | None = None,
+        duration_hours: int | None = None,
+        time_step_minutes: int | None = None,
+        output_timestep_minutes: int = 60,
+        random_seed: int = 20260314,
+        num_elements_cap: int = 5000,
+    ) -> tuple[pd.DataFrame, Path, dict]:
+        """
+        Run a deterministic, matched-forcing PyGNOME weathering scenario.
+
+        This is the support-only prototype_2016 Phase 4 comparator path. It keeps:
+        - drifter-of-record point release semantics
+        - matched grid wind and grid current forcing
+        - deterministic diffusion via a fixed random seed
+
+        It does not claim shoreline comparability and does not ingest a shoreline map.
+        """
+        if not GNOME_AVAILABLE:
+            raise RuntimeError("PyGNOME Phase 4 comparator requires the gnome container.")
+
+        duration_hours = (
+            int(duration_hours)
+            if duration_hours is not None
+            else int(self.sim_cfg.get("duration_hours", 72))
+        )
+        time_step_minutes = (
+            int(time_step_minutes)
+            if time_step_minutes is not None
+            else int(self.sim_cfg.get("time_step_minutes", 30))
+        )
+        t_start = pd.to_datetime(start_time, utc=True).tz_localize(None).to_pydatetime()
+
+        wind_path = Path(winds_file)
+        current_path = Path(currents_file)
+        wave_path = Path(wave_file) if wave_file else None
+        if not wind_path.exists():
+            raise FileNotFoundError(f"Matched Phase 4 PyGNOME wind forcing is missing: {wind_path}")
+        if not current_path.exists():
+            raise FileNotFoundError(f"Matched Phase 4 PyGNOME current forcing is missing: {current_path}")
+
+        model = Model(
+            start_time=t_start,
+            duration=timedelta(hours=duration_hours),
+            time_step=timedelta(minutes=time_step_minutes),
+        )
+
+        wind = GridWind.from_netCDF(filename=str(wind_path))
+        current = GridCurrent.from_netCDF(filename=str(current_path))
+        water_temperature_k = float(self.gnome_cfg.get("phase4_water_temperature_k", 301.15))
+        water_salinity_psu = float(self.gnome_cfg.get("phase4_water_salinity_psu", 33.0))
+        water = Water(temperature=water_temperature_k, salinity=water_salinity_psu)
+        waves = Waves(wind=wind, water=water)
+
+        model.environment += [wind, current, water, waves]
+        model.movers += CurrentMover(current)
+        model.movers += WindMover(wind)
+
+        diffusion_coef_cm2s = float(self.gnome_cfg.get("phase4_diffusion_coef_cm2s", 10000.0))
+        model.movers += RandomMover(diffusion_coef=diffusion_coef_cm2s)
+
+        gnome_oil_type = oil_cfg.get("gnome_oil_type", oil_cfg["adios_id"])
+        oil = GnomeOil(gnome_oil_type)
+        num_elements = min(int(self.sim_cfg.get("num_particles", 100000)), int(num_elements_cap))
+
+        model.spills += surface_point_line_spill(
+            num_elements=int(num_elements),
+            start_position=(float(start_lon), float(start_lat), 0.0),
+            release_time=t_start,
+            amount=float(self.sim_cfg.get("initial_mass_tonnes", 50.0)),
+            units="tonnes",
+            substance=oil,
+        )
+
+        model.weatherers += Evaporation(water=water, wind=wind)
+        model.weatherers += NaturalDispersion(waves=waves, water=water)
+
+        nc_path = self.output_dir / (output_name or f"pygnome_{oil_key}.nc")
+        if nc_path.exists():
+            nc_path.unlink()
+        nc_outputter = NetCDFOutput(
+            filename=str(nc_path),
+            which_data="most",
+            output_timestep=timedelta(minutes=int(output_timestep_minutes)),
+        )
+        model.outputters += nc_outputter
+
+        np.random.seed(int(random_seed))
+        model.full_run()
+
+        budget_df = extract_gnome_budget_from_nc(nc_path)
+        csv_path = self.output_dir / f"pygnome_budget_{oil_key}.csv"
+        budget_df.to_csv(csv_path, index=False)
+
+        metadata = {
+            "oil_key": str(oil_key),
+            "oil_type": str(gnome_oil_type),
+            "nc_path": str(nc_path),
+            "budget_csv_path": str(csv_path),
+            "weathering_enabled": True,
+            "start_point_release_used": True,
+            "release_start_utc": str(pd.Timestamp(t_start).strftime("%Y-%m-%dT%H:%M:%SZ")),
+            "duration_hours": int(duration_hours),
+            "time_step_minutes": int(time_step_minutes),
+            "output_timestep_minutes": int(output_timestep_minutes),
+            "num_elements": int(num_elements),
+            "random_seed": int(random_seed),
+            "diffusion_coef_cm2s": float(diffusion_coef_cm2s),
+            "wind_forcing_path": str(wind_path),
+            "current_forcing_path": str(current_path),
+            "wave_forcing_path": str(wave_path) if wave_path else "",
+            "wind_forcing_mode": "grid_wind_from_file",
+            "current_forcing_mode": "grid_current_from_file",
+            "current_mover_used": True,
+            "transport_forcing_mode": "matched_grid_wind_plus_grid_current",
+            "wave_forcing_mode": (
+                "waves_object_from_grid_wind_and_constant_water_with_reference_wave_file"
+                if wave_path
+                else "waves_object_from_grid_wind_and_constant_water"
+            ),
+            "water_temperature_k": float(water_temperature_k),
+            "water_salinity_psu": float(water_salinity_psu),
+            "shoreline_comparison_available": False,
+            "shoreline_comparison_reason": (
+                "No matched PyGNOME shoreline-arrival or shoreline-segment products are generated by this pilot."
+            ),
+            "beached_budget_comparable": False,
+            "beached_budget_reason": (
+                "PyGNOME beached mass is not treated as a matched Phase 4 shoreline quantity in this support-only pilot."
+            ),
+            "support_only": True,
+            "comparator_only": True,
+        }
+        return budget_df, nc_path, metadata
+
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------

@@ -116,7 +116,13 @@ class Phase4CrossModelComparabilityAuditTests(unittest.TestCase):
 
             matrix_df = pd.read_csv(matrix_path)
             self.assertEqual(len(matrix_df.index), 7)
-            self.assertTrue((matrix_df["classification"] == "not_comparable_honestly").all())
+            self.assertTrue((matrix_df["classification"] == "no_matched_phase4_pygnome_package_yet").all())
+            self.assertTrue(
+                (
+                    matrix_df["classification_label"]
+                    == "No matched Phase 4 PyGNOME comparison is packaged yet"
+                ).all()
+            )
             self.assertFalse(results["overall_verdict"]["scientifically_available_now"])
             self.assertFalse(results["overall_verdict"]["pilot_comparison_produced"])
             self.assertIn("weathering disabled", results["overall_verdict"]["biggest_blocker"])

@@ -126,7 +126,7 @@ class PrototypeLegacyFinalFiguresTests(unittest.TestCase):
     bounds = (115.0, 122.0, 6.0, 14.5)
     case_id = "CASE_2016-09-01"
 
-    def _build_fixture(self, root: Path, *, include_benchmark: bool) -> None:
+    def _build_fixture(self, root: Path, *, include_benchmark: bool, include_phase4_comparator: bool = False) -> None:
         _write_text(root / "config" / "publication_figure_style.yaml", STYLE_YAML)
         _write_text(root / "config" / "settings.yaml", "phase_1_start_date:\n  - 2016-09-01\n")
 
@@ -239,6 +239,64 @@ class PrototypeLegacyFinalFiguresTests(unittest.TestCase):
         for filename in ("mass_budget_comparison.png", "mass_budget_light.png", "mass_budget_heavy.png"):
             _write_png(weathering_dir / filename)
 
+        if include_phase4_comparator:
+            comparator_dir = root / "output" / self.case_id / "phase4_pygnome_comparator"
+            comparator_dir.mkdir(parents=True, exist_ok=True)
+            for filename in ("budget_comparison_board.png", "budget_time_series_light.png", "budget_time_series_heavy.png"):
+                _write_png(comparator_dir / filename)
+            pd.DataFrame(
+                [
+                    {
+                        "case_id": self.case_id,
+                        "scenario_key": "light",
+                        "hours_elapsed": 24,
+                        "comparison_scope": "budget_snapshot",
+                        "compartment": "surface",
+                        "opendrift_pct": 90.0,
+                        "pygnome_pct": 88.0,
+                        "abs_percentage_point_diff": 2.0,
+                        "comparable": True,
+                        "comparable_reason": "Matched budget fraction",
+                    }
+                ]
+            ).to_csv(comparator_dir / "phase4_budget_comparison.csv", index=False)
+            pd.DataFrame(
+                [
+                    {
+                        "case_id": self.case_id,
+                        "scenario_key": "light",
+                        "compartment": "surface",
+                        "comparable": True,
+                        "hours_compared": 73,
+                        "start_hour": 0,
+                        "end_hour": 72,
+                        "mae_pct_points": 1.2,
+                        "rmse_pct_points": 1.7,
+                        "end_horizon_opendrift_pct": 60.0,
+                        "end_horizon_pygnome_pct": 58.0,
+                        "end_horizon_abs_diff_pct_points": 2.0,
+                        "notes": "Comparator-only descriptive metric.",
+                    }
+                ]
+            ).to_csv(comparator_dir / "phase4_budget_time_series_metrics.csv", index=False)
+            pd.DataFrame({"hours_elapsed": [0, 24], "surface_pct": [100.0, 88.0]}).to_csv(
+                comparator_dir / "pygnome_budget_light.csv",
+                index=False,
+            )
+            pd.DataFrame({"hours_elapsed": [0, 24], "surface_pct": [100.0, 70.0]}).to_csv(
+                comparator_dir / "pygnome_budget_heavy.csv",
+                index=False,
+            )
+            _write_json(
+                comparator_dir / "pygnome_phase4_run_manifest.json",
+                {
+                    "phase": "prototype_legacy_phase4_pygnome_comparator",
+                    "case_id": self.case_id,
+                    "budget_only_feasible": True,
+                    "shoreline_comparison_feasible": False,
+                },
+            )
+
         if not include_benchmark:
             return
 
@@ -350,7 +408,7 @@ class PrototypeLegacyFinalFiguresTests(unittest.TestCase):
     def test_run_exports_expected_final_legacy_figures_and_manifest(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
-            self._build_fixture(root, include_benchmark=True)
+            self._build_fixture(root, include_benchmark=True, include_phase4_comparator=True)
             service = self._build_service(root)
 
             with mock.patch("src.services.prototype_legacy_final_figures.plot_legacy_drifter_track_map", side_effect=_placeholder_map_writer), mock.patch(
@@ -441,6 +499,27 @@ class PrototypeLegacyFinalFiguresTests(unittest.TestCase):
                     root
                     / "output"
                     / "2016 Legacy Runs FINAL Figures"
+                    / "publication"
+                    / "phase4_comparator"
+                    / self.case_id
+                    / "budget_comparison_board.png"
+                ).exists()
+            )
+            self.assertTrue(
+                (
+                    root
+                    / "output"
+                    / "2016 Legacy Runs FINAL Figures"
+                    / "summary"
+                    / "phase4_comparator"
+                    / "prototype_2016_phase4_pygnome_comparator_registry.csv"
+                ).exists()
+            )
+            self.assertTrue(
+                (
+                    root
+                    / "output"
+                    / "2016 Legacy Runs FINAL Figures"
                     / "phase5"
                     / "prototype_2016_packaging_summary.md"
                 ).exists()
@@ -454,6 +533,11 @@ class PrototypeLegacyFinalFiguresTests(unittest.TestCase):
                 "output/2016 Legacy Runs FINAL Figures",
             )
             self.assertFalse(curated_manifest["scientific_rerun_performed"])
+            self.assertIn("publication_phase4_comparator_dir", curated_manifest)
+            self.assertIn(
+                "A limited deterministic Phase 4 PyGNOME budget comparator pilot may be packaged when stored case-local comparator outputs exist; shoreline comparison remains unavailable in that pilot.",
+                curated_manifest["notes"],
+            )
             registry_path = root / results["legacy_final_output_registry_csv"]
             with open(registry_path, "r", encoding="utf-8", newline="") as handle:
                 reader = csv.DictReader(handle)
@@ -463,6 +547,9 @@ class PrototypeLegacyFinalFiguresTests(unittest.TestCase):
             self.assertTrue(all((root / Path(row["final_relative_path"])).exists() for row in registry_rows))
             self.assertTrue(
                 any(row["phase_group"] == "phase4" and row["copied_vs_regenerated"] == "regenerated_from_stored_csv" for row in registry_rows)
+            )
+            self.assertTrue(
+                any(row["phase_group"] == "phase4_comparator" and row["comparator_only"] == "True" for row in registry_rows)
             )
             self.assertIn(
                 "PyGNOME remains comparator-only; matched grid wind/current forcing is used when available and degraded mode is surfaced explicitly otherwise.",

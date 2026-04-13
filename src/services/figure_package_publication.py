@@ -91,7 +91,7 @@ FIGURE_FAMILIES: dict[str, str] = {
     "C": "Mindoro legacy March 6 honesty / limitations package",
     "D": "Mindoro trajectory publication package",
     "E": "Mindoro Phase 4 OpenDrift-only publication package",
-    "F": "Mindoro Phase 4 cross-model deferred note package",
+    "F": "Mindoro Phase 4 no-matched-PyGNOME note package",
     "G": "DWH deterministic publication package",
     "H": "DWH deterministic vs ensemble publication package",
     "I": "DWH OpenDrift vs PyGNOME publication package",
@@ -2666,7 +2666,12 @@ class FigurePackagePublicationService:
 
     def _phase4_deferred_note_lines(self) -> list[str]:
         matrix = _read_csv(self.repo_root / PHASE4_CROSSMODEL_MATRIX)
-        not_comparable = int((matrix.get("classification", pd.Series(dtype=str)) == "not_comparable_honestly").sum()) if not matrix.empty else 0
+        not_packaged = int(
+            (
+                matrix.get("classification", pd.Series(dtype=str)).astype(str)
+                == "no_matched_phase4_pygnome_package_yet"
+            ).sum()
+        ) if not matrix.empty else 0
         blocker_text = ""
         blockers_path = self.repo_root / PHASE4_CROSSMODEL_BLOCKERS
         if blockers_path.exists():
@@ -2675,7 +2680,11 @@ class FigurePackagePublicationService:
                 blocker_text = blocker_lines[0]
         if not blocker_text:
             blocker_text = "The current Mindoro PyGNOME benchmark is transport-only with weathering disabled, so it cannot support Phase 4 fate or shoreline comparison."
-        quantity_text = f"All {not_comparable} audited Phase 4 quantities were classified as not honestly comparable with the current stored PyGNOME outputs." if not_comparable else "The current stored outputs do not support an honest Phase 4 OpenDrift-versus-PyGNOME comparison."
+        quantity_text = (
+            f"All {not_packaged} audited Phase 4 quantities still lack a matched PyGNOME package in the current repo outputs."
+            if not_packaged
+            else "No matched Phase 4 PyGNOME comparison is packaged yet."
+        )
         return [
             quantity_text,
             blocker_text,
@@ -3394,7 +3403,7 @@ class FigurePackagePublicationService:
                 model_names="openoil_only",
                 run_type="single_note",
                 figure_slug="crossmodel_comparison_deferred",
-                figure_title="Mindoro Phase 4 cross-model comparison is deferred",
+                figure_title="No matched Mindoro Phase 4 PyGNOME comparison is packaged yet",
                 subtitle="Mindoro | Phase 4 | publication package shows OpenDrift-only fate and shoreline results",
                 interpretation="This figure explains why the publication package includes OpenDrift-only Phase 4 figures and does not include a fake OpenDrift-versus-PyGNOME Phase 4 comparison.",
                 notes="Built from the stored Phase 4 cross-model comparability audit only.",
@@ -4077,7 +4086,7 @@ class FigurePackagePublicationService:
             "output_dir": _relative_to_repo(self.repo_root, self.output_dir),
             "publication_package_built_from_existing_outputs_only": True,
             "expensive_scientific_reruns_triggered": False,
-            "phase4_crossmodel_comparison_status": "deferred",
+            "phase4_crossmodel_comparison_status": "no_matched_pygnome_package_yet",
             "phase4_deferred_comparison_note_figure_produced": bool(deferred_note_figure_ids),
             "phase4_deferred_comparison_note_figure_ids": deferred_note_figure_ids,
             "style_config_path": _relative_to_repo(self.repo_root, self.repo_root / STYLE_CONFIG_PATH),

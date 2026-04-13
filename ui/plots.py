@@ -42,6 +42,11 @@ def phase4_budget_summary_figure(summary_df: pd.DataFrame) -> plt.Figure:
         ax.text(0.5, 0.5, "Phase 4 oil-budget summary not available.", ha="center", va="center")
         ax.axis("off")
         return fig
+    required_columns = {"oil_label", "final_evaporated_pct", "final_dispersed_pct", "final_beached_pct"}
+    if not required_columns.issubset(summary_df.columns):
+        ax.text(0.5, 0.5, "Phase 4 oil-budget summary is incomplete.", ha="center", va="center")
+        ax.axis("off")
+        return fig
     df = summary_df.copy()
     x = range(len(df))
     ax.bar(x, df["final_evaporated_pct"], label="Evaporated %", color="#f28c28")
@@ -64,15 +69,26 @@ def phase4_budget_summary_figure(summary_df: pd.DataFrame) -> plt.Figure:
 
 def comparability_status_figure(matrix_df: pd.DataFrame) -> plt.Figure:
     fig, ax = plt.subplots(figsize=(7.2, 3.8))
-    if matrix_df.empty:
+    if matrix_df.empty or "classification" not in matrix_df.columns:
         ax.text(0.5, 0.5, "Phase 4 cross-model matrix not available.", ha="center", va="center")
         ax.axis("off")
         return fig
-    counts = matrix_df["classification"].astype(str).value_counts().sort_index()
+    display_map = {
+        "directly_comparable_now": "Comparable now",
+        "comparable_with_small_adapter": "Small adapter needed",
+        "no_matched_phase4_pygnome_package_yet": "No matched\nPyGNOME package yet",
+    }
+    counts = (
+        matrix_df["classification"]
+        .astype(str)
+        .map(lambda value: display_map.get(value, value.replace("_", " ")))
+        .value_counts()
+        .sort_index()
+    )
     ax.bar(counts.index.tolist(), counts.values.tolist(), color="#9b4dca")
     ax.set_ylabel("Quantity count")
     ax.set_title("Phase 4 cross-model comparability status")
-    ax.tick_params(axis="x", rotation=15)
+    ax.tick_params(axis="x", rotation=0)
     ax.grid(axis="y", linestyle="--", alpha=0.35)
     fig.tight_layout()
     return fig

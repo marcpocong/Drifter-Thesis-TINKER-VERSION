@@ -53,7 +53,7 @@ Expected files:
 
 Interpretation:
 
-- use this directory to answer whether Phase 4 OpenDrift-versus-PyGNOME comparison is scientifically available now, pilot-only, or deferred
+- use this directory to answer whether a matched Phase 4 OpenDrift-versus-PyGNOME comparison is scientifically available now, pilot-only, or still not packaged
 - do not infer a valid Phase 4 cross-model comparison just from the existence of Phase 3 spatial PyGNOME comparator outputs
 - `output/phase4_crossmodel_comparison/` should only appear later if the audit finds one or more quantities honestly comparable
 
@@ -155,11 +155,13 @@ Interpretation:
 - the flat per-case `CASE_2016-.../` figure directories remain for backward compatibility
 - `publication/phase3a/` reuses the legacy OpenDrift-vs-deterministic-PyGNOME comparator figures
 - `publication/phase4/` reuses stored weathering/fate budget PNGs and adds honest shoreline summary figures rendered from stored shoreline CSVs only
+- `publication/phase4_comparator/` packages the budget-only deterministic PyGNOME Phase 4 pilot when stored case-local comparator outputs exist
 - `scientific_source_pngs/` keeps the exact stored source PNGs used by the curated publication family
-- `summary/` keeps the copied similarity tables, per-case pairing artifacts, weathering CSVs, and packaging notes
+- `summary/` keeps the copied similarity tables, per-case pairing artifacts, weathering CSVs, the Phase 4 comparator decision note, and packaging notes
 - `prototype_2016` remains support-only, with visible thesis-facing support flow `Phase 1 -> Phase 2 -> Phase 3A -> Phase 4 -> Phase 5`
 - this lane has no thesis-facing `Phase 3B` or `Phase 3C`
 - the generic `output/figure_package_publication/` package remains mostly a 2016 Phase 3A figure source; the dedicated 2016 Phase 4/Phase 5 packaging now lives here
+- the Phase 4 comparator pilot stays budget-only and descriptive; shoreline comparison is not packaged unless matched PyGNOME shoreline products exist
 
 ## Phase 4 Support Outputs
 
@@ -255,7 +257,7 @@ Interpretation:
 - filenames remain machine-readable, with case, phase/track, model, run type, date/date-range, scenario, view type, and variant tokens
 - recommended-for-defense and recommended-for-paper flags are recorded in the publication registry and manifest
 - Phase 3 OpenDrift-versus-PyGNOME comparison figures are included where those comparator products exist now
-- Mindoro Phase 4 is shown as OpenDrift-only support/context material; the package includes a deferred-comparison note figure instead of a fake Phase 4 OpenDrift-versus-PyGNOME board
+- Mindoro Phase 4 is shown as OpenDrift/OpenOil-only support/context material; the package includes a no-matched-PyGNOME note figure instead of a fake Phase 4 OpenDrift-versus-PyGNOME board
 - publication family `K` republishes the preferred accepted-segment 2021 deterministic OpenDrift-vs-PyGNOME forecast figures as support-only material rather than main-defense evidence, while the 2016 prototype package remains preserved as legacy output
 - Mindoro publication figures now report the promoted March 13 -> March 14 B1 validation while explicitly inheriting recipe provenance from the separate focused 2016-2023 Mindoro Phase 1 rerun; DWH figures remain transfer-validation/support visuals
 
@@ -399,7 +401,7 @@ Interpretation:
 
 - this is a read-only support/explorer layer rather than a new scientific phase
 - it is intentionally read-only in the first version
-- it defaults to the publication-grade figure package for panel-friendly viewing
+- it now prioritizes the curated final package roots (`Phase 3B March13-14 Final Output`, `Phase 3C DWH Final Output`, and `2016 Legacy Runs FINAL Figures`) before falling back to the generic publication package or raw case trees
 - it surfaces the Phase 4 cross-model deferred status explicitly instead of fabricating comparison products
 
 ## Case Output Trees
