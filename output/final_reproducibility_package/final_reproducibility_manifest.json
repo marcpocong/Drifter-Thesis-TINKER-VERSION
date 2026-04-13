@@ -1,6 +1,6 @@
 {
   "phase": "phase5_launcher_and_docs_sync",
-  "generated_at_utc": "2026-04-13T05:36:14.156043+00:00",
+  "generated_at_utc": "2026-04-13T13:25:36.768221+00:00",
   "repo_root": "/app",
   "output_dir": "output/final_reproducibility_package",
   "launcher_catalog": {
@@ -191,7 +191,7 @@
       "main_blocker": "",
       "reportable_now": true,
       "reportability_scope": "external_rich_data_transfer_validation",
-      "summary": "Main DWH deterministic transfer-validation track. fss_1km=0.5033, fss_3km=0.5523, fss_5km=0.5700, fss_10km=0.6018",
+      "summary": "Frozen DWH deterministic transfer-validation baseline. fss_1km=0.5033, fss_3km=0.5523, fss_5km=0.5700, fss_10km=0.6018",
       "evidence_path": "output/final_validation_package/final_validation_manifest.json"
     },
     {
@@ -205,7 +205,7 @@
       "main_blocker": "",
       "reportable_now": true,
       "reportability_scope": "external_rich_data_transfer_validation",
-      "summary": "DWH ensemble extension on the same truth masks; p50 preferred, p90 support-only. fss_1km=0.4997, fss_3km=0.5299, fss_5km=0.5467, fss_10km=0.5790",
+      "summary": "Frozen DWH ensemble extension on the same truth masks; p50 preferred, p90 support-only. fss_1km=0.4997, fss_3km=0.5299, fss_5km=0.5467, fss_10km=0.5790",
       "evidence_path": "output/final_validation_package/final_validation_manifest.json"
     },
     {
@@ -219,7 +219,7 @@
       "main_blocker": "",
       "reportable_now": true,
       "reportability_scope": "cross_model_comparator",
-      "summary": "DWH cross-model comparator; PyGNOME not truth. fss_1km=0.3197, fss_3km=0.3495, fss_5km=0.3689, fss_10km=0.4068",
+      "summary": "Frozen DWH cross-model comparator; PyGNOME not truth. fss_1km=0.3197, fss_3km=0.3495, fss_5km=0.3689, fss_10km=0.4068",
       "evidence_path": "output/final_validation_package/final_validation_manifest.json"
     },
     {

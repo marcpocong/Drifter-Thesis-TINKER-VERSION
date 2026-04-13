@@ -87,7 +87,7 @@ Safe utilities that summarize or audit the current repo state without rerunning 
   Note: Builds output/figure_package_publication without rerunning expensive scientific branches.
   Run with: `./start.ps1 -Entry figure_package_publication -NoPause`
 - `prototype_legacy_final_figures`: Prototype 2016 final paper figures. Workflow mode = `prototype_2016`. Cost = `cheap_read_only`. Safe read-only default = `true`. Phases = prototype_legacy_final_figures.
-  Note: Builds output/2016 Legacy Runs FINAL Figures without rerunning the scientific workflow. This is a legacy-support paper set only; output/figure_package_publication remains the canonical generic publication package.
+  Note: Builds output/2016 Legacy Runs FINAL Figures as the authoritative curated prototype_2016 legacy support package without rerunning the scientific workflow. The structured package now includes publication/phase3a, publication/phase4, scientific_source_pngs, summary, manifests, and phase5 notes; output/figure_package_publication remains the generic repo-wide publication package and is not the authoritative 2016 Phase 4 package.
   Run with: `./start.ps1 -Entry prototype_legacy_final_figures -NoPause`
 
 ### Legacy prototype tracks
@@ -98,13 +98,13 @@ Backward-compatible prototype workflows preserved for debugging and regression.
   Note: Preferred debug/demo lane only. Built from the two accepted 2021 strict-gate drifter segments, uses the official four-recipe Phase 1 family, and stops at the transport-core bundle. Phase 3B and Phase 4 are separate and are not part of this proof path.
   Run with: `./start.ps1 -Entry prototype_2021_bundle -NoPause`
 - `prototype_legacy_bundle`: Prototype 2016 legacy bundle. Workflow mode = `prototype_2016`. Cost = `moderate`. Safe read-only default = `false`. Phases = prep, 1_2, benchmark, prototype_pygnome_similarity_summary, prototype_legacy_phase4_weathering, prototype_legacy_final_figures.
-  Note: Backward-compatible legacy debug/regression path only. Not the preferred debug lane and not the final Chapter 3 Phase 1 study. Prototype prep now attempts GFS too, but missing GFS remains best-effort and does not collapse the legacy bundle. The visible thesis-facing legacy flow is Phase 1 -> Phase 2 -> Phase 3A -> Phase 4, with Phase 5 available separately through phase5_sync. The PyGNOME similarity step is transport-only, comparator-only, and now surfaces deterministic plus p50/p90 legacy support tracks. There is no thesis-facing prototype_2016 Phase 3B or Phase 3C.
+  Note: Backward-compatible legacy debug/regression path only. Not the preferred debug lane and not the final Chapter 3 Phase 1 study. Prototype prep now attempts GFS too, but missing GFS remains best-effort and does not collapse the legacy bundle. The visible thesis-facing legacy flow is Phase 1 -> Phase 2 -> Phase 3A -> Phase 4 -> Phase 5; the scientific rerun chain stops at Phase 4 and the bundle finishes with the read-only prototype_legacy_final_figures export. Repo-wide phase5_sync remains a separate cross-repo packaging layer. The PyGNOME similarity step is transport-only, comparator-only, and now surfaces deterministic plus p50/p90 legacy support tracks. There is no thesis-facing prototype_2016 Phase 3B or Phase 3C.
   Run with: `./start.ps1 -Entry prototype_legacy_bundle -NoPause`
 
 ## Guardrails
 
 - `prototype_2016` remains available for debugging and regression only; it is not the final Phase 1 study.
-- `prototype_2016` is thesis-facing only as Phase 1 / 2 / 3A / 4, with `phase5_sync` kept separate and no thesis-facing 3B/3C lane.
+- `prototype_2016` is thesis-facing only as Phase 1 / 2 / 3A / 4 / 5, with its dedicated curated package rooted at `output/2016 Legacy Runs FINAL Figures` and no thesis-facing 3B/3C lane. Repo-wide `phase5_sync` remains a separate cross-repo reproducibility layer.
 - `mindoro_reportable_core` and `dwh_reportable_bundle` are intentional scientific reruns and are not safe defaults.
 - The read-only utilities do not recompute scientific scores and are the safest launcher options for routine status refreshes.
 

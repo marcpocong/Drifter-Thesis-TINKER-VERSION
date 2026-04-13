@@ -138,24 +138,27 @@ STATUS_REGISTRY: dict[str, ArtifactStatus] = {
         label="DWH deterministic external transfer validation",
         panel_label="DWH deterministic external transfer validation",
         role="transfer_validation",
-        reportability="reportable_now_inherited_provisional",
+        reportability="reportable_now_frozen",
         official_status="reportable_external_transfer_validation",
-        frozen_status="not_frozen",
-        provenance_label="DWH public masks remain truth under the stored historical forcing stack.",
+        frozen_status="frozen",
+        provenance_label=(
+            "DWH public masks remain truth under the frozen readiness-gated HYCOM GOFS 3.1 + ERA5 + "
+            "CMEMS wave/Stokes stack."
+        ),
         panel_text=(
             "Use this as the clean baseline DWH transfer-validation view; it supports the external-case success "
             "story but does not replace the Mindoro main case."
         ),
-        dashboard_summary="Main DWH deterministic transfer-validation track.",
+        dashboard_summary="Frozen DWH deterministic transfer-validation baseline.",
     ),
     "dwh_observation_truth_context": ArtifactStatus(
         key="dwh_observation_truth_context",
         label="DWH observation-derived truth context",
         panel_label="DWH observation-derived truth context",
         role="observation_truth_context",
-        reportability="reportable_now_inherited_provisional",
+        reportability="reportable_now_frozen",
         official_status="truth_context_for_transfer_validation",
-        frozen_status="not_frozen",
+        frozen_status="frozen",
         provenance_label=(
             "DWH public masks remain truth and are used as date-composite daily or event-corridor context without "
             "claiming exact sub-daily acquisition times."
@@ -164,34 +167,37 @@ STATUS_REGISTRY: dict[str, ArtifactStatus] = {
             "Use this to establish the DWH observation-derived truth masks before any deterministic, ensemble, or "
             "PyGNOME comparison is shown."
         ),
-        dashboard_summary="Observation-derived truth context for the DWH external transfer-validation lane.",
+        dashboard_summary="Frozen observation-derived truth context for the DWH external transfer-validation lane.",
     ),
     "dwh_ensemble_transfer": ArtifactStatus(
         key="dwh_ensemble_transfer",
         label="DWH ensemble extension and deterministic-vs-ensemble comparison",
         panel_label="DWH ensemble extension and deterministic-vs-ensemble comparison",
         role="transfer_validation_comparison",
-        reportability="reportable_now_inherited_provisional",
+        reportability="reportable_now_frozen",
         official_status="reportable_ensemble_comparison",
-        frozen_status="not_frozen",
-        provenance_label="Same DWH truth masks as the deterministic track.",
+        frozen_status="frozen",
+        provenance_label=(
+            "Same frozen DWH truth masks and forcing stack as the deterministic track; p50 is the preferred "
+            "probabilistic extension and p90 remains support/comparison only."
+        ),
         panel_text=(
             "Use this to explain deterministic, p50, and p90 differences without overstating ensemble benefit as "
             "universal; p50 is the preferred probabilistic extension and p90 is support/comparison only."
         ),
-        dashboard_summary="DWH ensemble extension on the same truth masks; p50 preferred, p90 support-only.",
+        dashboard_summary="Frozen DWH ensemble extension on the same truth masks; p50 preferred, p90 support-only.",
     ),
     "dwh_crossmodel_comparator": ArtifactStatus(
         key="dwh_crossmodel_comparator",
         label="DWH PyGNOME comparator-only",
         panel_label="DWH PyGNOME comparator-only",
         role="comparator_only",
-        reportability="reportable_comparator_inherited_provisional",
+        reportability="reportable_comparator_frozen",
         official_status="comparator_only_not_truth",
-        frozen_status="not_frozen",
-        provenance_label="DWH observed masks remain truth; PyGNOME is comparator-only.",
+        frozen_status="frozen",
+        provenance_label="DWH observed masks remain truth; PyGNOME is a frozen comparator-only track and never truth.",
         panel_text="Use this for cross-model comparison only; PyGNOME is not truth and does not replace the OpenDrift DWH story.",
-        dashboard_summary="DWH cross-model comparator; PyGNOME not truth.",
+        dashboard_summary="Frozen DWH cross-model comparator; PyGNOME not truth.",
     ),
     "dwh_trajectory_context": ArtifactStatus(
         key="dwh_trajectory_context",
@@ -225,9 +231,9 @@ STATUS_REGISTRY: dict[str, ArtifactStatus] = {
         reportability="support_only_not_final_evidence",
         official_status="legacy_support_only_not_official",
         frozen_status="not_final_phase1_study",
-        provenance_label="Legacy/debug regression lane preserved for reproducibility only.",
-        panel_text="Legacy debug support only; comparator-only and not final Phase 1 evidence.",
-        dashboard_summary="Legacy debug support lane; not the preferred prototype lane.",
+        provenance_label="Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only.",
+        panel_text="Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
+        dashboard_summary="Legacy debug support lane with a dedicated curated Phase 5 package; not the preferred prototype lane or final Phase 1 evidence.",
     ),
 }
 

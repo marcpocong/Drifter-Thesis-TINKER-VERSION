@@ -5,7 +5,7 @@
 - Phase 1: Mindoro-specific recipe provenance is now finalized through the separate focused `2016-2023` drifter rerun selecting `cmems_era5`; the broader `2016-2022` regional rerun remains preserved as a reference/governance lane and currently selects `cmems_gfs`.
 - Phase 2: scientifically usable, not frozen.
 - Mindoro Phase 3: validation-focused and reportable; `Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents` is now carried by the March 13 -> March 14 B1 row, March 6 remains the preserved sparse-reference honesty case, the promotion is tracked by amendment rather than by rewriting the frozen March 3 -> March 6 case file, and B1 now inherits its recipe provenance from the separate focused `2016-2023` Mindoro drifter rerun without claiming direct drifter ingestion inside Phase 3B itself.
-- DWH Phase 3C: validation-only external rich-data transfer case kept separate from drifter-calibration governance.
+- DWH Phase 3C: frozen validation-only external rich-data transfer case kept separate from drifter-calibration governance.
 - Mindoro `phase4_oiltype_and_shoreline`: implemented as a support/context bundle outside the main thesis phase count; thesis-facing `Phase 4` labeling is reserved for `prototype_2016`.
 - Phase 4 cross-model comparison: deferred; current PyGNOME branches remain comparator-only for transport/spatial work rather than matched Phase 4 fate-and-shoreline outputs.
 - Repo sync, galleries, publication packaging, and dashboard layers: read-only support/explorer surfaces outside the main thesis phase count; thesis-facing `Phase 5` labeling is reserved for `prototype_2016`.
@@ -126,13 +126,14 @@ Promotion and provenance control:
 
 ## DWH Phase 3C
 
-- Plain-language status: validation-only external rich-data transfer case.
+- Plain-language status: frozen validation-only external rich-data transfer case.
 - Thesis framing: separate external transfer-validation/support case; Mindoro remains the main Philippine thesis case.
+- C-track semantics: `C1` deterministic external transfer validation, `C2` ensemble extension and deterministic-vs-ensemble comparison, `C3` PyGNOME comparator-only.
 - Deterministic OpenDrift: reportable transfer-validation result and the clean baseline DWH result.
 - Ensemble comparison: reportable transfer-validation support/comparative result; p50 is the preferred probabilistic extension and p90 remains support/comparison only.
 - PyGNOME comparator: reportable comparator-only result and never truth.
-- Frozen: `false`
-- Inherited provisional: `true`
+- Frozen: `true`
+- Inherited provisional: `false`
 - Guardrail: DWH observed masks remain truth, and PyGNOME remains comparator-only.
 - No new drifter ingestion: thesis-facing DWH packaging does not ingest new drifter data and does not reopen Phase 1-style recipe competition.
 - Forcing-stack selection rule: readiness-gated historical stack, not Phase 1 drifter-selected baseline logic.
@@ -142,6 +143,7 @@ Promotion and provenance control:
 - Scientific-ready means: not smoke-only, full May 20-23, 2010 coverage, required variables and usable metadata present, OpenDrift reader exposes the required variables, and the assembled stack completes a small reader-check forecast.
 - Drop-in methods note: `docs/DWH_METHODS_NOTE.md`
 - Final governance note: `docs/DWH_PHASE3C_FINAL.md`
+- Freeze sync note: `docs/DWH_PHASE3C_FREEZE_SYNC_NOTE.md`
 
 ## Phase 4 Support Layer
 

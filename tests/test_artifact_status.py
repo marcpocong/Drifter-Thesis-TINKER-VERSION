@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 
 from src.core.artifact_status import (
     artifact_status_columns,
@@ -77,6 +78,26 @@ class ArtifactStatusTests(unittest.TestCase):
 
         self.assertEqual(status["status_key"], "dwh_observation_truth_context")
         self.assertIn("truth context", status["status_label"].lower())
+
+    def test_dwh_reportable_tracks_are_frozen_not_inherited_provisional(self):
+        deterministic = artifact_status_columns_for_key("dwh_deterministic_transfer")
+        ensemble = artifact_status_columns_for_key("dwh_ensemble_transfer")
+        comparator = artifact_status_columns_for_key("dwh_crossmodel_comparator")
+
+        self.assertEqual(deterministic["status_frozen_status"], "frozen")
+        self.assertEqual(ensemble["status_frozen_status"], "frozen")
+        self.assertEqual(comparator["status_frozen_status"], "frozen")
+        self.assertIn("frozen", deterministic["status_dashboard_summary"].lower())
+        self.assertIn("frozen", ensemble["status_dashboard_summary"].lower())
+        self.assertIn("frozen", comparator["status_dashboard_summary"].lower())
+
+    def test_dwh_case_config_no_longer_marks_c2_or_c3_deferred(self):
+        config_text = Path("config/case_dwh_retro_2010_72h.yaml").read_text(encoding="utf-8")
+
+        self.assertNotIn("deferred_until_clean_dwh_ensemble_semantics_are_implemented", config_text)
+        self.assertNotIn("deferred_if_not_cleanly_available", config_text)
+        self.assertIn("frozen_reportable_probabilistic_extension_p50_preferred_p90_support_only", config_text)
+        self.assertIn("frozen_reportable_comparator_only", config_text)
 
 
 if __name__ == "__main__":

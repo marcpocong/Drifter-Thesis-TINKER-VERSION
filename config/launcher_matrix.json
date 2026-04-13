@@ -522,11 +522,11 @@
       "category_id": "read_only_packaging_help_utilities",
       "workflow_mode": "prototype_2016",
       "label": "Prototype 2016 final paper figures",
-      "description": "Read-only curated legacy-2016 final paper-figure export built from existing Phase 2, benchmark, and prototype similarity outputs only.",
+      "description": "Read-only curated prototype_2016 Phase 5 legacy package built from existing Phase 3A, Phase 4, and stored final-figure outputs only.",
       "service_profile": "pipeline_only",
       "rerun_cost": "cheap_read_only",
       "safe_default": true,
-      "notes": "Builds output/2016 Legacy Runs FINAL Figures without rerunning the scientific workflow. This is a legacy-support paper set only; output/figure_package_publication remains the canonical generic publication package.",
+      "notes": "Builds output/2016 Legacy Runs FINAL Figures as the authoritative curated prototype_2016 legacy support package without rerunning the scientific workflow. The structured package now includes publication/phase3a, publication/phase4, scientific_source_pngs, summary, manifests, and phase5 notes; output/figure_package_publication remains the generic repo-wide publication package and is not the authoritative 2016 Phase 4 package.",
       "steps": [
         {
           "phase": "prototype_legacy_final_figures",
@@ -579,7 +579,7 @@
       "service_profile": "mixed_pipeline_and_gnome",
       "rerun_cost": "moderate",
       "safe_default": false,
-      "notes": "Backward-compatible legacy debug/regression path only. Not the preferred debug lane and not the final Chapter 3 Phase 1 study. Prototype prep now attempts GFS too, but missing GFS remains best-effort and does not collapse the legacy bundle. The visible thesis-facing legacy flow is Phase 1 -> Phase 2 -> Phase 3A -> Phase 4, with Phase 5 available separately through phase5_sync. The PyGNOME similarity step is transport-only, comparator-only, and now surfaces deterministic plus p50/p90 legacy support tracks. There is no thesis-facing prototype_2016 Phase 3B or Phase 3C.",
+      "notes": "Backward-compatible legacy debug/regression path only. Not the preferred debug lane and not the final Chapter 3 Phase 1 study. Prototype prep now attempts GFS too, but missing GFS remains best-effort and does not collapse the legacy bundle. The visible thesis-facing legacy flow is Phase 1 -> Phase 2 -> Phase 3A -> Phase 4 -> Phase 5; the scientific rerun chain stops at Phase 4 and the bundle finishes with the read-only prototype_legacy_final_figures export. Repo-wide phase5_sync remains a separate cross-repo packaging layer. The PyGNOME similarity step is transport-only, comparator-only, and now surfaces deterministic plus p50/p90 legacy support tracks. There is no thesis-facing prototype_2016 Phase 3B or Phase 3C.",
       "steps": [
         {
           "phase": "prep",

@@ -181,6 +181,62 @@ class PrototypeLegacyFinalFiguresTests(unittest.TestCase):
         similarity_dir = root / "output" / "prototype_2016_pygnome_similarity"
         similarity_dir.mkdir(parents=True, exist_ok=True)
         pd.DataFrame(similarity_rows).to_csv(similarity_dir / "prototype_pygnome_similarity_by_case.csv", index=False)
+        pd.DataFrame(similarity_rows).to_csv(similarity_dir / "prototype_pygnome_fss_by_case_window.csv", index=False)
+        pd.DataFrame(similarity_rows).to_csv(similarity_dir / "prototype_pygnome_kl_by_case_hour.csv", index=False)
+        pd.DataFrame([{"case_id": self.case_id, "figure_id": "sample"}]).to_csv(
+            similarity_dir / "prototype_pygnome_case_registry.csv",
+            index=False,
+        )
+        pd.DataFrame([{"figure_id": "sample", "relative_path": "output/prototype_2016_pygnome_similarity/figures/sample.png"}]).to_csv(
+            similarity_dir / "prototype_pygnome_figure_registry.csv",
+            index=False,
+        )
+        _write_text(similarity_dir / "prototype_pygnome_similarity_summary.md", "prototype summary")
+        _write_text(similarity_dir / "prototype_pygnome_figure_captions.md", "captions")
+        _write_json(similarity_dir / "prototype_pygnome_similarity_manifest.json", {"workflow_mode": "prototype_2016"})
+        pd.DataFrame(columns=["case_id", "error_message"]).to_csv(
+            similarity_dir / "prototype_pygnome_skipped_cases.csv",
+            index=False,
+        )
+        similarity_figures_dir = similarity_dir / "figures"
+        similarity_figures_dir.mkdir(parents=True, exist_ok=True)
+        publication_dir = root / "output" / "figure_package_publication"
+        publication_dir.mkdir(parents=True, exist_ok=True)
+        for source_name in (
+            "case_2016_09_01__prototype_2016__24h__opendrift__single.png",
+            "case_2016_09_01__prototype_2016__24h__pygnome__single.png",
+            "case_2016_09_01__prototype_2016__24_48_72h__opendrift_vs_pygnome__board.png",
+        ):
+            _write_png(similarity_figures_dir / source_name)
+        for publication_name in (
+            "case_2016_09_01__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_02__single__paper__case_2016_09_01_prototype_2016_24h_opendrift_single.png",
+            "case_2016_09_01__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_02__single__paper__case_2016_09_01_prototype_2016_24h_pygnome_single.png",
+            "case_2016_09_01__prototype_pygnome_similarity_summary__opendrift_vs_pygnome__comparison_board__2016_09_02_to_2016_09_04__board__slide__case_2016_09_01_prototype_2016_24_48_72h_opendrift_vs_pygnome_board.png",
+        ):
+            _write_png(publication_dir / publication_name)
+
+        weathering_dir = root / "output" / self.case_id / "weathering"
+        weathering_dir.mkdir(parents=True, exist_ok=True)
+        pd.DataFrame({"hour": [0, 24], "surface_pct": [100.0, 75.0]}).to_csv(
+            weathering_dir / "budget_light.csv",
+            index=False,
+        )
+        pd.DataFrame({"hour": [0, 24], "surface_pct": [100.0, 60.0]}).to_csv(
+            weathering_dir / "budget_heavy.csv",
+            index=False,
+        )
+        shoreline_df = pd.DataFrame(
+            {
+                "segment_id": ["SEG_A", "SEG_B"],
+                "total_beached_kg": [12.5, 3.5],
+                "n_particles": [5, 2],
+                "first_arrival_h": [18.0, 30.0],
+            }
+        )
+        shoreline_df.to_csv(weathering_dir / "shoreline_light.csv", index=False)
+        shoreline_df.to_csv(weathering_dir / "shoreline_heavy.csv", index=False)
+        for filename in ("mass_budget_comparison.png", "mass_budget_light.png", "mass_budget_heavy.png"):
+            _write_png(weathering_dir / filename)
 
         if not include_benchmark:
             return
@@ -323,6 +379,7 @@ class PrototypeLegacyFinalFiguresTests(unittest.TestCase):
                 self.assertTrue((case_dir / filename).exists(), filename)
 
             manifest = json.loads((root / results["manifest_json"]).read_text(encoding="utf-8"))
+            curated_manifest = json.loads((root / results["legacy_final_output_manifest_json"]).read_text(encoding="utf-8"))
             self.assertEqual(manifest["figure_count"], 14)
             self.assertEqual(manifest["missing_figure_count"], 0)
             self.assertEqual(manifest["rendering_profile"], "prototype_2016_case_local_projected_v1")
@@ -330,13 +387,72 @@ class PrototypeLegacyFinalFiguresTests(unittest.TestCase):
             self.assertIn(self.case_id, manifest["case_rendering"])
             self.assertEqual(results["figure_count"], 14)
             self.assertEqual(results["missing_figure_count"], 0)
+            self.assertGreater(results["package_registry_count"], 0)
             self.assertEqual(manifest["configured_case_ids"], [self.case_id])
             self.assertEqual(service.style["typography"]["font_family"], "Arial")
             self.assertTrue(results["font_family"])
+            self.assertTrue((root / "output" / "2016 Legacy Runs FINAL Figures" / "README.md").exists())
+            self.assertTrue(
+                (
+                    root
+                    / "output"
+                    / "2016 Legacy Runs FINAL Figures"
+                    / "publication"
+                    / "phase3a"
+                    / self.case_id
+                    / "case_2016_09_01__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_02__single__paper__case_2016_09_01_prototype_2016_24h_opendrift_single.png"
+                ).exists()
+            )
+            self.assertTrue(
+                (
+                    root
+                    / "output"
+                    / "2016 Legacy Runs FINAL Figures"
+                    / "publication"
+                    / "phase4"
+                    / self.case_id
+                    / "shoreline_summary_light.png"
+                ).exists()
+            )
+            self.assertTrue(
+                (
+                    root
+                    / "output"
+                    / "2016 Legacy Runs FINAL Figures"
+                    / "scientific_source_pngs"
+                    / "phase4"
+                    / self.case_id
+                    / "mass_budget_comparison.png"
+                ).exists()
+            )
+            self.assertTrue(
+                (
+                    root
+                    / "output"
+                    / "2016 Legacy Runs FINAL Figures"
+                    / "summary"
+                    / "phase4"
+                    / "prototype_2016_phase4_registry.csv"
+                ).exists()
+            )
+            self.assertTrue(
+                (
+                    root
+                    / "output"
+                    / "2016 Legacy Runs FINAL Figures"
+                    / "phase5"
+                    / "prototype_2016_packaging_summary.md"
+                ).exists()
+            )
             self.assertIn(
                 "prototype_2016 p50/p90 products are exact valid-time member-occupancy footprints.",
                 manifest["notes"],
             )
+            self.assertEqual(
+                curated_manifest["authoritative_curated_root"],
+                "output/2016 Legacy Runs FINAL Figures",
+            )
+            self.assertFalse(curated_manifest["scientific_rerun_performed"])
             self.assertIn(
                 "PyGNOME remains comparator-only; matched grid wind/current forcing is used when available and degraded mode is surfaced explicitly otherwise.",
                 manifest["notes"],
@@ -379,6 +495,18 @@ class PrototypeLegacyFinalFiguresTests(unittest.TestCase):
             self.assertTrue((case_dir / "drifter_track_72h.png").exists())
             self.assertTrue((case_dir / "ensemble_probability_24h.png").exists())
             self.assertFalse((case_dir / "pygnome_24h.png").exists())
+            self.assertTrue((root / "output" / "2016 Legacy Runs FINAL Figures" / "README.md").exists())
+            self.assertTrue(
+                (
+                    root
+                    / "output"
+                    / "2016 Legacy Runs FINAL Figures"
+                    / "publication"
+                    / "phase4"
+                    / self.case_id
+                    / "shoreline_summary_heavy.png"
+                ).exists()
+            )
             self.assertGreater(results["missing_figure_count"], 0)
 
             missing_df = pd.read_csv(root / results["missing_figures_csv"])

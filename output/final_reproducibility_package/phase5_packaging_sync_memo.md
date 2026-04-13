@@ -27,7 +27,7 @@ Phase 5 reuses the existing final validation package, Phase 1 audit, Phase 2 aud
 - `Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents` remains tied to B1, and both noaa/nesdis public products cite worldview-3 imagery acquired on 2023-03-12, so the promoted march 13 -> march 14 row is a reinitialization-based public-validation pair with shared-imagery provenance rather than a fully independent day-to-day validation.
 - DWH Phase 3C remains a separate external transfer-validation lane under `config/case_dwh_retro_2010_72h.yaml` with forcing fixed to `HYCOM GOFS 3.1 currents + ERA5 winds + CMEMS wave/Stokes` and no thesis-facing drifter baseline.
 - The separate focused 2016-2023 Mindoro drifter rerun now supplies the active B1 recipe-provenance story, not the raw generation history of the stored March 13 -> March 14 science bundle.
-- The legacy `prototype_2016` lane is framed as Phase 1 / 2 / 3A / 4 only; it has no thesis-facing Phase 3B or Phase 3C.
+- The legacy `prototype_2016` lane is framed as Phase 1 / 2 / 3A / 4 / 5 support, with its dedicated curated package rooted at `output/2016 Legacy Runs FINAL Figures`; it has no thesis-facing Phase 3B or Phase 3C.
 - The launcher/menu is now organized around current track categories instead of the older monolithic Mindoro full-chain story.
 - The first dashboard version is intentionally read-only and does not add scientific run buttons.
 

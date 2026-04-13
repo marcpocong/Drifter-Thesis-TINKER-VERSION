@@ -94,12 +94,13 @@ phase3c_external_case_run:
     enabled: true
     transport_model: opendrift_oceandrift
     forcing_source: dwh_phase3c_scientific_forcing_ready
+    default_status: frozen_reportable_clean_baseline_transfer_validation
   ensemble:
     requested_member_count: 50
-    default_status: deferred_until_clean_dwh_ensemble_semantics_are_implemented
+    default_status: frozen_reportable_probabilistic_extension_p50_preferred_p90_support_only
   pygnome_comparator:
     truth_role: comparator_only
-    default_status: deferred_if_not_cleanly_available
+    default_status: frozen_reportable_comparator_only
 
 phase3c_external_case_ensemble_comparison:
   phase: phase3c_external_case_ensemble_comparison

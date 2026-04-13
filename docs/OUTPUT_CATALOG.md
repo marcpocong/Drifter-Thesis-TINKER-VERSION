@@ -126,6 +126,41 @@ Interpretation:
 - keep this package for historical reproducibility and regression checking
 - it is no longer the preferred support family for launcher/docs/publication work
 
+### `output/2016 Legacy Runs FINAL Figures/`
+
+Purpose:
+Authoritative curated `prototype_2016` legacy support export. This is the thesis-facing legacy support package for the 2016 prototype lane and is the easiest place to browse its final Phase 5 deliverables.
+
+Expected structure:
+
+- `README.md`
+- `CASE_2016-09-01/`, `CASE_2016-09-06/`, `CASE_2016-09-17/`
+- `publication/phase3a/`
+- `publication/phase4/CASE_2016-09-01/`
+- `publication/phase4/CASE_2016-09-06/`
+- `publication/phase4/CASE_2016-09-17/`
+- `scientific_source_pngs/phase3a/`
+- `scientific_source_pngs/phase4/`
+- `summary/phase3a/`
+- `summary/phase4/`
+- `manifests/legacy_final_output_manifest.json`
+- `manifests/prototype_2016_final_output_registry.csv`
+- `manifests/prototype_2016_final_output_registry.json`
+- `phase5/prototype_2016_packaging_summary.md`
+- compatibility files `final_figure_manifest.json` and `missing_figures.csv`
+
+Interpretation:
+
+- treat this as the authoritative curated root for `prototype_2016`
+- the flat per-case `CASE_2016-.../` figure directories remain for backward compatibility
+- `publication/phase3a/` reuses the legacy OpenDrift-vs-deterministic-PyGNOME comparator figures
+- `publication/phase4/` reuses stored weathering/fate budget PNGs and adds honest shoreline summary figures rendered from stored shoreline CSVs only
+- `scientific_source_pngs/` keeps the exact stored source PNGs used by the curated publication family
+- `summary/` keeps the copied similarity tables, per-case pairing artifacts, weathering CSVs, and packaging notes
+- `prototype_2016` remains support-only, with visible thesis-facing support flow `Phase 1 -> Phase 2 -> Phase 3A -> Phase 4 -> Phase 5`
+- this lane has no thesis-facing `Phase 3B` or `Phase 3C`
+- the generic `output/figure_package_publication/` package remains mostly a 2016 Phase 3A figure source; the dedicated 2016 Phase 4/Phase 5 packaging now lives here
+
 ## Phase 4 Support Outputs
 
 ### `output/phase4/CASE_MINDORO_RETRO_2023/`
@@ -310,6 +345,7 @@ Interpretation:
 
 - this directory is an alias/export layer, not the canonical scientific directory
 - it packages the DWH observation-context figures, deterministic baseline figures, ensemble extension figures, PyGNOME comparator figures, canonical scientific source PNGs, and stored summary artifacts in one thesis-facing location
+- the `C1/C2/C3` families exported here are frozen reportable tracks, not deferred placeholders
 - DWH remains a separate Phase 3C external transfer-validation lane; do not read this folder as a second local Phase 1 or drifter-calibration study
 - the authoritative forcing stack remains `HYCOM GOFS 3.1 currents + ERA5 winds + CMEMS wave/Stokes`
 - deterministic remains the clean baseline transfer-validation result, p50 is the preferred probabilistic extension, p90 is support/comparison only, and PyGNOME is comparator-only

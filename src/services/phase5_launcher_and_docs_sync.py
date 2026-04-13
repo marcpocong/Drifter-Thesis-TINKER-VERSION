@@ -80,6 +80,7 @@ PROTOTYPE_OUTPUT_DIRS = [
         get_artifact_status("prototype_2016_support").panel_text,
     ),
 ]
+PROTOTYPE_2016_FINAL_OUTPUT_DIR = Path("output") / "2016 Legacy Runs FINAL Figures"
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -284,10 +285,10 @@ class Phase5LauncherAndDocsSyncService:
                 "config_path": "config/settings.yaml",
                 "case_freeze_amendment_path": "",
                 "primary_launcher_entry_id": "prototype_legacy_bundle",
-                "launcher_alias_entry_id": "",
-                "primary_output_root": "output/CASE_2016-*",
+                "launcher_alias_entry_id": "prototype_legacy_final_figures",
+                "primary_output_root": PROTOTYPE_2016_FINAL_OUTPUT_DIR.as_posix(),
                 "reportable_track_ids": "",
-                "appendix_or_support_track_ids": "prototype_legacy_phase3a;prototype_legacy_phase4_weathering",
+                "appendix_or_support_track_ids": "prototype_legacy_phase3a;prototype_legacy_phase4_weathering;prototype_legacy_phase5_packaging",
                 "notes": prototype_2016_status.panel_text,
             }
         ]
@@ -436,6 +437,8 @@ class Phase5LauncherAndDocsSyncService:
             return "phase3a", "prototype_legacy_phase3a", prototype_2016.label
         if "output/case_2016-" in rel_lower and "/weathering/" in rel_lower:
             return "phase4", "prototype_legacy_phase4_weathering", "Prototype 2016 legacy Phase 4 weathering"
+        if "output/2016 legacy runs final figures" in rel_lower:
+            return "phase5", "prototype_legacy_phase5_packaging", "Prototype 2016 legacy final package"
         if "trajectory_gallery" in rel_lower:
             return "phase5", "trajectory_gallery", "Trajectory gallery"
         if "final_reproducibility_package" in rel_lower:
@@ -923,6 +926,20 @@ class Phase5LauncherAndDocsSyncService:
                     "Prototype 2016 legacy Phase 4 oil weathering and fate artifact.",
                 )
 
+        prototype_2016_final_dir = self.repo_root / PROTOTYPE_2016_FINAL_OUTPUT_DIR
+        if prototype_2016_final_dir.exists():
+            for output_path in sorted(prototype_2016_final_dir.rglob("*")):
+                if output_path.is_dir():
+                    continue
+                add_row(
+                    "phase5",
+                    "prototype_legacy_phase5_packaging",
+                    "prototype_2016_final_package",
+                    output_path.name,
+                    output_path,
+                    "Curated prototype_2016 legacy Phase 5 package artifact built from stored Phase 3A/Phase 4 outputs only.",
+                )
+
         for artifact_type, path in sorted(phase5_artifacts.items()):
             if artifact_type == "final_output_catalog":
                 continue
@@ -988,7 +1005,7 @@ class Phase5LauncherAndDocsSyncService:
                     "the Phase 3C observation context figures, deterministic baseline figures, ensemble extension figures, "
                     "PyGNOME comparator figures, canonical scientific source PNGs, and summary/manifests without rerunning science."
                 ),
-                "- `prototype_2016` is cataloged here as a legacy Phase 1 / 2 / 3A / 4 support lane, with Phase 5 available only through the separate read-only sync entry.",
+                f"- `prototype_2016` is cataloged here as a legacy Phase 1 / 2 / 3A / 4 / 5 support lane, with the dedicated curated package rooted at `{PROTOTYPE_2016_FINAL_OUTPUT_DIR.as_posix()}` and repo-wide `phase5_sync` kept as a separate cross-repo reproducibility layer.",
                 "- Mindoro Phase 4 now participates in the reproducibility/package layer via the current `phase4_run_manifest.json` and verdict bundle.",
                 "- The static `output/trajectory_gallery/` bundle now participates in the reproducibility/package layer as a read-only technical figure set.",
                 "- The static `output/trajectory_gallery_panel/` bundle now participates in the reproducibility/package layer as the polished panel-ready figure pack.",
@@ -1047,7 +1064,7 @@ class Phase5LauncherAndDocsSyncService:
             f"- `{MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE}` remains tied to B1, and {MINDORO_SHARED_IMAGERY_CAVEAT.lower()}",
             f"- DWH Phase 3C remains a separate external transfer-validation lane under `{DWH_BASE_CASE_CONFIG_PATH.as_posix()}` with forcing fixed to `{DWH_PHASE3C_FORCING_STACK}` and no thesis-facing drifter baseline.",
             "- The separate focused 2016-2023 Mindoro drifter rerun now supplies the active B1 recipe-provenance story, not the raw generation history of the stored March 13 -> March 14 science bundle.",
-            "- The legacy `prototype_2016` lane is framed as Phase 1 / 2 / 3A / 4 only; it has no thesis-facing Phase 3B or Phase 3C.",
+            f"- The legacy `prototype_2016` lane is framed as Phase 1 / 2 / 3A / 4 / 5 support, with its dedicated curated package rooted at `{PROTOTYPE_2016_FINAL_OUTPUT_DIR.as_posix()}`; it has no thesis-facing Phase 3B or Phase 3C.",
             "- The launcher/menu is now organized around current track categories instead of the older monolithic Mindoro full-chain story.",
             "- The first dashboard version is intentionally read-only and does not add scientific run buttons.",
         ]
@@ -1165,7 +1182,7 @@ class Phase5LauncherAndDocsSyncService:
                 "## Guardrails",
                 "",
                 "- `prototype_2016` remains available for debugging and regression only; it is not the final Phase 1 study.",
-                "- `prototype_2016` is thesis-facing only as Phase 1 / 2 / 3A / 4, with `phase5_sync` kept separate and no thesis-facing 3B/3C lane.",
+                f"- `prototype_2016` is thesis-facing only as Phase 1 / 2 / 3A / 4 / 5, with its dedicated curated package rooted at `{PROTOTYPE_2016_FINAL_OUTPUT_DIR.as_posix()}` and no thesis-facing 3B/3C lane. Repo-wide `phase5_sync` remains a separate cross-repo reproducibility layer.",
                 "- `mindoro_reportable_core` and `dwh_reportable_bundle` are intentional scientific reruns and are not safe defaults.",
                 "- The read-only utilities do not recompute scientific scores and are the safest launcher options for routine status refreshes.",
                 "",

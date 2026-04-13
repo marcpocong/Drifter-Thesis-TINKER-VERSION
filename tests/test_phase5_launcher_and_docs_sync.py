@@ -264,6 +264,9 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
             (root / "output" / "figure_package_publication").mkdir(parents=True, exist_ok=True)
             (root / "output" / "prototype_2016_pygnome_similarity").mkdir(parents=True, exist_ok=True)
             (root / "output" / "CASE_2016-09-01" / "weathering").mkdir(parents=True, exist_ok=True)
+            (root / "output" / "2016 Legacy Runs FINAL Figures" / "publication" / "phase4" / "CASE_2016-09-01").mkdir(parents=True, exist_ok=True)
+            (root / "output" / "2016 Legacy Runs FINAL Figures" / "manifests").mkdir(parents=True, exist_ok=True)
+            (root / "output" / "2016 Legacy Runs FINAL Figures" / "phase5").mkdir(parents=True, exist_ok=True)
 
             (root / "output" / "CASE_MINDORO_RETRO_2023" / "phase3b" / "phase3b_summary.csv").write_text(
                 "metric,value\nfss_1km,0.0\n",
@@ -449,6 +452,26 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
                 "hour,surface_pct\n0,100.0\n",
                 encoding="utf-8",
             )
+            (root / "output" / "2016 Legacy Runs FINAL Figures" / "README.md").write_text(
+                "prototype legacy package\n",
+                encoding="utf-8",
+            )
+            (root / "output" / "2016 Legacy Runs FINAL Figures" / "publication" / "phase4" / "CASE_2016-09-01" / "mass_budget_comparison.png").write_text(
+                "png\n",
+                encoding="utf-8",
+            )
+            (root / "output" / "2016 Legacy Runs FINAL Figures" / "manifests" / "legacy_final_output_manifest.json").write_text(
+                "{}\n",
+                encoding="utf-8",
+            )
+            (root / "output" / "2016 Legacy Runs FINAL Figures" / "manifests" / "prototype_2016_final_output_registry.csv").write_text(
+                "final_relative_path\noutput/2016 Legacy Runs FINAL Figures/README.md\n",
+                encoding="utf-8",
+            )
+            (root / "output" / "2016 Legacy Runs FINAL Figures" / "phase5" / "prototype_2016_packaging_summary.md").write_text(
+                "packaging summary\n",
+                encoding="utf-8",
+            )
             (root / "ui").mkdir(parents=True, exist_ok=True)
             (root / "ui" / "app.py").write_text("print('ui')\n", encoding="utf-8")
 
@@ -509,7 +532,10 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
             self.assertIn("accepted-segment debug support", prototype_2021["mode_label"])
             self.assertIn("not final Phase 1 evidence", prototype_2021["notes"])
             self.assertIn("legacy debug support", prototype_2016["mode_label"].lower())
-            self.assertIn("not final Phase 1 evidence", prototype_2016["notes"])
+            self.assertIn("not final phase 1 evidence", prototype_2016["notes"].lower())
+            self.assertEqual(prototype_2016["primary_output_root"], "output/2016 Legacy Runs FINAL Figures")
+            self.assertEqual(prototype_2016["launcher_alias_entry_id"], "prototype_legacy_final_figures")
+            self.assertIn("prototype_legacy_phase5_packaging", prototype_2016["appendix_or_support_track_ids"])
 
             manifest_index_df = pd.read_csv(results["final_manifest_index_csv"])
             optional_row = manifest_index_df[manifest_index_df["track_id"] == "dwh_phase4_appendix_pilot"].iloc[0]
@@ -581,11 +607,29 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
                     & (output_catalog_df["relative_path"] == "output/CASE_2016-09-01/weathering/budget_light.csv")
                 ).any()
             )
+            self.assertTrue(
+                (
+                    (output_catalog_df["track_id"] == "prototype_legacy_phase5_packaging")
+                    & (output_catalog_df["relative_path"] == "output/2016 Legacy Runs FINAL Figures/manifests/legacy_final_output_manifest.json")
+                ).any()
+            )
+            self.assertTrue(
+                (
+                    (output_catalog_df["track_id"] == "prototype_legacy_phase5_packaging")
+                    & (output_catalog_df["relative_path"] == "output/2016 Legacy Runs FINAL Figures/phase5/prototype_2016_packaging_summary.md")
+                ).any()
+            )
 
             self.assertTrue(
                 (
                     (manifest_index_df["track_id"] == "prototype_legacy_phase3a")
                     & (manifest_index_df["relative_path"] == "output/prototype_2016_pygnome_similarity/prototype_pygnome_similarity_manifest.json")
+                ).any()
+            )
+            self.assertTrue(
+                (
+                    (manifest_index_df["track_id"] == "prototype_legacy_phase5_packaging")
+                    & (manifest_index_df["relative_path"] == "output/2016 Legacy Runs FINAL Figures/manifests/legacy_final_output_manifest.json")
                 ).any()
             )
 
@@ -614,6 +658,7 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
             self.assertIn("trajectory_gallery", launcher_guide_text)
             self.assertIn("trajectory_gallery_panel", launcher_guide_text)
             self.assertIn("figure_package_publication", launcher_guide_text)
+            self.assertIn("output/2016 Legacy Runs FINAL Figures", launcher_guide_text)
 
             config_snapshot_df = pd.read_csv(results["final_config_snapshot_index_csv"])
             self.assertTrue((config_snapshot_df["relative_path"] == "docs/UI_GUIDE.md").any())
