@@ -43,6 +43,7 @@ Container routing via the PIPELINE_PHASE environment variable:
   PIPELINE_PHASE=trajectory_gallery_build -> Read-only static trajectory/overlay/shoreline figure gallery
   PIPELINE_PHASE=prototype_pygnome_similarity_summary -> Read-only cross-case prototype OpenDrift-vs-PyGNOME transport summary
   PIPELINE_PHASE=prototype_legacy_final_figures -> Read-only curated prototype_2016 legacy Phase 5 final paper-figure export
+  PIPELINE_PHASE=prototype_2016_display_review -> Read-only prototype_2016 review-only display refinement export from stored outputs
   PIPELINE_PHASE=prototype_legacy_phase4_weathering -> Prototype 2016 legacy Phase 4 oil weathering and fate analysis
   PIPELINE_PHASE=3               -> Legacy compatibility alias (prototype_2016 Phase 4; otherwise legacy Phase 3 weathering path)
   PIPELINE_PHASE=benchmark       -> Phase 3A cross-model benchmark
@@ -804,6 +805,28 @@ def run_prototype_legacy_final_figures_phase():
     print(f"Figure count: {results['figure_count']}")
     print(f"Missing figure count: {results['missing_figure_count']}")
     print(f"Typography: {results['font_family']}")
+
+
+def run_prototype_2016_display_review_phase():
+    from src.services.prototype_2016_display_review import run_prototype_2016_display_review
+    from src.core.case_context import get_case_context
+
+    case = get_case_context()
+    print(f"Starting {case.workflow_mode} display-review export...")
+    print(
+        "This phase is read-only and regenerates improved review-only 2016 figures from existing "
+        "Phase 2, benchmark, and prototype similarity outputs without rerunning ensemble or PyGNOME science."
+    )
+
+    results = run_prototype_2016_display_review()
+
+    print("\nPrototype 2016 display-review export complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print(f"Manifest: {results['manifest_json']}")
+    print(f"Audit CSV: {results['audit_csv']}")
+    print(f"Captions: {results['captions_md']}")
+    print(f"Figure count: {results['figure_count']}")
+    print(f"Missing figure count: {results['missing_figure_count']}")
 
 
 def run_phase3b():
@@ -2267,6 +2290,9 @@ def main():
     if phase == "prototype_legacy_final_figures":
         run_prototype_legacy_final_figures_phase()
         return
+    if phase == "prototype_2016_display_review":
+        run_prototype_2016_display_review_phase()
+        return
     if phase == "prototype_legacy_phase4_weathering":
         run_prototype_legacy_phase4_weathering()
         return
@@ -2385,6 +2411,8 @@ def main():
         run_trajectory_gallery_build_phase()
     elif phase == "prototype_legacy_final_figures":
         run_prototype_legacy_final_figures_phase()
+    elif phase == "prototype_2016_display_review":
+        run_prototype_2016_display_review_phase()
     elif phase == "trajectory_gallery_panel_polish":
         run_trajectory_gallery_panel_polish_phase()
     elif phase == "figure_package_publication":
