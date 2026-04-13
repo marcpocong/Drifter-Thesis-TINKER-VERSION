@@ -1,6 +1,6 @@
 {
   "phase": "phase5_launcher_and_docs_sync",
-  "generated_at_utc": "2026-04-13T13:25:36.768221+00:00",
+  "generated_at_utc": "2026-04-13T13:50:04.407722+00:00",
   "repo_root": "/app",
   "output_dir": "output/final_reproducibility_package",
   "launcher_catalog": {
@@ -266,7 +266,7 @@
     }
   ],
   "manifest_index_summary": {
-    "row_count": 132,
+    "row_count": 134,
     "missing_optional_artifacts": [
       "output/phase4/CASE_DWH_RETRO_2010_72H/phase4_run_manifest.json"
     ]

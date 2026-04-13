@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import platform
+import csv
 from importlib import metadata as importlib_metadata
 from pathlib import Path
 from typing import Any
@@ -117,13 +118,22 @@ def _write_text(path: Path, text: str) -> None:
 
 def _write_csv(path: Path, rows: list[dict[str, Any]], columns: list[str] | None = None) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    df = pd.DataFrame(rows)
+    sanitized_rows: list[dict[str, Any]] = []
+    for row in rows:
+        sanitized_row: dict[str, Any] = {}
+        for key, value in row.items():
+            if isinstance(value, str):
+                sanitized_row[key] = " | ".join(part.strip() for part in value.replace("\r", "\n").split("\n") if part.strip())
+            else:
+                sanitized_row[key] = value
+        sanitized_rows.append(sanitized_row)
+    df = pd.DataFrame(sanitized_rows)
     if columns is not None:
         for column in columns:
             if column not in df.columns:
                 df[column] = ""
         df = df[columns]
-    df.to_csv(path, index=False)
+    df.to_csv(path, index=False, lineterminator="\n", quoting=csv.QUOTE_MINIMAL)
 
 
 def _relative_to_repo(repo_root: Path, path: Path) -> str:

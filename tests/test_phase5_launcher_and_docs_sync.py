@@ -1,3 +1,4 @@
+import csv
 import json
 import tempfile
 import unittest
@@ -527,6 +528,10 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
             self.assertTrue(pd.isna(phase_status_by_track.loc["C1", "main_blocker"]))
 
             case_registry_df = pd.read_csv(results["final_case_registry_csv"])
+            with open(results["final_case_registry_csv"], "r", encoding="utf-8", newline="") as handle:
+                case_registry_rows = list(csv.DictReader(handle))
+            self.assertGreater(len(case_registry_rows), 0)
+            self.assertTrue(all("\n" not in str(row["notes"]) for row in case_registry_rows))
             prototype_2021 = case_registry_df[case_registry_df["case_id"] == "prototype_2021"].iloc[0]
             prototype_2016 = case_registry_df[case_registry_df["case_id"] == "prototype_2016"].iloc[0]
             self.assertIn("accepted-segment debug support", prototype_2021["mode_label"])
@@ -543,6 +548,16 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
             self.assertEqual(str(optional_row["optional"]).lower(), "true")
 
             output_catalog_df = pd.read_csv(results["final_output_catalog_csv"])
+            with open(results["final_output_catalog_csv"], "r", encoding="utf-8", newline="") as handle:
+                output_catalog_rows = list(csv.DictReader(handle))
+            self.assertGreater(len(output_catalog_rows), 0)
+            self.assertTrue(all("\n" not in str(row["notes"]) for row in output_catalog_rows))
+            self.assertTrue(
+                all(
+                    not str(row["exists"]).lower() == "true" or (root / Path(row["relative_path"])).exists()
+                    for row in output_catalog_rows
+                )
+            )
             self.assertTrue(
                 (
                     (output_catalog_df["track_id"] == "trajectory_gallery")

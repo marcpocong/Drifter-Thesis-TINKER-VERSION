@@ -1,3 +1,4 @@
+import csv
 import json
 import tempfile
 import unittest
@@ -453,6 +454,16 @@ class PrototypeLegacyFinalFiguresTests(unittest.TestCase):
                 "output/2016 Legacy Runs FINAL Figures",
             )
             self.assertFalse(curated_manifest["scientific_rerun_performed"])
+            registry_path = root / results["legacy_final_output_registry_csv"]
+            with open(registry_path, "r", encoding="utf-8", newline="") as handle:
+                reader = csv.DictReader(handle)
+                registry_rows = list(reader)
+            self.assertGreater(len(registry_rows), 0)
+            self.assertTrue(all("\n" not in str(row["notes"]) for row in registry_rows))
+            self.assertTrue(all((root / Path(row["final_relative_path"])).exists() for row in registry_rows))
+            self.assertTrue(
+                any(row["phase_group"] == "phase4" and row["copied_vs_regenerated"] == "regenerated_from_stored_csv" for row in registry_rows)
+            )
             self.assertIn(
                 "PyGNOME remains comparator-only; matched grid wind/current forcing is used when available and degraded mode is surfaced explicitly otherwise.",
                 manifest["notes"],
