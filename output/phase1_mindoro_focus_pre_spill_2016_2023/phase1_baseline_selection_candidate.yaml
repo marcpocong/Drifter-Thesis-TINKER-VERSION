@@ -1,0 +1,94 @@
+baseline_id: phase1_mindoro_focus_pre_spill_candidate_2016_2023_v1
+description: Staged experimental Mindoro-focused pre-spill candidate baseline from
+  the 2016-2023 drifter rerun
+selected_recipe: cmems_era5
+source_kind: staged_production_candidate
+status_flag: provisional
+valid: false
+provisional: true
+rerun_required: false
+promotion_required: true
+selection_basis: Experimental Mindoro-focused pre-spill 2016-2023 drogued-only non-overlapping
+  72 h transport-validation rerun ranked on the February-April seasonal subset
+forcing_outage_policy: continue_degraded
+forcing_source_budget_seconds: 300
+degraded_continue_used: false
+upstream_outage_detected: false
+missing_forcing_factors: []
+skipped_recipe_ids: []
+workflow_scope:
+- mindoro_retro_2023
+historical_validation_artifacts:
+- output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_drifter_registry.csv
+- output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv
+- output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_rejected_segment_registry.csv
+- output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_ranking_subset_registry.csv
+- output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_ranking_subset_report.md
+- output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv
+- output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_segment_metrics.csv
+- output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_summary.csv
+- output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv
+notes:
+- This artifact is staged only and does not overwrite config/phase1_baseline_selection.yaml.
+- This experimental lane does not modify legacy 2016 prototype outputs or the canonical
+  March 13 -> March 14 B1 outputs.
+- Downstream trial runs may set BASELINE_SELECTION_PATH to this candidate artifact
+  explicitly.
+- This temporary outage-constrained experiment excludes GFS-backed recipes until archived
+  NOAA/NCEI GFS access is healthy again.
+chapter3_finalization_audit:
+  target_historical_window:
+    start_date: '2016-01-01'
+    end_date: '2023-03-02'
+  phase1_validation_box:
+  - 118.751
+  - 124.305
+  - 10.62
+  - 16.026
+  core_pool_policy: drogued_segments_only
+  segment_policy:
+    horizon_hours: 72
+    overlap_policy: non_overlapping
+  official_recipe_family:
+  - cmems_era5
+  - hycom_era5
+  ranking_subset:
+    label: mindoro_pre_spill_seasonal_subset_feb_apr
+    config:
+      mode: seasonal_start_months
+      months:
+      - 2
+      - 3
+      - 4
+      label: mindoro_pre_spill_seasonal_subset_feb_apr
+      empty_subset_behavior: hard_fail
+      description: Rank recipes only on accepted segments whose start dates fall in
+        February-April.
+    accepted_segment_count: 19
+  current_local_evidence_scope: experimental_mindoro_focused_pre_spill_2016_2023_regional_transport_validation_rerun
+  accepted_segment_count: 65
+  rejected_segment_count: 24850
+  expected_phase1_artifacts:
+    drifter_registry: output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_drifter_registry.csv
+    accepted_segment_registry: output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv
+    rejected_segment_registry: output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_rejected_segment_registry.csv
+    ranking_subset_registry: output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_ranking_subset_registry.csv
+    ranking_subset_report: output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_ranking_subset_report.md
+    loading_audit: output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv
+    segment_metrics: output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_segment_metrics.csv
+    recipe_summary: output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_summary.csv
+    recipe_ranking: output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv
+    frozen_baseline_candidate: output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml
+  distance_audit:
+    enabled: true
+    source_point_path: data/arcgis/CASE_MINDORO_RETRO_2023/source_point_metadata.geojson
+    diagnostic_only: true
+  loading_audit_policy:
+    hard_fail_on_missing_required_forcing: true
+    hard_fail_on_empty_valid_recipe_set: true
+    require_wave_stokes_reader: true
+    forcing_source_budget_seconds: 300
+  audit_status:
+    classification: implemented_and_scientifically_ready
+    full_production_rerun_required: false
+    blocker: ''

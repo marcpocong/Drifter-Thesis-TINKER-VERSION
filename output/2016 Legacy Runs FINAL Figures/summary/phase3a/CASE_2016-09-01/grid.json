@@ -1,0 +1,50 @@
+{
+  "min_x": 113.267,
+  "max_x": 121.267,
+  "min_y": 6.368500000000001,
+  "max_y": 14.368500000000001,
+  "resolution": 0.05,
+  "crs": "EPSG:4326",
+  "x_name": "lon",
+  "y_name": "lat",
+  "units": "degrees",
+  "workflow_mode": "prototype_2016",
+  "run_name": "CASE_2016-09-01",
+  "display_bounds_wgs84": [
+    113.267,
+    121.267,
+    6.368500000000001,
+    14.368500000000001
+  ],
+  "buffer_m": null,
+  "grid_snap_m": null,
+  "metadata_path": null,
+  "metadata_json_path": null,
+  "template_path": null,
+  "extent_path": null,
+  "land_mask_path": null,
+  "sea_mask_path": null,
+  "shoreline_segments_path": null,
+  "shoreline_mask_manifest_json_path": null,
+  "shoreline_mask_manifest_csv_path": null,
+  "shoreline_mask_status": null,
+  "shoreline_mask_signature": null,
+  "source_paths": null,
+  "width": 160,
+  "height": 160,
+  "extent": [
+    113.267,
+    121.267,
+    6.368500000000001,
+    14.368500000000001
+  ],
+  "resolution_x": 0.05,
+  "resolution_y": 0.05,
+  "is_projected": false,
+  "rendering_profile": "prototype_2016_case_local_projected_v1",
+  "map_projection": "local_azimuthal_equidistant",
+  "projection_center": {
+    "lon": 117.267,
+    "lat": 10.368500000000001
+  }
+}

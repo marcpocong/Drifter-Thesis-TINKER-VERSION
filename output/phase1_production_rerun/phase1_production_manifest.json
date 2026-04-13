@@ -1,0 +1,1062 @@
+{
+  "phase": "phase1_production_rerun",
+  "workflow_mode": "phase1_regional_2016_2022",
+  "workflow_flavor": "historical/regional validation mode",
+  "transport_track": "historical/regional transport validation using strict drogued-only non-overlapping 72 h drifter segments",
+  "time_window": {
+    "start_utc": "2016-01-01T00:00:00+00:00",
+    "end_utc": "2022-12-31T23:59:59+00:00"
+  },
+  "validation_box": [
+    119.5,
+    124.5,
+    11.5,
+    16.5
+  ],
+  "drifter_query_box": [
+    116.5,
+    127.5,
+    8.5,
+    19.5
+  ],
+  "segment_policy": {
+    "horizon_hours": 72,
+    "timestep_hours": 6,
+    "overlap_policy": "non_overlapping",
+    "drogue_policy": "drogued_only_strict"
+  },
+  "official_recipe_family": [
+    "cmems_era5",
+    "cmems_gfs",
+    "hycom_era5",
+    "hycom_gfs"
+  ],
+  "accepted_segment_count": 89,
+  "rejected_segment_count": 26687,
+  "winning_recipe": "cmems_gfs",
+  "gfs_capable_recipes_ran": true,
+  "loading_audit_invalid_count": 0,
+  "drifter_chunk_status": [
+    {
+      "month_key": "201601",
+      "chunk_start_utc": "2016-01-01T00:00:00+00:00",
+      "chunk_end_utc": "2016-01-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 256,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201601.csv"
+    },
+    {
+      "month_key": "201602",
+      "chunk_start_utc": "2016-02-01T00:00:00+00:00",
+      "chunk_end_utc": "2016-02-29T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 402,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201602.csv"
+    },
+    {
+      "month_key": "201603",
+      "chunk_start_utc": "2016-03-01T00:00:00+00:00",
+      "chunk_end_utc": "2016-03-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 380,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201603.csv"
+    },
+    {
+      "month_key": "201604",
+      "chunk_start_utc": "2016-04-01T00:00:00+00:00",
+      "chunk_end_utc": "2016-04-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 154,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201604.csv"
+    },
+    {
+      "month_key": "201605",
+      "chunk_start_utc": "2016-05-01T00:00:00+00:00",
+      "chunk_end_utc": "2016-05-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 225,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201605.csv"
+    },
+    {
+      "month_key": "201606",
+      "chunk_start_utc": "2016-06-01T00:00:00+00:00",
+      "chunk_end_utc": "2016-06-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 276,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201606.csv"
+    },
+    {
+      "month_key": "201607",
+      "chunk_start_utc": "2016-07-01T00:00:00+00:00",
+      "chunk_end_utc": "2016-07-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 289,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201607.csv"
+    },
+    {
+      "month_key": "201608",
+      "chunk_start_utc": "2016-08-01T00:00:00+00:00",
+      "chunk_end_utc": "2016-08-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 495,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201608.csv"
+    },
+    {
+      "month_key": "201609",
+      "chunk_start_utc": "2016-09-01T00:00:00+00:00",
+      "chunk_end_utc": "2016-09-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 412,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201609.csv"
+    },
+    {
+      "month_key": "201610",
+      "chunk_start_utc": "2016-10-01T00:00:00+00:00",
+      "chunk_end_utc": "2016-10-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 125,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201610.csv"
+    },
+    {
+      "month_key": "201611",
+      "chunk_start_utc": "2016-11-01T00:00:00+00:00",
+      "chunk_end_utc": "2016-11-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 424,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201611.csv"
+    },
+    {
+      "month_key": "201612",
+      "chunk_start_utc": "2016-12-01T00:00:00+00:00",
+      "chunk_end_utc": "2016-12-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 1427,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201612.csv"
+    },
+    {
+      "month_key": "201701",
+      "chunk_start_utc": "2017-01-01T00:00:00+00:00",
+      "chunk_end_utc": "2017-01-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 1822,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201701.csv"
+    },
+    {
+      "month_key": "201702",
+      "chunk_start_utc": "2017-02-01T00:00:00+00:00",
+      "chunk_end_utc": "2017-02-28T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 948,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201702.csv"
+    },
+    {
+      "month_key": "201703",
+      "chunk_start_utc": "2017-03-01T00:00:00+00:00",
+      "chunk_end_utc": "2017-03-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 731,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201703.csv"
+    },
+    {
+      "month_key": "201704",
+      "chunk_start_utc": "2017-04-01T00:00:00+00:00",
+      "chunk_end_utc": "2017-04-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 690,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201704.csv"
+    },
+    {
+      "month_key": "201705",
+      "chunk_start_utc": "2017-05-01T00:00:00+00:00",
+      "chunk_end_utc": "2017-05-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 839,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201705.csv"
+    },
+    {
+      "month_key": "201706",
+      "chunk_start_utc": "2017-06-01T00:00:00+00:00",
+      "chunk_end_utc": "2017-06-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 1086,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201706.csv"
+    },
+    {
+      "month_key": "201707",
+      "chunk_start_utc": "2017-07-01T00:00:00+00:00",
+      "chunk_end_utc": "2017-07-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 603,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201707.csv"
+    },
+    {
+      "month_key": "201708",
+      "chunk_start_utc": "2017-08-01T00:00:00+00:00",
+      "chunk_end_utc": "2017-08-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 316,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201708.csv"
+    },
+    {
+      "month_key": "201709",
+      "chunk_start_utc": "2017-09-01T00:00:00+00:00",
+      "chunk_end_utc": "2017-09-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 116,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201709.csv"
+    },
+    {
+      "month_key": "201710",
+      "chunk_start_utc": "2017-10-01T00:00:00+00:00",
+      "chunk_end_utc": "2017-10-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 687,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201710.csv"
+    },
+    {
+      "month_key": "201711",
+      "chunk_start_utc": "2017-11-01T00:00:00+00:00",
+      "chunk_end_utc": "2017-11-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 422,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201711.csv"
+    },
+    {
+      "month_key": "201712",
+      "chunk_start_utc": "2017-12-01T00:00:00+00:00",
+      "chunk_end_utc": "2017-12-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 157,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201712.csv"
+    },
+    {
+      "month_key": "201801",
+      "chunk_start_utc": "2018-01-01T00:00:00+00:00",
+      "chunk_end_utc": "2018-01-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 303,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201801.csv"
+    },
+    {
+      "month_key": "201802",
+      "chunk_start_utc": "2018-02-01T00:00:00+00:00",
+      "chunk_end_utc": "2018-02-28T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 376,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201802.csv"
+    },
+    {
+      "month_key": "201803",
+      "chunk_start_utc": "2018-03-01T00:00:00+00:00",
+      "chunk_end_utc": "2018-03-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 405,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201803.csv"
+    },
+    {
+      "month_key": "201804",
+      "chunk_start_utc": "2018-04-01T00:00:00+00:00",
+      "chunk_end_utc": "2018-04-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 381,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201804.csv"
+    },
+    {
+      "month_key": "201805",
+      "chunk_start_utc": "2018-05-01T00:00:00+00:00",
+      "chunk_end_utc": "2018-05-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 299,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201805.csv"
+    },
+    {
+      "month_key": "201806",
+      "chunk_start_utc": "2018-06-01T00:00:00+00:00",
+      "chunk_end_utc": "2018-06-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 325,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201806.csv"
+    },
+    {
+      "month_key": "201807",
+      "chunk_start_utc": "2018-07-01T00:00:00+00:00",
+      "chunk_end_utc": "2018-07-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 347,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201807.csv"
+    },
+    {
+      "month_key": "201808",
+      "chunk_start_utc": "2018-08-01T00:00:00+00:00",
+      "chunk_end_utc": "2018-08-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 303,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201808.csv"
+    },
+    {
+      "month_key": "201809",
+      "chunk_start_utc": "2018-09-01T00:00:00+00:00",
+      "chunk_end_utc": "2018-09-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 455,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201809.csv"
+    },
+    {
+      "month_key": "201810",
+      "chunk_start_utc": "2018-10-01T00:00:00+00:00",
+      "chunk_end_utc": "2018-10-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 225,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201810.csv"
+    },
+    {
+      "month_key": "201811",
+      "chunk_start_utc": "2018-11-01T00:00:00+00:00",
+      "chunk_end_utc": "2018-11-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 82,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201811.csv"
+    },
+    {
+      "month_key": "201812",
+      "chunk_start_utc": "2018-12-01T00:00:00+00:00",
+      "chunk_end_utc": "2018-12-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 202,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201812.csv"
+    },
+    {
+      "month_key": "201901",
+      "chunk_start_utc": "2019-01-01T00:00:00+00:00",
+      "chunk_end_utc": "2019-01-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 76,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201901.csv"
+    },
+    {
+      "month_key": "201902",
+      "chunk_start_utc": "2019-02-01T00:00:00+00:00",
+      "chunk_end_utc": "2019-02-28T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 290,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201902.csv"
+    },
+    {
+      "month_key": "201903",
+      "chunk_start_utc": "2019-03-01T00:00:00+00:00",
+      "chunk_end_utc": "2019-03-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 75,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201903.csv"
+    },
+    {
+      "month_key": "201904",
+      "chunk_start_utc": "2019-04-01T00:00:00+00:00",
+      "chunk_end_utc": "2019-04-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 47,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201904.csv"
+    },
+    {
+      "month_key": "201905",
+      "chunk_start_utc": "2019-05-01T00:00:00+00:00",
+      "chunk_end_utc": "2019-05-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 212,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201905.csv"
+    },
+    {
+      "month_key": "201906",
+      "chunk_start_utc": "2019-06-01T00:00:00+00:00",
+      "chunk_end_utc": "2019-06-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 224,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201906.csv"
+    },
+    {
+      "month_key": "201907",
+      "chunk_start_utc": "2019-07-01T00:00:00+00:00",
+      "chunk_end_utc": "2019-07-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 170,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201907.csv"
+    },
+    {
+      "month_key": "201908",
+      "chunk_start_utc": "2019-08-01T00:00:00+00:00",
+      "chunk_end_utc": "2019-08-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 235,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201908.csv"
+    },
+    {
+      "month_key": "201909",
+      "chunk_start_utc": "2019-09-01T00:00:00+00:00",
+      "chunk_end_utc": "2019-09-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 386,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201909.csv"
+    },
+    {
+      "month_key": "201910",
+      "chunk_start_utc": "2019-10-01T00:00:00+00:00",
+      "chunk_end_utc": "2019-10-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 581,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201910.csv"
+    },
+    {
+      "month_key": "201911",
+      "chunk_start_utc": "2019-11-01T00:00:00+00:00",
+      "chunk_end_utc": "2019-11-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 414,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201911.csv"
+    },
+    {
+      "month_key": "201912",
+      "chunk_start_utc": "2019-12-01T00:00:00+00:00",
+      "chunk_end_utc": "2019-12-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 291,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/201912.csv"
+    },
+    {
+      "month_key": "202001",
+      "chunk_start_utc": "2020-01-01T00:00:00+00:00",
+      "chunk_end_utc": "2020-01-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 69,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202001.csv"
+    },
+    {
+      "month_key": "202002",
+      "chunk_start_utc": "2020-02-01T00:00:00+00:00",
+      "chunk_end_utc": "2020-02-29T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 125,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202002.csv"
+    },
+    {
+      "month_key": "202003",
+      "chunk_start_utc": "2020-03-01T00:00:00+00:00",
+      "chunk_end_utc": "2020-03-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 26,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202003.csv"
+    },
+    {
+      "month_key": "202004",
+      "chunk_start_utc": "2020-04-01T00:00:00+00:00",
+      "chunk_end_utc": "2020-04-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 43,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202004.csv"
+    },
+    {
+      "month_key": "202005",
+      "chunk_start_utc": "2020-05-01T00:00:00+00:00",
+      "chunk_end_utc": "2020-05-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 38,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202005.csv"
+    },
+    {
+      "month_key": "202006",
+      "chunk_start_utc": "2020-06-01T00:00:00+00:00",
+      "chunk_end_utc": "2020-06-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 50,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202006.csv"
+    },
+    {
+      "month_key": "202007",
+      "chunk_start_utc": "2020-07-01T00:00:00+00:00",
+      "chunk_end_utc": "2020-07-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 82,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202007.csv"
+    },
+    {
+      "month_key": "202008",
+      "chunk_start_utc": "2020-08-01T00:00:00+00:00",
+      "chunk_end_utc": "2020-08-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 191,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202008.csv"
+    },
+    {
+      "month_key": "202009",
+      "chunk_start_utc": "2020-09-01T00:00:00+00:00",
+      "chunk_end_utc": "2020-09-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 408,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202009.csv"
+    },
+    {
+      "month_key": "202010",
+      "chunk_start_utc": "2020-10-01T00:00:00+00:00",
+      "chunk_end_utc": "2020-10-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 292,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202010.csv"
+    },
+    {
+      "month_key": "202011",
+      "chunk_start_utc": "2020-11-01T00:00:00+00:00",
+      "chunk_end_utc": "2020-11-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 332,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202011.csv"
+    },
+    {
+      "month_key": "202012",
+      "chunk_start_utc": "2020-12-01T00:00:00+00:00",
+      "chunk_end_utc": "2020-12-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 397,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202012.csv"
+    },
+    {
+      "month_key": "202101",
+      "chunk_start_utc": "2021-01-01T00:00:00+00:00",
+      "chunk_end_utc": "2021-01-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 328,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202101.csv"
+    },
+    {
+      "month_key": "202102",
+      "chunk_start_utc": "2021-02-01T00:00:00+00:00",
+      "chunk_end_utc": "2021-02-28T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 252,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202102.csv"
+    },
+    {
+      "month_key": "202103",
+      "chunk_start_utc": "2021-03-01T00:00:00+00:00",
+      "chunk_end_utc": "2021-03-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 362,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202103.csv"
+    },
+    {
+      "month_key": "202104",
+      "chunk_start_utc": "2021-04-01T00:00:00+00:00",
+      "chunk_end_utc": "2021-04-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 468,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202104.csv"
+    },
+    {
+      "month_key": "202105",
+      "chunk_start_utc": "2021-05-01T00:00:00+00:00",
+      "chunk_end_utc": "2021-05-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 338,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202105.csv"
+    },
+    {
+      "month_key": "202106",
+      "chunk_start_utc": "2021-06-01T00:00:00+00:00",
+      "chunk_end_utc": "2021-06-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 142,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202106.csv"
+    },
+    {
+      "month_key": "202107",
+      "chunk_start_utc": "2021-07-01T00:00:00+00:00",
+      "chunk_end_utc": "2021-07-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 137,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202107.csv"
+    },
+    {
+      "month_key": "202108",
+      "chunk_start_utc": "2021-08-01T00:00:00+00:00",
+      "chunk_end_utc": "2021-08-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 278,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202108.csv"
+    },
+    {
+      "month_key": "202109",
+      "chunk_start_utc": "2021-09-01T00:00:00+00:00",
+      "chunk_end_utc": "2021-09-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 131,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202109.csv"
+    },
+    {
+      "month_key": "202110",
+      "chunk_start_utc": "2021-10-01T00:00:00+00:00",
+      "chunk_end_utc": "2021-10-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 175,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202110.csv"
+    },
+    {
+      "month_key": "202111",
+      "chunk_start_utc": "2021-11-01T00:00:00+00:00",
+      "chunk_end_utc": "2021-11-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 107,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202111.csv"
+    },
+    {
+      "month_key": "202112",
+      "chunk_start_utc": "2021-12-01T00:00:00+00:00",
+      "chunk_end_utc": "2021-12-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 221,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202112.csv"
+    },
+    {
+      "month_key": "202201",
+      "chunk_start_utc": "2022-01-01T00:00:00+00:00",
+      "chunk_end_utc": "2022-01-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 119,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202201.csv"
+    },
+    {
+      "month_key": "202202",
+      "chunk_start_utc": "2022-02-01T00:00:00+00:00",
+      "chunk_end_utc": "2022-02-28T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 33,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202202.csv"
+    },
+    {
+      "month_key": "202203",
+      "chunk_start_utc": "2022-03-01T00:00:00+00:00",
+      "chunk_end_utc": "2022-03-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 0,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202203.csv"
+    },
+    {
+      "month_key": "202204",
+      "chunk_start_utc": "2022-04-01T00:00:00+00:00",
+      "chunk_end_utc": "2022-04-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 91,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202204.csv"
+    },
+    {
+      "month_key": "202205",
+      "chunk_start_utc": "2022-05-01T00:00:00+00:00",
+      "chunk_end_utc": "2022-05-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 40,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202205.csv"
+    },
+    {
+      "month_key": "202206",
+      "chunk_start_utc": "2022-06-01T00:00:00+00:00",
+      "chunk_end_utc": "2022-06-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 20,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202206.csv"
+    },
+    {
+      "month_key": "202207",
+      "chunk_start_utc": "2022-07-01T00:00:00+00:00",
+      "chunk_end_utc": "2022-07-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 21,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202207.csv"
+    },
+    {
+      "month_key": "202208",
+      "chunk_start_utc": "2022-08-01T00:00:00+00:00",
+      "chunk_end_utc": "2022-08-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 21,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202208.csv"
+    },
+    {
+      "month_key": "202209",
+      "chunk_start_utc": "2022-09-01T00:00:00+00:00",
+      "chunk_end_utc": "2022-09-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 153,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202209.csv"
+    },
+    {
+      "month_key": "202210",
+      "chunk_start_utc": "2022-10-01T00:00:00+00:00",
+      "chunk_end_utc": "2022-10-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 878,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202210.csv"
+    },
+    {
+      "month_key": "202211",
+      "chunk_start_utc": "2022-11-01T00:00:00+00:00",
+      "chunk_end_utc": "2022-11-30T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 171,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202211.csv"
+    },
+    {
+      "month_key": "202212",
+      "chunk_start_utc": "2022-12-01T00:00:00+00:00",
+      "chunk_end_utc": "2022-12-31T23:59:59+00:00",
+      "status": "cached",
+      "row_count": 251,
+      "cache_path": "output/phase1_production_rerun/_scratch/drifter_chunks/202212.csv"
+    }
+  ],
+  "forcing_cache_status": [
+    {
+      "month_key": "201612",
+      "start_time_utc": "2016-12-02T12:00:00+00:00",
+      "end_time_utc": "2017-01-03T12:00:00+00:00",
+      "hycom": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201612/hycom_curr.nc"
+      },
+      "cmems": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201612/cmems_curr.nc"
+      },
+      "cmems_wave": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201612/cmems_wave.nc"
+      },
+      "era5": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201612/era5_wind.nc"
+      },
+      "gfs": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201612/gfs_wind.nc"
+      }
+    },
+    {
+      "month_key": "201701",
+      "start_time_utc": "2017-01-02T06:00:00+00:00",
+      "end_time_utc": "2017-02-03T12:00:00+00:00",
+      "hycom": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201701/hycom_curr.nc"
+      },
+      "cmems": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201701/cmems_curr.nc"
+      },
+      "cmems_wave": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201701/cmems_wave.nc"
+      },
+      "era5": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201701/era5_wind.nc"
+      },
+      "gfs": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201701/gfs_wind.nc"
+      }
+    },
+    {
+      "month_key": "201702",
+      "start_time_utc": "2017-02-02T12:00:00+00:00",
+      "end_time_utc": "2017-03-01T18:00:00+00:00",
+      "hycom": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201702/hycom_curr.nc"
+      },
+      "cmems": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201702/cmems_curr.nc"
+      },
+      "cmems_wave": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201702/cmems_wave.nc"
+      },
+      "era5": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201702/era5_wind.nc"
+      },
+      "gfs": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201702/gfs_wind.nc"
+      }
+    },
+    {
+      "month_key": "201703",
+      "start_time_utc": "2017-03-02T00:00:00+00:00",
+      "end_time_utc": "2017-03-11T12:00:00+00:00",
+      "hycom": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201703/hycom_curr.nc"
+      },
+      "cmems": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201703/cmems_curr.nc"
+      },
+      "cmems_wave": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201703/cmems_wave.nc"
+      },
+      "era5": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201703/era5_wind.nc"
+      },
+      "gfs": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201703/gfs_wind.nc"
+      }
+    },
+    {
+      "month_key": "201707",
+      "start_time_utc": "2017-07-05T12:00:00+00:00",
+      "end_time_utc": "2017-08-01T06:00:00+00:00",
+      "hycom": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201707/hycom_curr.nc"
+      },
+      "cmems": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201707/cmems_curr.nc"
+      },
+      "cmems_wave": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201707/cmems_wave.nc"
+      },
+      "era5": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201707/era5_wind.nc"
+      },
+      "gfs": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201707/gfs_wind.nc"
+      }
+    },
+    {
+      "month_key": "201708",
+      "start_time_utc": "2017-08-01T06:00:00+00:00",
+      "end_time_utc": "2017-08-27T18:00:00+00:00",
+      "hycom": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201708/hycom_curr.nc"
+      },
+      "cmems": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201708/cmems_curr.nc"
+      },
+      "cmems_wave": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201708/cmems_wave.nc"
+      },
+      "era5": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201708/era5_wind.nc"
+      },
+      "gfs": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201708/gfs_wind.nc"
+      }
+    },
+    {
+      "month_key": "201804",
+      "start_time_utc": "2018-04-17T12:00:00+00:00",
+      "end_time_utc": "2018-04-23T18:00:00+00:00",
+      "hycom": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201804/hycom_curr.nc"
+      },
+      "cmems": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201804/cmems_curr.nc"
+      },
+      "cmems_wave": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201804/cmems_wave.nc"
+      },
+      "era5": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201804/era5_wind.nc"
+      },
+      "gfs": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201804/gfs_wind.nc"
+      }
+    },
+    {
+      "month_key": "201807",
+      "start_time_utc": "2018-07-06T06:00:00+00:00",
+      "end_time_utc": "2018-07-09T06:00:00+00:00",
+      "hycom": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201807/hycom_curr.nc"
+      },
+      "cmems": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201807/cmems_curr.nc"
+      },
+      "cmems_wave": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201807/cmems_wave.nc"
+      },
+      "era5": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201807/era5_wind.nc"
+      },
+      "gfs": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201807/gfs_wind.nc"
+      }
+    },
+    {
+      "month_key": "201809",
+      "start_time_utc": "2018-09-22T00:00:00+00:00",
+      "end_time_utc": "2018-10-01T12:00:00+00:00",
+      "hycom": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201809/hycom_curr.nc"
+      },
+      "cmems": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201809/cmems_curr.nc"
+      },
+      "cmems_wave": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201809/cmems_wave.nc"
+      },
+      "era5": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201809/era5_wind.nc"
+      },
+      "gfs": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201809/gfs_wind.nc"
+      }
+    },
+    {
+      "month_key": "201810",
+      "start_time_utc": "2018-10-01T18:00:00+00:00",
+      "end_time_utc": "2018-10-04T18:00:00+00:00",
+      "hycom": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201810/hycom_curr.nc"
+      },
+      "cmems": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201810/cmems_curr.nc"
+      },
+      "cmems_wave": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201810/cmems_wave.nc"
+      },
+      "era5": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201810/era5_wind.nc"
+      },
+      "gfs": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201810/gfs_wind.nc"
+      }
+    },
+    {
+      "month_key": "201909",
+      "start_time_utc": "2019-09-20T06:00:00+00:00",
+      "end_time_utc": "2019-10-03T00:00:00+00:00",
+      "hycom": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201909/hycom_curr.nc"
+      },
+      "cmems": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201909/cmems_curr.nc"
+      },
+      "cmems_wave": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201909/cmems_wave.nc"
+      },
+      "era5": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201909/era5_wind.nc"
+      },
+      "gfs": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201909/gfs_wind.nc"
+      }
+    },
+    {
+      "month_key": "201912",
+      "start_time_utc": "2019-12-12T00:00:00+00:00",
+      "end_time_utc": "2019-12-21T12:00:00+00:00",
+      "hycom": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201912/hycom_curr.nc"
+      },
+      "cmems": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201912/cmems_curr.nc"
+      },
+      "cmems_wave": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201912/cmems_wave.nc"
+      },
+      "era5": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201912/era5_wind.nc"
+      },
+      "gfs": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/201912/gfs_wind.nc"
+      }
+    },
+    {
+      "month_key": "202103",
+      "start_time_utc": "2021-03-05T18:00:00+00:00",
+      "end_time_utc": "2021-03-12T00:00:00+00:00",
+      "hycom": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/202103/hycom_curr.nc"
+      },
+      "cmems": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/202103/cmems_curr.nc"
+      },
+      "cmems_wave": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/202103/cmems_wave.nc"
+      },
+      "era5": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/202103/era5_wind.nc"
+      },
+      "gfs": {
+        "status": "cached",
+        "path": "output/phase1_production_rerun/_scratch/forcing_months/202103/gfs_wind.nc"
+      }
+    }
+  ],
+  "baseline_candidate": {
+    "path": "output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml",
+    "selected_recipe": "cmems_gfs",
+    "promotion_required": true
+  },
+  "canonical_baseline_integrity": {
+    "path": "config/phase1_baseline_selection.yaml",
+    "sha256_before": "304f55e1bdcb1cc9995bf2eef921860bf8ca2bed3e20ef5d95ec29034f0ae499",
+    "sha256_after": "304f55e1bdcb1cc9995bf2eef921860bf8ca2bed3e20ef5d95ec29034f0ae499",
+    "unchanged": true
+  },
+  "artifacts": {
+    "drifter_registry": "output/phase1_production_rerun/phase1_drifter_registry.csv",
+    "accepted_registry": "output/phase1_production_rerun/phase1_accepted_segment_registry.csv",
+    "rejected_registry": "output/phase1_production_rerun/phase1_rejected_segment_registry.csv",
+    "loading_audit": "output/phase1_production_rerun/phase1_loading_audit.csv",
+    "segment_metrics": "output/phase1_production_rerun/phase1_segment_metrics.csv",
+    "recipe_summary": "output/phase1_production_rerun/phase1_recipe_summary.csv",
+    "recipe_ranking": "output/phase1_production_rerun/phase1_recipe_ranking.csv",
+    "manifest": "output/phase1_production_rerun/phase1_production_manifest.json",
+    "baseline_candidate": "output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml"
+  }
+}

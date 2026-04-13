@@ -1,0 +1,19 @@
+comparison_track_id,comparison_track_label,metric,window_km,pair_count,mean_value,min_value,max_value,notes
+deterministic,OpenDrift deterministic,FSS,1,3,0.38888888888888884,0.0,0.6666666666666666,Footprint-mask Fractions Skill Score on OpenDrift deterministic vs deterministic PyGNOME.
+deterministic,OpenDrift deterministic,FSS,3,3,0.49773063777381094,0.16513761467889898,0.7692307692307692,Footprint-mask Fractions Skill Score on OpenDrift deterministic vs deterministic PyGNOME.
+deterministic,OpenDrift deterministic,FSS,5,3,0.5462942286763307,0.28080229226361053,0.782608695652174,Footprint-mask Fractions Skill Score on OpenDrift deterministic vs deterministic PyGNOME.
+deterministic,OpenDrift deterministic,FSS,10,3,0.5846238309499636,0.3743523316062176,0.7916666666666667,Footprint-mask Fractions Skill Score on OpenDrift deterministic vs deterministic PyGNOME.
+deterministic,OpenDrift deterministic,KL,,3,14.955158272790413,2.5409291058761965,22.633609741220678,KL divergence on ocean-only normalized density rasters after epsilon handling and renormalization.
+deterministic,OpenDrift deterministic,PAIRING,,3,,,,Benchmark raster pairing count.
+ensemble_p50,OpenDrift p50 occupancy footprint,FSS,1,3,0.33383458646616543,0.2857142857142858,0.4,Footprint-mask Fractions Skill Score on OpenDrift p50 occupancy footprint vs deterministic PyGNOME.
+ensemble_p50,OpenDrift p50 occupancy footprint,FSS,3,3,0.43265877564429545,0.38585209003215437,0.5182926829268293,Footprint-mask Fractions Skill Score on OpenDrift p50 occupancy footprint vs deterministic PyGNOME.
+ensemble_p50,OpenDrift p50 occupancy footprint,FSS,5,3,0.43330693724856423,0.38039735099337746,0.49665551839464894,Footprint-mask Fractions Skill Score on OpenDrift p50 occupancy footprint vs deterministic PyGNOME.
+ensemble_p50,OpenDrift p50 occupancy footprint,FSS,10,3,0.4298638348846726,0.36984826235927537,0.48277062304211626,Footprint-mask Fractions Skill Score on OpenDrift p50 occupancy footprint vs deterministic PyGNOME.
+ensemble_p50,OpenDrift p50 occupancy footprint,KL,,3,2.210582367929855,1.6964865959885576,2.5460252571893633,KL divergence on ocean-only normalized density rasters after epsilon handling and renormalization.
+ensemble_p50,OpenDrift p50 occupancy footprint,PAIRING,,3,,,,Benchmark raster pairing count.
+ensemble_p90,OpenDrift p90 occupancy footprint,FSS,1,3,0.37105836486641447,0.3157894736842105,0.44444444444444453,Footprint-mask Fractions Skill Score on OpenDrift p90 occupancy footprint vs deterministic PyGNOME.
+ensemble_p90,OpenDrift p90 occupancy footprint,FSS,3,3,0.4813999753068172,0.4296081277213353,0.5830258302583027,Footprint-mask Fractions Skill Score on OpenDrift p90 occupancy footprint vs deterministic PyGNOME.
+ensemble_p90,OpenDrift p90 occupancy footprint,FSS,5,3,0.4823649998570651,0.4214738246082027,0.5586708203530635,Footprint-mask Fractions Skill Score on OpenDrift p90 occupancy footprint vs deterministic PyGNOME.
+ensemble_p90,OpenDrift p90 occupancy footprint,FSS,10,3,0.4803808413784165,0.414673844998122,0.5426561125769571,Footprint-mask Fractions Skill Score on OpenDrift p90 occupancy footprint vs deterministic PyGNOME.
+ensemble_p90,OpenDrift p90 occupancy footprint,KL,,3,2.080057678849735,1.5629555473046888,2.421513285354207,KL divergence on ocean-only normalized density rasters after epsilon handling and renormalization.
+ensemble_p90,OpenDrift p90 occupancy footprint,PAIRING,,3,,,,Benchmark raster pairing count.

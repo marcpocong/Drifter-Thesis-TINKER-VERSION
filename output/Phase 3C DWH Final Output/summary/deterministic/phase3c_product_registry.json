@@ -1,0 +1,110 @@
+[
+  {
+    "track_id": "opendrift_control",
+    "product_type": "control_footprint_mask",
+    "timestamp_utc": "2010-05-21T23:59:59Z",
+    "actual_snapshot_time_utc": "2010-05-22T00:00:00Z",
+    "date_utc": "2010-05-21",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_footprint_mask_2010-05-21T23-59-59Z.tif",
+    "score_candidate": false
+  },
+  {
+    "track_id": "opendrift_control",
+    "product_type": "control_density_norm",
+    "timestamp_utc": "2010-05-21T23:59:59Z",
+    "actual_snapshot_time_utc": "2010-05-22T00:00:00Z",
+    "date_utc": "2010-05-21",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_density_norm_2010-05-21T23-59-59Z.tif",
+    "score_candidate": false
+  },
+  {
+    "track_id": "opendrift_control",
+    "product_type": "control_footprint_mask_datecomposite",
+    "date_utc": "2010-05-21",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_footprint_mask_2010-05-21_datecomposite.tif",
+    "score_candidate": true,
+    "active_snapshots": 24,
+    "active_particles_total": 115369
+  },
+  {
+    "track_id": "opendrift_control",
+    "product_type": "control_density_norm_datecomposite",
+    "date_utc": "2010-05-21",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_density_norm_2010-05-21_datecomposite.tif",
+    "score_candidate": false,
+    "active_snapshots": 24,
+    "active_particles_total": 115369
+  },
+  {
+    "track_id": "opendrift_control",
+    "product_type": "control_footprint_mask",
+    "timestamp_utc": "2010-05-22T23:59:59Z",
+    "actual_snapshot_time_utc": "2010-05-23T00:00:00Z",
+    "date_utc": "2010-05-22",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_footprint_mask_2010-05-22T23-59-59Z.tif",
+    "score_candidate": false
+  },
+  {
+    "track_id": "opendrift_control",
+    "product_type": "control_density_norm",
+    "timestamp_utc": "2010-05-22T23:59:59Z",
+    "actual_snapshot_time_utc": "2010-05-23T00:00:00Z",
+    "date_utc": "2010-05-22",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_density_norm_2010-05-22T23-59-59Z.tif",
+    "score_candidate": false
+  },
+  {
+    "track_id": "opendrift_control",
+    "product_type": "control_footprint_mask_datecomposite",
+    "date_utc": "2010-05-22",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_footprint_mask_2010-05-22_datecomposite.tif",
+    "score_candidate": true,
+    "active_snapshots": 24,
+    "active_particles_total": 112662
+  },
+  {
+    "track_id": "opendrift_control",
+    "product_type": "control_density_norm_datecomposite",
+    "date_utc": "2010-05-22",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_density_norm_2010-05-22_datecomposite.tif",
+    "score_candidate": false,
+    "active_snapshots": 24,
+    "active_particles_total": 112662
+  },
+  {
+    "track_id": "opendrift_control",
+    "product_type": "control_footprint_mask",
+    "timestamp_utc": "2010-05-23T23:59:59Z",
+    "actual_snapshot_time_utc": "2010-05-24T00:00:00Z",
+    "date_utc": "2010-05-23",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_footprint_mask_2010-05-23T23-59-59Z.tif",
+    "score_candidate": false
+  },
+  {
+    "track_id": "opendrift_control",
+    "product_type": "control_density_norm",
+    "timestamp_utc": "2010-05-23T23:59:59Z",
+    "actual_snapshot_time_utc": "2010-05-24T00:00:00Z",
+    "date_utc": "2010-05-23",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_density_norm_2010-05-23T23-59-59Z.tif",
+    "score_candidate": false
+  },
+  {
+    "track_id": "opendrift_control",
+    "product_type": "control_footprint_mask_datecomposite",
+    "date_utc": "2010-05-23",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_footprint_mask_2010-05-23_datecomposite.tif",
+    "score_candidate": true,
+    "active_snapshots": 24,
+    "active_particles_total": 109057
+  },
+  {
+    "track_id": "opendrift_control",
+    "product_type": "control_density_norm_datecomposite",
+    "date_utc": "2010-05-23",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_density_norm_2010-05-23_datecomposite.tif",
+    "score_candidate": false,
+    "active_snapshots": 24,
+    "active_particles_total": 109057
+  }
+]

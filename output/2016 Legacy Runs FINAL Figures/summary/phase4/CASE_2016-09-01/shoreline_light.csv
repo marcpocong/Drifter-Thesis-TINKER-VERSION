@@ -1,0 +1,12 @@
+segment_id,total_beached_kg,n_particles,first_arrival_h,arrival_p25_h,arrival_p75_h,mean_assignment_distance_m,max_assignment_distance_m,beached_lat_mean,beached_lon_mean,first_arrival_utc,segment_length_m,segment_midpoint_lon,segment_midpoint_lat,segment_assignment_method
+shoreline_00906,570.383,4334,40.0,43.0,49.0,99.34,445.572,12.931,121.681,2016-09-02T16:00:00Z,1000.0,121.681,12.93,canonical_shoreline_segments_gpkg
+shoreline_00907,1651.803,12143,40.0,44.0,49.0,290.637,516.763,12.936,121.684,2016-09-02T16:00:00Z,1000.0,121.681,12.937,canonical_shoreline_segments_gpkg
+shoreline_00891,764.237,5960,42.0,44.0,48.0,213.412,715.774,12.947,121.692,2016-09-02T18:00:00Z,1000.0,121.691,12.949,canonical_shoreline_segments_gpkg
+shoreline_00905,1001.151,7865,42.0,45.0,49.0,218.24,534.583,12.923,121.685,2016-09-02T18:00:00Z,1000.0,121.687,12.923,canonical_shoreline_segments_gpkg
+shoreline_00908,1102.024,8237,42.0,44.0,49.0,403.073,716.608,12.943,121.688,2016-09-02T18:00:00Z,879.542,121.685,12.945,canonical_shoreline_segments_gpkg
+shoreline_00892,668.267,5051,44.0,46.0,49.0,73.433,221.501,12.95,121.701,2016-09-02T20:00:00Z,1000.0,121.7,12.95,canonical_shoreline_segments_gpkg
+shoreline_00893,139.703,1092,46.0,47.0,50.0,42.361,121.658,12.951,121.707,2016-09-02T22:00:00Z,1000.0,121.709,12.949,canonical_shoreline_segments_gpkg
+shoreline_00904,326.015,2568,46.0,49.0,53.0,277.328,482.522,12.914,121.693,2016-09-02T22:00:00Z,1000.0,121.694,12.917,canonical_shoreline_segments_gpkg
+shoreline_00894,138.477,1061,48.0,50.0,53.0,419.911,806.427,12.947,121.718,2016-09-03T00:00:00Z,1000.0,121.716,12.944,canonical_shoreline_segments_gpkg
+shoreline_00903,248.895,2343,48.0,50.0,53.0,412.272,633.831,12.908,121.697,2016-09-03T00:00:00Z,1000.0,121.7,12.911,canonical_shoreline_segments_gpkg
+shoreline_00895,0.128,1,55.0,55.0,55.0,801.994,801.994,12.947,121.724,2016-09-03T07:00:00Z,1000.0,121.723,12.938,canonical_shoreline_segments_gpkg

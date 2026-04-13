@@ -1,0 +1,13 @@
+track_id,product_type,timestamp_utc,actual_snapshot_time_utc,date_utc,path,score_candidate,active_snapshots,active_particles_total
+opendrift_control,control_footprint_mask,2010-05-21T23:59:59Z,2010-05-22T00:00:00Z,2010-05-21,output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_footprint_mask_2010-05-21T23-59-59Z.tif,False,,
+opendrift_control,control_density_norm,2010-05-21T23:59:59Z,2010-05-22T00:00:00Z,2010-05-21,output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_density_norm_2010-05-21T23-59-59Z.tif,False,,
+opendrift_control,control_footprint_mask_datecomposite,,,2010-05-21,output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_footprint_mask_2010-05-21_datecomposite.tif,True,24,115369
+opendrift_control,control_density_norm_datecomposite,,,2010-05-21,output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_density_norm_2010-05-21_datecomposite.tif,False,24,115369
+opendrift_control,control_footprint_mask,2010-05-22T23:59:59Z,2010-05-23T00:00:00Z,2010-05-22,output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_footprint_mask_2010-05-22T23-59-59Z.tif,False,,
+opendrift_control,control_density_norm,2010-05-22T23:59:59Z,2010-05-23T00:00:00Z,2010-05-22,output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_density_norm_2010-05-22T23-59-59Z.tif,False,,
+opendrift_control,control_footprint_mask_datecomposite,,,2010-05-22,output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_footprint_mask_2010-05-22_datecomposite.tif,True,24,112662
+opendrift_control,control_density_norm_datecomposite,,,2010-05-22,output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_density_norm_2010-05-22_datecomposite.tif,False,24,112662
+opendrift_control,control_footprint_mask,2010-05-23T23:59:59Z,2010-05-24T00:00:00Z,2010-05-23,output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_footprint_mask_2010-05-23T23-59-59Z.tif,False,,
+opendrift_control,control_density_norm,2010-05-23T23:59:59Z,2010-05-24T00:00:00Z,2010-05-23,output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_density_norm_2010-05-23T23-59-59Z.tif,False,,
+opendrift_control,control_footprint_mask_datecomposite,,,2010-05-23,output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_footprint_mask_2010-05-23_datecomposite.tif,True,24,109057
+opendrift_control,control_density_norm_datecomposite,,,2010-05-23,output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/control_density_norm_2010-05-23_datecomposite.tif,False,24,109057

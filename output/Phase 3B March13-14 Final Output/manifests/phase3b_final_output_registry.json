@@ -1,0 +1,283 @@
+{
+  "rows": [
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/publication/observations/march13_seed_mask_on_grid.png",
+      "source_relative_path": "output/figure_package_publication/case_mindoro_retro_2023__phase3b_reinit_primary__observation__single_seed_observation__2023_03_13__single__paper__march13_seed_mask_on_grid.png",
+      "artifact_group": "publication/observations",
+      "scientific_vs_display_only": "display_only",
+      "primary_vs_secondary": "primary",
+      "comparator_only": false,
+      "provenance_note": "Display-only publication rendering derived from stored March 13/14 observation geometry; no scientific rerun and no direct drifter ingestion inside Phase 3B."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/publication/observations/march14_target_mask_on_grid.png",
+      "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public/accepted_obs_masks/10b37c42a9754363a5f7b14199b077e6.tif",
+      "artifact_group": "publication/observations",
+      "scientific_vs_display_only": "display_only",
+      "primary_vs_secondary": "primary",
+      "comparator_only": false,
+      "provenance_note": "Display-only publication rendering derived from stored March 13/14 observation geometry; no scientific rerun and no direct drifter ingestion inside Phase 3B."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/publication/observations/march13_seed_vs_march14_target.png",
+      "source_relative_path": "output/figure_package_publication/case_mindoro_retro_2023__phase3b_reinit_primary__observation__single_seed_target_compare__2023_03_13_to_2023_03_14__single__paper__march13_seed_vs_march14_target.png",
+      "artifact_group": "publication/observations",
+      "scientific_vs_display_only": "display_only",
+      "primary_vs_secondary": "primary",
+      "comparator_only": false,
+      "provenance_note": "Display-only publication rendering derived from stored March 13/14 observation geometry; no scientific rerun and no direct drifter ingestion inside Phase 3B."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/publication/opendrift_primary/march14_r0_overlay.png",
+      "source_relative_path": "output/figure_package_publication/case_mindoro_retro_2023__phase3b_reinit_primary__opendrift__single_primary_overlay__2023_03_14__single__paper__march14_r0_overlay.png",
+      "artifact_group": "publication/opendrift_primary",
+      "scientific_vs_display_only": "display_only",
+      "primary_vs_secondary": "primary",
+      "comparator_only": false,
+      "provenance_note": "Curated publication export over stored B1 OpenDrift artifacts. B1 inherits recipe provenance from the separate focused Mindoro Phase 1 rerun selecting cmems_era5."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/publication/opendrift_primary/march14_r1_previous_overlay.png",
+      "source_relative_path": "output/figure_package_publication/case_mindoro_retro_2023__phase3b_reinit_primary__opendrift__single_primary_overlay__2023_03_14__single__paper__march14_r1_previous_overlay.png",
+      "artifact_group": "publication/opendrift_primary",
+      "scientific_vs_display_only": "display_only",
+      "primary_vs_secondary": "primary",
+      "comparator_only": false,
+      "provenance_note": "Curated publication export over stored B1 OpenDrift artifacts. B1 inherits recipe provenance from the separate focused Mindoro Phase 1 rerun selecting cmems_era5."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/publication/opendrift_primary/mindoro_primary_validation_board.png",
+      "source_relative_path": "output/figure_package_publication/case_mindoro_retro_2023__phase3b_reinit_primary__opendrift__comparison_board__2023_03_13_to_2023_03_14__board__slide__mindoro_primary_validation_board.png",
+      "artifact_group": "publication/opendrift_primary",
+      "scientific_vs_display_only": "display_only",
+      "primary_vs_secondary": "primary",
+      "comparator_only": false,
+      "provenance_note": "Curated publication export over stored B1 OpenDrift artifacts. B1 inherits recipe provenance from the separate focused Mindoro Phase 1 rerun selecting cmems_era5."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/publication/comparator_pygnome/march14_crossmodel_r0_overlay.png",
+      "source_relative_path": "output/figure_package_publication/case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift__single_model_overlay__2023_03_14__single__paper__march14_crossmodel_r0_overlay.png",
+      "artifact_group": "publication/comparator_pygnome",
+      "scientific_vs_display_only": "display_only",
+      "primary_vs_secondary": "secondary",
+      "comparator_only": true,
+      "provenance_note": "Comparator-only publication export for the same March 13 -> March 14 case. PyGNOME is not truth and does not replace the primary OpenDrift-vs-observation claim."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/publication/comparator_pygnome/march14_crossmodel_r1_overlay.png",
+      "source_relative_path": "output/figure_package_publication/case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift__single_model_overlay__2023_03_14__single__paper__march14_crossmodel_r1_overlay.png",
+      "artifact_group": "publication/comparator_pygnome",
+      "scientific_vs_display_only": "display_only",
+      "primary_vs_secondary": "secondary",
+      "comparator_only": true,
+      "provenance_note": "Comparator-only publication export for the same March 13 -> March 14 case. PyGNOME is not truth and does not replace the primary OpenDrift-vs-observation claim."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/publication/comparator_pygnome/march14_crossmodel_pygnome_overlay.png",
+      "source_relative_path": "output/figure_package_publication/case_mindoro_retro_2023__phase3a_reinit_crossmodel__pygnome__single_model_overlay__2023_03_14__single__paper__march14_crossmodel_pygnome_overlay.png",
+      "artifact_group": "publication/comparator_pygnome",
+      "scientific_vs_display_only": "display_only",
+      "primary_vs_secondary": "secondary",
+      "comparator_only": true,
+      "provenance_note": "Comparator-only publication export for the same March 13 -> March 14 case. PyGNOME is not truth and does not replace the primary OpenDrift-vs-observation claim."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/publication/comparator_pygnome/mindoro_crossmodel_board.png",
+      "source_relative_path": "output/figure_package_publication/case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift_vs_pygnome__comparison_board__2023_03_14__board__slide__mindoro_crossmodel_board.png",
+      "artifact_group": "publication/comparator_pygnome",
+      "scientific_vs_display_only": "display_only",
+      "primary_vs_secondary": "secondary",
+      "comparator_only": true,
+      "provenance_note": "Comparator-only publication export for the same March 13 -> March 14 case. PyGNOME is not truth and does not replace the primary OpenDrift-vs-observation claim."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/scientific_source_pngs/opendrift_primary/qa_march13_seed_mask_on_grid.png",
+      "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/qa_march13_seed_mask_on_grid.png",
+      "artifact_group": "scientific_source_pngs/opendrift_primary",
+      "scientific_vs_display_only": "scientific_source_png",
+      "primary_vs_secondary": "primary",
+      "comparator_only": false,
+      "provenance_note": "Exact stored QA/source PNGs used to derive the primary OpenDrift publication family."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/scientific_source_pngs/opendrift_primary/qa_march13_seed_vs_march14_target.png",
+      "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/qa_march13_seed_vs_march14_target.png",
+      "artifact_group": "scientific_source_pngs/opendrift_primary",
+      "scientific_vs_display_only": "scientific_source_png",
+      "primary_vs_secondary": "primary",
+      "comparator_only": false,
+      "provenance_note": "Exact stored QA/source PNGs used to derive the primary OpenDrift publication family."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/scientific_source_pngs/opendrift_primary/qa_march14_reinit_R0_overlay.png",
+      "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/qa_march14_reinit_R0_overlay.png",
+      "artifact_group": "scientific_source_pngs/opendrift_primary",
+      "scientific_vs_display_only": "scientific_source_png",
+      "primary_vs_secondary": "primary",
+      "comparator_only": false,
+      "provenance_note": "Exact stored QA/source PNGs used to derive the primary OpenDrift publication family."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/scientific_source_pngs/opendrift_primary/qa_march14_reinit_R1_previous_overlay.png",
+      "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/qa_march14_reinit_R1_previous_overlay.png",
+      "artifact_group": "scientific_source_pngs/opendrift_primary",
+      "scientific_vs_display_only": "scientific_source_png",
+      "primary_vs_secondary": "primary",
+      "comparator_only": false,
+      "provenance_note": "Exact stored QA/source PNGs used to derive the primary OpenDrift publication family."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/scientific_source_pngs/comparator_pygnome/qa_march14_crossmodel_R0_reinit_p50_overlay.png",
+      "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/qa/qa_march14_crossmodel_R0_reinit_p50_overlay.png",
+      "artifact_group": "scientific_source_pngs/comparator_pygnome",
+      "scientific_vs_display_only": "scientific_source_png",
+      "primary_vs_secondary": "secondary",
+      "comparator_only": true,
+      "provenance_note": "Exact stored QA/source PNGs used to derive the March 13 -> March 14 comparator-only PyGNOME family."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/scientific_source_pngs/comparator_pygnome/qa_march14_crossmodel_R1_previous_reinit_p50_overlay.png",
+      "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/qa/qa_march14_crossmodel_R1_previous_reinit_p50_overlay.png",
+      "artifact_group": "scientific_source_pngs/comparator_pygnome",
+      "scientific_vs_display_only": "scientific_source_png",
+      "primary_vs_secondary": "secondary",
+      "comparator_only": true,
+      "provenance_note": "Exact stored QA/source PNGs used to derive the March 13 -> March 14 comparator-only PyGNOME family."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/scientific_source_pngs/comparator_pygnome/qa_march14_crossmodel_pygnome_reinit_deterministic_overlay.png",
+      "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/qa/qa_march14_crossmodel_pygnome_reinit_deterministic_overlay.png",
+      "artifact_group": "scientific_source_pngs/comparator_pygnome",
+      "scientific_vs_display_only": "scientific_source_png",
+      "primary_vs_secondary": "secondary",
+      "comparator_only": true,
+      "provenance_note": "Exact stored QA/source PNGs used to derive the March 13 -> March 14 comparator-only PyGNOME family."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_branch_pairing_manifest.csv",
+      "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_branch_pairing_manifest.csv",
+      "artifact_group": "summary/opendrift_primary",
+      "scientific_vs_display_only": "scientific_summary",
+      "primary_vs_secondary": "primary",
+      "comparator_only": false,
+      "provenance_note": "Canonical summary/diagnostic artifacts for the stored March 13 -> March 14 B1 OpenDrift validation run."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_fss_by_window.csv",
+      "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_fss_by_window.csv",
+      "artifact_group": "summary/opendrift_primary",
+      "scientific_vs_display_only": "scientific_summary",
+      "primary_vs_secondary": "primary",
+      "comparator_only": false,
+      "provenance_note": "Canonical summary/diagnostic artifacts for the stored March 13 -> March 14 B1 OpenDrift validation run."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_diagnostics.csv",
+      "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_diagnostics.csv",
+      "artifact_group": "summary/opendrift_primary",
+      "scientific_vs_display_only": "scientific_summary",
+      "primary_vs_secondary": "primary",
+      "comparator_only": false,
+      "provenance_note": "Canonical summary/diagnostic artifacts for the stored March 13 -> March 14 B1 OpenDrift validation run."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_summary.csv",
+      "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_summary.csv",
+      "artifact_group": "summary/opendrift_primary",
+      "scientific_vs_display_only": "scientific_summary",
+      "primary_vs_secondary": "primary",
+      "comparator_only": false,
+      "provenance_note": "Canonical summary/diagnostic artifacts for the stored March 13 -> March 14 B1 OpenDrift validation run."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_branch_survival_summary.csv",
+      "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_branch_survival_summary.csv",
+      "artifact_group": "summary/opendrift_primary",
+      "scientific_vs_display_only": "scientific_summary",
+      "primary_vs_secondary": "primary",
+      "comparator_only": false,
+      "provenance_note": "Canonical summary/diagnostic artifacts for the stored March 13 -> March 14 B1 OpenDrift validation run."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_decision_note.md",
+      "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_decision_note.md",
+      "artifact_group": "summary/opendrift_primary",
+      "scientific_vs_display_only": "scientific_summary",
+      "primary_vs_secondary": "primary",
+      "comparator_only": false,
+      "provenance_note": "Canonical summary/diagnostic artifacts for the stored March 13 -> March 14 B1 OpenDrift validation run."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_run_manifest.json",
+      "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_run_manifest.json",
+      "artifact_group": "summary/opendrift_primary",
+      "scientific_vs_display_only": "scientific_summary",
+      "primary_vs_secondary": "primary",
+      "comparator_only": false,
+      "provenance_note": "Canonical summary/diagnostic artifacts for the stored March 13 -> March 14 B1 OpenDrift validation run."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_tracks_registry.csv",
+      "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/march13_14_reinit_crossmodel_tracks_registry.csv",
+      "artifact_group": "summary/comparator_pygnome",
+      "scientific_vs_display_only": "scientific_summary",
+      "primary_vs_secondary": "secondary",
+      "comparator_only": true,
+      "provenance_note": "Canonical summary/diagnostic artifacts for the same-case March 13 -> March 14 comparator-only PyGNOME lane."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_pairing_manifest.csv",
+      "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/march13_14_reinit_crossmodel_pairing_manifest.csv",
+      "artifact_group": "summary/comparator_pygnome",
+      "scientific_vs_display_only": "scientific_summary",
+      "primary_vs_secondary": "secondary",
+      "comparator_only": true,
+      "provenance_note": "Canonical summary/diagnostic artifacts for the same-case March 13 -> March 14 comparator-only PyGNOME lane."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_fss_by_window.csv",
+      "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/march13_14_reinit_crossmodel_fss_by_window.csv",
+      "artifact_group": "summary/comparator_pygnome",
+      "scientific_vs_display_only": "scientific_summary",
+      "primary_vs_secondary": "secondary",
+      "comparator_only": true,
+      "provenance_note": "Canonical summary/diagnostic artifacts for the same-case March 13 -> March 14 comparator-only PyGNOME lane."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_diagnostics.csv",
+      "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/march13_14_reinit_crossmodel_diagnostics.csv",
+      "artifact_group": "summary/comparator_pygnome",
+      "scientific_vs_display_only": "scientific_summary",
+      "primary_vs_secondary": "secondary",
+      "comparator_only": true,
+      "provenance_note": "Canonical summary/diagnostic artifacts for the same-case March 13 -> March 14 comparator-only PyGNOME lane."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_summary.csv",
+      "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/march13_14_reinit_crossmodel_summary.csv",
+      "artifact_group": "summary/comparator_pygnome",
+      "scientific_vs_display_only": "scientific_summary",
+      "primary_vs_secondary": "secondary",
+      "comparator_only": true,
+      "provenance_note": "Canonical summary/diagnostic artifacts for the same-case March 13 -> March 14 comparator-only PyGNOME lane."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_model_ranking.csv",
+      "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/march13_14_reinit_crossmodel_model_ranking.csv",
+      "artifact_group": "summary/comparator_pygnome",
+      "scientific_vs_display_only": "scientific_summary",
+      "primary_vs_secondary": "secondary",
+      "comparator_only": true,
+      "provenance_note": "Canonical summary/diagnostic artifacts for the same-case March 13 -> March 14 comparator-only PyGNOME lane."
+    },
+    {
+      "final_relative_path": "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_run_manifest.json",
+      "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/march13_14_reinit_crossmodel_run_manifest.json",
+      "artifact_group": "summary/comparator_pygnome",
+      "scientific_vs_display_only": "scientific_summary",
+      "primary_vs_secondary": "secondary",
+      "comparator_only": true,
+      "provenance_note": "Canonical summary/diagnostic artifacts for the same-case March 13 -> March 14 comparator-only PyGNOME lane."
+    }
+  ]
+}

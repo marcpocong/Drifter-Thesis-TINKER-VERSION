@@ -1,0 +1,37 @@
+comparison_track_id,comparison_track_label,timestamp_utc,hour,window_km,window_cells,fss
+deterministic,OpenDrift deterministic,2016-09-18T00:00:00Z,24,1,1,1.0
+deterministic,OpenDrift deterministic,2016-09-18T00:00:00Z,24,3,3,1.0
+deterministic,OpenDrift deterministic,2016-09-18T00:00:00Z,24,5,5,1.0
+deterministic,OpenDrift deterministic,2016-09-18T00:00:00Z,24,10,10,1.0
+deterministic,OpenDrift deterministic,2016-09-19T00:00:00Z,48,1,1,0.6666666666666666
+deterministic,OpenDrift deterministic,2016-09-19T00:00:00Z,48,3,3,0.7692307692307692
+deterministic,OpenDrift deterministic,2016-09-19T00:00:00Z,48,5,5,0.782608695652174
+deterministic,OpenDrift deterministic,2016-09-19T00:00:00Z,48,10,10,0.7916666666666666
+deterministic,OpenDrift deterministic,2016-09-20T00:00:00Z,72,1,1,0.33333333333333337
+deterministic,OpenDrift deterministic,2016-09-20T00:00:00Z,72,3,3,0.41891891891891897
+deterministic,OpenDrift deterministic,2016-09-20T00:00:00Z,72,5,5,0.404
+deterministic,OpenDrift deterministic,2016-09-20T00:00:00Z,72,10,10,0.39388646288209594
+ensemble_p50,OpenDrift p50 occupancy footprint,2016-09-18T00:00:00Z,24,1,1,0.19999999999999996
+ensemble_p50,OpenDrift p50 occupancy footprint,2016-09-18T00:00:00Z,24,3,3,0.2648648648648646
+ensemble_p50,OpenDrift p50 occupancy footprint,2016-09-18T00:00:00Z,24,5,5,0.24246771879483497
+ensemble_p50,OpenDrift p50 occupancy footprint,2016-09-18T00:00:00Z,24,10,10,0.22977725674091454
+ensemble_p50,OpenDrift p50 occupancy footprint,2016-09-19T00:00:00Z,48,1,1,0.23529411764705876
+ensemble_p50,OpenDrift p50 occupancy footprint,2016-09-19T00:00:00Z,48,3,3,0.3410641200545703
+ensemble_p50,OpenDrift p50 occupancy footprint,2016-09-19T00:00:00Z,48,5,5,0.30058157330884605
+ensemble_p50,OpenDrift p50 occupancy footprint,2016-09-19T00:00:00Z,48,10,10,0.278584392014519
+ensemble_p50,OpenDrift p50 occupancy footprint,2016-09-20T00:00:00Z,72,1,1,0.4
+ensemble_p50,OpenDrift p50 occupancy footprint,2016-09-20T00:00:00Z,72,3,3,0.5709372312983663
+ensemble_p50,OpenDrift p50 occupancy footprint,2016-09-20T00:00:00Z,72,5,5,0.5370675453047775
+ensemble_p50,OpenDrift p50 occupancy footprint,2016-09-20T00:00:00Z,72,10,10,0.4982471795525527
+ensemble_p90,OpenDrift p90 occupancy footprint,2016-09-18T00:00:00Z,24,1,1,0.2222222222222221
+ensemble_p90,OpenDrift p90 occupancy footprint,2016-09-18T00:00:00Z,24,3,3,0.2931596091205212
+ensemble_p90,OpenDrift p90 occupancy footprint,2016-09-18T00:00:00Z,24,5,5,0.27055702917771873
+ensemble_p90,OpenDrift p90 occupancy footprint,2016-09-18T00:00:00Z,24,10,10,0.257226491035492
+ensemble_p90,OpenDrift p90 occupancy footprint,2016-09-19T00:00:00Z,48,1,1,0.25
+ensemble_p90,OpenDrift p90 occupancy footprint,2016-09-19T00:00:00Z,48,3,3,0.36144578313253006
+ensemble_p90,OpenDrift p90 occupancy footprint,2016-09-19T00:00:00Z,48,5,5,0.3193392980041293
+ensemble_p90,OpenDrift p90 occupancy footprint,2016-09-19T00:00:00Z,48,10,10,0.29698375870069627
+ensemble_p90,OpenDrift p90 occupancy footprint,2016-09-20T00:00:00Z,72,1,1,0.4545454545454546
+ensemble_p90,OpenDrift p90 occupancy footprint,2016-09-20T00:00:00Z,72,3,3,0.6365503080082136
+ensemble_p90,OpenDrift p90 occupancy footprint,2016-09-20T00:00:00Z,72,5,5,0.5984396512161541
+ensemble_p90,OpenDrift p90 occupancy footprint,2016-09-20T00:00:00Z,72,10,10,0.5663094440723375

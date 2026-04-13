@@ -1,0 +1,66 @@
+baseline_id: phase1_historical_transport_baseline_candidate_2016_2022_v1
+description: Staged candidate Phase 1 baseline from the completed 2016-2022 regional
+  production rerun
+selected_recipe: cmems_gfs
+source_kind: staged_production_candidate
+status_flag: valid
+valid: true
+provisional: false
+rerun_required: false
+promotion_required: true
+selection_basis: Completed 2016-2022 regional drogued-only non-overlapping 72 h production
+  rerun
+workflow_scope:
+- phase1_regional_2016_2022
+- mindoro_retro_2023
+- dwh_retro_2010
+historical_validation_artifacts:
+- output/phase1_production_rerun/phase1_drifter_registry.csv
+- output/phase1_production_rerun/phase1_accepted_segment_registry.csv
+- output/phase1_production_rerun/phase1_rejected_segment_registry.csv
+- output/phase1_production_rerun/phase1_loading_audit.csv
+- output/phase1_production_rerun/phase1_segment_metrics.csv
+- output/phase1_production_rerun/phase1_recipe_summary.csv
+- output/phase1_production_rerun/phase1_recipe_ranking.csv
+notes:
+- This artifact is staged only and does not overwrite config/phase1_baseline_selection.yaml.
+- Downstream trial runs may set BASELINE_SELECTION_PATH to this candidate artifact
+  explicitly.
+chapter3_finalization_audit:
+  target_historical_window:
+    start_date: '2016-01-01'
+    end_date: '2022-12-31'
+  regional_validation_box:
+  - 119.5
+  - 124.5
+  - 11.5
+  - 16.5
+  core_pool_policy: drogued_segments_only
+  segment_policy:
+    horizon_hours: 72
+    overlap_policy: non_overlapping
+  official_recipe_family:
+  - cmems_era5
+  - cmems_gfs
+  - hycom_era5
+  - hycom_gfs
+  current_local_evidence_scope: completed_2016_2022_regional_production_rerun
+  accepted_segment_count: 89
+  rejected_segment_count: 26687
+  expected_phase1_artifacts:
+    drifter_registry: output/phase1_production_rerun/phase1_drifter_registry.csv
+    accepted_segment_registry: output/phase1_production_rerun/phase1_accepted_segment_registry.csv
+    rejected_segment_registry: output/phase1_production_rerun/phase1_rejected_segment_registry.csv
+    loading_audit: output/phase1_production_rerun/phase1_loading_audit.csv
+    segment_metrics: output/phase1_production_rerun/phase1_segment_metrics.csv
+    recipe_summary: output/phase1_production_rerun/phase1_recipe_summary.csv
+    recipe_ranking: output/phase1_production_rerun/phase1_recipe_ranking.csv
+    frozen_baseline_candidate: output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml
+  loading_audit_policy:
+    hard_fail_on_missing_required_forcing: true
+    hard_fail_on_empty_valid_recipe_set: true
+    require_wave_stokes_reader: true
+  audit_status:
+    classification: implemented_and_scientifically_ready
+    full_production_rerun_required: false
+    blocker: ''

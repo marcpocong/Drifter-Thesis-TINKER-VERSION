@@ -1,0 +1,10 @@
+comparison_track_id,comparison_track_label,timestamp_utc,hour,epsilon,ocean_cell_count,kl_divergence
+deterministic,OpenDrift deterministic,2016-09-02T00:00:00Z,24,1e-10,25600,19.690935971274364
+deterministic,OpenDrift deterministic,2016-09-03T00:00:00Z,48,1e-10,25600,2.5409291058761965
+deterministic,OpenDrift deterministic,2016-09-04T00:00:00Z,72,1e-10,25600,22.633609741220678
+ensemble_p50,OpenDrift p50 occupancy footprint,2016-09-02T00:00:00Z,24,1e-10,25600,1.6964865959885576
+ensemble_p50,OpenDrift p50 occupancy footprint,2016-09-03T00:00:00Z,48,1e-10,25600,2.389235250611644
+ensemble_p50,OpenDrift p50 occupancy footprint,2016-09-04T00:00:00Z,72,1e-10,25600,2.5460252571893633
+ensemble_p90,OpenDrift p90 occupancy footprint,2016-09-02T00:00:00Z,24,1e-10,25600,1.5629555473046888
+ensemble_p90,OpenDrift p90 occupancy footprint,2016-09-03T00:00:00Z,48,1e-10,25600,2.2557042038903097
+ensemble_p90,OpenDrift p90 occupancy footprint,2016-09-04T00:00:00Z,72,1e-10,25600,2.421513285354207

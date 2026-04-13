@@ -1,0 +1,123 @@
+[
+  {
+    "track_id": "pygnome_deterministic",
+    "product_type": "pygnome_footprint_mask",
+    "timestamp_utc": "2010-05-21T23:59:59Z",
+    "actual_snapshot_time_utc": "2010-05-22T00:00:00Z",
+    "date_utc": "2010-05-21",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator/products/pygnome_footprint_mask_2010-05-21T23-59-59Z.tif",
+    "score_candidate": false,
+    "mass_strategy": "mass"
+  },
+  {
+    "track_id": "pygnome_deterministic",
+    "product_type": "pygnome_density_norm",
+    "timestamp_utc": "2010-05-21T23:59:59Z",
+    "actual_snapshot_time_utc": "2010-05-22T00:00:00Z",
+    "date_utc": "2010-05-21",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator/products/pygnome_density_norm_2010-05-21T23-59-59Z.tif",
+    "score_candidate": false,
+    "mass_strategy": "mass"
+  },
+  {
+    "track_id": "pygnome_deterministic",
+    "product_type": "pygnome_footprint_mask_datecomposite",
+    "date_utc": "2010-05-21",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator/products/pygnome_footprint_mask_2010-05-21_datecomposite.tif",
+    "score_candidate": true,
+    "active_snapshots": 24,
+    "active_particles_total": 120000
+  },
+  {
+    "track_id": "pygnome_deterministic",
+    "product_type": "pygnome_density_norm_datecomposite",
+    "date_utc": "2010-05-21",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator/products/pygnome_density_norm_2010-05-21_datecomposite.tif",
+    "score_candidate": false,
+    "active_snapshots": 24,
+    "active_particles_total": 120000
+  },
+  {
+    "track_id": "pygnome_deterministic",
+    "product_type": "pygnome_footprint_mask",
+    "timestamp_utc": "2010-05-22T23:59:59Z",
+    "actual_snapshot_time_utc": "2010-05-23T00:00:00Z",
+    "date_utc": "2010-05-22",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator/products/pygnome_footprint_mask_2010-05-22T23-59-59Z.tif",
+    "score_candidate": false,
+    "mass_strategy": "mass"
+  },
+  {
+    "track_id": "pygnome_deterministic",
+    "product_type": "pygnome_density_norm",
+    "timestamp_utc": "2010-05-22T23:59:59Z",
+    "actual_snapshot_time_utc": "2010-05-23T00:00:00Z",
+    "date_utc": "2010-05-22",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator/products/pygnome_density_norm_2010-05-22T23-59-59Z.tif",
+    "score_candidate": false,
+    "mass_strategy": "mass"
+  },
+  {
+    "track_id": "pygnome_deterministic",
+    "product_type": "pygnome_footprint_mask_datecomposite",
+    "date_utc": "2010-05-22",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator/products/pygnome_footprint_mask_2010-05-22_datecomposite.tif",
+    "score_candidate": true,
+    "active_snapshots": 24,
+    "active_particles_total": 120000
+  },
+  {
+    "track_id": "pygnome_deterministic",
+    "product_type": "pygnome_density_norm_datecomposite",
+    "date_utc": "2010-05-22",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator/products/pygnome_density_norm_2010-05-22_datecomposite.tif",
+    "score_candidate": false,
+    "active_snapshots": 24,
+    "active_particles_total": 120000
+  },
+  {
+    "track_id": "pygnome_deterministic",
+    "product_type": "pygnome_footprint_mask",
+    "timestamp_utc": "2010-05-23T23:59:59Z",
+    "actual_snapshot_time_utc": "2010-05-24T00:00:00Z",
+    "date_utc": "2010-05-23",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator/products/pygnome_footprint_mask_2010-05-23T23-59-59Z.tif",
+    "score_candidate": false,
+    "mass_strategy": "mass"
+  },
+  {
+    "track_id": "pygnome_deterministic",
+    "product_type": "pygnome_density_norm",
+    "timestamp_utc": "2010-05-23T23:59:59Z",
+    "actual_snapshot_time_utc": "2010-05-24T00:00:00Z",
+    "date_utc": "2010-05-23",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator/products/pygnome_density_norm_2010-05-23T23-59-59Z.tif",
+    "score_candidate": false,
+    "mass_strategy": "mass"
+  },
+  {
+    "track_id": "pygnome_deterministic",
+    "product_type": "pygnome_footprint_mask_datecomposite",
+    "date_utc": "2010-05-23",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator/products/pygnome_footprint_mask_2010-05-23_datecomposite.tif",
+    "score_candidate": true,
+    "active_snapshots": 24,
+    "active_particles_total": 120000
+  },
+  {
+    "track_id": "pygnome_deterministic",
+    "product_type": "pygnome_density_norm_datecomposite",
+    "date_utc": "2010-05-23",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator/products/pygnome_density_norm_2010-05-23_datecomposite.tif",
+    "score_candidate": false,
+    "active_snapshots": 24,
+    "active_particles_total": 120000
+  },
+  {
+    "track_id": "pygnome_deterministic",
+    "product_type": "pygnome_eventcorridor_union",
+    "date_utc": "2010-05-21/2010-05-23",
+    "path": "output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator/products/pygnome_eventcorridor_union_2010-05-21_to_2010-05-23.tif",
+    "score_candidate": true
+  }
+]

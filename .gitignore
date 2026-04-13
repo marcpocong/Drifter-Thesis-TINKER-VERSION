@@ -100,3 +100,28 @@ openclaw/
 .agents/
 # raw shoreline downloads
 data_processed/grids/raw/
+
+# Curated final-output roots
+!output/2016 Legacy Runs FINAL Figures/
+!output/2016 Legacy Runs FINAL Figures/**
+
+!output/Phase 3B March13-14 Final Output/
+!output/Phase 3B March13-14 Final Output/**
+
+!output/Phase 3C DWH Final Output/
+!output/Phase 3C DWH Final Output/**
+
+# Small Phase 1 provenance artifacts
+!output/phase1_mindoro_focus_pre_spill_2016_2023/
+output/phase1_mindoro_focus_pre_spill_2016_2023/*
+!output/phase1_mindoro_focus_pre_spill_2016_2023/*.csv
+!output/phase1_mindoro_focus_pre_spill_2016_2023/*.json
+!output/phase1_mindoro_focus_pre_spill_2016_2023/*.md
+!output/phase1_mindoro_focus_pre_spill_2016_2023/*.yaml
+
+!output/phase1_production_rerun/
+output/phase1_production_rerun/*
+!output/phase1_production_rerun/*.csv
+!output/phase1_production_rerun/*.json
+!output/phase1_production_rerun/*.md
+!output/phase1_production_rerun/*.yaml
