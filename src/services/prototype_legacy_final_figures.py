@@ -425,7 +425,7 @@ class PrototypeLegacyFinalFiguresService:
             mean_values = self._mean_fss_values(case_id, comparison_track_id=comparison_track_id)
             lines.append(f"{label} FSS 1/3/5/10 km: {self._format_values(snapshot_values)}")
             lines.append(f"{label} mean FSS 1/3/5/10 km: {self._format_values(mean_values)}")
-        lines.append("PyGNOME remains comparator-only in this legacy support lane.")
+        lines.append(self.prototype_helper._pygnome_forcing_sentence(item))
         return lines
 
     def _overlay_track_polygons(
@@ -573,13 +573,14 @@ class PrototypeLegacyFinalFiguresService:
             first_line = f"{case_label} legacy support case at T+{int(hour)} h."
         lines = [
             first_line,
-            "Stored probability raster cells and exact p50/p90 footprint geometry are rendered directly. Empty stored layers are omitted.",
+            "Stored member-occupancy probability raster cells and exact p50/p90 occupancy footprint geometry are rendered directly. Empty stored layers are omitted.",
+            "p50/p90 are exact valid-time member-occupancy footprints, not pooled-particle-density thresholds and not cumulative corridors.",
             "The drifter-of-record start point remains the authoritative prototype_2016 release reference.",
             "Legacy/debug support only; not final Chapter 3 evidence.",
         ]
         omitted_layers: list[str] = []
         if not probability_drawn:
-            omitted_layers.append("probability raster")
+            omitted_layers.append("member-occupancy probability raster")
         if not p50_drawn:
             omitted_layers.append("p50 mask")
         if not p90_drawn:
@@ -619,7 +620,7 @@ class PrototypeLegacyFinalFiguresService:
                 Patch(
                     facecolor=(0.545, 0.847, 0.804, 0.32),
                     edgecolor="none",
-                    label="Stored probability raster cells",
+                    label="Stored member-occupancy probability cells",
                 )
             )
         if show_p50:
@@ -711,7 +712,7 @@ class PrototypeLegacyFinalFiguresService:
         case_label = case_id.replace("CASE_", "")
         fig, ax = self._figure_frame(
             f"{case_label} | {title_suffix}",
-            "Prototype 2016 legacy support export | Arial publication styling | exact stored probability cells and mask geometry",
+            "Prototype 2016 legacy support export | Arial publication styling | exact stored member-occupancy probability cells and mask geometry",
             display_bounds=plot_bounds,
         )
         side_ax = fig.add_axes([0.83, 0.12, 0.14, 0.76])
@@ -884,7 +885,7 @@ class PrototypeLegacyFinalFiguresService:
         case_label = case_id.replace("CASE_", "")
         fig, ax = self._figure_frame(
             f"{case_label} | PyGNOME vs ensemble {note_suffix}",
-            "Prototype 2016 legacy support export | deterministic PyGNOME over exact stored ensemble p50/p90 footprint geometry",
+            "Prototype 2016 legacy support export | deterministic PyGNOME over exact stored ensemble p50/p90 occupancy footprint geometry",
             display_bounds=plot_bounds,
         )
         side_ax = fig.add_axes([0.83, 0.12, 0.14, 0.76])
@@ -1075,7 +1076,7 @@ class PrototypeLegacyFinalFiguresService:
                 [
                     f"{case_label} legacy support case. This consolidated PyGNOME panel unions the stored 24/48/72 comparator snapshots.",
                     "Stored PyGNOME raster cells and exact footprint outlines are rendered directly. Empty stored layers are omitted.",
-                    "PyGNOME remains comparator-only, not truth.",
+                    self.prototype_helper._pygnome_forcing_sentence(item),
                     "Legacy/debug support only; not final Chapter 3 evidence.",
                 ],
             )
@@ -1088,7 +1089,10 @@ class PrototypeLegacyFinalFiguresService:
                 output_path=pygnome_single_output,
                 figure_type="pygnome_consolidated_map",
                 source_paths=[*pygnome_footprints, *pygnome_density_paths],
-                notes="Consolidated deterministic PyGNOME comparator map built from stored 24/48/72 benchmark artifacts only.",
+                notes=(
+                    "Consolidated deterministic PyGNOME comparator map built from stored 24/48/72 benchmark artifacts only. "
+                    + self.prototype_helper._pygnome_forcing_sentence(item)
+                ),
                 geometry_render_mode=render_info["geometry_render_mode"],
                 density_render_mode=render_info["density_render_mode"],
                 stored_geometry_status=render_info["stored_geometry_status"],
@@ -1113,7 +1117,10 @@ class PrototypeLegacyFinalFiguresService:
                 output_path=comparator_output,
                 figure_type="pygnome_vs_ensemble_consolidated_overlay",
                 source_paths=[*pygnome_footprints, *pygnome_density_paths, *p50_paths, *p90_paths],
-                notes="Consolidated deterministic PyGNOME vs ensemble p50/p90 overlay using stored 24/48/72 benchmark artifacts only.",
+                notes=(
+                    "Consolidated deterministic PyGNOME vs ensemble p50/p90 occupancy overlay using stored 24/48/72 benchmark artifacts only. "
+                    + self.prototype_helper._pygnome_forcing_sentence(item)
+                ),
                 geometry_render_mode=comparator_render_info["geometry_render_mode"],
                 density_render_mode=comparator_render_info["density_render_mode"],
                 stored_geometry_status=comparator_render_info["stored_geometry_status"],
@@ -1195,7 +1202,7 @@ class PrototypeLegacyFinalFiguresService:
                     output_path=overlay_output,
                     figure_type="drifter_track_ensemble_overlay",
                     source_paths=[self._drifter_csv_path(case_id), p50_72h, p90_72h],
-                    notes="Observed drifter-of-record track overlaid on the stored 72 h ensemble p50/p90 footprints.",
+                    notes="Observed drifter-of-record track overlaid on the stored 72 h ensemble p50/p90 member-occupancy footprints.",
                     geometry_render_mode="observed_track_line_plus_exact_stored_raster",
                     density_render_mode="not_applicable",
                     stored_geometry_status="mixed_nonempty_or_empty_stored_artifacts",
@@ -1222,7 +1229,7 @@ class PrototypeLegacyFinalFiguresService:
                     case_id=case_id,
                     hour=int(hour),
                     output_path=output_path,
-                    title_suffix=f"Ensemble probability footprint {int(hour)} h",
+                    title_suffix=f"Ensemble member-occupancy footprint {int(hour)} h",
                 )
                 self._record_figure(
                     case_id=case_id,
@@ -1230,7 +1237,7 @@ class PrototypeLegacyFinalFiguresService:
                     output_path=output_path,
                     figure_type="ensemble_probability_map",
                     source_paths=list(phase2_paths.values()),
-                    notes=f"Redrawn stored prototype_2016 ensemble support footprint for T+{int(hour)} h.",
+                    notes=f"Redrawn stored prototype_2016 ensemble member-occupancy support footprint for T+{int(hour)} h.",
                     geometry_render_mode=render_info["geometry_render_mode"],
                     density_render_mode=render_info["density_render_mode"],
                     stored_geometry_status=render_info["stored_geometry_status"],
@@ -1254,7 +1261,7 @@ class PrototypeLegacyFinalFiguresService:
                 case_id=case_id,
                 hour=72,
                 output_path=consolidated_output,
-                title_suffix="Consolidated ensemble footprint 72 h",
+                title_suffix="Consolidated ensemble member-occupancy footprint 72 h",
             )
             self._record_figure(
                 case_id=case_id,
@@ -1262,7 +1269,7 @@ class PrototypeLegacyFinalFiguresService:
                 output_path=consolidated_output,
                 figure_type="ensemble_consolidated_map",
                 source_paths=list(self._phase2_source_paths(case_id, 72).values()),
-                notes="Paper-style consolidated 72 h ensemble support footprint using the stored prototype legacy 72 h support products.",
+                notes="Paper-style consolidated 72 h ensemble member-occupancy support footprint using the stored prototype legacy 72 h support products.",
                 geometry_render_mode=consolidated_render_info["geometry_render_mode"],
                 density_render_mode=consolidated_render_info["density_render_mode"],
                 stored_geometry_status=consolidated_render_info["stored_geometry_status"],
@@ -1301,7 +1308,10 @@ class PrototypeLegacyFinalFiguresService:
                     output_path=pygnome_output,
                     figure_type="pygnome_single_map",
                     source_paths=missing_sources,
-                    notes=f"Deterministic PyGNOME comparator export for T+{int(hour)} h.",
+                    notes=(
+                        f"Deterministic PyGNOME comparator export for T+{int(hour)} h. "
+                        + self.prototype_helper._pygnome_forcing_sentence(item)
+                    ),
                     geometry_render_mode=render_info["geometry_render_mode"],
                     density_render_mode=render_info["density_render_mode"],
                     stored_geometry_status=render_info["stored_geometry_status"],
@@ -1361,7 +1371,10 @@ class PrototypeLegacyFinalFiguresService:
                         Path(p50_row["opendrift_footprint_path_resolved"]),
                         Path(p90_row["opendrift_footprint_path_resolved"]),
                     ],
-                    notes=f"Per-hour deterministic PyGNOME vs ensemble p50/p90 overlay for T+{int(hour)} h with snapshot and mean FSS notes.",
+                    notes=(
+                        f"Per-hour deterministic PyGNOME vs ensemble p50/p90 occupancy overlay for T+{int(hour)} h with snapshot and mean FSS notes. "
+                        + self.prototype_helper._pygnome_forcing_sentence(item)
+                    ),
                     geometry_render_mode=render_info["geometry_render_mode"],
                     density_render_mode=render_info["density_render_mode"],
                     stored_geometry_status=render_info["stored_geometry_status"],
@@ -1458,8 +1471,9 @@ class PrototypeLegacyFinalFiguresService:
             "notes": [
                 "Curated prototype_2016 final paper-figure export built from existing outputs only.",
                 "Forecast figures use exact stored raster cells and exact stored footprint geometry only; empty stored layers are omitted.",
+                "prototype_2016 p50/p90 products are exact valid-time member-occupancy footprints.",
                 "This folder is legacy support only and does not replace the canonical generic publication package.",
-                "PyGNOME remains comparator-only, not truth.",
+                "PyGNOME remains comparator-only; matched grid wind/current forcing is used when available and degraded mode is surfaced explicitly otherwise.",
             ],
         }
         _write_json(manifest_json, manifest_payload)

@@ -7,6 +7,7 @@ from unittest import mock
 
 import numpy as np
 import pandas as pd
+import rasterio
 import xarray as xr
 
 from src.core.case_context import get_case_context
@@ -481,10 +482,20 @@ class ForecastLoadingTests(unittest.TestCase):
 
             for member_id in range(1, service.ensemble_size + 1):
                 (service.output_dir / f"member_{member_id:02d}.nc").write_bytes(b"member")
-            (service.output_dir / "metadata.json").write_bytes(b"{}")
+            (service.output_dir / "metadata.json").write_text(
+                json.dumps(
+                    {
+                        "probability_semantics": "member_occupancy_probability",
+                        "probability_semantics_version": "prototype_2016_member_occupancy_v1",
+                    }
+                ),
+                encoding="utf-8",
+            )
             for hour in (24, 48, 72):
                 (service.output_dir / f"probability_{hour}h.nc").write_bytes(b"nc")
                 (service.output_dir / f"probability_{hour}h.tif").write_bytes(b"tif")
+                (service.output_dir / f"particle_density_fraction_{hour}h.nc").write_bytes(b"nc")
+                (service.output_dir / f"particle_density_fraction_{hour}h.tif").write_bytes(b"tif")
                 (service.output_dir / f"mask_p50_{hour}h.tif").write_bytes(b"mask")
                 (service.output_dir / f"mask_p90_{hour}h.tif").write_bytes(b"mask")
 
@@ -520,6 +531,128 @@ class ForecastLoadingTests(unittest.TestCase):
 
             self.assertTrue(validation["valid"])
             self.assertEqual(len(validation["member_runs"]), service.ensemble_size)
+            get_case_context.cache_clear()
+
+    def test_prototype_2016_probability_products_use_member_occupancy_not_pooled_density(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            dummy = tmp_path / "dummy.nc"
+            xr.Dataset().to_netcdf(dummy)
+
+            with mock.patch.dict(
+                os.environ,
+                {
+                    "WORKFLOW_MODE": "prototype_2016",
+                    "PHASE_1_START_DATE": "2016-09-01",
+                    "RUN_NAME": "CASE_2016-09-01",
+                },
+                clear=False,
+            ):
+                get_case_context.cache_clear()
+                service = EnsembleForecastService(
+                    str(dummy),
+                    str(dummy),
+                    output_run_name="TEST_PROTOTYPE_2016_OCCUPANCY",
+                )
+
+            runtime_root = tmp_path / "runtime"
+            service.base_output_dir = runtime_root
+            service.output_dir = runtime_root / "ensemble"
+            service.forecast_dir = runtime_root / "forecast"
+            service.member_mask_dir = service.output_dir / "member_presence"
+            service.loading_cache_dir = service.forecast_dir / "forcing_cache"
+            service.output_dir.mkdir(parents=True, exist_ok=True)
+            service.forecast_dir.mkdir(parents=True, exist_ok=True)
+            service.member_mask_dir.mkdir(parents=True, exist_ok=True)
+            service.loading_cache_dir.mkdir(parents=True, exist_ok=True)
+            service.snapshot_hours = [24]
+
+            member_01 = service.output_dir / "member_01.nc"
+            member_02 = service.output_dir / "member_02.nc"
+            member1_particles = 100
+            xr.Dataset(
+                data_vars={
+                    "lon": (
+                        ("time", "particle"),
+                        np.vstack(
+                            [
+                                np.full(member1_particles, 117.180, dtype=np.float32),
+                                np.full(member1_particles, 117.200, dtype=np.float32),
+                            ]
+                        ),
+                    ),
+                    "lat": (
+                        ("time", "particle"),
+                        np.vstack(
+                            [
+                                np.full(member1_particles, 10.415, dtype=np.float32),
+                                np.full(member1_particles, 10.430, dtype=np.float32),
+                            ]
+                        ),
+                    ),
+                    "status": (("time", "particle"), np.zeros((2, member1_particles), dtype=np.int32)),
+                },
+                coords={
+                    "time": pd.to_datetime(["2016-09-01T00:00:00", "2016-09-02T00:00:00"]),
+                    "particle": np.arange(member1_particles),
+                },
+            ).to_netcdf(member_01)
+            xr.Dataset(
+                data_vars={
+                    "lon": (("time", "particle"), np.array([[117.600], [117.650]], dtype=np.float32)),
+                    "lat": (("time", "particle"), np.array([[10.700], [10.750]], dtype=np.float32)),
+                    "status": (("time", "particle"), np.zeros((2, 1), dtype=np.int32)),
+                },
+                coords={
+                    "time": pd.to_datetime(["2016-09-01T00:00:00", "2016-09-02T00:00:00"]),
+                    "particle": [0],
+                },
+            ).to_netcdf(member_02)
+
+            with mock.patch("src.services.ensemble.plot_probability_map", return_value=None), mock.patch.object(
+                service,
+                "_prototype_2016_display_bounds",
+                return_value=(117.0, 118.0, 10.2, 10.9),
+            ), mock.patch.object(
+                service,
+                "_generate_prototype_2016_drifter_visual_products",
+                return_value=([], []),
+            ):
+                written_files, product_records = service._generate_prototype_probability_products(
+                    [member_01, member_02],
+                    10.4150,
+                    117.1800,
+                    nominal_start_time="2016-09-01T00:00:00Z",
+                )
+
+            probability_path = service.output_dir / "probability_24h.tif"
+            p50_path = service.output_dir / "mask_p50_24h.tif"
+            p90_path = service.output_dir / "mask_p90_24h.tif"
+            density_path = service.output_dir / "particle_density_fraction_24h.tif"
+
+            with rasterio.open(probability_path) as src:
+                probability = src.read(1)
+            with rasterio.open(p50_path) as src:
+                p50 = src.read(1)
+            with rasterio.open(p90_path) as src:
+                p90 = src.read(1)
+            with rasterio.open(density_path) as src:
+                density = src.read(1)
+
+            self.assertEqual(int(np.count_nonzero(probability > 0)), 2)
+            self.assertAlmostEqual(float(np.nanmax(probability)), 0.5, places=6)
+            self.assertEqual(int(np.count_nonzero(p50 > 0)), 2)
+            self.assertEqual(int(np.count_nonzero(p90 > 0)), 0)
+            self.assertEqual(int(np.count_nonzero(density > 0)), 2)
+            self.assertGreater(float(np.nanmax(density)), 0.95)
+
+            prob_record = next(record for record in product_records if record["product_type"] == "prob_presence")
+            self.assertEqual(prob_record["contributing_member_count"], 2)
+            self.assertEqual(prob_record["contributing_member_ids"], [1, 2])
+            self.assertEqual(prob_record["probability_semantics"], "member_occupancy_probability")
+            density_record = next(record for record in product_records if record["product_type"] == "particle_density_fraction")
+            self.assertIn("not a probability-of-presence product", density_record["semantics"])
+            self.assertTrue(any(path.name == "particle_density_fraction_24h.tif" for path in written_files))
             get_case_context.cache_clear()
 
     def test_prototype_2016_reuse_validation_rejects_incomplete_science_outputs(self):
@@ -565,6 +698,86 @@ class ForecastLoadingTests(unittest.TestCase):
 
             self.assertFalse(validation["valid"])
             self.assertIn("member records", validation["reason"])
+            get_case_context.cache_clear()
+
+    def test_prototype_2016_reuse_validation_rejects_stale_probability_semantics(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
+            dummy = tmp_path / "dummy.nc"
+            xr.Dataset().to_netcdf(dummy)
+
+            with mock.patch.dict(
+                os.environ,
+                {
+                    "WORKFLOW_MODE": "prototype_2016",
+                    "PHASE_1_START_DATE": "2016-09-01",
+                    "RUN_NAME": "CASE_2016-09-01",
+                },
+                clear=False,
+            ):
+                get_case_context.cache_clear()
+                service = EnsembleForecastService(str(dummy), str(dummy))
+
+            service.base_output_dir = tmp_path / "output" / "CASE_2016-09-01"
+            service.output_dir = service.base_output_dir / "ensemble"
+            service.forecast_dir = service.base_output_dir / "forecast"
+            service.member_mask_dir = service.output_dir / "member_presence"
+            service.loading_cache_dir = service.forecast_dir / "forcing_cache"
+            service.output_dir.mkdir(parents=True, exist_ok=True)
+            service.forecast_dir.mkdir(parents=True, exist_ok=True)
+            service.member_mask_dir.mkdir(parents=True, exist_ok=True)
+            service.loading_cache_dir.mkdir(parents=True, exist_ok=True)
+
+            for member_id in range(1, service.ensemble_size + 1):
+                (service.output_dir / f"member_{member_id:02d}.nc").write_bytes(b"member")
+            (service.output_dir / "metadata.json").write_text(
+                json.dumps(
+                    {
+                        "probability_semantics": "pooled_particle_density_threshold",
+                        "probability_semantics_version": "legacy_v0",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            for hour in (24, 48, 72):
+                (service.output_dir / f"probability_{hour}h.nc").write_bytes(b"nc")
+                (service.output_dir / f"probability_{hour}h.tif").write_bytes(b"tif")
+                (service.output_dir / f"particle_density_fraction_{hour}h.nc").write_bytes(b"nc")
+                (service.output_dir / f"particle_density_fraction_{hour}h.tif").write_bytes(b"tif")
+                (service.output_dir / f"mask_p50_{hour}h.tif").write_bytes(b"mask")
+                (service.output_dir / f"mask_p90_{hour}h.tif").write_bytes(b"mask")
+
+            manifest_path = tmp_path / "ensemble_manifest.json"
+            manifest_path.write_text(
+                json.dumps(
+                    {
+                        "manifest_type": "prototype_phase2_ensemble",
+                        "workflow_mode": "prototype_2016",
+                        "source_geometry": {
+                            "initialization_mode": "drifter_of_record_point",
+                            "release_geometry": "legacy_drifter_of_record_point",
+                        },
+                        "member_runs": [
+                            {
+                                "member_id": member_id,
+                                "relative_path": f"ensemble/member_{member_id:02d}.nc",
+                                "seed_initialization": {
+                                    "initialization_mode": "drifter_of_record_point",
+                                    "release_geometry": "legacy_drifter_of_record_point",
+                                },
+                            }
+                            for member_id in range(1, service.ensemble_size + 1)
+                        ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+
+            with mock.patch("src.services.ensemble.get_ensemble_manifest_path", return_value=manifest_path):
+                validation = service._validate_prototype_2016_reusable_science()
+
+            self.assertFalse(validation["valid"])
+            self.assertIn("member_occupancy_probability", validation["reason"])
             get_case_context.cache_clear()
 
     def test_prototype_2016_reuse_policy_short_circuits_member_rerun(self):

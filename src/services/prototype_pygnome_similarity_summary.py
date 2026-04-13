@@ -94,15 +94,15 @@ MODEL_STYLES = {
         "color": "#0f766e",
         "mid_color": "#1f9d8f",
         "light_color": "#8bd8cd",
-        "label": "OpenDrift p50 threshold",
-        "short_label": "OpenDrift p50",
+        "label": "OpenDrift p50 occupancy footprint",
+        "short_label": "OpenDrift p50 occ.",
     },
     "opendrift_p90": {
         "color": "#9a3412",
         "mid_color": "#c85a2b",
         "light_color": "#efb08f",
-        "label": "OpenDrift p90 threshold",
-        "short_label": "OpenDrift p90",
+        "label": "OpenDrift p90 occupancy footprint",
+        "short_label": "OpenDrift p90 occ.",
     },
     "pygnome": {
         "color": "#6b21a8",
@@ -114,8 +114,8 @@ MODEL_STYLES = {
 }
 COMPARISON_TRACK_LABELS = {
     "deterministic": "OpenDrift deterministic",
-    "ensemble_p50": "OpenDrift p50 threshold",
-    "ensemble_p90": "OpenDrift p90 threshold",
+    "ensemble_p50": "OpenDrift p50 occupancy footprint",
+    "ensemble_p90": "OpenDrift p90 occupancy footprint",
 }
 COMPARISON_TRACK_SUBDIRS = {
     "deterministic": "control",
@@ -296,6 +296,22 @@ class PrototypePygnomeSimilaritySummaryService:
         if self.support_context_mode == CASE_LOCAL_SUPPORT_CONTEXT_MODE:
             return "Map context is case-local and drifter-centered, so the legacy 2016 support lane is no longer framed on the old Mindoro prototype domain."
         return "Map context is neutral/case-local because this preferred 2021 debug lane is not tied to the old Mindoro prototype geography."
+
+    def _track_semantics_sentence(self, comparison_track_id: str) -> str:
+        if comparison_track_id == "ensemble_p50":
+            return "p50 is the exact valid-time member-occupancy footprint where probability of member presence is at least 0.50."
+        if comparison_track_id == "ensemble_p90":
+            return "p90 is the exact valid-time member-occupancy footprint where probability of member presence is at least 0.90."
+        return "This panel is an exact valid-time footprint, not a cumulative corridor."
+
+    def _pygnome_forcing_sentence(self, item: dict[str, Any]) -> str:
+        metadata = dict(item.get("metadata") or {})
+        if _coerce_bool(metadata.get("degraded_forcing")):
+            reason = str(metadata.get("degraded_reason") or "degraded_transport_forcing").replace("_", " ")
+            return f"PyGNOME remains comparator-only and is degraded for this case: {reason}."
+        if _coerce_bool(metadata.get("current_mover_used")):
+            return "PyGNOME remains comparator-only and uses matched prepared grid wind plus grid current forcing for this support benchmark."
+        return "PyGNOME remains comparator-only, not truth."
 
     def _comparison_track_ids(self) -> tuple[str, ...]:
         if self.workflow_mode == "prototype_2016":
@@ -1225,11 +1241,15 @@ class PrototypePygnomeSimilaritySummaryService:
                     "projection_center_lon": float(rendering["projection_center"]["lon"]),
                     "projection_center_lat": float(rendering["projection_center"]["lat"]),
                     "pygnome_weathering_enabled": _coerce_bool(metadata.get("weathering_enabled")),
+                    "pygnome_degraded_forcing": _coerce_bool(metadata.get("degraded_forcing")),
+                    "pygnome_degraded_reason": str(metadata.get("degraded_reason") or ""),
+                    "pygnome_transport_forcing_mode": str(metadata.get("transport_forcing_mode") or ""),
+                    "pygnome_current_mover_used": _coerce_bool(metadata.get("current_mover_used")),
                     "pygnome_role": "comparator_only",
                     "benchmark_particles": int(metadata.get("benchmark_particles", 0) or 0),
                     "notes": (
                         "Legacy prototype Phase 3A transport benchmark. "
-                        "OpenDrift deterministic plus legacy support-only p50/p90 threshold tracks are compared against deterministic PyGNOME."
+                        "OpenDrift deterministic plus legacy support-only p50/p90 member-occupancy footprints are compared against deterministic PyGNOME."
                         if self.workflow_mode == "prototype_2016"
                         else "Accepted-segment prototype transport benchmark. Deterministic OpenDrift control is compared to deterministic PyGNOME only."
                     ),
@@ -1318,6 +1338,10 @@ class PrototypePygnomeSimilaritySummaryService:
                         )
                     ),
                     "pygnome_weathering_enabled": _coerce_bool(item["metadata"].get("weathering_enabled")),
+                    "pygnome_degraded_forcing": _coerce_bool(item["metadata"].get("degraded_forcing")),
+                    "pygnome_degraded_reason": str(item["metadata"].get("degraded_reason") or ""),
+                    "pygnome_transport_forcing_mode": str(item["metadata"].get("transport_forcing_mode") or ""),
+                    "pygnome_current_mover_used": _coerce_bool(item["metadata"].get("current_mover_used")),
                     "relative_similarity_rank": 0,
                     "mean_kl": float(case_kl["kl_divergence"].mean()),
                     "min_kl": float(case_kl["kl_divergence"].min()),
@@ -1625,8 +1649,9 @@ class PrototypePygnomeSimilaritySummaryService:
         lines = [
             f"Case: {item['case_id']}",
             self._context_note_sentence(),
+            "p50/p90 panels are exact valid-time member-occupancy footprints.",
             "Panels show exact stored raster cells and exact footprint outlines only. Empty stored layers are omitted.",
-            "PyGNOME is comparator-only, not truth.",
+            self._pygnome_forcing_sentence(item),
         ]
         ax.text(
             0.0,
@@ -1862,13 +1887,14 @@ class PrototypePygnomeSimilaritySummaryService:
         comparison_track_id = MODEL_NAME_TO_TRACK_ID.get(model_name, "deterministic")
         return [
             self._metrics_snippet(item, comparison_track_id, hour),
+            self._track_semantics_sentence(comparison_track_id),
             "Stored forecast raster cells and exact footprint outlines are rendered directly. Empty stored layers are omitted.",
-            "PyGNOME is comparator-only, not truth.",
+            self._pygnome_forcing_sentence(item),
         ]
 
     def _board_note_lines(self, item: dict[str, Any]) -> list[str]:
         if self.workflow_mode == "prototype_2016":
-            lines = ["Rows show OpenDrift deterministic, p50, p90, and deterministic PyGNOME side by side for each benchmark hour."]
+            lines = ["Rows show OpenDrift deterministic, p50 occupancy, p90 occupancy, and deterministic PyGNOME side by side for each benchmark hour."]
             for hour in REQUIRED_HOURS:
                 lines.append(f"{hour} h deterministic: {self._metrics_snippet(item, 'deterministic', hour)}")
                 lines.append(f"{hour} h p50: {self._metrics_snippet(item, 'ensemble_p50', hour)}")
@@ -1880,8 +1906,9 @@ class PrototypePygnomeSimilaritySummaryService:
         lines.extend(
             [
                 "Stored forecast raster cells and exact footprint outlines are rendered directly. Empty stored layers are omitted.",
+                "p50/p90 rows are exact valid-time member-occupancy footprints, not pooled-particle-density thresholds and not cumulative corridors.",
                 self._context_note_sentence(),
-                "PyGNOME is a comparator only, not truth.",
+                self._pygnome_forcing_sentence(item),
                 f"{self._support_status_phrase().capitalize()}; not final Chapter 3 evidence.",
             ]
         )
@@ -1992,7 +2019,8 @@ class PrototypePygnomeSimilaritySummaryService:
         interpretation = (
             f"{self._workflow_label()} support figure for {item['case_id']} at {hour} h showing the "
             f"{MODEL_STYLES[model_name]['label']} exact benchmark footprint and direct stored raster cells over {self._context_phrase()}. "
-            "PyGNOME remains comparator-only, not truth, and this is not final Chapter 3 evidence."
+            f"{self._track_semantics_sentence(comparison_track_id)} {self._pygnome_forcing_sentence(item)} "
+            "This is not final Chapter 3 evidence."
         )
         context = self._load_prototype_map_context()
         source_paths = [
@@ -2059,7 +2087,8 @@ class PrototypePygnomeSimilaritySummaryService:
             "notes": (
                 f"{self._support_status_phrase().capitalize()} transport comparator with {self._context_phrase()}, "
                 f"a small locator inset, exact stored-raster geometry rendering, and {source_note}. "
-                f"{MODEL_STYLES[model_name]['label']} vs deterministic PyGNOME."
+                f"{self._track_semantics_sentence(comparison_track_id)} {MODEL_STYLES[model_name]['label']} vs deterministic PyGNOME. "
+                f"{self._pygnome_forcing_sentence(item)}"
             ),
             "extent_mode": self.extent_mode,
             "plot_bounds_wgs84": ",".join(f"{value:.4f}" for value in plot_bounds),
@@ -2067,6 +2096,10 @@ class PrototypePygnomeSimilaritySummaryService:
             "comparison_track_label": COMPARISON_TRACK_LABELS.get(comparison_track_id, MODEL_STYLES[model_name]["label"]),
             "legacy_debug_only": self.workflow_mode == "prototype_2016",
             "pygnome_role": "comparator_only",
+            "pygnome_degraded_forcing": _coerce_bool(item["metadata"].get("degraded_forcing")),
+            "pygnome_degraded_reason": str(item["metadata"].get("degraded_reason") or ""),
+            "pygnome_transport_forcing_mode": str(item["metadata"].get("transport_forcing_mode") or ""),
+            "pygnome_current_mover_used": _coerce_bool(item["metadata"].get("current_mover_used")),
             **render_info,
         }
 
@@ -2190,8 +2223,8 @@ class PrototypePygnomeSimilaritySummaryService:
         timestamps = [str(item["pairings_by_hour"]["deterministic"][hour]["timestamp_utc"]) for hour in REQUIRED_HOURS]
         interpretation = (
             f"{self._workflow_label()} support board for {item['case_id']} showing paired 24 h, 48 h, and 72 h "
-            f"OpenDrift deterministic, OpenDrift p50, OpenDrift p90, and deterministic PyGNOME exact footprint views on the same benchmark grid with {self._context_phrase()} and locator context. "
-            "PyGNOME remains comparator-only, not truth, and this is not final Chapter 3 evidence."
+            f"OpenDrift deterministic, OpenDrift p50 occupancy, OpenDrift p90 occupancy, and deterministic PyGNOME exact footprint views on the same benchmark grid with {self._context_phrase()} and locator context. "
+            f"{self._pygnome_forcing_sentence(item)} This is not final Chapter 3 evidence."
         )
         context = self._load_prototype_map_context()
         for key in ("land_mask_path", "shoreline_path", "labels_path"):
@@ -2237,9 +2270,18 @@ class PrototypePygnomeSimilaritySummaryService:
             "pixel_height": pixel_height,
             "short_plain_language_interpretation": interpretation,
             "source_paths": " | ".join(dict.fromkeys(source_paths)),
-            "notes": f"{self._support_status_phrase().capitalize()} transport comparator board with {self._context_phrase()}, on-panel FSS/KL annotations, exact stored-raster geometry rendering, and {source_note}. Deterministic OpenDrift plus legacy support-only p50/p90 tracks vs deterministic PyGNOME.",
+            "notes": (
+                f"{self._support_status_phrase().capitalize()} transport comparator board with {self._context_phrase()}, "
+                f"on-panel FSS/KL annotations, exact stored-raster geometry rendering, and {source_note}. "
+                "Deterministic OpenDrift plus legacy support-only p50/p90 member-occupancy footprints vs deterministic PyGNOME. "
+                f"{self._pygnome_forcing_sentence(item)}"
+            ),
             "legacy_debug_only": self.workflow_mode == "prototype_2016",
             "pygnome_role": "comparator_only",
+            "pygnome_degraded_forcing": _coerce_bool(item["metadata"].get("degraded_forcing")),
+            "pygnome_degraded_reason": str(item["metadata"].get("degraded_reason") or ""),
+            "pygnome_transport_forcing_mode": str(item["metadata"].get("transport_forcing_mode") or ""),
+            "pygnome_current_mover_used": _coerce_bool(item["metadata"].get("current_mover_used")),
             "extent_mode": self.extent_mode,
             "plot_bounds_wgs84": ",".join(f"{value:.4f}" for value in item["crop_bounds"]),
             "geometry_render_mode": "exact_stored_raster",
@@ -2385,6 +2427,48 @@ class PrototypePygnomeSimilaritySummaryService:
                 lines.append(
                     f"- `{skipped['case_id']}` skipped due to {skipped['error_type']}: {skipped['error_message']}"
                 )
+        pygnome_degraded_flags = (
+            df["pygnome_degraded_forcing"].astype(bool).tolist()
+            if "pygnome_degraded_forcing" in df.columns
+            else []
+        )
+        pygnome_current_flags = (
+            df["pygnome_current_mover_used"].astype(bool).tolist()
+            if "pygnome_current_mover_used" in df.columns
+            else []
+        )
+        pygnome_transport_modes = (
+            {str(value).strip() for value in df["pygnome_transport_forcing_mode"].dropna().astype(str).tolist()}
+            if "pygnome_transport_forcing_mode" in df.columns
+            else set()
+        )
+        if pygnome_degraded_flags:
+            if any(pygnome_degraded_flags):
+                degraded_reasons = sorted(
+                    {
+                        str(value).strip().replace("_", " ")
+                        for value in df.get("pygnome_degraded_reason", pd.Series(dtype=str)).dropna().astype(str).tolist()
+                        if str(value).strip()
+                    }
+                )
+                reason_text = f" Reasons surfaced in metadata: {', '.join(degraded_reasons)}." if degraded_reasons else ""
+                lines.extend(
+                    [
+                        "",
+                        "PyGNOME transport forcing status:",
+                        "",
+                        f"- Some prototype PyGNOME comparator cases remain degraded rather than fully matched.{reason_text}",
+                    ]
+                )
+            elif pygnome_current_flags and all(pygnome_current_flags) and pygnome_transport_modes == {"matched_grid_wind_plus_grid_current"}:
+                lines.extend(
+                    [
+                        "",
+                        "PyGNOME transport forcing status:",
+                        "",
+                        "- PyGNOME remains comparator-only but uses matched prepared grid wind plus grid current forcing for these support benchmarks.",
+                    ]
+                )
         for comparison_track_id in self._comparison_track_ids():
             track_df = df[df["comparison_track_id"] == comparison_track_id]
             if track_df.empty:
@@ -2413,6 +2497,7 @@ class PrototypePygnomeSimilaritySummaryService:
                 "",
                 "- Higher FSS means stronger footprint overlap between the named OpenDrift track and deterministic PyGNOME.",
                 "- Lower KL means the normalized density fields are more similar over the ocean cells.",
+                "- In prototype_2016, p50/p90 are exact valid-time member-occupancy footprints; they are not pooled-particle-density thresholds.",
                 f"- The ranking is relative within each comparison track inside the {self.workflow_mode} support set only.",
                 f"- The per-forecast figures under `figures/` are support visuals built from the stored benchmark rasters only, now shown with exact stored raster cells and exact footprint outlines over {self._context_phrase()}, with a provenance source-point star when available.",
             ]
@@ -2436,6 +2521,7 @@ class PrototypePygnomeSimilaritySummaryService:
             "Guardrails:",
             "",
             "- PyGNOME is comparator-only, not truth",
+            "- prototype_2016 p50/p90 are exact valid-time member-occupancy footprints, not pooled-particle-density thresholds",
             "- transport benchmark only",
             "- not final Chapter 3 evidence",
             "",
@@ -2532,6 +2618,10 @@ class PrototypePygnomeSimilaritySummaryService:
                 "stored_geometry_status",
                 "legacy_debug_only",
                 "pygnome_role",
+                "pygnome_degraded_forcing",
+                "pygnome_degraded_reason",
+                "pygnome_transport_forcing_mode",
+                "pygnome_current_mover_used",
                 "status_key",
                 "status_label",
                 "status_role",

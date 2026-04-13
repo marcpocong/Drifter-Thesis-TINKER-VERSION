@@ -126,12 +126,12 @@ Interpretation:
 - keep this package for historical reproducibility and regression checking
 - it is no longer the preferred support family for launcher/docs/publication work
 
-## Phase 4 Outputs
+## Phase 4 Support Outputs
 
 ### `output/phase4/CASE_MINDORO_RETRO_2023/`
 
 Purpose:
-Dedicated Mindoro Phase 4 oil-type and shoreline-impact bundle.
+Dedicated Mindoro oil-type and shoreline-impact support bundle. Outside `prototype_2016`, treat it as technical/context support rather than a main thesis phase.
 
 Expected files:
 
@@ -157,7 +157,7 @@ Interpretation:
 ### `output/trajectory_gallery/`
 
 Purpose:
-Read-only static technical gallery of trajectories, overlays, comparison maps, and Mindoro Phase 4 shoreline/oil-type figures for panel inspection before any UI exists.
+Read-only static technical gallery of trajectories, overlays, comparison maps, and Mindoro Phase 4 support/context shoreline/oil-type figures for panel inspection before any UI exists.
 
 Expected files:
 
@@ -197,7 +197,7 @@ Interpretation:
 ### `output/figure_package_publication/`
 
 Purpose:
-Canonical publication-grade and defense-grade figure package derived from stored rasters, tracks, manifests, and Phase 4 tables only.
+Canonical publication-grade and defense-grade figure package derived from stored rasters, tracks, manifests, and Phase 4 support tables only.
 
 Expected files:
 
@@ -220,7 +220,7 @@ Interpretation:
 - filenames remain machine-readable, with case, phase/track, model, run type, date/date-range, scenario, view type, and variant tokens
 - recommended-for-defense and recommended-for-paper flags are recorded in the publication registry and manifest
 - Phase 3 OpenDrift-versus-PyGNOME comparison figures are included where those comparator products exist now
-- Mindoro Phase 4 is shown as OpenDrift-only; the package includes a deferred-comparison note figure instead of a fake Phase 4 OpenDrift-versus-PyGNOME board
+- Mindoro Phase 4 is shown as OpenDrift-only support/context material; the package includes a deferred-comparison note figure instead of a fake Phase 4 OpenDrift-versus-PyGNOME board
 - publication family `K` republishes the preferred accepted-segment 2021 deterministic OpenDrift-vs-PyGNOME forecast figures as support-only material rather than main-defense evidence, while the 2016 prototype package remains preserved as legacy output
 - Mindoro publication figures remain inherited-provisional from the unfinished Phase 1/2 freeze story, while DWH figures remain transfer-validation/support visuals
 
@@ -247,7 +247,7 @@ Representative files:
 Interpretation:
 
 - this remains the thesis-facing summary bundle
-- Phase 5 reuses it rather than replacing it
+- repo support layers reuse it rather than replacing it
 
 ## Curated B1 Final Output Export
 
@@ -279,7 +279,7 @@ Interpretation:
 ### `output/final_reproducibility_package/`
 
 Purpose:
-Phase 5 launcher/docs/reproducibility/package synchronization layer built from the current local repo state.
+Read-only launcher/docs/reproducibility/package support layer built from the current local repo state.
 
 Expected files:
 
@@ -301,13 +301,14 @@ Interpretation:
 - use this directory to audit current reproducibility/package state
 - this layer is intentionally non-scientific and does not recompute scientific scores
 - the phase-status registry is the machine-readable summary of what is reportable, frozen, or inherited-provisional
+- because this docs-only pass does not regenerate artifacts, some machine-readable files here may still use older Phase 4/5 labels until `phase5_sync` is rerun
 
 ## Read-Only Dashboard Layer
 
 ### `ui/`
 
 Purpose:
-Read-only local dashboard code that consumes the synced reproducibility package, final validation package, raw/panel/publication figure registries, Phase 4 outputs, and the Phase 4 cross-model audit.
+Read-only local dashboard code that consumes the synced reproducibility package, final validation package, raw/panel/publication figure registries, Phase 4 support outputs, and the Phase 4 cross-model audit.
 
 Representative files:
 
@@ -319,7 +320,7 @@ Representative files:
 
 Interpretation:
 
-- this is a Phase 5 exploration layer rather than a new scientific phase
+- this is a read-only support/explorer layer rather than a new scientific phase
 - it is intentionally read-only in the first version
 - it defaults to the publication-grade figure package for panel-friendly viewing
 - it surfaces the Phase 4 cross-model deferred status explicitly instead of fabricating comparison products
@@ -332,7 +333,7 @@ Contains:
 
 - official deterministic forecast products
 - ensemble products
-- strict Phase 3B scoring outputs
+- validation-focused Phase 3B scoring outputs
 - broader public-support outputs
 - benchmark and sensitivity branches
 
@@ -367,7 +368,7 @@ Intentionally trackable where appropriate:
 - small CSV/JSON/MD/PNG audit and package artifacts
 - final validation summaries
 - final reproducibility summaries
-- Mindoro Phase 4 summary artifacts
+- Mindoro Phase 4 support summary artifacts
 - publication-grade figure package summaries and presentation PNGs
 
 Intentionally excluded:

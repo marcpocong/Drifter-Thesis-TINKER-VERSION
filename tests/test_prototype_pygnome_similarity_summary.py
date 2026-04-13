@@ -165,13 +165,13 @@ def _write_case(
             "mask_offset": 0,
         },
         "ensemble_p50": {
-            "label": "OpenDrift p50 threshold",
+            "label": "OpenDrift p50 occupancy footprint",
             "fss_5km": tuple(min(0.99, value + 0.08) for value in fss_5km_values),
             "kl": tuple(max(0.01, value - 1.0) for value in kl_values),
             "mask_offset": 1,
         },
         "ensemble_p90": {
-            "label": "OpenDrift p90 threshold",
+            "label": "OpenDrift p90 occupancy footprint",
             "fss_5km": tuple(min(0.99, value + 0.03) for value in fss_5km_values),
             "kl": tuple(max(0.01, value - 0.4) for value in kl_values),
             "mask_offset": 2,
@@ -300,6 +300,10 @@ def _write_case(
                     "density_precheck_json": str(precheck_density.relative_to(root)).replace("\\", "/"),
                     "qa_overlay_path": str(overlay_path.relative_to(root)).replace("\\", "/"),
                     "pygnome_mass_strategy": "mass",
+                    "pygnome_degraded_forcing": False,
+                    "pygnome_degraded_reason": "",
+                    "pygnome_transport_forcing_mode": "matched_grid_wind_plus_grid_current",
+                    "pygnome_current_mover_used": True,
                     "opendrift_density_ocean_sum": 1.0,
                     "pygnome_density_ocean_sum": 1.0,
                 }
@@ -330,6 +334,10 @@ def _write_case(
             {
                 "weathering_enabled": False,
                 "benchmark_particles": 2500,
+                "degraded_forcing": False,
+                "degraded_reason": "",
+                "transport_forcing_mode": "matched_grid_wind_plus_grid_current",
+                "current_mover_used": True,
             },
         )
 
@@ -404,14 +412,16 @@ class PrototypePygnomeSimilaritySummaryTests(unittest.TestCase):
             summary_text = Path(results["summary_md"]).read_text(encoding="utf-8")
             self.assertIn("PyGNOME is a comparator, not truth", summary_text)
             self.assertIn("Rank 1: `CASE_2016-09-06`", summary_text)
-            self.assertIn("OpenDrift p50 threshold", summary_text)
+            self.assertIn("OpenDrift p50 occupancy footprint", summary_text)
+            self.assertIn("matched prepared grid wind plus grid current forcing", summary_text)
             self.assertIn("exact stored raster cells and exact footprint outlines", summary_text)
             captions_text = Path(results["figure_captions_md"]).read_text(encoding="utf-8")
             self.assertIn("CASE_2016-09-01", captions_text)
             self.assertIn("board", captions_text)
             self.assertIn("exact stored raster cells", captions_text)
-            self.assertIn("OpenDrift p50 threshold", captions_text)
-            self.assertIn("OpenDrift p90 threshold", captions_text)
+            self.assertIn("OpenDrift p50 occupancy footprint", captions_text)
+            self.assertIn("OpenDrift p90 occupancy footprint", captions_text)
+            self.assertIn("matched prepared grid wind plus grid current forcing", captions_text)
             self.assertNotIn("canonical Mindoro", captions_text)
 
             figure_registry_df = pd.read_csv(results["figure_registry_csv"])
@@ -429,7 +439,18 @@ class PrototypePygnomeSimilaritySummaryTests(unittest.TestCase):
             self.assertTrue((figure_registry_df["comparison_track_id"].notna()).all())
             self.assertIn("status_key", figure_registry_df.columns)
             self.assertIn("status_label", figure_registry_df.columns)
+            self.assertIn("pygnome_degraded_forcing", figure_registry_df.columns)
+            self.assertIn("pygnome_transport_forcing_mode", figure_registry_df.columns)
+            self.assertIn("pygnome_current_mover_used", figure_registry_df.columns)
             self.assertTrue((figure_registry_df["status_key"] == "prototype_2016_support").all())
+            self.assertTrue((figure_registry_df["pygnome_degraded_forcing"] == False).all())
+            self.assertTrue((figure_registry_df["pygnome_current_mover_used"] == True).all())
+            self.assertTrue(
+                figure_registry_df["pygnome_transport_forcing_mode"]
+                .astype(str)
+                .eq("matched_grid_wind_plus_grid_current")
+                .all()
+            )
             self.assertFalse(figure_registry_df["notes"].astype(str).str.contains("Mindoro", regex=False).any())
 
             manifest = json.loads(Path(results["manifest_json"]).read_text(encoding="utf-8"))

@@ -210,8 +210,8 @@ class PrototypeLegacyFinalFiguresTests(unittest.TestCase):
         ):
             label = {
                 "deterministic": "OpenDrift deterministic",
-                "ensemble_p50": "OpenDrift p50 threshold",
-                "ensemble_p90": "OpenDrift p90 threshold",
+                "ensemble_p50": "OpenDrift p50 occupancy footprint",
+                "ensemble_p90": "OpenDrift p90 occupancy footprint",
             }[comparison_track_id]
             for hour, day in ((24, "2016-09-02"), (48, "2016-09-03"), (72, "2016-09-04")):
                 timestamp = f"{day}T00:00:00Z"
@@ -276,6 +276,10 @@ class PrototypeLegacyFinalFiguresTests(unittest.TestCase):
             {
                 "weathering_enabled": False,
                 "benchmark_particles": 1000,
+                "degraded_forcing": False,
+                "degraded_reason": "",
+                "transport_forcing_mode": "matched_grid_wind_plus_grid_current",
+                "current_mover_used": True,
             },
         )
 
@@ -329,6 +333,14 @@ class PrototypeLegacyFinalFiguresTests(unittest.TestCase):
             self.assertEqual(manifest["configured_case_ids"], [self.case_id])
             self.assertEqual(service.style["typography"]["font_family"], "Arial")
             self.assertTrue(results["font_family"])
+            self.assertIn(
+                "prototype_2016 p50/p90 products are exact valid-time member-occupancy footprints.",
+                manifest["notes"],
+            )
+            self.assertIn(
+                "PyGNOME remains comparator-only; matched grid wind/current forcing is used when available and degraded mode is surfaced explicitly otherwise.",
+                manifest["notes"],
+            )
             figure_rows = manifest["figures"]
             ensemble_row = next(row for row in figure_rows if row["figure_id"] == "ensemble_probability_24h")
             self.assertEqual(ensemble_row["extent_mode"], "dynamic_forecast_extent")
@@ -336,11 +348,13 @@ class PrototypeLegacyFinalFiguresTests(unittest.TestCase):
             self.assertEqual(ensemble_row["geometry_render_mode"], "exact_stored_raster")
             self.assertEqual(ensemble_row["density_render_mode"], "direct_raster")
             self.assertTrue(str(ensemble_row["stored_geometry_status"]))
+            self.assertIn("member-occupancy", ensemble_row["notes"])
             pygnome_row = next(row for row in figure_rows if row["figure_id"] == "pygnome_24h")
             self.assertEqual(pygnome_row["extent_mode"], "dynamic_forecast_extent")
             self.assertTrue(str(pygnome_row["plot_bounds_wgs84"]))
             self.assertEqual(pygnome_row["geometry_render_mode"], "exact_stored_raster")
             self.assertEqual(pygnome_row["density_render_mode"], "direct_raster")
+            self.assertIn("matched prepared grid wind plus grid current forcing", pygnome_row["notes"])
             drifter_row = next(row for row in figure_rows if row["figure_id"] == "drifter_track_72h")
             self.assertEqual(drifter_row["extent_mode"], "dynamic_forecast_extent")
             self.assertEqual(drifter_row["geometry_render_mode"], "observed_track_line")

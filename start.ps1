@@ -785,14 +785,15 @@ function Show-Help {
     Write-Host "  docker-compose exec -T ... stays prompt-free and now prints the resolved startup policy instead." -ForegroundColor White
     Write-Host ""
     Write-Host "Current status guardrails:" -ForegroundColor Yellow
-    Write-Host "  - Phase 1 is architecture-audited, but the full 2016-2022 production rerun is still needed." -ForegroundColor White
+    Write-Host "  - Phase 1 dedicated 2016-2022 rerun outputs now exist and stage a candidate baseline; default spill-case adoption remains a manual promotion or BASELINE_SELECTION_PATH trial." -ForegroundColor White
     Write-Host "  - FORCING_OUTAGE_POLICY=default|continue_degraded|fail_hard controls forcing-only outage behavior. Reportable lanes fail hard by default; appendix/legacy/experimental lanes may continue in degraded mode." -ForegroundColor White
     Write-Host "  - Interactive launcher runs now ask once for the forcing wait budget and, when eligible caches already exist, whether to reuse validated inputs or force refresh." -ForegroundColor White
     Write-Host "  - Direct interactive docker-compose exec runs do the same once per run; no-TTY direct runs skip prompts and print the resolved policy instead." -ForegroundColor White
     Write-Host "  - Non-interactive launcher runs default silently to INPUT_CACHE_POLICY=reuse_if_valid and FORCING_SOURCE_BUDGET_SECONDS=300." -ForegroundColor White
     Write-Host "  - Drifter truth and ArcGIS/observation truth inputs stay hard requirements even when degraded forcing continuation is enabled." -ForegroundColor White
     Write-Host "  - Phase 2 is scientifically usable, but not scientifically frozen." -ForegroundColor White
-    Write-Host "  - Phase 4 is scientifically reportable now for Mindoro, but inherited-provisional from the upstream Phase 1/2 state." -ForegroundColor White
+    Write-Host "  - Phase 3B and Phase 3C are validation-only lanes: public-observation validation for Mindoro and external transfer validation for DWH." -ForegroundColor White
+    Write-Host "  - Outside prototype_2016, phase4_oiltype_and_shoreline, phase5_sync, the galleries, and the dashboard are support layers rather than main thesis phases." -ForegroundColor White
     Write-Host "  - DWH Phase 3C stays a separate external transfer-validation story with readiness-gated HYCOM GOFS 3.1 + ERA5 + CMEMS wave/Stokes forcing; observed masks remain truth and PyGNOME remains comparator-only." -ForegroundColor White
     Write-Host "  - Prototype mode remains available for debugging and regression only." -ForegroundColor White
     Write-Host ""

@@ -1,7 +1,7 @@
 {
   "phase": "prototype_pygnome_similarity_summary",
   "workflow_mode": "prototype_2016",
-  "generated_at_utc": "2026-04-12T22:12:19.030299+00:00",
+  "generated_at_utc": "2026-04-13T00:30:03.369981+00:00",
   "output_root": "output/prototype_2016_pygnome_similarity",
   "configured_case_ids": [
     "CASE_2016-09-01",
@@ -37,40 +37,40 @@
       "display_bounds_wgs84": [
         116.855,
         117.50500000000001,
-        10.091750000000001,
-        10.74175
+        10.141750000000002,
+        10.79175
       ],
       "map_projection": "local_azimuthal_equidistant",
       "projection_center": {
         "lon": 117.18,
-        "lat": 10.41675
+        "lat": 10.466750000000001
       }
     },
     "CASE_2016-09-06": {
       "rendering_profile": "prototype_2016_case_local_projected_v1",
       "display_bounds_wgs84": [
-        117.099,
-        117.74900000000001,
+        117.06975,
+        117.71975,
         9.947000000000001,
         10.597
       ],
       "map_projection": "local_azimuthal_equidistant",
       "projection_center": {
-        "lon": 117.424,
+        "lon": 117.39475,
         "lat": 10.272
       }
     },
     "CASE_2016-09-17": {
       "rendering_profile": "prototype_2016_case_local_projected_v1",
       "display_bounds_wgs84": [
-        112.2465,
-        112.91299999999998,
+        112.09649999999999,
+        112.91300000000001,
         15.972999999999999,
         16.622999999999998
       ],
       "map_projection": "local_azimuthal_equidistant",
       "projection_center": {
-        "lon": 112.57974999999999,
+        "lon": 112.50475,
         "lat": 16.298
       }
     }
@@ -84,10 +84,10 @@
     "pygnome/pygnome_benchmark_metadata.json"
   ],
   "headline": {
-    "top_ranked_case_id": "CASE_2016-09-06",
+    "top_ranked_case_id": "CASE_2016-09-17",
     "top_ranked_comparison_track_id": "deterministic",
-    "top_ranked_mean_fss_5km": 0.43478260869565216,
-    "top_ranked_mean_kl": 22.833256835719236
+    "top_ranked_mean_fss_5km": 0.7288695652173912,
+    "top_ranked_mean_kl": 5.333625947013979
   },
   "outputs": {
     "case_registry_csv": "output/prototype_2016_pygnome_similarity/prototype_pygnome_case_registry.csv",

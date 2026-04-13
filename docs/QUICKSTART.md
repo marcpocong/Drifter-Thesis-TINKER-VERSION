@@ -60,7 +60,7 @@ Use panel-friendly mode first if you want:
 
 - publication-grade recommended defense figures
 - simple validation summaries
-- Mindoro Phase 4 figures
+- Mindoro Phase 4 support/context figures
 - the explicit Phase 4 cross-model deferred-status page
 
 Switch to advanced mode only when you need:
@@ -71,7 +71,7 @@ Switch to advanced mode only when you need:
 
 The dashboard is read-only in this first version and does not expose scientific rerun controls.
 
-## 7. Run Mindoro Phase 4 Only When Needed
+## 7. Run Mindoro Phase 4 Support Workflow Only When Needed
 
 ```bash
 docker-compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=phase4_oiltype_and_shoreline pipeline python -m src
@@ -93,11 +93,12 @@ These are intentional rerun paths. Do not use them casually for status inspectio
 
 ## 9. Current Caution Notes
 
-- Phase 1 is architecture-audited, but the final multi-year production rerun is still needed.
+- Phase 1 dedicated `2016-2022` rerun outputs now exist and stage a candidate baseline, but the default spill-case baseline remains the older preserved artifact until you trial or promote the candidate explicitly.
 - Phase 2 is scientifically usable, but not scientifically frozen.
 - The frozen Mindoro March 3 -> March 6 base case remains in `config/case_mindoro_retro_2023.yaml`; the promoted March 13 -> March 14 B1 row is tracked in `config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml`.
 - March 6 remains visible as a legacy honesty-only row, not as the primary Mindoro validation result.
 - March 13 -> March 14 must keep the shared-imagery caveat explicit, so do not describe it as independent day-to-day validation.
-- Phase 4 is reportable now for Mindoro, but inherited-provisional from the upstream Phase 1/2 status.
+- `Phase 3B` and `Phase 3C` are validation-only lanes.
+- Outside `prototype_2016`, `phase4_oiltype_and_shoreline`, `phase5_sync`, the galleries, and the dashboard are support layers rather than main thesis phases.
 - Phase 4 cross-model comparison is still deferred; the UI surfaces that status directly and does not fake Phase 4 PyGNOME comparison pages.
 - Prototype mode remains for debugging/regression only.

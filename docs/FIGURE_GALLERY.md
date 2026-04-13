@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The repo now has three read-only figure layers:
+The repo now has three read-only figure/support layers:
 
 - `output/trajectory_gallery/`: the raw technical gallery with standardized filenames and machine-readable metadata
 - `output/trajectory_gallery_panel/`: the intermediate polished board pack for non-technical review
@@ -14,7 +14,7 @@ It is built from existing outputs only:
 - stored trajectory NetCDFs
 - existing QA overlays
 - existing comparison rasters
-- existing Phase 4 shoreline and oil-budget outputs
+- existing Phase 4 shoreline and oil-budget support outputs
 - existing `final_reproducibility_package` and `final_validation_package` metadata
 
 It does not rerun expensive scientific branches.
@@ -87,14 +87,17 @@ docker-compose exec -T -e WORKFLOW_MODE=prototype_2016 -e PIPELINE_PHASE=prototy
 - B. Mindoro March 13 -> March 14 cross-model comparator board
 - C. Mindoro legacy March 6 honesty / limitations board
 - D. Mindoro trajectory board
-- E. Mindoro Phase 4 oil-budget board
-- F. Mindoro Phase 4 shoreline-arrival / shoreline-impact board
 - G. DWH deterministic forecast-vs-observation board
 - H. DWH deterministic vs ensemble board
 - I. DWH OpenDrift vs PyGNOME comparison board
+
+Optional support/context figures:
+
+- E. Mindoro Phase 4 oil-budget board
+- F. Mindoro Phase 4 shoreline-arrival / shoreline-impact board
 - Supporting honesty figure: Mindoro Phase 4 deferred-comparison note figure
 
-These are the clearest figures for a main defense presentation. Use the publication package first, the panel gallery second, and the raw gallery only when the panel needs the technical archive behind a polished board.
+These are the clearest figures for a main defense presentation. Use the publication package first, the panel gallery second, and the raw gallery only when the panel needs the technical archive behind a polished board. Keep the Phase 4 boards as support/context figures rather than as main-phase claims outside `prototype_2016`.
 
 ## Panel-Ready Board Families
 
@@ -102,12 +105,15 @@ These are the clearest figures for a main defense presentation. Use the publicat
 - B. Mindoro March 13 -> March 14 cross-model comparator board
 - C. Mindoro legacy March 6 honesty / limitations board
 - D. Mindoro trajectory board
-- E. Mindoro Phase 4 oil-budget board
-- F. Mindoro Phase 4 shoreline-arrival / shoreline-impact board
 - G. DWH deterministic forecast-vs-observation board
 - H. DWH deterministic vs ensemble board
 - I. DWH OpenDrift vs PyGNOME comparison board
 - J. DWH trajectory board
+
+Available support/context board families:
+
+- E. Mindoro Phase 4 oil-budget board
+- F. Mindoro Phase 4 shoreline-arrival / shoreline-impact board
 
 The polished board layer adds:
 
@@ -123,7 +129,7 @@ The polished board layer adds:
 - B. Mindoro March 13 -> March 14 cross-model comparison singles plus board
 - C. Mindoro legacy March 6 honesty / limitations singles plus board
 - D. Mindoro trajectory singles plus trajectory board
-- E. Mindoro Phase 4 OpenDrift-only oil-budget and shoreline-impact singles plus boards
+- E. Mindoro Phase 4 OpenDrift-only support/context oil-budget and shoreline-impact singles plus boards
 - F. Mindoro Phase 4 deferred-comparison note figure built from the cross-model audit bundle
 - G. DWH daily deterministic singles plus deterministic board
 - H. DWH deterministic vs ensemble singles plus board
@@ -136,7 +142,7 @@ The publication package adds:
 - separate paper-ready single-image figures
 - explicit side-by-side comparison boards
 - plain-language captions and defense talking points
-- a promoted March 13 -> March 14 Mindoro presentation lane for `Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents`, with the shared March 12 imagery caveat kept explicit and the later drifter-confirmation note carried as provenance rather than rewritten run history
+- a promoted March 13 -> March 14 Mindoro validation presentation lane for `Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents`, with the shared March 12 imagery caveat kept explicit and the later drifter-confirmation note carried as provenance rather than rewritten run history
 - an explicit publication-grade note figure explaining why Phase 4 OpenDrift-versus-PyGNOME comparison is still deferred
 - support-only prototype family `K`, which now republishes the preferred accepted-segment 2021 deterministic OpenDrift-vs-PyGNOME forecast figures without elevating them into the default main-defense list
 - the canonical presentation layer for defense and manuscript use
@@ -177,7 +183,7 @@ These figures remain:
 - The polished board pack reorganizes existing evidence into clearer presentation boards, but it does not fabricate trajectories or relabel score products.
 - The publication package redraws from the stored rasters, tracks, and Phase 4 tables, but it still does not fabricate trajectories or relabel score products.
 - The publication package includes Phase 3 OpenDrift-versus-PyGNOME comparison boards, but it does not generate fake Phase 4 cross-model figures; instead it writes a deferred-comparison note figure grounded in `output/phase4_crossmodel_comparability_audit/`.
-- Mindoro transport and Phase 4 figures remain inherited-provisional from the unfinished Phase 1/2 frozen-baseline story.
+- Mindoro validation figures remain inherited-provisional from the unfinished Phase 1/2 frozen-baseline story, and the Phase 4 figures remain support/context material outside `prototype_2016`.
 - DWH figures remain reportable transfer-validation/support visuals, not a replacement for the Mindoro thesis case.
 
 ## Still Optional

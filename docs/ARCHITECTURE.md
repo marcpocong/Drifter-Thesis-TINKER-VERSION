@@ -6,20 +6,20 @@ This repo intentionally keeps four stories separate:
 
 - historical/regional transport validation
 - spill-case forecast generation and validation
-- oil-type and shoreline interpretation
-- launcher/docs/reproducibility packaging
+- support-only oil-type and shoreline interpretation outside the main thesis phase count
+- read-only launcher/docs/reproducibility packaging and exploration support
 
 That separation is now explicit in both the code and the launcher. The project no longer relies on a single stale "Mindoro full chain" entrypoint.
 
 ## Lane Model
 
-- `prototype_2016`: backward-compatible legacy/debug lane only, now with an explicit six-recipe prototype debug family, a padded forcing-prep window that preserves the legacy `+/- 3 h` ensemble jitter, a visible `Phase 1 -> Phase 2 -> Phase 3A -> Phase 4` support story, a consolidated multi-track OpenDrift-vs-PyGNOME Phase 3A comparator package, and a drifter-of-record-seeded legacy Phase 4 weathering path
+- `prototype_2016`: backward-compatible legacy/debug lane only, now with an explicit six-recipe prototype debug family, a padded forcing-prep window that preserves the legacy `+/- 3 h` ensemble jitter, a visible `Phase 1 -> Phase 2 -> Phase 3A -> Phase 4 -> Phase 5` support story, a consolidated multi-track OpenDrift-vs-PyGNOME Phase 3A comparator package, a drifter-of-record-seeded legacy Phase 4 weathering path, and a legacy Phase 5 figure/package story
 - `prototype_2021`: preferred accepted-segment debug/demo lane built from the two fixed 2021 strict-gate drifter segments, restricted to the official Phase 1 recipe family, and intentionally scoped to the transport-core bundle only
 - `mindoro_retro_2023`: main Philippine spill-case lane
 - `dwh_retro_2010`: external rich-data transfer-validation lane
 - `phase1_regional_2016_2022`: dedicated historical/regional Phase 1 scientific rerun lane
 
-Neither prototype lane is the final Phase 1 scientific evidence base. `prototype_2021` is the preferred debug/demo path, while `prototype_2016` is retained so older transport-validation logic can still be debugged and regression-checked. More specifically, `prototype_2016` preserves the earliest prototype stage of the study, when the ingestion-and-validation pipeline was first exercised on 2016 drifter records in the Palawan-side western Philippine context before the study widened toward the broader west-coast Palawan/Mindoro context. Methodologically, that legacy lane shows that the early pipeline could carry drifter-driven transport validation through Phase 1 and Phase 2, then through a Phase 3A OpenDrift-versus-deterministic-PyGNOME comparator check using fraction skill score, before continuing into legacy Phase 4 and separate Phase 5 packaging. Its comparator result remains support-only: a non-zero FSS means the ensemble footprint was not completely disjoint from the deterministic PyGNOME forecast, not that PyGNOME is truth or that the prototype lane is final proof.
+Neither prototype lane is the final Phase 1 scientific evidence base. `prototype_2021` is the preferred debug/demo path, while `prototype_2016` is retained so older transport-validation logic can still be debugged and regression-checked. More specifically, `prototype_2016` preserves the earliest prototype stage of the study, when the ingestion-and-validation pipeline was first exercised on 2016 drifter records in the Palawan-side western Philippine context before the study widened toward the broader west-coast Palawan/Mindoro context. Methodologically, that legacy lane shows that the early pipeline could carry drifter-driven transport validation through Phase 1 and Phase 2, then through a Phase 3A OpenDrift-versus-deterministic-PyGNOME comparator check using fraction skill score, before continuing into legacy Phase 4 weathering/fate work and the legacy Phase 5 figure/package story. Its comparator result remains support-only: a non-zero FSS means the ensemble footprint was not completely disjoint from the deterministic PyGNOME forecast, not that PyGNOME is truth or that the prototype lane is final proof.
 
 ## Phase 1 Boundary
 
@@ -66,8 +66,8 @@ Current local state:
 
 Mindoro and DWH serve different roles:
 
-- Mindoro Phase 3A/3B establishes thesis-case comparator, strict stress-test, and broader-support interpretation
-- DWH Phase 3C provides external rich-data transfer validation
+- Mindoro Phase 3A/3B establishes thesis-case comparator and public-observation validation
+- DWH Phase 3C provides external transfer validation
 
 These should not be collapsed into a single validation claim. Mindoro remains the main Philippine case; DWH remains the external rich-data transfer benchmark.
 Within Mindoro, the original March 3 -> March 6 case definition remains frozen in `config/case_mindoro_retro_2023.yaml`, while the promoted March 13 -> March 14 B1 row is recorded separately in `config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml`. This preserves provenance and keeps March 6 visible as a legacy honesty-only row instead of silently rewriting history.
@@ -77,23 +77,23 @@ The later `phase1_mindoro_focus_pre_spill_2016_2023` drifter rerun independently
 Unlike Mindoro, DWH Phase 3C does not use a Phase 1 drifter-selected forcing recipe. It uses a frozen historical forcing stack chosen by a scientific-readiness gate: the first complete real current+wind+wave stack for the DWH May 20-23, 2010 window that is not smoke-only, spans the required window, exposes the required variables with usable metadata, opens cleanly in the OpenDrift reader, and passes a small end-to-end reader-check forecast. In the current repo state, that frozen DWH stack is HYCOM GOFS 3.1 currents plus ERA5 winds plus CMEMS wave/Stokes.
 Observed DWH daily masks remain truth, the cumulative DWH layer remains context-only, and PyGNOME remains comparator-only within that separate external-case story.
 
-## Phase 4 Boundary
+## Phase 4 Support Boundary
 
-Phase 4 is now a real workflow, not a placeholder shell:
+Outside `prototype_2016`, `phase4_oiltype_and_shoreline` is a real technical support workflow rather than a main thesis phase:
 
 - dedicated scenario registry in `config/phase4_oil_scenarios.csv`
 - reuse of the current reportable transport branch rather than rerunning scoring logic
 - shoreline assignment tied to the existing canonical shoreline segments
 - separate output bundle under `output/phase4/CASE_MINDORO_RETRO_2023/`
 
-Phase 4 is reportable now for Mindoro, but it still inherits upstream provisional status from the unfinished Phase 1/2 freeze story.
+This support bundle can be reported honestly as technical/context output for Mindoro, but it still inherits upstream provisional status from the unfinished Phase 1/2 freeze story.
 The repo's existing PyGNOME branches remain Phase 3-style transport comparators, so a separate read-only `phase4_crossmodel_comparability_audit` is now the guardrail that decides whether any OpenDrift-versus-PyGNOME Phase 4 comparison is scientifically defensible. In the current repo state, that audit is deferred rather than promoted to a result because matched PyGNOME fate-and-shoreline outputs do not yet exist.
-This is also why the prototype/debug drifter lanes should be framed as support only rather than as proof that official `Phase 4 = Oil-Type Fate and Shoreline Impact Analysis` has been validated there. For the preserved `prototype_2016` lane specifically, the honest legacy framing is `Phase 1 / Phase 2 / Phase 3A / Phase 4`, with no thesis-facing `Phase 3B` or `Phase 3C`.
+This is also why the prototype/debug drifter lanes should be framed as support only rather than as proof that official `phase4_oiltype_and_shoreline` validation has been completed there. For the preserved `prototype_2016` lane specifically, the honest legacy framing is `Phase 1 / Phase 2 / Phase 3A / Phase 4 / Phase 5`, with no thesis-facing `Phase 3B` or `Phase 3C`.
 For that lane, the release origin is the selected drifter-of-record start from `data/drifters/CASE_2016-*/drifters_noaa.csv`. Legacy `source_point_metadata.geojson` paths may still survive in some compatibility-oriented audit fields, but they are not the actual release geometry for the 2016 oil/weathering runs.
 
-## Phase 5 Boundary
+## Phase 5 Support Boundary
 
-Phase 5 is the project synchronization layer:
+Outside `prototype_2016`, `phase5_sync` and the downstream galleries/UI are project support layers rather than main thesis phases:
 
 - launcher/menu rationalization
 - docs synchronization
@@ -101,7 +101,7 @@ Phase 5 is the project synchronization layer:
 - honest cross-phase status registry
 - read-only local dashboard over the packaged outputs and figure layers
 
-It is intentionally non-scientific in scope. It reuses existing scientific artifacts rather than recomputing them.
+It is intentionally non-scientific in scope. It reuses existing scientific artifacts rather than recomputing them. Thesis-facing `Phase 5` language is reserved for the preserved `prototype_2016` legacy-runs story.
 
 ## Launcher Architecture
 
@@ -130,15 +130,15 @@ The launcher source of truth is `config/launcher_matrix.json`. It defines:
 The repo now has two different packaging layers:
 
 - `output/final_validation_package/`: frozen thesis validation package built from completed scientific outputs
-- `output/final_reproducibility_package/`: Phase 5 synchronization layer that indexes software versions, cases, configs, manifests, outputs, logs, and honest phase status
+- `output/final_reproducibility_package/`: read-only reproducibility/support layer that indexes software versions, cases, configs, manifests, outputs, logs, and honest phase status
 - `output/prototype_2021_pygnome_similarity/`: read-only preferred accepted-segment debug support package built from the fixed 2021 deterministic OpenDrift-vs-PyGNOME cases
 - `output/prototype_2016_pygnome_similarity/`: read-only legacy/debug Phase 3A comparator package that consolidates the three prototype 2016 OpenDrift deterministic plus `p50`/`p90` support tracks against deterministic PyGNOME
 - `output/2016 Legacy Runs FINAL Figures/`: read-only curated prototype_2016 final paper-figure pack with per-case drifter, ensemble, PyGNOME, and PyGNOME-vs-ensemble exports plus explicit missing-figure diagnostics
-- `output/trajectory_gallery/`: read-only technical gallery built from existing trajectories, rasters, overlays, and Phase 4 artifacts
+- `output/trajectory_gallery/`: read-only technical gallery built from existing trajectories, rasters, overlays, and Phase 4 support artifacts
 - `output/trajectory_gallery_panel/`: read-only polished panel-ready board pack built from the raw gallery and the same stored source artifacts
-- `output/figure_package_publication/`: read-only canonical publication-grade package built from stored rasters, tracks, manifests, and Phase 4 tables for defense and paper use
+- `output/figure_package_publication/`: read-only canonical publication-grade package built from stored rasters, tracks, manifests, and Phase 4 support tables for defense and paper use
 - `output/Phase 3B March13-14 Final Output/`: read-only curated export of the promoted B1 family, built from the publication package plus the stored canonical March 13 -> March 14 scientific source artifacts
 - `ui/`: read-only local dashboard that consumes those packages and archives without becoming a scientific rerun surface
 
-Phase 5 reuses the final validation package rather than replacing it. The validation package remains the thesis summary bundle; the reproducibility package is the reproducibility/indexing layer around the current repo state; the prototype PyGNOME similarity package is a legacy/debug comparator summary only; the curated `2016 Legacy Runs FINAL Figures` folder is the prototype_2016-specific paper-facing export; the raw trajectory gallery is the technical figure archive; the polished panel gallery is the intermediate non-technical review layer; the publication figure package is the canonical generic presentation layer for defense slides and paper-ready single figures; the dedicated `Phase 3B March13-14 Final Output` folder is the read-only curated export of the promoted B1 family; and the UI is the read-only local explorer over that same packaged state.
+The repo support layers reuse the final validation package rather than replacing it. The validation package remains the thesis summary bundle; the reproducibility package is the reproducibility/indexing layer around the current repo state; the prototype PyGNOME similarity package is a legacy/debug comparator summary only; the curated `2016 Legacy Runs FINAL Figures` folder is the prototype_2016-specific paper-facing export and legacy Phase 5 figure story; the raw trajectory gallery is the technical figure archive; the polished panel gallery is the intermediate non-technical review layer; the publication figure package is the canonical generic presentation layer for defense slides and paper-ready single figures; the dedicated `Phase 3B March13-14 Final Output` folder is the read-only curated export of the promoted B1 validation family; and the UI is the read-only local explorer over that same packaged state.
 The Mindoro packaging outputs now also carry explicit provenance fields for the promoted B1 row, including the frozen base case path, the amendment path, the row role, launcher IDs, and the shared-imagery caveat so that the primary/legacy distinction survives into downstream tables and figure manifests.

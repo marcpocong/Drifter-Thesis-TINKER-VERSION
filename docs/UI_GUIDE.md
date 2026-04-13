@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The local dashboard is a Phase 5 read-only exploration layer over the outputs that already exist in this repo. It does not rerun model branches, it does not modify scientific artifacts, and it does not pretend that missing comparisons already exist.
+The local dashboard is a read-only exploration/support layer over the outputs that already exist in this repo. It does not rerun model branches, it does not modify scientific artifacts, and it does not pretend that missing comparisons already exist.
 
 ## Launch Command
 
@@ -49,6 +49,8 @@ This is the default mode. It prioritizes:
 - simplified summary tables
 - the current phase-status registry
 
+The phase-status display is driven by generated reproducibility artifacts. In this docs-only sync pass, that generated registry may temporarily lag the source docs until the read-only audit/sync bundles are refreshed.
+
 Recommended first stops:
 
 - `Home / Overview`
@@ -82,9 +84,10 @@ This mode is still read-only.
 
 ## Honesty Rules Surfaced In The UI
 
-- Phase 1 is still architecture-audited rather than frozen.
+- Phase 1 dedicated `2016-2022` rerun outputs now exist and stage a candidate baseline, but the default spill-case baseline has not been manually replaced yet.
 - Phase 2 is scientifically usable, but not scientifically frozen.
-- Phase 4 is reportable now for Mindoro, but inherited-provisional from upstream Phase 1/2 status.
+- `Phase 3B` and `Phase 3C` are validation-only pages in the thesis-facing story.
+- Outside `prototype_2016`, the Mindoro Phase 4 pages are support/context views rather than additional thesis phases, and they inherit upstream Phase 1/2 provisional status.
 - Phase 4 OpenDrift-versus-PyGNOME comparison is currently deferred.
 - The current blocker is that the stored Mindoro PyGNOME benchmark is transport-only with `weathering_enabled=false`, so it does not expose matched Phase 4 fate or shoreline semantics.
 

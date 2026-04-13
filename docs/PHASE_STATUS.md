@@ -4,15 +4,15 @@
 
 - Phase 1: dedicated production rerun implemented; candidate baseline staged, but canonical promotion remains manual.
 - Phase 2: scientifically usable, not frozen.
-- Mindoro Phase 3: scientifically informative and reportable; `Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents` is now carried by the March 13 -> March 14 B1 row, March 6 remains the preserved sparse-reference honesty case, the promotion is tracked by amendment rather than by rewriting the frozen March 3 -> March 6 case file, and the later `2016-2023` Mindoro-focused drifter rerun confirmed the same `cmems_era5` recipe without rewriting stored B1 provenance.
-- DWH Phase 3C: external rich-data transfer validation success.
-- Phase 4: scientifically reportable now for Mindoro, inherited-provisional.
+- Mindoro Phase 3: validation-focused and reportable; `Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents` is now carried by the March 13 -> March 14 B1 row, March 6 remains the preserved sparse-reference honesty case, the promotion is tracked by amendment rather than by rewriting the frozen March 3 -> March 6 case file, and the later `2016-2023` Mindoro-focused drifter rerun confirmed the same `cmems_era5` recipe without rewriting stored B1 provenance.
+- DWH Phase 3C: validation-only external rich-data transfer case.
+- Mindoro `phase4_oiltype_and_shoreline`: implemented as a support/context bundle outside the main thesis phase count; thesis-facing `Phase 4` labeling is reserved for `prototype_2016`.
 - Phase 4 cross-model comparison: deferred; current PyGNOME branches remain comparator-only for transport/spatial work rather than matched Phase 4 fate-and-shoreline outputs.
-- Phase 5: launcher/docs/package synchronization layer.
+- Repo sync, galleries, publication packaging, and dashboard layers: read-only support/explorer surfaces outside the main thesis phase count; thesis-facing `Phase 5` labeling is reserved for `prototype_2016`.
 - Trajectory gallery: read-only technical figure set built from existing outputs only.
 - Trajectory gallery panel pack: read-only polished board layer for non-technical review, built from existing outputs only.
 - Publication figure package: canonical publication-grade defense/paper figure layer built from existing outputs only, with honest Phase 3 cross-model boards and a Phase 4 deferred-comparison note figure.
-- Read-only local dashboard: implemented Phase 5 exploration layer over the publication package, panel/raw figure archives, reproducibility indexes, and the Phase 4 cross-model audit.
+- Read-only local dashboard: implemented support/explorer layer over the publication package, panel/raw figure archives, reproducibility indexes, and the Phase 4 cross-model audit.
 
 ## Phase 1
 
@@ -70,7 +70,7 @@ What remains provisional:
 
 ## Legacy Prototype 2016 Support Lane
 
-- Plain-language status: preserved legacy support lane only, reframed thesis-facing as `Phase 1 -> Phase 2 -> Phase 3A -> Phase 4`, with `phase5_sync` separate.
+- Plain-language status: preserved legacy support lane only, reframed thesis-facing as `Phase 1 -> Phase 2 -> Phase 3A -> Phase 4 -> Phase 5`.
 - Reportable: `false` as final evidence, `true` as legacy support/comparator context.
 - Methodological role: this preserved three-date 2016 lane captures the earliest prototype stage of the study, when the ingestion-and-validation pipeline was first exercised on 2016 drifter records in the Palawan-side western Philippine context before the study widened toward the broader west-coast Palawan/Mindoro context.
 - Guardrail: there is no thesis-facing `Phase 3B` or `Phase 3C` for `prototype_2016`.
@@ -91,14 +91,14 @@ Promotion and provenance control:
 
 ### Phase 3A Benchmark Comparator
 
-- Plain-language status: scientifically informative comparator track built around the promoted March 13 -> March 14 reinit comparison.
+- Plain-language status: validation-support comparator track built around the promoted March 13 -> March 14 reinit comparison.
 - Reportable: `true`
 - Frozen: `false`
 - Guardrail: PyGNOME is comparator-only and not truth.
 
 ### Phase 3B1 March 13 -> March 14 Primary Validation
 
-- Plain-language status: scientifically informative and reportable promoted primary validation row carried under the thesis-facing title `Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents`, with an explicit caveat that both NOAA products cite March 12 WorldView-3 imagery.
+- Plain-language status: validation-focused and reportable promoted primary row carried under the thesis-facing title `Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents`, with an explicit caveat that both NOAA products cite March 12 WorldView-3 imagery.
 - Reportable: `true`
 - Frozen: `false`
 - Provenance: the original March 3 -> March 6 base case YAML stays frozen; this promotion is authorized through the separate amendment file above.
@@ -114,17 +114,17 @@ Promotion and provenance control:
 
 ### Phase 3B3 Legacy Broader Public Support
 
-- Plain-language status: reportable legacy supporting-interpretation track.
+- Plain-language status: reportable legacy broader public-validation support track.
 - Reportable: `true`
 - Frozen: `false`
 - Guardrail: keep it separate from both the promoted March 13 -> March 14 primary row and from DWH transfer validation.
 
 ## DWH Phase 3C
 
-- Plain-language status: external rich-data transfer validation success.
+- Plain-language status: validation-only external rich-data transfer case.
 - Thesis framing: separate external transfer-validation/support case; Mindoro remains the main Philippine thesis case.
-- Deterministic OpenDrift: reportable main result.
-- Ensemble comparison: reportable support/comparative result.
+- Deterministic OpenDrift: reportable transfer-validation result.
+- Ensemble comparison: reportable transfer-validation support/comparative result.
 - PyGNOME comparator: reportable comparator-only result.
 - Frozen: `false`
 - Inherited provisional: `true`
@@ -135,13 +135,13 @@ Promotion and provenance control:
 - Scientific-ready means: not smoke-only, full May 20-23, 2010 coverage, required variables and usable metadata present, OpenDrift reader exposes the required variables, and the assembled stack completes a small reader-check forecast.
 - Drop-in methods note: `docs/DWH_METHODS_NOTE.md`
 
-## Phase 4
+## Phase 4 Support Layer
 
-- Plain-language status: scientifically reportable now for Mindoro on the current framework.
-- Scientifically reportable: `true`
+- Plain-language status: implemented Mindoro oil-type and shoreline support bundle outside the main thesis phase count; thesis-facing `Phase 4` language is reserved for `prototype_2016`.
+- Scientifically reportable: `true` as a technical/support bundle, `false` as a main thesis phase outside `prototype_2016`
 - Scientifically frozen: `false`
 - Inherited provisional: `true`
-- Does Phase 4 still depend on a later full Phase 1 production rerun for the final frozen baseline story? `no`, but it still depends on a manual downstream trial or promotion step if you want the new candidate baseline to become the default.
+- Does this support bundle still depend on a later full Phase 1 production rerun for the final frozen baseline story? `no`, but it still depends on a manual downstream trial or promotion step if you want the new candidate baseline to become the default.
 - Is any part of official product generation still coupled to legacy recipe naming drift? `yes`
 - Biggest remaining blocker: the new Phase 1 candidate baseline is staged, but official spill-case workflows still use the older canonical baseline file unless you promote or override it manually with `BASELINE_SELECTION_PATH` or an explicit promotion step.
 
@@ -183,9 +183,9 @@ Why comparison is still deferred:
 - no stored PyGNOME shoreline-arrival or shoreline-segment output family exists
 - DWH PyGNOME remains a Phase 3 comparator branch and does not substitute for a matched Mindoro Phase 4 run
 
-## Phase 5
+## Phase 5 Support Layer
 
-- Plain-language status: launcher/docs/package synchronization layer.
+- Plain-language status: read-only launcher/docs/package synchronization and explorer support layer outside the main thesis phase count; thesis-facing `Phase 5` language is reserved for `prototype_2016`.
 - Scientifically reportable: `false`
 - Reportable now: `true`
 - Scientifically frozen: `false`
@@ -197,7 +197,7 @@ What is already in place:
 - matrix-driven launcher via `config/launcher_matrix.json` and `start.ps1`
 - `output/final_reproducibility_package/` with software, case, config, manifest, log, output, and phase-status indexes
 - synchronized documentation for launcher safety, command matrix, and current phase boundaries
-- `output/trajectory_gallery/` with a static technical figure manifest, index, and trajectory/overlay/Phase 4 figures built from existing artifacts only
+- `output/trajectory_gallery/` with a static technical figure manifest, index, and trajectory/overlay/Phase 4 support figures built from existing artifacts only
 - `output/trajectory_gallery_panel/` with polished comparison boards, captions, talking points, and panel recommendations built from the existing gallery and stored outputs only
 - `output/figure_package_publication/` with canonical publication-grade single figures, side-by-side boards, captions, and defense talking points built from existing outputs only
 - `output/2016 Legacy Runs FINAL Figures/` with a curated prototype_2016 paper-facing figure set, per-case subfolders, `final_figure_manifest.json`, and `missing_figures.csv` built from existing legacy outputs only
@@ -211,7 +211,7 @@ Optional future work still deferred:
 
 ## Read-Only Dashboard
 
-- Plain-language status: implemented read-only local exploration layer for the current packaged outputs.
+- Plain-language status: implemented read-only local support/exploration layer for the current packaged outputs.
 - Scientifically reportable: `false`
 - Reportable now: `true`
 - Scientifically frozen: `false`
@@ -222,7 +222,7 @@ What is already in place:
 
 - panel-friendly mode that defaults to publication-grade figures and recommended defense boards
 - advanced mode that exposes panel/raw figures, manifests, logs, and lower-level artifact inspection
-- dedicated pages for Mindoro validation, DWH transfer validation, cross-model comparison, Phase 4 interpretation, and Phase 4 cross-model deferred status
+- dedicated pages for Mindoro validation, DWH transfer validation, cross-model comparison, Phase 4 support/context interpretation, and Phase 4 cross-model deferred status
 - an explicit read-only Phase 4 cross-model status page that states the comparison is deferred and links to blocker/next-step artifacts
 
 What remains deferred:
@@ -237,7 +237,7 @@ What remains deferred:
 - Reportable now: `true`
 - Scientifically frozen: `false`
 - Inherited provisional: `true`
-- Scope: static trajectories, overlays, comparison maps, and Mindoro Phase 4 shoreline/oil-type figures built from existing outputs without rerunning science.
+- Scope: static trajectories, overlays, comparison maps, and Mindoro Phase 4 support/context shoreline/oil-type figures built from existing outputs without rerunning science.
 
 Panel-ready now:
 
@@ -264,19 +264,22 @@ Still optional future work:
 - Reportable now: `true`
 - Scientifically frozen: `false`
 - Inherited provisional: `true`
-- Scope: panel-ready trajectory, comparison, and Phase 4 boards with captions and talking points built from the raw gallery and stored outputs only.
+- Scope: panel-ready trajectory, comparison, and support/context Phase 4 boards with captions and talking points built from the raw gallery and stored outputs only.
 
 Recommended main-presentation boards:
 
 - Mindoro March 13 -> March 14 primary validation board
 - Mindoro March 13 -> March 14 cross-model comparator board
 - Mindoro trajectory board
-- Mindoro Phase 4 oil-budget board
-- Mindoro Phase 4 shoreline-arrival / shoreline-impact board
 - Mindoro legacy March 6 honesty / limitations board
 - DWH deterministic forecast-vs-observation board
 - DWH deterministic vs ensemble board
 - DWH OpenDrift vs PyGNOME comparison board
+
+Optional support/context boards:
+
+- Mindoro Phase 4 oil-budget board
+- Mindoro Phase 4 shoreline-arrival / shoreline-impact board
 
 Still optional future work:
 
@@ -298,12 +301,15 @@ Recommended main-presentation figures:
 - Mindoro March 13 -> March 14 cross-model comparator board
 - Mindoro legacy March 6 honesty / limitations board
 - Mindoro trajectory publication board
-- Mindoro Phase 4 oil-budget publication board
-- Mindoro Phase 4 shoreline-impact publication board
-- Mindoro Phase 4 deferred-comparison note figure when the panel asks why no Phase 4 PyGNOME board is shown
 - DWH deterministic forecast-vs-observation board
 - DWH deterministic versus ensemble publication board
 - DWH OpenDrift versus PyGNOME publication board
+
+Optional support/context figures:
+
+- Mindoro Phase 4 oil-budget publication board
+- Mindoro Phase 4 shoreline-impact publication board
+- Mindoro Phase 4 deferred-comparison note figure when the panel asks why no Phase 4 PyGNOME board is shown
 
 What this package adds beyond the panel gallery:
 

@@ -26,10 +26,10 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 try:
     from gnome.model import Model
-    from gnome.movers import RandomMover, WindMover
+    from gnome.movers import CurrentMover, RandomMover, WindMover
     from gnome.outputters import NetCDFOutput
     from gnome.spills import surface_point_line_spill
-    from gnome.environment import Wind, Water, Waves
+    from gnome.environment import GridCurrent, GridWind, Wind, Water, Waves
     from gnome.weatherers import Evaporation, NaturalDispersion
     try:
         from gnome.spills.gnome_oil import GnomeOil
@@ -81,6 +81,9 @@ class GnomeComparisonService:
         duration_hours: int | None = None,
         time_step_minutes: int | None = None,
         use_start_point_release: bool = False,
+        winds_file: str | Path | None = None,
+        currents_file: str | Path | None = None,
+        allow_degraded_forcing: bool = True,
     ) -> tuple[Path, dict]:
         """
         Run a deterministic transport-style PyGNOME scenario for Phase 3A benchmarking.
@@ -101,9 +104,10 @@ class GnomeComparisonService:
             if time_step_minutes is not None
             else int(self.gnome_cfg.get("time_step_minutes", self.sim_cfg["time_step_minutes"]))
         )
-        t_start = pd.to_datetime(start_time).to_pydatetime()
-        release_start = pd.to_datetime(seed_time_override or start_time).to_pydatetime()
+        t_start = pd.to_datetime(start_time, utc=True).tz_localize(None).to_pydatetime()
+        release_start = pd.to_datetime(seed_time_override or start_time, utc=True).tz_localize(None).to_pydatetime()
         wind_speed_ms = float(self.gnome_cfg.get("benchmark_wind_speed_ms", 5.0))
+        diffusion_coef_cm2s = float(self.gnome_cfg.get("benchmark_diffusion_coef_cm2s", 10000.0))
 
         model = Model(
             start_time=t_start,
@@ -111,12 +115,54 @@ class GnomeComparisonService:
             time_step=timedelta(minutes=time_step_minutes),
         )
 
-        wind = Wind(
-            timeseries=[(t_start, (wind_speed_ms, 0.0))],
-            units="m/s",
-        )
-        model.environment += [wind]
-        model.movers += WindMover(wind)
+        transport_forcing_notes: list[str] = []
+        degraded_reasons: list[str] = []
+        wind_path = str(Path(winds_file)) if winds_file else ""
+        current_path = str(Path(currents_file)) if currents_file else ""
+        wind_forcing_mode = "constant_wind_fallback"
+        current_forcing_mode = "no_current_mover"
+        current_mover_used = False
+        wind_grid_error = ""
+        current_grid_error = ""
+
+        try:
+            if wind_path:
+                wind = GridWind.from_netCDF(filename=wind_path)
+                model.environment += [wind]
+                model.movers += WindMover(wind)
+                wind_forcing_mode = "grid_wind_from_file"
+                transport_forcing_notes.append(f"Attached GridWind from {wind_path}.")
+            else:
+                raise FileNotFoundError("No wind forcing path was provided.")
+        except Exception as exc:
+            wind_grid_error = str(exc)
+            degraded_reasons.append("wind_grid_unavailable")
+            transport_forcing_notes.append(f"Falling back to constant benchmark wind because grid wind loading failed: {exc}")
+            if not allow_degraded_forcing:
+                raise RuntimeError(f"PyGNOME grid-wind setup failed for {wind_path or 'unset wind path'}: {exc}") from exc
+            wind = Wind(
+                timeseries=[(t_start, (wind_speed_ms, 0.0))],
+                units="m/s",
+            )
+            model.environment += [wind]
+            model.movers += WindMover(wind)
+
+        try:
+            if current_path:
+                current = GridCurrent.from_netCDF(filename=current_path)
+                model.environment += [current]
+                model.movers += CurrentMover(current)
+                current_forcing_mode = "grid_current_from_file"
+                current_mover_used = True
+                transport_forcing_notes.append(f"Attached GridCurrent from {current_path}.")
+            else:
+                raise FileNotFoundError("No current forcing path was provided.")
+        except Exception as exc:
+            current_grid_error = str(exc)
+            degraded_reasons.append("current_mover_unavailable")
+            transport_forcing_notes.append(f"PyGNOME current mover is unavailable for this run: {exc}")
+            if not allow_degraded_forcing:
+                raise RuntimeError(f"PyGNOME current-mover setup failed for {current_path or 'unset current path'}: {exc}") from exc
 
         first_oil_key = list(self.oils_cfg.keys())[0]
         oil_cfg = self.oils_cfg[first_oil_key]
@@ -171,18 +217,20 @@ class GnomeComparisonService:
             output_timestep=timedelta(hours=1),
         )
         model.outputters += nc_outputter
+        model.movers += RandomMover(diffusion_coef=diffusion_coef_cm2s)
         model.full_run()
 
+        degraded_forcing = bool(degraded_reasons)
         metadata = {
             "nc_path": str(nc_path),
             "random_seed": int(random_seed),
-            "wind_speed_ms": wind_speed_ms,
+            "wind_speed_ms": wind_speed_ms if wind_forcing_mode == "constant_wind_fallback" else None,
             "weathering_enabled": False,
             "benchmark_particles": int(benchmark_particles),
             "benchmark_clusters": int(num_clusters),
             "oil_key": first_oil_key,
             "oil_type": gnome_oil_type,
-            "release_start_utc": str(pd.to_datetime(start_time).strftime("%Y-%m-%dT%H:%M:%SZ")),
+            "release_start_utc": str(pd.to_datetime(release_start).strftime("%Y-%m-%dT%H:%M:%SZ")),
             "seed_time_override_utc": (
                 str(pd.to_datetime(seed_time_override).strftime("%Y-%m-%dT%H:%M:%SZ"))
                 if seed_time_override
@@ -193,6 +241,23 @@ class GnomeComparisonService:
             "start_point_release_used": bool(use_start_point_release),
             "duration_hours": int(duration_hours),
             "time_step_minutes": int(time_step_minutes),
+            "diffusion_coef_cm2s": float(diffusion_coef_cm2s),
+            "wind_forcing_path": wind_path,
+            "current_forcing_path": current_path,
+            "wind_forcing_mode": wind_forcing_mode,
+            "current_forcing_mode": current_forcing_mode,
+            "current_mover_used": bool(current_mover_used),
+            "degraded_forcing": degraded_forcing,
+            "degraded_reason": "; ".join(dict.fromkeys(degraded_reasons)),
+            "degraded_reasons": list(dict.fromkeys(degraded_reasons)),
+            "transport_forcing_mode": (
+                "matched_grid_wind_plus_grid_current"
+                if wind_forcing_mode == "grid_wind_from_file" and current_mover_used
+                else "degraded_transport_forcing"
+            ),
+            "wind_grid_error": wind_grid_error,
+            "current_grid_error": current_grid_error,
+            "transport_forcing_notes": transport_forcing_notes,
         }
         return nc_path, metadata
 

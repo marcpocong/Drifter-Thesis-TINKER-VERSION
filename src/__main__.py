@@ -5,12 +5,12 @@ Container routing via the PIPELINE_PHASE environment variable:
   PIPELINE_PHASE=prep            -> Pipeline-only input preparation and manifests
   PIPELINE_PHASE=1_2  (default) -> Prototype: Phase 1 validation + Phase 2 ensemble
                                     Official: frozen-baseline recipe + deterministic control + Phase 2 ensemble
-  PIPELINE_PHASE=official_phase3b -> Official minimal path: deterministic control + ensemble + Phase 3B
-  PIPELINE_PHASE=recipe_sensitivity -> Official event-scale Phase 3B recipe sensitivities
+  PIPELINE_PHASE=official_phase3b -> Official minimal path: deterministic control + ensemble + Phase 3B public-validation lane
+  PIPELINE_PHASE=recipe_sensitivity -> Official event-scale Phase 3B validation sensitivities
   PIPELINE_PHASE=convergence_after_shoreline -> Official shoreline-aware particle-count convergence
   PIPELINE_PHASE=displacement_after_convergence -> Official post-convergence displacement/transport audit
-  PIPELINE_PHASE=phase3b_multidate_public -> Official multi-date public-observation Phase 3B
-  PIPELINE_PHASE=phase3b_extended_public -> Official extended-horizon public-observation Phase 3B guardrail
+  PIPELINE_PHASE=phase3b_multidate_public -> Official multi-date public-observation validation
+  PIPELINE_PHASE=phase3b_extended_public -> Official extended-horizon public-observation validation guardrail
   PIPELINE_PHASE=phase3b_extended_public_scored -> Appendix-only short extended public-observation scoring
   PIPELINE_PHASE=phase3b_extended_public_scored_march23 -> Appendix-only March 23 extended public branch stress test
   PIPELINE_PHASE=phase3b_extended_public_scored_march13_14_reinit -> Mindoro Phase 3B primary public-validation row (March 13 -> March 14 NOAA reinit with explicit shared-imagery caveat)
@@ -28,21 +28,21 @@ Container routing via the PIPELINE_PHASE environment variable:
   PIPELINE_PHASE=phase3c_external_case_setup -> External rich-data spill setup and observation ingestion
   PIPELINE_PHASE=dwh_phase3c_forcing_adapter_and_non_scientific_smoke_forecast -> DWH forcing adapter status + non-scientific smoke forecast
   PIPELINE_PHASE=dwh_phase3c_scientific_forcing_ready -> DWH scientific historical forcing readiness check
-  PIPELINE_PHASE=phase3c_external_case_run -> DWH Phase 3C scientific external transfer-validation run
-  PIPELINE_PHASE=phase3c_external_case_ensemble_comparison -> DWH Phase 3C deterministic-vs-ensemble comparison
-  PIPELINE_PHASE=phase3c_dwh_pygnome_comparator -> DWH Phase 3C cross-model PyGNOME comparator
+  PIPELINE_PHASE=phase3c_external_case_run -> DWH Phase 3C external transfer-validation run
+  PIPELINE_PHASE=phase3c_external_case_ensemble_comparison -> DWH Phase 3C transfer-validation deterministic-vs-ensemble comparison
+  PIPELINE_PHASE=phase3c_dwh_pygnome_comparator -> DWH Phase 3C transfer-validation cross-model PyGNOME comparator
   PIPELINE_PHASE=final_validation_package -> Read-only thesis package built from completed Mindoro + DWH outputs
   PIPELINE_PHASE=phase1_finalization_audit -> Read-only Chapter 3 Phase 1 architecture audit and verdict
   PIPELINE_PHASE=phase2_finalization_audit -> Read-only Chapter 3 Phase 2 semantics/manifests audit and verdict
   PIPELINE_PHASE=phase1_production_rerun -> Dedicated full 2016-2022 historical/regional Phase 1 production rerun
   PIPELINE_PHASE=mindoro_march13_14_phase1_focus_trial -> Experimental March 13 -> March 14 replay using the staged Mindoro-focused pre-spill Phase 1 candidate
   PIPELINE_PHASE=mindoro_local_recipe_experiment -> Stage a Mindoro-local recipe candidate and replay the Mindoro event comparison with GFS
-  PIPELINE_PHASE=phase4_oiltype_and_shoreline -> Mindoro Phase 4 oil-type fate and shoreline-impact workflow
+  PIPELINE_PHASE=phase4_oiltype_and_shoreline -> Mindoro support-layer oil-type fate and shoreline-impact workflow
   PIPELINE_PHASE=phase4_crossmodel_comparability_audit -> Read-only Phase 4 OpenDrift-vs-PyGNOME comparability audit
-  PIPELINE_PHASE=phase5_launcher_and_docs_sync -> Read-only launcher/docs/reproducibility package sync
+  PIPELINE_PHASE=phase5_launcher_and_docs_sync -> Read-only launcher/docs/reproducibility support sync
   PIPELINE_PHASE=trajectory_gallery_build -> Read-only static trajectory/overlay/shoreline figure gallery
   PIPELINE_PHASE=prototype_pygnome_similarity_summary -> Read-only cross-case prototype OpenDrift-vs-PyGNOME transport summary
-  PIPELINE_PHASE=prototype_legacy_final_figures -> Read-only curated prototype_2016 final paper-figure export
+  PIPELINE_PHASE=prototype_legacy_final_figures -> Read-only curated prototype_2016 legacy Phase 5 final paper-figure export
   PIPELINE_PHASE=prototype_legacy_phase4_weathering -> Prototype 2016 legacy Phase 4 oil weathering and fate analysis
   PIPELINE_PHASE=3               -> Legacy compatibility alias (prototype_2016 Phase 4; otherwise legacy Phase 3 weathering path)
   PIPELINE_PHASE=benchmark       -> Phase 3A cross-model benchmark
@@ -432,7 +432,10 @@ def print_recipe_selection(selection, label: str = "Recipe selection"):
             selected_recipe=selection.recipe,
         )
         if phase2_status["requires_phase1_production_rerun_for_full_freeze"]:
-            print("Phase 1 freeze note: later full Phase 1 production rerun is still required for the final frozen-baseline story.")
+            print(
+                "Phase 1 freeze note: dedicated 2016-2022 rerun outputs now exist, "
+                "but the candidate baseline is not yet adopted as the default frozen spill-case baseline."
+            )
         if phase2_status["legacy_recipe_drift_leaks_into_official_mode"]:
             print("Recipe-family note: official recipe-family support is still partial locally; legacy *_ncep IDs remain and gfs_wind.nc is not present.")
 
@@ -531,7 +534,7 @@ def run_official_phase3b_minimal():
         print("official_phase3b is only supported for official spill-case workflows.")
         sys.exit(1)
 
-    print("Starting minimal official spill-case path: deterministic control + ensemble + Phase 3B...")
+    print("Starting minimal official spill-case path: deterministic control + ensemble + Phase 3B public-validation...")
     run_phase1_and_2()
     run_phase3b()
 
@@ -696,7 +699,7 @@ def run_prototype_legacy_phase4_weathering(*, deprecated_alias: str | None = Non
             "Use PIPELINE_PHASE=prototype_legacy_phase4_weathering instead."
         )
     print(
-        "Legacy prototype 2016 thesis-facing flow is Phase 1 -> Phase 2 -> Phase 3A -> Phase 4. "
+        "Legacy prototype 2016 thesis-facing flow is Phase 1 -> Phase 2 -> Phase 3A -> Phase 4 -> Phase 5. "
         "No thesis-facing Phase 3B or Phase 3C exists for this lane."
     )
     run_phase3(
@@ -817,7 +820,7 @@ def run_phase3b():
         )
         print("Starting legacy appendix-only 3b scoring...")
     else:
-        print("Starting Phase 3B: Observational Validation vs Satellite Imagery...")
+        print("Starting Phase 3B public-observation validation...")
     print_workflow_context()
 
     selection = resolve_recipe_selection()
@@ -1921,7 +1924,10 @@ def run_phase2_finalization_audit_phase():
     print(f"Verdict: {results['verdict_md']}")
     print(f"Phase 2 scientifically usable as implemented: {verdict['scientifically_usable_as_implemented']}")
     print(f"Phase 2 scientifically frozen: {verdict['scientifically_frozen']}")
-    print(f"Later Phase 1 production rerun still needed for full freeze: {verdict['requires_phase1_production_rerun_for_full_freeze']}")
+    print(
+        "Phase 1 freeze remains incomplete "
+        f"(candidate baseline not yet adopted as default): {verdict['requires_phase1_production_rerun_for_full_freeze']}"
+    )
     print(f"Legacy recipe drift still leaks into official mode: {verdict['legacy_recipe_drift_leaks_into_official_mode']}")
     print(f"Biggest remaining provisional item: {verdict['biggest_remaining_phase2_provisional_item']}")
 
@@ -2040,8 +2046,8 @@ def run_mindoro_local_recipe_experiment_phase():
 def run_phase4_oiltype_and_shoreline_phase():
     from src.services.phase4_oiltype_and_shoreline import run_phase4_oiltype_and_shoreline
 
-    print("Starting Phase 4 oil-type fate and shoreline-impact workflow...")
-    print("This phase writes a separate Phase 4 output bundle and does not overwrite the stored Mindoro or DWH Phase 3 validation outputs.")
+    print("Starting support-layer oil-type fate and shoreline-impact workflow...")
+    print("This workflow writes a separate Phase 4 support bundle and does not overwrite the stored Mindoro or DWH Phase 3 validation outputs.")
 
     results = run_phase4_oiltype_and_shoreline()
     verdict = results["verdict"]
@@ -2063,9 +2069,9 @@ def run_phase4_oiltype_and_shoreline_phase():
         f"{results['weathering_path_audit']['reused_existing_weathering_path']}"
     )
     print(f"Selected transport loading audit: {results['selected_transport_loading_audit_path']}")
-    print(f"Phase 4 scientifically reportable now: {verdict['scientifically_reportable_now']}")
-    print(f"Phase 4 provisional because of inherited transport: {verdict['provisional_inherited_from_transport']}")
-    print(f"Biggest remaining blocker: {verdict['biggest_remaining_phase4_blocker']}")
+    print(f"Support-layer bundle usable now: {verdict['scientifically_reportable_now']}")
+    print(f"Support-layer bundle remains inherited-provisional from transport: {verdict['provisional_inherited_from_transport']}")
+    print(f"Biggest remaining support-layer blocker: {verdict['biggest_remaining_phase4_blocker']}")
 
 
 def run_phase4_crossmodel_comparability_audit_phase():
@@ -2098,13 +2104,13 @@ def run_phase4_crossmodel_comparability_audit_phase():
 def run_phase5_launcher_and_docs_sync_phase():
     from src.services.phase5_launcher_and_docs_sync import run_phase5_launcher_and_docs_sync
 
-    print("Starting Phase 5 launcher/docs/package sync...")
+    print("Starting read-only launcher/docs/package support sync...")
     print("This phase is read-only with respect to scientific outputs and will not rerun expensive science by default.")
 
     results = run_phase5_launcher_and_docs_sync()
     verdict = results["overall_verdict"]
 
-    print("\nPhase 5 sync complete.")
+    print("\nSupport sync complete.")
     print(f"Outputs saved to: {results['output_dir']}")
     print(f"Launcher entrypoint: {results['launcher_entrypoint']}")
     print(f"Menu categories: {', '.join(results['menu_categories'])}")
@@ -2115,10 +2121,10 @@ def run_phase5_launcher_and_docs_sync_phase():
     print(f"Output catalog: {results['final_output_catalog_csv']}")
     print(f"Summary: {results['final_reproducibility_summary_md']}")
     print(f"Verdict: {results['phase5_final_verdict_md']}")
-    print(f"Phase 5 reportable now: {verdict['phase5_reportable_now']}")
+    print(f"Support sync current and usable: {verdict['phase5_reportable_now']}")
     print(f"Launcher/menu honest and current: {verdict['launcher_menu_honest_and_current']}")
     print(
-        "Later Phase 1 production rerun still needed for full freeze: "
+        "Phase 1 freeze remains incomplete (candidate baseline not yet adopted as default): "
         f"{verdict['requires_phase1_production_rerun_for_full_freeze']}"
     )
     print(

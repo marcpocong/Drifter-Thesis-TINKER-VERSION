@@ -1,28 +1,28 @@
 case_id,comparison_track_id,comparison_track_label,hour,kl_divergence,epsilon,ocean_cell_count
-CASE_2016-09-01,deterministic,OpenDrift deterministic,24,22.34723571391521,1e-10,25600
-CASE_2016-09-01,deterministic,OpenDrift deterministic,48,22.391049876303683,1e-10,25600
-CASE_2016-09-01,deterministic,OpenDrift deterministic,72,22.516645574445334,1e-10,25600
-CASE_2016-09-01,ensemble_p50,OpenDrift p50 threshold,24,22.34723571391521,1e-10,25600
-CASE_2016-09-01,ensemble_p50,OpenDrift p50 threshold,48,0.0584034457352398,1e-10,2
-CASE_2016-09-01,ensemble_p50,OpenDrift p50 threshold,72,0.1839994653767589,1e-10,2
-CASE_2016-09-01,ensemble_p90,OpenDrift p90 threshold,24,0.0145891711912688,1e-10,2
-CASE_2016-09-01,ensemble_p90,OpenDrift p90 threshold,48,0.0584034457352398,1e-10,2
-CASE_2016-09-01,ensemble_p90,OpenDrift p90 threshold,72,0.1839994653767589,1e-10,2
-CASE_2016-09-06,deterministic,OpenDrift deterministic,24,23.020741030615504,1e-10,25600
-CASE_2016-09-06,deterministic,OpenDrift deterministic,48,22.88077177462232,1e-10,25600
-CASE_2016-09-06,deterministic,OpenDrift deterministic,72,22.598257701919884,1e-10,25600
-CASE_2016-09-06,ensemble_p50,OpenDrift p50 threshold,24,0.6880962119304719,1e-10,2
-CASE_2016-09-06,ensemble_p50,OpenDrift p50 threshold,48,0.5481265976439859,1e-10,2
-CASE_2016-09-06,ensemble_p50,OpenDrift p50 threshold,72,0.2656118017620267,1e-10,2
-CASE_2016-09-06,ensemble_p90,OpenDrift p90 threshold,24,0.6880962119304719,1e-10,2
-CASE_2016-09-06,ensemble_p90,OpenDrift p90 threshold,48,0.5481265976439859,1e-10,2
-CASE_2016-09-06,ensemble_p90,OpenDrift p90 threshold,72,0.2656118017620267,1e-10,2
-CASE_2016-09-17,deterministic,OpenDrift deterministic,24,22.347235713915204,1e-10,25600
-CASE_2016-09-17,deterministic,OpenDrift deterministic,48,22.39104987630369,1e-10,25600
-CASE_2016-09-17,deterministic,OpenDrift deterministic,72,22.516645574445334,1e-10,25600
-CASE_2016-09-17,ensemble_p50,OpenDrift p50 threshold,24,22.347235713915204,1e-10,25600
-CASE_2016-09-17,ensemble_p50,OpenDrift p50 threshold,48,0.0584034457352398,1e-10,2
-CASE_2016-09-17,ensemble_p50,OpenDrift p50 threshold,72,0.1839994653767589,1e-10,2
-CASE_2016-09-17,ensemble_p90,OpenDrift p90 threshold,24,0.0145891711912688,1e-10,2
-CASE_2016-09-17,ensemble_p90,OpenDrift p90 threshold,48,0.0584034457352398,1e-10,2
-CASE_2016-09-17,ensemble_p90,OpenDrift p90 threshold,72,0.1839994653767589,1e-10,2
+CASE_2016-09-01,deterministic,OpenDrift deterministic,24,19.690935971274364,1e-10,25600
+CASE_2016-09-01,deterministic,OpenDrift deterministic,48,2.5409291058761965,1e-10,25600
+CASE_2016-09-01,deterministic,OpenDrift deterministic,72,22.63360974122068,1e-10,25600
+CASE_2016-09-01,ensemble_p50,OpenDrift p50 occupancy footprint,24,1.6964865959885576,1e-10,25600
+CASE_2016-09-01,ensemble_p50,OpenDrift p50 occupancy footprint,48,2.389235250611644,1e-10,25600
+CASE_2016-09-01,ensemble_p50,OpenDrift p50 occupancy footprint,72,2.546025257189364,1e-10,25600
+CASE_2016-09-01,ensemble_p90,OpenDrift p90 occupancy footprint,24,1.5629555473046888,1e-10,25600
+CASE_2016-09-01,ensemble_p90,OpenDrift p90 occupancy footprint,48,2.2557042038903097,1e-10,25600
+CASE_2016-09-01,ensemble_p90,OpenDrift p90 occupancy footprint,72,2.421513285354207,1e-10,25600
+CASE_2016-09-06,deterministic,OpenDrift deterministic,24,22.76262930096855,1e-10,25600
+CASE_2016-09-06,deterministic,OpenDrift deterministic,48,17.93316335437054,1e-10,25600
+CASE_2016-09-06,deterministic,OpenDrift deterministic,72,16.316827699197106,1e-10,25600
+CASE_2016-09-06,ensemble_p50,OpenDrift p50 occupancy footprint,24,2.1044471151747404,1e-10,25600
+CASE_2016-09-06,ensemble_p50,OpenDrift p50 occupancy footprint,48,1.4746035544640246,1e-10,25600
+CASE_2016-09-06,ensemble_p50,OpenDrift p50 occupancy footprint,72,2.4116210698022766,1e-10,25600
+CASE_2016-09-06,ensemble_p90,OpenDrift p90 occupancy footprint,24,1.986664383130788,1e-10,25600
+CASE_2016-09-06,ensemble_p90,OpenDrift p90 occupancy footprint,48,1.2669647273472249,1e-10,25600
+CASE_2016-09-06,ensemble_p90,OpenDrift p90 occupancy footprint,72,2.3603279087307727,1e-10,25600
+CASE_2016-09-17,deterministic,OpenDrift deterministic,24,0.0,1e-10,25600
+CASE_2016-09-17,deterministic,OpenDrift deterministic,48,15.04018322297185,1e-10,25600
+CASE_2016-09-17,deterministic,OpenDrift deterministic,72,0.9606946180700878,1e-10,25600
+CASE_2016-09-17,ensemble_p50,OpenDrift p50 occupancy footprint,24,2.197218935212566,1e-10,25600
+CASE_2016-09-17,ensemble_p50,OpenDrift p50 occupancy footprint,48,2.0814772746211485,1e-10,25600
+CASE_2016-09-17,ensemble_p50,OpenDrift p50 occupancy footprint,72,2.7682883342449616,1e-10,25600
+CASE_2016-09-17,ensemble_p90,OpenDrift p90 occupancy footprint,24,2.0794362031686138,1e-10,25600
+CASE_2016-09-17,ensemble_p90,OpenDrift p90 occupancy footprint,48,2.0124845817906807,1e-10,25600
+CASE_2016-09-17,ensemble_p90,OpenDrift p90 occupancy footprint,72,2.605769826827319,1e-10,25600

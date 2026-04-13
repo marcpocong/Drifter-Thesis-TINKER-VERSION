@@ -37,11 +37,11 @@ COMPARISON_TRACK_REGISTRY = {
         "subdir": "control",
     },
     "ensemble_p50": {
-        "label": "OpenDrift p50 threshold",
+        "label": "OpenDrift p50 occupancy footprint",
         "subdir": "ensemble_p50",
     },
     "ensemble_p90": {
-        "label": "OpenDrift p90 threshold",
+        "label": "OpenDrift p90 occupancy footprint",
         "subdir": "ensemble_p90",
     },
 }
@@ -350,7 +350,8 @@ class BenchmarkPipeline:
             service.output_dir / f"mask_p90_{hour}h.tif"
             for hour, _ in targets
         ]
-        if not all(_raster_matches_grid(path, grid) for path in expected_sources):
+        reuse_validation = service._validate_prototype_2016_reusable_science()
+        if (not all(_raster_matches_grid(path, grid) for path in expected_sources)) or not reuse_validation.get("valid"):
             service.run_ensemble(
                 recipe_name=recipe_name,
                 start_lat=start_lat,
@@ -366,7 +367,9 @@ class BenchmarkPipeline:
             ):
                 source_path = service.output_dir / filename
                 if not source_path.exists():
-                    raise FileNotFoundError(f"Missing legacy ensemble threshold product for {track_id} {hour} h: {source_path}")
+                    raise FileNotFoundError(
+                        f"Missing legacy ensemble occupancy-footprint product for {track_id} {hour} h: {source_path}"
+                    )
                 track_records.append(
                     {
                         **self._copy_track_product(
@@ -418,6 +421,9 @@ class BenchmarkPipeline:
         start_time: str,
         snapshot_hours: list[int],
         grid: GridBuilder,
+        *,
+        winds_file: str | Path | None = None,
+        currents_file: str | Path | None = None,
     ) -> tuple[list[dict], dict]:
         if not GNOME_AVAILABLE:
             raise RuntimeError("Phase 3A benchmark requires the gnome container.")
@@ -432,7 +438,16 @@ class BenchmarkPipeline:
             start_time=start_time,
             output_name="pygnome_deterministic_control.nc",
             use_start_point_release=self.case.workflow_mode == "prototype_2016",
+            winds_file=winds_file,
+            currents_file=currents_file,
+            allow_degraded_forcing=True,
         )
+        if py_metadata.get("degraded_forcing"):
+            self.logger.warning(
+                "PyGNOME benchmark is running in degraded forcing mode for %s: %s",
+                self.run_id,
+                py_metadata.get("degraded_reason") or "unknown_reason",
+            )
 
         py_records = []
         targets = self._snapshot_targets(start_time, snapshot_hours)
@@ -489,6 +504,10 @@ class BenchmarkPipeline:
                     "pygnome_density_path": str(density_path),
                     "pygnome_mass_strategy": extract_meta["mass_strategy"],
                     "pygnome_nonzero_density_cells": int(np.count_nonzero(density > 0)),
+                    "pygnome_degraded_forcing": bool(py_metadata.get("degraded_forcing")),
+                    "pygnome_degraded_reason": str(py_metadata.get("degraded_reason") or ""),
+                    "pygnome_transport_forcing_mode": str(py_metadata.get("transport_forcing_mode") or ""),
+                    "pygnome_current_mover_used": bool(py_metadata.get("current_mover_used")),
                 }
             )
 
@@ -624,6 +643,8 @@ class BenchmarkPipeline:
             start_time=start_time,
             snapshot_hours=service.snapshot_hours,
             grid=grid,
+            winds_file=str(service.winds_file),
+            currents_file=str(service.currents_file),
         )
         self.generate_config_snapshot(best_recipe, start_lat, start_lon, start_time, grid, py_metadata)
 
@@ -752,6 +773,10 @@ class BenchmarkPipeline:
                     "qa_overlay_path": str(overlay_path),
                     "pygnome_nc_path": py_record["pygnome_nc_path"],
                     "pygnome_mass_strategy": py_record["pygnome_mass_strategy"],
+                    "pygnome_degraded_forcing": bool(py_record.get("pygnome_degraded_forcing")),
+                    "pygnome_degraded_reason": str(py_record.get("pygnome_degraded_reason") or ""),
+                    "pygnome_transport_forcing_mode": str(py_record.get("pygnome_transport_forcing_mode") or ""),
+                    "pygnome_current_mover_used": bool(py_record.get("pygnome_current_mover_used")),
                     "opendrift_density_ocean_sum": opendrift_density_ocean_sum,
                     "pygnome_density_ocean_sum": py_density_ocean_sum,
                     "density_pair_strategy": density_pair_meta["strategy"],

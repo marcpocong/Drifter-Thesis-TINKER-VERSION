@@ -79,6 +79,9 @@ WAVE_VARIABLE_HINTS = [
     "Hs",
 ]
 PROTOTYPE_2016_REQUIRED_PROBABILITY_HOURS = (24, 48, 72)
+PROTOTYPE_2016_PROBABILITY_SEMANTICS = "member_occupancy_probability"
+PROTOTYPE_2016_PROBABILITY_SEMANTICS_VERSION = "prototype_2016_member_occupancy_v1"
+PROTOTYPE_2016_VALID_TIME_TOLERANCE_MINUTES = 31
 WAVE_REQUIRED_VARS = [
     "sea_surface_wave_stokes_drift_x_velocity",
     "sea_surface_wave_stokes_drift_y_velocity",
@@ -1101,7 +1104,10 @@ class EnsembleForecastService:
 
             lon = np.asarray(ds["lon"].isel(time=time_index).values).reshape(-1)
             lat = np.asarray(ds["lat"].isel(time=time_index).values).reshape(-1)
-            status = np.asarray(ds["status"].isel(time=time_index).values).reshape(-1)
+            if "status" in ds:
+                status = np.asarray(ds["status"].isel(time=time_index).values).reshape(-1)
+            else:
+                status = np.zeros_like(lon, dtype=np.int32)
             if "mass_oil" in ds:
                 mass = np.asarray(ds["mass_oil"].isel(time=time_index).values).reshape(-1)
             else:
@@ -1457,6 +1463,8 @@ class EnsembleForecastService:
                 [
                     self.output_dir / f"probability_{int(hour)}h.nc",
                     self.output_dir / f"probability_{int(hour)}h.tif",
+                    self.output_dir / f"particle_density_fraction_{int(hour)}h.nc",
+                    self.output_dir / f"particle_density_fraction_{int(hour)}h.tif",
                     self.output_dir / f"mask_p50_{int(hour)}h.tif",
                     self.output_dir / f"mask_p90_{int(hour)}h.tif",
                 ]
@@ -1552,6 +1560,28 @@ class EnsembleForecastService:
                 "manifest_path": manifest_path,
             }
 
+        metadata_path = self.output_dir / "metadata.json"
+        try:
+            metadata_payload = json.loads(metadata_path.read_text(encoding="utf-8")) or {}
+        except Exception as exc:
+            return {
+                "valid": False,
+                "reason": f"Unreadable prototype_2016 metadata.json: {exc}",
+                "manifest_path": manifest_path,
+            }
+        if str(metadata_payload.get("probability_semantics") or "") != PROTOTYPE_2016_PROBABILITY_SEMANTICS:
+            return {
+                "valid": False,
+                "reason": "Existing prototype_2016 metadata does not record member_occupancy_probability semantics.",
+                "manifest_path": manifest_path,
+            }
+        if str(metadata_payload.get("probability_semantics_version") or "") != PROTOTYPE_2016_PROBABILITY_SEMANTICS_VERSION:
+            return {
+                "valid": False,
+                "reason": "Existing prototype_2016 metadata predates the member-occupancy semantics patch.",
+                "manifest_path": manifest_path,
+            }
+
         return {
             "valid": True,
             "reason": "Validated same-case prototype_2016 ensemble science outputs are present.",
@@ -1585,7 +1615,21 @@ class EnsembleForecastService:
             "grid": grid.spec.to_metadata(),
             "snapshot_hours": list(self.snapshot_hours),
             "snapshots_hours": list(self.snapshot_hours),
-            "variables": ["probability", "mask_p50", "mask_p90"],
+            "variables": ["probability", "mask_p50", "mask_p90", "particle_density_fraction"],
+            "probability_semantics": PROTOTYPE_2016_PROBABILITY_SEMANTICS,
+            "probability_semantics_version": PROTOTYPE_2016_PROBABILITY_SEMANTICS_VERSION,
+            "threshold_semantics": {
+                "mask_p50": "Binary footprint where member-occupancy probability is at least 0.50 at the exact valid time.",
+                "mask_p90": "Binary footprint where member-occupancy probability is at least 0.90 at the exact valid time.",
+            },
+            "diagnostic_density_semantics": (
+                "particle_density_fraction is a pooled active-particle fraction diagnostic at the exact valid time. "
+                "It is not a probability-of-presence product and does not drive p50/p90."
+            ),
+            "valid_time_rule": (
+                f"Prototype 2016 occupancy products use the nominal case valid time across members with a "
+                f"{PROTOTYPE_2016_VALID_TIME_TOLERANCE_MINUTES}-minute nearest-output tolerance."
+            ),
             "legacy_support_only": True,
             "ensemble_science_reused": bool(ensemble_science_reused),
             **prototype_2016_rendering_metadata(display_bounds),
@@ -1628,7 +1672,7 @@ class EnsembleForecastService:
                 start_lon=float(start_lon),
                 start_lat=float(start_lat),
                 corners=list(display_bounds),
-                title=f"Ensemble Forecast: T+{int(hour)}h\nProbability Footprint (N={self.ensemble_size})",
+                title=f"Ensemble Forecast: T+{int(hour)}h\nMember-Occupancy Footprint (N={self.ensemble_size})",
                 use_projected_case_local=True,
                 probability_raster_path=str(probability_raster),
                 p50_mask_path=str(p50_mask),
@@ -1709,7 +1753,191 @@ class EnsembleForecastService:
         )
         return manifest
 
-    def _generate_prototype_probability_products(self, file_list, start_lat, start_lon):
+    @staticmethod
+    def _prototype_member_id_from_output_path(file_path: Path, fallback_member_id: int) -> int:
+        for token in reversed(file_path.stem.split("_")):
+            if token.isdigit():
+                return int(token)
+        return int(fallback_member_id)
+
+    @staticmethod
+    def _load_prototype_member_snapshot(
+        nc_path: Path,
+        target_time,
+        tolerance_minutes: int = PROTOTYPE_2016_VALID_TIME_TOLERANCE_MINUTES,
+    ) -> dict:
+        with xr.open_dataset(nc_path) as ds:
+            if "time" not in ds.coords:
+                raise ValueError(f"{nc_path} is missing a time coordinate.")
+            times = normalize_time_index(ds["time"].values)
+            if len(times) == 0:
+                raise ValueError(f"{nc_path} contains no model timesteps.")
+            target = normalize_model_timestamp(target_time)
+            index = int(np.abs(times - target).argmin())
+            actual_time = normalize_model_timestamp(times[index])
+            if abs(actual_time - target) > pd.Timedelta(minutes=int(tolerance_minutes)):
+                raise ValueError(
+                    f"{nc_path.name} has no snapshot close enough to {timestamp_to_utc_iso(target)} "
+                    f"(nearest was {timestamp_to_utc_iso(actual_time)})."
+                )
+
+            lon = np.asarray(ds["lon"].isel(time=index).values).reshape(-1)
+            lat = np.asarray(ds["lat"].isel(time=index).values).reshape(-1)
+            if "status" in ds:
+                status = np.asarray(ds["status"].isel(time=index).values).reshape(-1)
+            else:
+                status = np.zeros_like(lon, dtype=np.int32)
+            if "mass_oil" in ds:
+                mass = np.asarray(ds["mass_oil"].isel(time=index).values).reshape(-1)
+            else:
+                mass = np.ones_like(lon, dtype=np.float32)
+
+        valid = ~np.isnan(lon) & ~np.isnan(lat) & (status == 0)
+        return {
+            "actual_time": actual_time,
+            "lon": lon[valid],
+            "lat": lat[valid],
+            "mass": mass[valid],
+            "active_particle_count": int(np.count_nonzero(valid)),
+        }
+
+    def _write_prototype_2016_snapshot_products(
+        self,
+        *,
+        grid: GridBuilder,
+        hour: int,
+        target_time: pd.Timestamp,
+        probability_data: np.ndarray,
+        particle_density_fraction: np.ndarray,
+        contributing_member_ids: list[int],
+        skipped_members: list[dict],
+    ) -> tuple[list[Path], list[dict]]:
+        if not contributing_member_ids:
+            raise RuntimeError(
+                f"Prototype 2016 ensemble occupancy for T+{int(hour)}h cannot be written because zero members "
+                f"contributed a valid snapshot near {timestamp_to_utc_iso(target_time)}."
+            )
+
+        common_attrs = {
+            "crs": grid.crs,
+            "resolution": grid.resolution,
+            "grid_id": grid_id_from_builder(grid),
+            "timestamp_utc": timestamp_to_utc_iso(target_time),
+            "hour": int(hour),
+            "probability_semantics": PROTOTYPE_2016_PROBABILITY_SEMANTICS,
+            "probability_semantics_version": PROTOTYPE_2016_PROBABILITY_SEMANTICS_VERSION,
+            "contributing_member_count": int(len(contributing_member_ids)),
+            "contributing_member_ids": ",".join(str(int(member_id)) for member_id in contributing_member_ids),
+            "skipped_member_count": int(len(skipped_members)),
+            "skipped_member_ids": ",".join(str(int(item["member_id"])) for item in skipped_members),
+        }
+        product_records: list[dict] = []
+        written_files: list[Path] = []
+        coords = {
+            "time": [int(hour)],
+            grid.y_name: grid.y_centers,
+            grid.x_name: grid.x_centers,
+        }
+        dims = ["time", grid.y_name, grid.x_name]
+
+        probability_path_nc = self.output_dir / f"probability_{int(hour)}h.nc"
+        xr.Dataset(
+            data_vars={"probability": (dims, probability_data[np.newaxis, :, :])},
+            coords=coords,
+            attrs={
+                **common_attrs,
+                "description": f"Prototype 2016 member-occupancy probability of presence at T+{int(hour)}h.",
+                "units": "decimal_fraction",
+            },
+        ).to_netcdf(probability_path_nc)
+        written_files.append(probability_path_nc)
+
+        probability_path_tif = self.output_dir / f"probability_{int(hour)}h.tif"
+        save_raster(grid, probability_data.astype(np.float32), probability_path_tif)
+        written_files.append(probability_path_tif)
+        product_records.append(
+            {
+                "product_type": "prob_presence",
+                "hour": int(hour),
+                "timestamp_utc": timestamp_to_utc_iso(target_time),
+                "relative_path": _relative_output_path(probability_path_tif, self.base_output_dir),
+                "semantics": (
+                    "Per-cell member-occupancy probability of presence at the exact valid time on the prototype grid."
+                ),
+                "probability_semantics": PROTOTYPE_2016_PROBABILITY_SEMANTICS,
+                "probability_semantics_version": PROTOTYPE_2016_PROBABILITY_SEMANTICS_VERSION,
+                "contributing_member_count": int(len(contributing_member_ids)),
+                "contributing_member_ids": list(contributing_member_ids),
+                "skipped_member_count": int(len(skipped_members)),
+                "skipped_members": list(skipped_members),
+                "legacy_support_only": True,
+            }
+        )
+
+        diagnostic_path_nc = self.output_dir / f"particle_density_fraction_{int(hour)}h.nc"
+        xr.Dataset(
+            data_vars={"particle_density_fraction": (dims, particle_density_fraction[np.newaxis, :, :])},
+            coords=coords,
+            attrs={
+                **common_attrs,
+                "description": (
+                    f"Prototype 2016 pooled active-particle fraction diagnostic at T+{int(hour)}h. "
+                    "This diagnostic does not drive p50/p90."
+                ),
+                "units": "decimal_fraction",
+            },
+        ).to_netcdf(diagnostic_path_nc)
+        written_files.append(diagnostic_path_nc)
+
+        diagnostic_path_tif = self.output_dir / f"particle_density_fraction_{int(hour)}h.tif"
+        save_raster(grid, particle_density_fraction.astype(np.float32), diagnostic_path_tif)
+        written_files.append(diagnostic_path_tif)
+        product_records.append(
+            {
+                "product_type": "particle_density_fraction",
+                "hour": int(hour),
+                "timestamp_utc": timestamp_to_utc_iso(target_time),
+                "relative_path": _relative_output_path(diagnostic_path_tif, self.base_output_dir),
+                "semantics": (
+                    "Pooled active-particle fraction diagnostic at the exact valid time. "
+                    "This is not a probability-of-presence product."
+                ),
+                "contributing_member_count": int(len(contributing_member_ids)),
+                "contributing_member_ids": list(contributing_member_ids),
+                "skipped_member_count": int(len(skipped_members)),
+                "skipped_members": list(skipped_members),
+                "legacy_support_only": True,
+            }
+        )
+
+        for threshold, threshold_label in ((0.50, "p50"), (0.90, "p90")):
+            mask_path = self.output_dir / f"mask_{threshold_label}_{int(hour)}h.tif"
+            mask_data = (probability_data >= threshold).astype(np.float32)
+            save_raster(grid, mask_data, mask_path)
+            written_files.append(mask_path)
+            product_records.append(
+                {
+                    "product_type": f"mask_{threshold_label}",
+                    "hour": int(hour),
+                    "timestamp_utc": timestamp_to_utc_iso(target_time),
+                    "relative_path": _relative_output_path(mask_path, self.base_output_dir),
+                    "semantics": (
+                        f"Binary member-occupancy footprint where probability of presence is at least {threshold:.2f} "
+                        "at the exact valid time."
+                    ),
+                    "probability_semantics": PROTOTYPE_2016_PROBABILITY_SEMANTICS,
+                    "probability_semantics_version": PROTOTYPE_2016_PROBABILITY_SEMANTICS_VERSION,
+                    "contributing_member_count": int(len(contributing_member_ids)),
+                    "contributing_member_ids": list(contributing_member_ids),
+                    "skipped_member_count": int(len(skipped_members)),
+                    "skipped_members": list(skipped_members),
+                    "legacy_support_only": True,
+                }
+            )
+
+        return written_files, product_records
+
+    def _generate_prototype_probability_products(self, file_list, start_lat, start_lon, nominal_start_time=None):
         """
         Generate gridded NetCDF probability fields and PNG snapshots for 24h, 48h, and 72h.
         """
@@ -1737,109 +1965,117 @@ class EnsembleForecastService:
                 json.dump(metadata, f, indent=4)
         written_files.append(metadata_path)
 
+        nominal_start = normalize_model_timestamp(nominal_start_time or self.case.release_start_utc or self.case.simulation_start_utc)
+
         for hr in snapshots:
             logger.info("   Processing T+%sh snapshot...", hr)
-            all_lons = []
-            all_lats = []
+            target_time = nominal_start + timedelta(hours=int(hr))
 
-            for file_path in file_list:
-                try:
-                    with xr.open_dataset(file_path) as ds:
-                        times = normalize_time_index(ds.time.values)
-                        target_time = normalize_model_timestamp(times[0] + timedelta(hours=hr))
-                        idx = int(np.abs(times - target_time).argmin())
+            if self.case.workflow_mode == "prototype_2016":
+                member_masks: list[np.ndarray] = []
+                pooled_lons: list[np.ndarray] = []
+                pooled_lats: list[np.ndarray] = []
+                contributing_member_ids: list[int] = []
+                skipped_members: list[dict] = []
 
-                        lons = np.asarray(ds["lon"].isel(time=idx).values).reshape(-1)
-                        lats = np.asarray(ds["lat"].isel(time=idx).values).reshape(-1)
-                        valid = ~np.isnan(lons) & ~np.isnan(lats)
-                        all_lons.extend(lons[valid])
-                        all_lats.extend(lats[valid])
-                except Exception as exc:
-                    logger.warning("Could not process %s for %sh: %s", Path(file_path).name, hr, exc)
+                for index, file_path in enumerate(file_list, start=1):
+                    member_path = Path(file_path)
+                    member_id = self._prototype_member_id_from_output_path(member_path, index)
+                    try:
+                        snapshot = self._load_prototype_member_snapshot(member_path, target_time)
+                    except Exception as exc:
+                        logger.warning(
+                            "Skipping prototype_2016 member %s for T+%sh occupancy at %s: %s",
+                            member_id,
+                            hr,
+                            timestamp_to_utc_iso(target_time),
+                            exc,
+                        )
+                        skipped_members.append(
+                            {
+                                "member_id": int(member_id),
+                                "relative_path": _relative_output_path(member_path, self.base_output_dir),
+                                "reason": str(exc),
+                            }
+                        )
+                        continue
 
-            if not all_lons:
-                raise RuntimeError(
-                    f"Ensemble probability snapshot T+{hr}h could not be generated because "
-                    "no valid particle positions were found."
+                    lon = np.asarray(snapshot["lon"], dtype=np.float32)
+                    lat = np.asarray(snapshot["lat"], dtype=np.float32)
+                    mass = np.asarray(snapshot["mass"], dtype=np.float32)
+                    hits, _ = rasterize_particles(
+                        grid,
+                        lon,
+                        lat,
+                        mass,
+                    )
+                    member_masks.append(hits.astype(np.float32))
+                    contributing_member_ids.append(int(member_id))
+                    if lon.size:
+                        pooled_lons.append(lon)
+                        pooled_lats.append(lat)
+
+                if not contributing_member_ids:
+                    raise RuntimeError(
+                        f"Prototype 2016 ensemble occupancy snapshot T+{int(hr)}h failed because zero members "
+                        f"contributed a valid snapshot near {timestamp_to_utc_iso(target_time)}."
+                    )
+
+                probability = np.mean(np.stack(member_masks, axis=0), axis=0).astype(np.float32)
+                if pooled_lons:
+                    pooled_lon_arr = np.concatenate(pooled_lons).astype(np.float32)
+                    pooled_lat_arr = np.concatenate(pooled_lats).astype(np.float32)
+                    pooled_mass = np.ones(pooled_lon_arr.shape[0], dtype=np.float32)
+                    _, particle_density_fraction = rasterize_particles(grid, pooled_lon_arr, pooled_lat_arr, pooled_mass)
+                else:
+                    particle_density_fraction = np.zeros((grid.height, grid.width), dtype=np.float32)
+
+                snapshot_files, snapshot_records = self._write_prototype_2016_snapshot_products(
+                    grid=grid,
+                    hour=int(hr),
+                    target_time=target_time,
+                    probability_data=probability,
+                    particle_density_fraction=particle_density_fraction.astype(np.float32),
+                    contributing_member_ids=contributing_member_ids,
+                    skipped_members=skipped_members,
                 )
-
-            x_vals, y_vals = project_points_to_grid(grid, np.asarray(all_lons), np.asarray(all_lats))
-            hist, _, _ = np.histogram2d(y_vals, x_vals, bins=[grid.y_bins, grid.x_bins])
-            hist = np.flipud(hist)
-            prob_density = (hist / len(all_lons)).astype(np.float32)
-
-            dims = ["time", grid.y_name, grid.x_name]
-            coords = {
-                "time": [hr],
-                grid.y_name: grid.y_centers,
-                grid.x_name: grid.x_centers,
-            }
-            attrs = {
-                "description": f"Probability field at T+{hr}h",
-                "units": "decimal_fraction",
-                "crs": grid.crs,
-                "resolution": grid.resolution,
-                "grid_id": grid_id_from_builder(grid),
-            }
-
-            ds_prob = xr.Dataset(
-                data_vars={"probability": (dims, prob_density[np.newaxis, :, :])},
-                coords=coords,
-                attrs=attrs,
-            )
-
-            nc_out = self.output_dir / f"probability_{hr}h.nc"
-            ds_prob.to_netcdf(nc_out)
-            written_files.append(nc_out)
-
-            tif_out = get_ensemble_probability_score_raster_path(hr, run_name=self.output_run_name)
-            save_raster(grid, prob_density, tif_out)
-            written_files.append(tif_out)
-            product_records.append(
-                {
-                    "product_type": "probability_density",
-                    "hour": int(hr),
-                    "relative_path": _relative_output_path(tif_out, self.base_output_dir),
-                    "semantics": "Legacy prototype support-only ensemble probability density raster.",
-                    "legacy_support_only": True,
-                }
-            )
-
-            for threshold, threshold_label in ((0.50, "p50"), (0.90, "p90")):
-                mask_out = self.output_dir / f"mask_{threshold_label}_{hr}h.tif"
-                save_raster(grid, (prob_density >= threshold).astype(np.float32), mask_out)
-                written_files.append(mask_out)
-                product_records.append(
-                    {
-                        "product_type": f"mask_{threshold_label}",
-                        "hour": int(hr),
-                        "relative_path": _relative_output_path(mask_out, self.base_output_dir),
-                        "semantics": (
-                            "Legacy prototype support-only ensemble threshold mask "
-                            f"where probability of presence is at least {threshold:.2f}."
-                        ),
-                        "legacy_support_only": True,
-                    }
-                )
+                written_files.extend(snapshot_files)
+                product_records.extend(snapshot_records)
 
             if self.case.workflow_mode != "prototype_2016":
-                img_out = self.output_dir / f"probability_{hr}h.png"
-                plot_corners = grid.display_bounds_wgs84 or [grid.min_lon, grid.max_lon, grid.min_lat, grid.max_lat]
-                plot_probability_map(
-                    output_file=str(img_out),
-                    all_lons=np.array(all_lons),
-                    all_lats=np.array(all_lats),
-                    start_lon=start_lon,
-                    start_lat=start_lat,
-                    corners=plot_corners,
-                    title=f"Ensemble Forecast: T+{hr}h\nProbability Distribution (N={self.ensemble_size})",
-                )
-                written_files.append(img_out)
+                member_masks: list[np.ndarray] = []
+                all_lons: list[float] = []
+                all_lats: list[float] = []
+                for file_path in file_list:
+                    lon, lat, mass, _ = self._load_opendrift_snapshot(Path(file_path), target_time)
+                    hits, _ = rasterize_particles(
+                        grid,
+                        lon,
+                        lat,
+                        mass if len(mass) else np.ones(len(lon), dtype=np.float32),
+                    )
+                    member_masks.append(hits.astype(np.float32))
+                    all_lons.extend(lon.tolist())
+                    all_lats.extend(lat.tolist())
 
-                if self.alias_probability_cone and hr == 72 and img_out.exists():
-                    alias_path = self.output_dir / "probability_cone.png"
-                    shutil.copyfile(img_out, alias_path)
-                    written_files.append(alias_path)
+                if not member_masks:
+                    raise RuntimeError(
+                        f"Ensemble probability snapshot T+{int(hr)}h failed because zero member outputs were available."
+                    )
+
+                probability = np.mean(np.stack(member_masks, axis=0), axis=0).astype(np.float32)
+                written_files.extend(
+                    self._write_legacy_probability_products(
+                        probability_data=probability,
+                        target_time=target_time,
+                        nominal_start_time=nominal_start,
+                        all_lons=all_lons,
+                        all_lats=all_lats,
+                        start_lat=float(start_lat),
+                        start_lon=float(start_lon),
+                        grid=grid,
+                    )
+                )
 
         if self.case.workflow_mode == "prototype_2016":
             display_bounds = self._prototype_2016_display_bounds()
@@ -2229,6 +2465,8 @@ class EnsembleForecastService:
                     "release_reference": self.case.release_reference,
                 }
                 payload["ensemble_science_reused"] = bool(ensemble_science_reused)
+                payload["probability_semantics"] = PROTOTYPE_2016_PROBABILITY_SEMANTICS
+                payload["probability_semantics_version"] = PROTOTYPE_2016_PROBABILITY_SEMANTICS_VERSION
                 payload["figure_rendering"] = rendering
                 payload["member_runs"] = [
                     self._serialize_member_run(member, self.base_output_dir)
@@ -2572,6 +2810,7 @@ class EnsembleForecastService:
                 ensemble_files,
                 start_lat,
                 start_lon,
+                nominal_start_time=base_time,
             )
 
         manifest = self.write_output_manifest(
