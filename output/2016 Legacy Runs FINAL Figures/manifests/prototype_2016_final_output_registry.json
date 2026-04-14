@@ -2688,6 +2688,18 @@
     "notes": "Explicit Phase 5 packaging note for the curated prototype_2016 legacy package."
   },
   {
+    "final_relative_path": "output/2016 Legacy Runs FINAL Figures/manifests/prototype_2016_provenance_metadata.json",
+    "source_relative_path": "src/services/prototype_legacy_final_figures.py",
+    "phase_group": "phase5",
+    "artifact_group": "prototype_legacy_phase5_packaging",
+    "scientific_vs_display_only": "metadata",
+    "copied_vs_regenerated": "regenerated_from_existing_metadata",
+    "case_id": "",
+    "support_only": true,
+    "comparator_only": false,
+    "notes": "Historical-origin metadata for the prototype_2016 first-code search box and source boxes."
+  },
+  {
     "final_relative_path": "output/2016 Legacy Runs FINAL Figures/manifests/prototype_2016_final_output_registry.csv",
     "source_relative_path": "output/prototype_2016_pygnome_similarity | output/CASE_2016-*/weathering | output/figure_package_publication | output/2016 Legacy Runs FINAL Figures",
     "phase_group": "phase5",

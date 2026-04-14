@@ -59,13 +59,19 @@
   },
   "official_recipe_family": [
     "cmems_era5",
-    "hycom_era5"
+    "cmems_gfs",
+    "hycom_era5",
+    "hycom_gfs"
   ],
   "accepted_segment_count": 65,
   "rejected_segment_count": 24850,
   "ranking_subset_segment_count": 19,
-  "winning_recipe": "cmems_era5",
-  "gfs_capable_recipes_ran": false,
+  "winning_recipe": "cmems_gfs",
+  "historical_four_recipe_winner": "cmems_gfs",
+  "official_b1_recipe": "cmems_gfs",
+  "official_b1_selection_rule": "historical_four_recipe_winner_used_directly_for_official_b1",
+  "gfs_historical_winner_not_adopted": false,
+  "gfs_capable_recipes_ran": true,
   "loading_audit_invalid_count": 0,
   "drifter_chunk_status": [
     {
@@ -74,7 +80,8 @@
       "chunk_end_utc": "2016-01-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 226,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201601.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201601.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201602",
@@ -82,7 +89,8 @@
       "chunk_end_utc": "2016-02-29T23:59:59+00:00",
       "status": "cached",
       "row_count": 313,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201602.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201602.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201603",
@@ -90,7 +98,8 @@
       "chunk_end_utc": "2016-03-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 348,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201603.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201603.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201604",
@@ -98,7 +107,8 @@
       "chunk_end_utc": "2016-04-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 161,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201604.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201604.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201605",
@@ -106,7 +116,8 @@
       "chunk_end_utc": "2016-05-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 285,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201605.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201605.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201606",
@@ -114,7 +125,8 @@
       "chunk_end_utc": "2016-06-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 330,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201606.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201606.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201607",
@@ -122,7 +134,8 @@
       "chunk_end_utc": "2016-07-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 395,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201607.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201607.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201608",
@@ -130,7 +143,8 @@
       "chunk_end_utc": "2016-08-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 480,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201608.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201608.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201609",
@@ -138,7 +152,8 @@
       "chunk_end_utc": "2016-09-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 373,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201609.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201609.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201610",
@@ -146,7 +161,8 @@
       "chunk_end_utc": "2016-10-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 155,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201610.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201610.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201611",
@@ -154,7 +170,8 @@
       "chunk_end_utc": "2016-11-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 339,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201611.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201611.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201612",
@@ -162,7 +179,8 @@
       "chunk_end_utc": "2016-12-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 1232,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201612.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201612.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201701",
@@ -170,7 +188,8 @@
       "chunk_end_utc": "2017-01-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 1706,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201701.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201701.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201702",
@@ -178,7 +197,8 @@
       "chunk_end_utc": "2017-02-28T23:59:59+00:00",
       "status": "cached",
       "row_count": 891,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201702.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201702.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201703",
@@ -186,7 +206,8 @@
       "chunk_end_utc": "2017-03-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 676,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201703.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201703.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201704",
@@ -194,7 +215,8 @@
       "chunk_end_utc": "2017-04-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 601,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201704.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201704.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201705",
@@ -202,7 +224,8 @@
       "chunk_end_utc": "2017-05-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 939,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201705.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201705.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201706",
@@ -210,7 +233,8 @@
       "chunk_end_utc": "2017-06-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 1047,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201706.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201706.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201707",
@@ -218,7 +242,8 @@
       "chunk_end_utc": "2017-07-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 558,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201707.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201707.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201708",
@@ -226,7 +251,8 @@
       "chunk_end_utc": "2017-08-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 314,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201708.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201708.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201709",
@@ -234,7 +260,8 @@
       "chunk_end_utc": "2017-09-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 105,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201709.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201709.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201710",
@@ -242,7 +269,8 @@
       "chunk_end_utc": "2017-10-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 643,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201710.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201710.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201711",
@@ -250,7 +278,8 @@
       "chunk_end_utc": "2017-11-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 393,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201711.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201711.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201712",
@@ -258,7 +287,8 @@
       "chunk_end_utc": "2017-12-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 169,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201712.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201712.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201801",
@@ -266,7 +296,8 @@
       "chunk_end_utc": "2018-01-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 255,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201801.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201801.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201802",
@@ -274,7 +305,8 @@
       "chunk_end_utc": "2018-02-28T23:59:59+00:00",
       "status": "cached",
       "row_count": 281,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201802.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201802.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201803",
@@ -282,7 +314,8 @@
       "chunk_end_utc": "2018-03-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 364,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201803.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201803.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201804",
@@ -290,7 +323,8 @@
       "chunk_end_utc": "2018-04-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 367,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201804.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201804.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201805",
@@ -298,7 +332,8 @@
       "chunk_end_utc": "2018-05-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 274,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201805.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201805.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201806",
@@ -306,7 +341,8 @@
       "chunk_end_utc": "2018-06-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 300,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201806.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201806.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201807",
@@ -314,7 +350,8 @@
       "chunk_end_utc": "2018-07-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 318,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201807.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201807.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201808",
@@ -322,7 +359,8 @@
       "chunk_end_utc": "2018-08-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 291,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201808.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201808.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201809",
@@ -330,7 +368,8 @@
       "chunk_end_utc": "2018-09-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 423,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201809.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201809.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201810",
@@ -338,7 +377,8 @@
       "chunk_end_utc": "2018-10-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 209,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201810.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201810.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201811",
@@ -346,7 +386,8 @@
       "chunk_end_utc": "2018-11-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 74,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201811.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201811.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201812",
@@ -354,7 +395,8 @@
       "chunk_end_utc": "2018-12-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 165,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201812.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201812.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201901",
@@ -362,7 +404,8 @@
       "chunk_end_utc": "2019-01-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 42,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201901.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201901.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201902",
@@ -370,7 +413,8 @@
       "chunk_end_utc": "2019-02-28T23:59:59+00:00",
       "status": "cached",
       "row_count": 259,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201902.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201902.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201903",
@@ -378,7 +422,8 @@
       "chunk_end_utc": "2019-03-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 51,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201903.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201903.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201904",
@@ -386,7 +431,8 @@
       "chunk_end_utc": "2019-04-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 35,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201904.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201904.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201905",
@@ -394,7 +440,8 @@
       "chunk_end_utc": "2019-05-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 167,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201905.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201905.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201906",
@@ -402,7 +449,8 @@
       "chunk_end_utc": "2019-06-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 191,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201906.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201906.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201907",
@@ -410,7 +458,8 @@
       "chunk_end_utc": "2019-07-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 171,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201907.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201907.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201908",
@@ -418,7 +467,8 @@
       "chunk_end_utc": "2019-08-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 275,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201908.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201908.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201909",
@@ -426,7 +476,8 @@
       "chunk_end_utc": "2019-09-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 354,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201909.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201909.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201910",
@@ -434,7 +485,8 @@
       "chunk_end_utc": "2019-10-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 532,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201910.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201910.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201911",
@@ -442,7 +494,8 @@
       "chunk_end_utc": "2019-11-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 410,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201911.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201911.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "201912",
@@ -450,7 +503,8 @@
       "chunk_end_utc": "2019-12-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 287,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/201912.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/201912.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202001",
@@ -458,7 +512,8 @@
       "chunk_end_utc": "2020-01-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 58,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202001.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202001.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202002",
@@ -466,7 +521,8 @@
       "chunk_end_utc": "2020-02-29T23:59:59+00:00",
       "status": "cached",
       "row_count": 124,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202002.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202002.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202003",
@@ -474,7 +530,8 @@
       "chunk_end_utc": "2020-03-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 29,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202003.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202003.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202004",
@@ -482,7 +539,8 @@
       "chunk_end_utc": "2020-04-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 25,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202004.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202004.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202005",
@@ -490,7 +548,8 @@
       "chunk_end_utc": "2020-05-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 70,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202005.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202005.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202006",
@@ -498,7 +557,8 @@
       "chunk_end_utc": "2020-06-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 50,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202006.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202006.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202007",
@@ -506,7 +566,8 @@
       "chunk_end_utc": "2020-07-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 56,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202007.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202007.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202008",
@@ -514,7 +575,8 @@
       "chunk_end_utc": "2020-08-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 214,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202008.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202008.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202009",
@@ -522,7 +584,8 @@
       "chunk_end_utc": "2020-09-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 331,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202009.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202009.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202010",
@@ -530,7 +593,8 @@
       "chunk_end_utc": "2020-10-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 193,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202010.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202010.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202011",
@@ -538,7 +602,8 @@
       "chunk_end_utc": "2020-11-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 287,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202011.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202011.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202012",
@@ -546,7 +611,8 @@
       "chunk_end_utc": "2020-12-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 359,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202012.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202012.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202101",
@@ -554,7 +620,8 @@
       "chunk_end_utc": "2021-01-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 316,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202101.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202101.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202102",
@@ -562,7 +629,8 @@
       "chunk_end_utc": "2021-02-28T23:59:59+00:00",
       "status": "cached",
       "row_count": 218,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202102.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202102.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202103",
@@ -570,7 +638,8 @@
       "chunk_end_utc": "2021-03-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 319,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202103.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202103.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202104",
@@ -578,7 +647,8 @@
       "chunk_end_utc": "2021-04-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 397,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202104.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202104.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202105",
@@ -586,7 +656,8 @@
       "chunk_end_utc": "2021-05-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 314,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202105.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202105.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202106",
@@ -594,7 +665,8 @@
       "chunk_end_utc": "2021-06-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 120,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202106.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202106.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202107",
@@ -602,7 +674,8 @@
       "chunk_end_utc": "2021-07-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 140,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202107.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202107.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202108",
@@ -610,7 +683,8 @@
       "chunk_end_utc": "2021-08-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 195,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202108.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202108.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202109",
@@ -618,7 +692,8 @@
       "chunk_end_utc": "2021-09-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 120,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202109.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202109.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202110",
@@ -626,7 +701,8 @@
       "chunk_end_utc": "2021-10-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 171,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202110.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202110.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202111",
@@ -634,7 +710,8 @@
       "chunk_end_utc": "2021-11-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 97,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202111.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202111.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202112",
@@ -642,7 +719,8 @@
       "chunk_end_utc": "2021-12-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 207,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202112.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202112.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202201",
@@ -650,7 +728,8 @@
       "chunk_end_utc": "2022-01-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 122,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202201.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202201.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202202",
@@ -658,7 +737,8 @@
       "chunk_end_utc": "2022-02-28T23:59:59+00:00",
       "status": "cached",
       "row_count": 19,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202202.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202202.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202203",
@@ -666,7 +746,8 @@
       "chunk_end_utc": "2022-03-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 0,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202203.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202203.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202204",
@@ -674,7 +755,8 @@
       "chunk_end_utc": "2022-04-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 90,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202204.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202204.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202205",
@@ -682,7 +764,8 @@
       "chunk_end_utc": "2022-05-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 34,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202205.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202205.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202206",
@@ -690,7 +773,8 @@
       "chunk_end_utc": "2022-06-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 0,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202206.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202206.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202207",
@@ -698,7 +782,8 @@
       "chunk_end_utc": "2022-07-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 0,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202207.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202207.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202208",
@@ -706,7 +791,8 @@
       "chunk_end_utc": "2022-08-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 18,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202208.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202208.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202209",
@@ -714,7 +800,8 @@
       "chunk_end_utc": "2022-09-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 134,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202209.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202209.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202210",
@@ -722,7 +809,8 @@
       "chunk_end_utc": "2022-10-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 574,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202210.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202210.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202211",
@@ -730,7 +818,8 @@
       "chunk_end_utc": "2022-11-30T23:59:59+00:00",
       "status": "cached",
       "row_count": 156,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202211.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202211.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202212",
@@ -738,7 +827,8 @@
       "chunk_end_utc": "2022-12-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 219,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202212.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202212.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202301",
@@ -746,7 +836,8 @@
       "chunk_end_utc": "2023-01-31T23:59:59+00:00",
       "status": "cached",
       "row_count": 288,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202301.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202301.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202302",
@@ -754,7 +845,8 @@
       "chunk_end_utc": "2023-02-28T23:59:59+00:00",
       "status": "cached",
       "row_count": 77,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202302.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202302.csv",
+      "staged_from_legacy_path": ""
     },
     {
       "month_key": "202303",
@@ -762,9 +854,360 @@
       "chunk_end_utc": "2023-03-02T23:59:59+00:00",
       "status": "cached",
       "row_count": 0,
-      "cache_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/drifter_chunks/202303.csv"
+      "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks/202303.csv",
+      "staged_from_legacy_path": ""
     }
   ],
+  "gfs_preflight": {
+    "required": true,
+    "rows": [
+      {
+        "month_key": "201612",
+        "required_start_utc": "2016-12-05T12:00:00+00:00",
+        "required_end_utc": "2017-01-03T06:00:00+00:00",
+        "cache_present_before": true,
+        "coverage_start_utc_before": "2016-12-05T06:00:00+00:00",
+        "coverage_end_utc_before": "2017-01-03T12:00:00+00:00",
+        "reader_metadata_ok_before": true,
+        "coverage_ok_before": true,
+        "status": "already_present",
+        "gfs_source_system": "ncei_thredds_archive",
+        "gfs_source_tier": "primary",
+        "gfs_source_inferred": false,
+        "gfs_primary_failure": "",
+        "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201612/gfs_wind.nc",
+        "staged_from_cache_path": "",
+        "provenance_sidecar": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201612/gfs_wind.provenance.json",
+        "cache_present_after": true,
+        "coverage_start_utc_after": "2016-12-05T06:00:00+00:00",
+        "coverage_end_utc_after": "2017-01-03T12:00:00+00:00",
+        "reader_metadata_ok_after": true,
+        "coverage_ok_after": true,
+        "valid_after": true
+      },
+      {
+        "month_key": "201701",
+        "required_start_utc": "2017-01-01T06:00:00+00:00",
+        "required_end_utc": "2017-02-01T00:00:00+00:00",
+        "cache_present_before": true,
+        "coverage_start_utc_before": "2017-01-01T00:00:00+00:00",
+        "coverage_end_utc_before": "2017-02-01T06:00:00+00:00",
+        "reader_metadata_ok_before": true,
+        "coverage_ok_before": true,
+        "status": "already_present",
+        "gfs_source_system": "ncei_thredds_archive",
+        "gfs_source_tier": "primary",
+        "gfs_source_inferred": false,
+        "gfs_primary_failure": "",
+        "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201701/gfs_wind.nc",
+        "staged_from_cache_path": "",
+        "provenance_sidecar": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201701/gfs_wind.provenance.json",
+        "cache_present_after": true,
+        "coverage_start_utc_after": "2017-01-01T00:00:00+00:00",
+        "coverage_end_utc_after": "2017-02-01T06:00:00+00:00",
+        "reader_metadata_ok_after": true,
+        "coverage_ok_after": true,
+        "valid_after": true
+      },
+      {
+        "month_key": "201702",
+        "required_start_utc": "2017-02-01T06:00:00+00:00",
+        "required_end_utc": "2017-03-02T00:00:00+00:00",
+        "cache_present_before": true,
+        "coverage_start_utc_before": "2017-02-01T00:00:00+00:00",
+        "coverage_end_utc_before": "2017-03-02T18:00:00+00:00",
+        "reader_metadata_ok_before": true,
+        "coverage_ok_before": true,
+        "status": "already_present",
+        "gfs_source_system": "ncei_thredds_archive",
+        "gfs_source_tier": "primary",
+        "gfs_source_inferred": false,
+        "gfs_primary_failure": "",
+        "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201702/gfs_wind.nc",
+        "staged_from_cache_path": "",
+        "provenance_sidecar": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201702/gfs_wind.provenance.json",
+        "cache_present_after": true,
+        "coverage_start_utc_after": "2017-02-01T00:00:00+00:00",
+        "coverage_end_utc_after": "2017-03-02T18:00:00+00:00",
+        "reader_metadata_ok_after": true,
+        "coverage_ok_after": true,
+        "valid_after": true
+      },
+      {
+        "month_key": "201703",
+        "required_start_utc": "2017-03-02T06:00:00+00:00",
+        "required_end_utc": "2017-03-11T18:00:00+00:00",
+        "cache_present_before": true,
+        "coverage_start_utc_before": "2017-03-01T00:00:00+00:00",
+        "coverage_end_utc_before": "2017-03-12T18:00:00+00:00",
+        "reader_metadata_ok_before": true,
+        "coverage_ok_before": true,
+        "status": "already_present",
+        "gfs_source_system": "ncei_thredds_archive",
+        "gfs_source_tier": "primary",
+        "gfs_source_inferred": true,
+        "gfs_primary_failure": "",
+        "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201703/gfs_wind.nc",
+        "staged_from_cache_path": "",
+        "provenance_sidecar": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201703/gfs_wind.provenance.json",
+        "cache_present_after": true,
+        "coverage_start_utc_after": "2017-03-01T00:00:00+00:00",
+        "coverage_end_utc_after": "2017-03-12T18:00:00+00:00",
+        "reader_metadata_ok_after": true,
+        "coverage_ok_after": true,
+        "valid_after": true
+      },
+      {
+        "month_key": "201706",
+        "required_start_utc": "2017-06-09T06:00:00+00:00",
+        "required_end_utc": "2017-06-12T06:00:00+00:00",
+        "cache_present_before": true,
+        "coverage_start_utc_before": "2017-06-09T00:00:00+00:00",
+        "coverage_end_utc_before": "2017-06-12T12:00:00+00:00",
+        "reader_metadata_ok_before": true,
+        "coverage_ok_before": true,
+        "status": "already_present",
+        "gfs_source_system": "ncei_thredds_archive",
+        "gfs_source_tier": "primary",
+        "gfs_source_inferred": false,
+        "gfs_primary_failure": "",
+        "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201706/gfs_wind.nc",
+        "staged_from_cache_path": "",
+        "provenance_sidecar": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201706/gfs_wind.provenance.json",
+        "cache_present_after": true,
+        "coverage_start_utc_after": "2017-06-09T00:00:00+00:00",
+        "coverage_end_utc_after": "2017-06-12T12:00:00+00:00",
+        "reader_metadata_ok_after": true,
+        "coverage_ok_after": true,
+        "valid_after": true
+      },
+      {
+        "month_key": "201707",
+        "required_start_utc": "2017-07-27T12:00:00+00:00",
+        "required_end_utc": "2017-08-02T18:00:00+00:00",
+        "cache_present_before": true,
+        "coverage_start_utc_before": "2017-07-05T00:00:00+00:00",
+        "coverage_end_utc_before": "2017-08-02T18:00:00+00:00",
+        "reader_metadata_ok_before": true,
+        "coverage_ok_before": true,
+        "status": "already_present",
+        "gfs_source_system": "ncei_thredds_archive",
+        "gfs_source_tier": "primary",
+        "gfs_source_inferred": true,
+        "gfs_primary_failure": "",
+        "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201707/gfs_wind.nc",
+        "staged_from_cache_path": "",
+        "provenance_sidecar": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201707/gfs_wind.provenance.json",
+        "cache_present_after": true,
+        "coverage_start_utc_after": "2017-07-05T00:00:00+00:00",
+        "coverage_end_utc_after": "2017-08-02T18:00:00+00:00",
+        "reader_metadata_ok_after": true,
+        "coverage_ok_after": true,
+        "valid_after": true
+      },
+      {
+        "month_key": "201708",
+        "required_start_utc": "2017-08-25T12:00:00+00:00",
+        "required_end_utc": "2017-08-28T12:00:00+00:00",
+        "cache_present_before": true,
+        "coverage_start_utc_before": "2017-08-01T00:00:00+00:00",
+        "coverage_end_utc_before": "2017-08-28T18:00:00+00:00",
+        "reader_metadata_ok_before": true,
+        "coverage_ok_before": true,
+        "status": "already_present",
+        "gfs_source_system": "ncei_thredds_archive",
+        "gfs_source_tier": "primary",
+        "gfs_source_inferred": true,
+        "gfs_primary_failure": "",
+        "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201708/gfs_wind.nc",
+        "staged_from_cache_path": "",
+        "provenance_sidecar": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201708/gfs_wind.provenance.json",
+        "cache_present_after": true,
+        "coverage_start_utc_after": "2017-08-01T00:00:00+00:00",
+        "coverage_end_utc_after": "2017-08-28T18:00:00+00:00",
+        "reader_metadata_ok_after": true,
+        "coverage_ok_after": true,
+        "valid_after": true
+      },
+      {
+        "month_key": "201710",
+        "required_start_utc": "2017-10-27T12:00:00+00:00",
+        "required_end_utc": "2017-10-30T12:00:00+00:00",
+        "cache_present_before": true,
+        "coverage_start_utc_before": "2017-10-27T06:00:00+00:00",
+        "coverage_end_utc_before": "2017-10-30T18:00:00+00:00",
+        "reader_metadata_ok_before": true,
+        "coverage_ok_before": true,
+        "status": "already_present",
+        "gfs_source_system": "ncei_thredds_archive",
+        "gfs_source_tier": "primary",
+        "gfs_source_inferred": false,
+        "gfs_primary_failure": "",
+        "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201710/gfs_wind.nc",
+        "staged_from_cache_path": "",
+        "provenance_sidecar": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201710/gfs_wind.provenance.json",
+        "cache_present_after": true,
+        "coverage_start_utc_after": "2017-10-27T06:00:00+00:00",
+        "coverage_end_utc_after": "2017-10-30T18:00:00+00:00",
+        "reader_metadata_ok_after": true,
+        "coverage_ok_after": true,
+        "valid_after": true
+      },
+      {
+        "month_key": "201804",
+        "required_start_utc": "2018-04-18T06:00:00+00:00",
+        "required_end_utc": "2018-04-21T06:00:00+00:00",
+        "cache_present_before": true,
+        "coverage_start_utc_before": "2018-04-17T00:00:00+00:00",
+        "coverage_end_utc_before": "2018-04-24T18:00:00+00:00",
+        "reader_metadata_ok_before": true,
+        "coverage_ok_before": true,
+        "status": "already_present",
+        "gfs_source_system": "ncei_thredds_archive",
+        "gfs_source_tier": "primary",
+        "gfs_source_inferred": true,
+        "gfs_primary_failure": "",
+        "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201804/gfs_wind.nc",
+        "staged_from_cache_path": "",
+        "provenance_sidecar": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201804/gfs_wind.provenance.json",
+        "cache_present_after": true,
+        "coverage_start_utc_after": "2018-04-17T00:00:00+00:00",
+        "coverage_end_utc_after": "2018-04-24T18:00:00+00:00",
+        "reader_metadata_ok_after": true,
+        "coverage_ok_after": true,
+        "valid_after": true
+      },
+      {
+        "month_key": "201807",
+        "required_start_utc": "2018-07-07T06:00:00+00:00",
+        "required_end_utc": "2018-07-10T06:00:00+00:00",
+        "cache_present_before": true,
+        "coverage_start_utc_before": "2018-07-06T00:00:00+00:00",
+        "coverage_end_utc_before": "2018-07-10T18:00:00+00:00",
+        "reader_metadata_ok_before": true,
+        "coverage_ok_before": true,
+        "status": "already_present",
+        "gfs_source_system": "ncei_thredds_archive",
+        "gfs_source_tier": "primary",
+        "gfs_source_inferred": true,
+        "gfs_primary_failure": "",
+        "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201807/gfs_wind.nc",
+        "staged_from_cache_path": "",
+        "provenance_sidecar": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201807/gfs_wind.provenance.json",
+        "cache_present_after": true,
+        "coverage_start_utc_after": "2018-07-06T00:00:00+00:00",
+        "coverage_end_utc_after": "2018-07-10T18:00:00+00:00",
+        "reader_metadata_ok_after": true,
+        "coverage_ok_after": true,
+        "valid_after": true
+      },
+      {
+        "month_key": "201809",
+        "required_start_utc": "2018-09-22T18:00:00+00:00",
+        "required_end_utc": "2018-10-02T06:00:00+00:00",
+        "cache_present_before": true,
+        "coverage_start_utc_before": "2018-09-21T00:00:00+00:00",
+        "coverage_end_utc_before": "2018-10-02T18:00:00+00:00",
+        "reader_metadata_ok_before": true,
+        "coverage_ok_before": true,
+        "status": "already_present",
+        "gfs_source_system": "ncei_thredds_archive",
+        "gfs_source_tier": "primary",
+        "gfs_source_inferred": true,
+        "gfs_primary_failure": "",
+        "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201809/gfs_wind.nc",
+        "staged_from_cache_path": "",
+        "provenance_sidecar": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201809/gfs_wind.provenance.json",
+        "cache_present_after": true,
+        "coverage_start_utc_after": "2018-09-21T00:00:00+00:00",
+        "coverage_end_utc_after": "2018-10-02T18:00:00+00:00",
+        "reader_metadata_ok_after": true,
+        "coverage_ok_after": true,
+        "valid_after": true
+      },
+      {
+        "month_key": "201909",
+        "required_start_utc": "2019-09-22T06:00:00+00:00",
+        "required_end_utc": "2019-09-28T12:00:00+00:00",
+        "cache_present_before": true,
+        "coverage_start_utc_before": "2019-09-20T00:00:00+00:00",
+        "coverage_end_utc_before": "2019-10-03T06:00:00+00:00",
+        "reader_metadata_ok_before": true,
+        "coverage_ok_before": true,
+        "status": "already_present",
+        "gfs_source_system": "ncei_thredds_archive",
+        "gfs_source_tier": "primary",
+        "gfs_source_inferred": true,
+        "gfs_primary_failure": "",
+        "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201909/gfs_wind.nc",
+        "staged_from_cache_path": "",
+        "provenance_sidecar": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201909/gfs_wind.provenance.json",
+        "cache_present_after": true,
+        "coverage_start_utc_after": "2019-09-20T00:00:00+00:00",
+        "coverage_end_utc_after": "2019-10-03T06:00:00+00:00",
+        "reader_metadata_ok_after": true,
+        "coverage_ok_after": true,
+        "valid_after": true
+      },
+      {
+        "month_key": "201912",
+        "required_start_utc": "2019-12-13T12:00:00+00:00",
+        "required_end_utc": "2019-12-23T00:00:00+00:00",
+        "cache_present_before": true,
+        "coverage_start_utc_before": "2019-12-13T06:00:00+00:00",
+        "coverage_end_utc_before": "2019-12-23T06:00:00+00:00",
+        "reader_metadata_ok_before": true,
+        "coverage_ok_before": true,
+        "status": "already_present",
+        "gfs_source_system": "ncei_thredds_archive",
+        "gfs_source_tier": "primary",
+        "gfs_source_inferred": false,
+        "gfs_primary_failure": "",
+        "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201912/gfs_wind.nc",
+        "staged_from_cache_path": "",
+        "provenance_sidecar": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201912/gfs_wind.provenance.json",
+        "cache_present_after": true,
+        "coverage_start_utc_after": "2019-12-13T06:00:00+00:00",
+        "coverage_end_utc_after": "2019-12-23T06:00:00+00:00",
+        "reader_metadata_ok_after": true,
+        "coverage_ok_after": true,
+        "valid_after": true
+      },
+      {
+        "month_key": "202103",
+        "required_start_utc": "2021-03-06T12:00:00+00:00",
+        "required_end_utc": "2021-03-09T12:00:00+00:00",
+        "cache_present_before": true,
+        "coverage_start_utc_before": "2021-03-05T12:00:00+00:00",
+        "coverage_end_utc_before": "2021-03-12T06:00:00+00:00",
+        "reader_metadata_ok_before": true,
+        "coverage_ok_before": true,
+        "status": "already_present",
+        "gfs_source_system": "ncei_thredds_archive",
+        "gfs_source_tier": "primary",
+        "gfs_source_inferred": true,
+        "gfs_primary_failure": "",
+        "cache_path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/202103/gfs_wind.nc",
+        "staged_from_cache_path": "",
+        "provenance_sidecar": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/202103/gfs_wind.provenance.json",
+        "cache_present_after": true,
+        "coverage_start_utc_after": "2021-03-05T12:00:00+00:00",
+        "coverage_end_utc_after": "2021-03-12T06:00:00+00:00",
+        "reader_metadata_ok_after": true,
+        "coverage_ok_after": true,
+        "valid_after": true
+      }
+    ],
+    "artifact": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_gfs_month_preflight.csv"
+  },
+  "local_input_store": {
+    "root": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023",
+    "drifter_chunk_root": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/drifter_chunks",
+    "forcing_month_root": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months",
+    "inventory_csv": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_local_input_inventory.csv",
+    "legacy_output_scratch_root": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch",
+    "policy": "persist_workflow_scoped_monthly_inputs_under_data_and_reuse_them_before_remote_refetch"
+  },
   "forcing_cache_status": [
     {
       "month_key": "201702",
@@ -775,14 +1218,15 @@
         "hycom",
         "cmems",
         "cmems_wave",
-        "era5"
+        "era5",
+        "gfs"
       ],
       "hycom": {
         "status": "cached",
-        "path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/forcing_months/201702/hycom_curr.nc",
+        "path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201702/hycom_curr.nc",
         "source_id": "hycom",
         "forcing_factor": "hycom_curr.nc",
-        "elapsed_seconds": 0.063,
+        "elapsed_seconds": 0.09,
         "budget_seconds": 300,
         "budget_exhausted": false,
         "upstream_outage_detected": false,
@@ -790,10 +1234,10 @@
       },
       "cmems": {
         "status": "cached",
-        "path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/forcing_months/201702/cmems_curr.nc",
+        "path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201702/cmems_curr.nc",
         "source_id": "cmems",
         "forcing_factor": "cmems_curr.nc",
-        "elapsed_seconds": 0.07,
+        "elapsed_seconds": 0.08,
         "budget_seconds": 300,
         "budget_exhausted": false,
         "upstream_outage_detected": false,
@@ -801,10 +1245,10 @@
       },
       "cmems_wave": {
         "status": "cached",
-        "path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/forcing_months/201702/cmems_wave.nc",
+        "path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201702/cmems_wave.nc",
         "source_id": "cmems_wave",
         "forcing_factor": "cmems_wave.nc",
-        "elapsed_seconds": 0.067,
+        "elapsed_seconds": 0.063,
         "budget_seconds": 300,
         "budget_exhausted": false,
         "upstream_outage_detected": false,
@@ -812,19 +1256,43 @@
       },
       "era5": {
         "status": "cached",
-        "path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/forcing_months/201702/era5_wind.nc",
+        "path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201702/era5_wind.nc",
         "source_id": "era5",
         "forcing_factor": "era5_wind.nc",
-        "elapsed_seconds": 0.492,
+        "elapsed_seconds": 0.186,
         "budget_seconds": 300,
         "budget_exhausted": false,
         "upstream_outage_detected": false,
         "failure_stage": ""
       },
+      "gfs": {
+        "status": "cached",
+        "path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201702/gfs_wind.nc",
+        "source_system": "ncei_thredds_archive",
+        "source_tier": "primary",
+        "source_inferred": false,
+        "provenance_sidecar": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201702/gfs_wind.provenance.json",
+        "coverage_start_utc": "2017-02-01T00:00:00+00:00",
+        "coverage_end_utc": "2017-03-02T18:00:00+00:00",
+        "primary_failure": "",
+        "source_id": "gfs",
+        "forcing_factor": "gfs_wind.nc",
+        "elapsed_seconds": 0.218,
+        "budget_seconds": 300,
+        "budget_exhausted": false,
+        "upstream_outage_detected": false,
+        "failure_stage": ""
+      },
+      "gfs_source_system": "ncei_thredds_archive",
+      "gfs_source_tier": "primary",
+      "gfs_source_inferred": false,
+      "gfs_provenance_sidecar": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201702/gfs_wind.provenance.json",
+      "gfs_primary_failure": "",
       "available_forcing_factors": [
         "cmems_curr.nc",
         "cmems_wave.nc",
         "era5_wind.nc",
+        "gfs_wind.nc",
         "hycom_curr.nc"
       ],
       "missing_forcing_factors": [],
@@ -840,14 +1308,15 @@
         "hycom",
         "cmems",
         "cmems_wave",
-        "era5"
+        "era5",
+        "gfs"
       ],
       "hycom": {
         "status": "cached",
-        "path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/forcing_months/201703/hycom_curr.nc",
+        "path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201703/hycom_curr.nc",
         "source_id": "hycom",
         "forcing_factor": "hycom_curr.nc",
-        "elapsed_seconds": 0.063,
+        "elapsed_seconds": 0.062,
         "budget_seconds": 300,
         "budget_exhausted": false,
         "upstream_outage_detected": false,
@@ -855,10 +1324,10 @@
       },
       "cmems": {
         "status": "cached",
-        "path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/forcing_months/201703/cmems_curr.nc",
+        "path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201703/cmems_curr.nc",
         "source_id": "cmems",
         "forcing_factor": "cmems_curr.nc",
-        "elapsed_seconds": 0.061,
+        "elapsed_seconds": 0.095,
         "budget_seconds": 300,
         "budget_exhausted": false,
         "upstream_outage_detected": false,
@@ -866,10 +1335,10 @@
       },
       "cmems_wave": {
         "status": "cached",
-        "path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/forcing_months/201703/cmems_wave.nc",
+        "path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201703/cmems_wave.nc",
         "source_id": "cmems_wave",
         "forcing_factor": "cmems_wave.nc",
-        "elapsed_seconds": 0.064,
+        "elapsed_seconds": 0.092,
         "budget_seconds": 300,
         "budget_exhausted": false,
         "upstream_outage_detected": false,
@@ -877,19 +1346,43 @@
       },
       "era5": {
         "status": "cached",
-        "path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/forcing_months/201703/era5_wind.nc",
+        "path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201703/era5_wind.nc",
         "source_id": "era5",
         "forcing_factor": "era5_wind.nc",
-        "elapsed_seconds": 0.466,
+        "elapsed_seconds": 0.135,
         "budget_seconds": 300,
         "budget_exhausted": false,
         "upstream_outage_detected": false,
         "failure_stage": ""
       },
+      "gfs": {
+        "status": "cached",
+        "path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201703/gfs_wind.nc",
+        "source_system": "ncei_thredds_archive",
+        "source_tier": "primary",
+        "source_inferred": true,
+        "provenance_sidecar": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201703/gfs_wind.provenance.json",
+        "coverage_start_utc": "2017-03-01T00:00:00+00:00",
+        "coverage_end_utc": "2017-03-12T18:00:00+00:00",
+        "primary_failure": "",
+        "source_id": "gfs",
+        "forcing_factor": "gfs_wind.nc",
+        "elapsed_seconds": 0.228,
+        "budget_seconds": 300,
+        "budget_exhausted": false,
+        "upstream_outage_detected": false,
+        "failure_stage": ""
+      },
+      "gfs_source_system": "ncei_thredds_archive",
+      "gfs_source_tier": "primary",
+      "gfs_source_inferred": true,
+      "gfs_provenance_sidecar": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201703/gfs_wind.provenance.json",
+      "gfs_primary_failure": "",
       "available_forcing_factors": [
         "cmems_curr.nc",
         "cmems_wave.nc",
         "era5_wind.nc",
+        "gfs_wind.nc",
         "hycom_curr.nc"
       ],
       "missing_forcing_factors": [],
@@ -905,14 +1398,15 @@
         "hycom",
         "cmems",
         "cmems_wave",
-        "era5"
+        "era5",
+        "gfs"
       ],
       "hycom": {
         "status": "cached",
-        "path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/forcing_months/201804/hycom_curr.nc",
+        "path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201804/hycom_curr.nc",
         "source_id": "hycom",
         "forcing_factor": "hycom_curr.nc",
-        "elapsed_seconds": 0.074,
+        "elapsed_seconds": 0.063,
         "budget_seconds": 300,
         "budget_exhausted": false,
         "upstream_outage_detected": false,
@@ -920,10 +1414,10 @@
       },
       "cmems": {
         "status": "cached",
-        "path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/forcing_months/201804/cmems_curr.nc",
+        "path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201804/cmems_curr.nc",
         "source_id": "cmems",
         "forcing_factor": "cmems_curr.nc",
-        "elapsed_seconds": 0.074,
+        "elapsed_seconds": 0.063,
         "budget_seconds": 300,
         "budget_exhausted": false,
         "upstream_outage_detected": false,
@@ -931,10 +1425,10 @@
       },
       "cmems_wave": {
         "status": "cached",
-        "path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/forcing_months/201804/cmems_wave.nc",
+        "path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201804/cmems_wave.nc",
         "source_id": "cmems_wave",
         "forcing_factor": "cmems_wave.nc",
-        "elapsed_seconds": 0.084,
+        "elapsed_seconds": 0.073,
         "budget_seconds": 300,
         "budget_exhausted": false,
         "upstream_outage_detected": false,
@@ -942,19 +1436,43 @@
       },
       "era5": {
         "status": "cached",
-        "path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/forcing_months/201804/era5_wind.nc",
+        "path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201804/era5_wind.nc",
         "source_id": "era5",
         "forcing_factor": "era5_wind.nc",
-        "elapsed_seconds": 0.43,
+        "elapsed_seconds": 0.139,
         "budget_seconds": 300,
         "budget_exhausted": false,
         "upstream_outage_detected": false,
         "failure_stage": ""
       },
+      "gfs": {
+        "status": "cached",
+        "path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201804/gfs_wind.nc",
+        "source_system": "ncei_thredds_archive",
+        "source_tier": "primary",
+        "source_inferred": true,
+        "provenance_sidecar": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201804/gfs_wind.provenance.json",
+        "coverage_start_utc": "2018-04-17T00:00:00+00:00",
+        "coverage_end_utc": "2018-04-24T18:00:00+00:00",
+        "primary_failure": "",
+        "source_id": "gfs",
+        "forcing_factor": "gfs_wind.nc",
+        "elapsed_seconds": 0.214,
+        "budget_seconds": 300,
+        "budget_exhausted": false,
+        "upstream_outage_detected": false,
+        "failure_stage": ""
+      },
+      "gfs_source_system": "ncei_thredds_archive",
+      "gfs_source_tier": "primary",
+      "gfs_source_inferred": true,
+      "gfs_provenance_sidecar": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/201804/gfs_wind.provenance.json",
+      "gfs_primary_failure": "",
       "available_forcing_factors": [
         "cmems_curr.nc",
         "cmems_wave.nc",
         "era5_wind.nc",
+        "gfs_wind.nc",
         "hycom_curr.nc"
       ],
       "missing_forcing_factors": [],
@@ -970,14 +1488,15 @@
         "hycom",
         "cmems",
         "cmems_wave",
-        "era5"
+        "era5",
+        "gfs"
       ],
       "hycom": {
         "status": "cached",
-        "path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/forcing_months/202103/hycom_curr.nc",
+        "path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/202103/hycom_curr.nc",
         "source_id": "hycom",
         "forcing_factor": "hycom_curr.nc",
-        "elapsed_seconds": 0.066,
+        "elapsed_seconds": 0.072,
         "budget_seconds": 300,
         "budget_exhausted": false,
         "upstream_outage_detected": false,
@@ -985,10 +1504,10 @@
       },
       "cmems": {
         "status": "cached",
-        "path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/forcing_months/202103/cmems_curr.nc",
+        "path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/202103/cmems_curr.nc",
         "source_id": "cmems",
         "forcing_factor": "cmems_curr.nc",
-        "elapsed_seconds": 0.066,
+        "elapsed_seconds": 0.071,
         "budget_seconds": 300,
         "budget_exhausted": false,
         "upstream_outage_detected": false,
@@ -996,10 +1515,10 @@
       },
       "cmems_wave": {
         "status": "cached",
-        "path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/forcing_months/202103/cmems_wave.nc",
+        "path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/202103/cmems_wave.nc",
         "source_id": "cmems_wave",
         "forcing_factor": "cmems_wave.nc",
-        "elapsed_seconds": 0.069,
+        "elapsed_seconds": 0.066,
         "budget_seconds": 300,
         "budget_exhausted": false,
         "upstream_outage_detected": false,
@@ -1007,19 +1526,43 @@
       },
       "era5": {
         "status": "cached",
-        "path": "output/phase1_mindoro_focus_pre_spill_2016_2023/_scratch/forcing_months/202103/era5_wind.nc",
+        "path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/202103/era5_wind.nc",
         "source_id": "era5",
         "forcing_factor": "era5_wind.nc",
-        "elapsed_seconds": 0.564,
+        "elapsed_seconds": 0.155,
         "budget_seconds": 300,
         "budget_exhausted": false,
         "upstream_outage_detected": false,
         "failure_stage": ""
       },
+      "gfs": {
+        "status": "cached",
+        "path": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/202103/gfs_wind.nc",
+        "source_system": "ncei_thredds_archive",
+        "source_tier": "primary",
+        "source_inferred": true,
+        "provenance_sidecar": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/202103/gfs_wind.provenance.json",
+        "coverage_start_utc": "2021-03-05T12:00:00+00:00",
+        "coverage_end_utc": "2021-03-12T06:00:00+00:00",
+        "primary_failure": "",
+        "source_id": "gfs",
+        "forcing_factor": "gfs_wind.nc",
+        "elapsed_seconds": 0.204,
+        "budget_seconds": 300,
+        "budget_exhausted": false,
+        "upstream_outage_detected": false,
+        "failure_stage": ""
+      },
+      "gfs_source_system": "ncei_thredds_archive",
+      "gfs_source_tier": "primary",
+      "gfs_source_inferred": true,
+      "gfs_provenance_sidecar": "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/202103/gfs_wind.provenance.json",
+      "gfs_primary_failure": "",
       "available_forcing_factors": [
         "cmems_curr.nc",
         "cmems_wave.nc",
         "era5_wind.nc",
+        "gfs_wind.nc",
         "hycom_curr.nc"
       ],
       "missing_forcing_factors": [],
@@ -1029,7 +1572,7 @@
   ],
   "baseline_candidate": {
     "path": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml",
-    "selected_recipe": "cmems_era5",
+    "selected_recipe": "cmems_gfs",
     "promotion_required": true,
     "status_flag": "provisional",
     "valid": false,
@@ -1038,9 +1581,10 @@
   },
   "canonical_baseline_integrity": {
     "path": "config/phase1_baseline_selection.yaml",
-    "sha256_before": "7261fd498dbbd37c52be7814b017d1a2de7b5c927520ad3095aeb6e837bfa033",
-    "sha256_after": "7261fd498dbbd37c52be7814b017d1a2de7b5c927520ad3095aeb6e837bfa033",
-    "unchanged": true
+    "sha256_before": "df3726859d48a988a47d4d1576dd5072607df3c55e792d5be0100d3f744fa67f",
+    "sha256_after": "83ad06a47ab0864f18449d916ec473552d786d54e22b58772776d9920cb9ef3c",
+    "unchanged": false,
+    "official_baseline_update_enabled": true
   },
   "artifacts": {
     "drifter_registry": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_drifter_registry.csv",
@@ -1053,6 +1597,10 @@
     "recipe_summary": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_summary.csv",
     "recipe_ranking": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
     "manifest": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_production_manifest.json",
-    "baseline_candidate": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml"
+    "baseline_candidate": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml",
+    "gfs_preflight": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_gfs_month_preflight.csv",
+    "adoption_decision_json": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_official_adoption_decision.json",
+    "adoption_decision_md": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_official_adoption_decision.md",
+    "local_input_inventory": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_local_input_inventory.csv"
   }
 }

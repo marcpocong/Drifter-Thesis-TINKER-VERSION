@@ -46,7 +46,7 @@ Supporting branches and backward-compatible aliases that are informative but not
   Note: These tracks are informative and reportable as support material, but the promoted B1 row now has its own scientific launcher entry. Forcing-only outages may skip the affected support branch with explicit degraded-mode honesty fields.
   Run with: `./start.ps1 -Entry mindoro_appendix_sensitivity_bundle -NoPause`
 - `phase1_mindoro_focus_pre_spill_experiment`: Mindoro-focused Phase 1 provenance rerun. Workflow mode = `phase1_mindoro_focus_pre_spill_2016_2023`. Cost = `expensive`. Safe read-only default = `false`. Phases = phase1_production_rerun.
-  Note: Mindoro-specific provenance lane only. This does not rewrite the stored March 13 -> March 14 B1 raw-generation history, does not modify legacy 2016 prototype outputs, and currently evaluates the outage-constrained ERA5-backed family while archived NOAA/NCEI GFS access remains unavailable.
+  Note: Mindoro-specific provenance lane only. This does not rewrite the stored March 13 -> March 14 B1 raw-generation history, does not modify legacy 2016 prototype outputs, and now evaluates the full four-recipe family with a GFS completeness preflight while promoting the focused historical winner directly into official B1.
   Run with: `./start.ps1 -Entry phase1_mindoro_focus_pre_spill_experiment -NoPause`
 - `mindoro_march13_14_phase1_focus_trial`: Experimental Mindoro March 13-14 Phase 1 focus trial. Workflow mode = `mindoro_retro_2023`. Cost = `expensive`. Safe read-only default = `false`. Phases = phase3b_extended_public, mindoro_march13_14_phase1_focus_trial.
   Note: Archive-labeled comparison trial only. Runs only the OpenDrift March 13 -> March 14 lane in a separate directory; does not rerun PyGNOME or overwrite canonical B1 outputs.
@@ -105,6 +105,7 @@ Backward-compatible prototype workflows preserved for debugging and regression.
 
 - `prototype_2016` remains available for debugging and regression only; it is not the final Phase 1 study.
 - `prototype_2016` is thesis-facing only as Phase 1 / 2 / 3A / 4 / 5, with its dedicated curated package rooted at `output/2016 Legacy Runs FINAL Figures` and no thesis-facing 3B/3C lane. Repo-wide `phase5_sync` remains a separate cross-repo reproducibility layer.
+- Its historical-origin note keeps the shared first-code search box `[108.6465, 121.3655, 6.1865, 20.3515]` explicit for the first three 2016 drifters on the west coast of the Philippines, while the stored per-case local prototype extents remain operative.
 - `mindoro_reportable_core` and `dwh_reportable_bundle` are intentional scientific reruns and are not safe defaults.
 - The read-only utilities do not recompute scientific scores and are the safest launcher options for routine status refreshes.
 

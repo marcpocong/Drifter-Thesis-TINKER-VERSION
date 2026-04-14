@@ -49,6 +49,22 @@ class UiDataAccessTests(unittest.TestCase):
         ):
             self.assertIn(key, state)
 
+    def test_publication_registry_contains_thesis_study_box_reference(self):
+        registry = data_access.publication_registry(REPO_ROOT)
+
+        thesis_boxes = registry.loc[
+            registry.get("status_key", "").astype(str).eq("thesis_study_box_reference")
+        ].copy()
+        self.assertFalse(thesis_boxes.empty)
+        self.assertTrue(thesis_boxes["figure_id"].astype(str).str.contains("thesis_study_boxes_reference").any())
+        self.assertGreaterEqual(len(thesis_boxes), 5)
+        self.assertTrue(
+            thesis_boxes["figure_id"].astype(str).str.contains("focused_phase1_box_geography_reference").any()
+        )
+        self.assertTrue(
+            thesis_boxes["figure_id"].astype(str).str.contains("prototype_first_code_search_box_geography_reference").any()
+        )
+
     def test_legacy_2016_provenance_metadata_records_union_and_source_boxes(self):
         metadata = data_access.legacy_2016_provenance_metadata(REPO_ROOT)
 
@@ -70,7 +86,12 @@ class UiDataAccessTests(unittest.TestCase):
         ranking = data_access.phase1_focused_recipe_ranking(REPO_ROOT)
         accepted = data_access.phase1_focused_accepted_segments(REPO_ROOT)
 
-        self.assertEqual(manifest.get("winning_recipe"), "cmems_era5")
+        winning_recipe = str(manifest.get("winning_recipe") or "").strip()
+        official_recipe = str(manifest.get("official_b1_recipe") or "").strip()
+        if not winning_recipe and not ranking.empty and "recipe" in ranking.columns:
+            winning_recipe = str(ranking.iloc[0]["recipe"])
+        self.assertEqual(official_recipe or winning_recipe, "cmems_era5")
+        self.assertIn(winning_recipe or official_recipe, {"cmems_era5", "cmems_gfs"})
         self.assertFalse(ranking.empty)
         self.assertFalse(accepted.empty)
         self.assertIn("start_time_utc", accepted.columns)

@@ -94,14 +94,15 @@ candidate_baseline:
     - This separate focused rerun now serves as the authoritative Mindoro-specific recipe-provenance lane for B1 while keeping the broader regional rerun preserved as reference.
     - This staged artifact is kept as a non-destructive provenance snapshot distinct from the official B1 baseline artifact in config/phase1_baseline_selection.yaml.
     - This experimental lane does not modify legacy 2016 prototype outputs or the canonical March 13 -> March 14 B1 outputs.
-    - The staged candidate preserves the raw historical four-recipe winner even if the official B1 spill-usable fallback rule keeps a different non-GFS recipe.
+    - The staged candidate preserves the raw historical four-recipe winner and remains a separate provenance snapshot even when official B1 promotes that winner directly.
 
 official_baseline_update:
   enabled: true
+  promote_historical_winner_directly: true
   baseline_id: mindoro_phase1_focused_recipe_provenance_v2
   description: Current default Mindoro spill-case Phase 1 recipe provenance finalized from the separate focused pre-spill 2016-2023 Mindoro drifter rerun with the full four-recipe family
   source_kind: focused_mindoro_phase1_provenance_artifact
-  selection_basis: Focused Mindoro pre-spill 2016-2023 drogued-only non-overlapping 72 h transport-validation rerun with the full four-recipe family ranked on the February-April seasonal subset; if a GFS recipe wins historically, official B1 adopts the highest-ranked non-GFS recipe from the same rerun
+  selection_basis: Focused Mindoro pre-spill 2016-2023 drogued-only non-overlapping 72 h transport-validation rerun with the full four-recipe family ranked on the February-April seasonal subset; official B1 promotes the focused historical winner directly
   workflow_scope:
     - mindoro_retro_2023
   current_local_evidence_scope: mindoro_focused_pre_spill_2016_2023_recipe_provenance
@@ -110,6 +111,7 @@ official_baseline_update:
   notes:
     - Official Mindoro spill-case workflows inherit recipe provenance from this separate focused Phase 1 drifter rerun rather than from the preserved three-date 2016 prototype artifact.
     - The focused rerun now evaluates the full four-recipe family cmems_era5, cmems_gfs, hycom_era5, and hycom_gfs after a GFS completeness preflight across all accepted focused months.
+    - Official B1 now promotes the focused historical winner directly so the main-validation ensemble recipe matches the completed focused rerun result.
     - This finalizes Mindoro-specific recipe provenance only and does not rewrite the raw-generation history of the stored March 13 -> March 14 B1 output bundle.
     - The broader 2016-2022 regional rerun remains preserved as a regional reference/governance lane and is not the active provenance for Mindoro B1.
     - The focused rerun searched through early 2023, but its accepted registry does not include near-2023 accepted segments.

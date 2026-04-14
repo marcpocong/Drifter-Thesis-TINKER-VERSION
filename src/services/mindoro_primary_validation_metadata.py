@@ -47,7 +47,8 @@ MINDORO_SHARED_IMAGERY_CAVEAT = (
 )
 
 MINDORO_PHASE1_CONFIRMATION_INTERPRETATION_TEMPLATE = (
-    "The separate {workflow_mode} Mindoro-focused drifter rerun selected the same recipe used by the stored "
-    "B1 run ({recipe}). It now serves as the active Mindoro-specific recipe-provenance lane for B1 without "
+    "The separate {workflow_mode} Mindoro-focused drifter rerun selected {recipe} as the active official "
+    "B1 recipe after the focused four-recipe comparison. It now serves as the active Mindoro-specific "
+    "recipe-provenance lane for B1 without "
     "rewriting the original March 13 -> March 14 raw-generation history."
 )

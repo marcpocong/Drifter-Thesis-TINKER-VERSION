@@ -7,7 +7,7 @@ Phase 5 is reportable now as the launcher/docs/reproducibility synchronization l
 - Is Phase 5 reportable now? Yes; it is reportable as a non-scientific reproducibility/package layer rather than as a scientific result.
 - Is the launcher/menu now honest and current? Yes.
 - Were existing scientific outputs recomputed here? No.
-- Does the project still need a later final Phase 1 production rerun for the frozen baseline story? Yes.
+- Does the project still need a later final Phase 1 production rerun for the frozen baseline story? No.
 - Does legacy recipe-family drift still leak into official-mode behavior? Yes.
 
 ## What Remains Provisional

@@ -7,7 +7,7 @@ Thesis-facing Phase 3B title: Phase 3B Observation-Based Spatial Validation Usin
 ## Headline Results
 
 - Mindoro March 13 -> March 14 primary validation (B1): FSS(1/3/5/10 km) = 0.0000, 0.0441, 0.1371, 0.2490; IoU=0.0000; Dice=0.0000.
-- The separate focused 2016-2023 Mindoro drifter rerun selected `cmems_era5` as the active B1 recipe provenance. It does not replace the original B1 raw provenance.
+- The separate focused 2016-2023 Mindoro drifter rerun selected `cmems_gfs` as the active B1 recipe provenance. It does not replace the original B1 raw provenance.
 - Mindoro promoted cross-model top track (A): OpenDrift R1 previous reinit p50 with FSS(1/3/5/10 km) = 0.0000, 0.0441, 0.1371, 0.2490.
 - Mindoro legacy March 6 honesty-only sparse reference (B2): FSS(1/3/5/10 km) = 0.0000, 0.0000, 0.0000, 0.0000; IoU=0.0000; Dice=0.0000.
 - Mindoro legacy March 3-6 broader-support reference (B3): FSS(1/3/5/10 km) = 0.1722, 0.2004, 0.2166, 0.2438; IoU=0.0942; Dice=0.1722.

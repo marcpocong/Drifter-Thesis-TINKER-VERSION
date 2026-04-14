@@ -1,0 +1,8 @@
+{
+  "historical_four_recipe_winner": "cmems_gfs",
+  "official_b1_recipe": "cmems_gfs",
+  "official_b1_selection_rule": "historical_four_recipe_winner_used_directly_for_official_b1",
+  "gfs_historical_winner_not_adopted": false,
+  "non_gfs_fallback_recipe": "",
+  "reason_for_non_adoption": ""
+}

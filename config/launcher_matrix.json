@@ -271,7 +271,7 @@
       "service_profile": "pipeline_only",
       "rerun_cost": "expensive",
       "safe_default": false,
-      "notes": "Mindoro-specific provenance lane only. This does not rewrite the stored March 13 -> March 14 B1 raw-generation history, does not modify legacy 2016 prototype outputs, and currently evaluates the outage-constrained ERA5-backed family while archived NOAA/NCEI GFS access remains unavailable.",
+      "notes": "Mindoro-specific provenance lane only. This does not rewrite the stored March 13 -> March 14 B1 raw-generation history, does not modify legacy 2016 prototype outputs, and now evaluates the full four-recipe family with a GFS completeness preflight while promoting the focused historical winner directly into official B1.",
       "steps": [
         {
           "phase": "phase1_production_rerun",

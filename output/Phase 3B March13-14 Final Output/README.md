@@ -18,13 +18,13 @@ What remains secondary:
 
 Mindoro Phase 1 provenance:
 - Stored B1 run recipe source path: `config/phase1_baseline_selection.yaml`
-- Stored B1 run selected recipe: `cmems_era5`
+- Stored B1 run selected recipe: `cmems_gfs`
 - Active focused drifter-based provenance workflow: `phase1_mindoro_focus_pre_spill_2016_2023`
 - Focused provenance artifact: `config/phase1_baseline_selection.yaml`
-- Focused provenance selected recipe: `cmems_era5`
-- Focused historical four-recipe winner: `cmems_era5`
+- Focused provenance selected recipe: `cmems_gfs`
+- Focused historical four-recipe winner: `cmems_gfs`
 - Same recipe confirmed: `Yes`
-- Interpretation: The separate phase1_mindoro_focus_pre_spill_2016_2023 Mindoro-focused drifter rerun selected the same recipe used by the stored B1 run (cmems_era5). It now serves as the active Mindoro-specific recipe-provenance lane for B1 without rewriting the original March 13 -> March 14 raw-generation history.
+- Interpretation: The separate phase1_mindoro_focus_pre_spill_2016_2023 Mindoro-focused drifter rerun selected cmems_gfs as the active official B1 recipe after the focused four-recipe comparison. It now serves as the active Mindoro-specific recipe-provenance lane for B1 without rewriting the original March 13 -> March 14 raw-generation history.
 - The focused rerun searched through early 2023, but its accepted registry does not include near-2023 accepted segments.
 - Historical GFS winner not adopted for official B1: `False`
 - Non-GFS fallback recipe: `not_needed`

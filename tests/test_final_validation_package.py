@@ -81,12 +81,12 @@ class FinalValidationPackageTests(unittest.TestCase):
         service.mindoro_reinit_pairing = pd.DataFrame([{"branch_id": "R1_previous", "forecast_product": "mask_p50_2023-03-14_datecomposite.tif"}])
         service.mindoro_reinit_manifest = {
             "recipe": {
-                "recipe": "cmems_era5",
+                "recipe": "cmems_gfs",
                 "source_path": "config/phase1_baseline_selection.yaml",
             }
         }
         service.mindoro_phase1_confirmation_candidate = {
-            "selected_recipe": "cmems_era5",
+            "selected_recipe": "cmems_gfs",
         }
         service.phase3b_summary = pd.DataFrame(
             [
@@ -228,8 +228,8 @@ class FinalValidationPackageTests(unittest.TestCase):
             b1["thesis_phase_title"],
             "Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents",
         )
-        self.assertEqual(b1["stored_run_selected_recipe"], "cmems_era5")
-        self.assertEqual(b1["posthoc_phase1_confirmation_selected_recipe"], "cmems_era5")
+        self.assertEqual(b1["stored_run_selected_recipe"], "cmems_gfs")
+        self.assertEqual(b1["posthoc_phase1_confirmation_selected_recipe"], "cmems_gfs")
         self.assertTrue(bool(b1["matches_stored_b1_recipe"]))
         self.assertTrue((main_table["track_id"] == "B2").any())
         self.assertTrue((main_table["track_id"] == "B3").any())
@@ -354,10 +354,10 @@ class FinalValidationPackageTests(unittest.TestCase):
             export = service._build_dwh_final_output_export()
 
             export_root = root / DWH_FINAL_OUTPUT_DIR
-            self.assertTrue((export_root / "publication" / "observations" / "dwh_2010-05-21_observation_context.png").exists())
-            self.assertTrue((export_root / "publication" / "opendrift_deterministic" / "dwh_daily_deterministic_board.png").exists())
-            self.assertTrue((export_root / "publication" / "opendrift_ensemble" / "dwh_deterministic_vs_ensemble_board.png").exists())
-            self.assertTrue((export_root / "publication" / "comparator_pygnome" / "dwh_opendrift_vs_pygnome_board.png").exists())
+            self.assertTrue((export_root / "publication" / "observations" / "dwh_2010-05-21_24h_observation_truth_context.png").exists())
+            self.assertTrue((export_root / "publication" / "opendrift_deterministic" / "dwh_24h_48h_72h_deterministic_footprint_overview_board.png").exists())
+            self.assertTrue((export_root / "publication" / "opendrift_ensemble" / "dwh_2010-05-21_24h_mask_p50_overlay.png").exists())
+            self.assertTrue((export_root / "publication" / "comparator_pygnome" / "dwh_2010-05-21_24h_pygnome_footprint_overlay.png").exists())
             self.assertTrue((export_root / "publication" / "context_optional" / "dwh_ensemble_sampled_trajectory_context.png").exists())
             self.assertTrue((export_root / "scientific_source_pngs" / "deterministic" / "qa_phase3c_eventcorridor_overlay.png").exists())
             self.assertTrue((export_root / "scientific_source_pngs" / "ensemble" / "qa_phase3c_ensemble_eventcorridor_overlay.png").exists())

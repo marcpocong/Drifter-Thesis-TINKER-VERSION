@@ -33,7 +33,7 @@ from src.services.transport_retention_fix import (
     _time_reaches,
     _write_json,
 )
-from src.utils.io import get_case_output_dir, resolve_recipe_selection, resolve_spill_origin
+from src.utils.io import get_case_output_dir, model_dir_complete_for_recipe, resolve_recipe_selection, resolve_spill_origin
 
 try:
     import matplotlib.pyplot as plt
@@ -273,10 +273,11 @@ class InitModeSensitivityR1Service:
             raise RuntimeError("official_rerun_r1 manifest must preserve R3 as diagnostic-only.")
 
     def _resolve_or_run_branch(self, branch: InitBranch, forcing_paths: dict) -> dict:
+        expected_recipe = resolve_recipe_selection().recipe
         if branch.reuse_official_rerun_r1:
             manifest = _read_json(self.case_output / OFFICIAL_RERUN_R1_DIR_NAME / "official_rerun_r1_run_manifest.json")
             model_dir = Path(((manifest.get("model_result") or {}).get("model_dir") or ""))
-            if not model_dir.exists():
+            if not model_dir_complete_for_recipe(model_dir, expected_recipe):
                 raise FileNotFoundError(f"B branch could not reuse official_rerun_r1 model directory: {model_dir}")
             return {
                 "branch_id": branch.branch_id,
@@ -290,7 +291,7 @@ class InitModeSensitivityR1Service:
 
         model_run_name = f"{self.case.run_name}/{INIT_MODE_SENSITIVITY_DIR_NAME}/{branch.output_slug}/model_run"
         model_dir = get_case_output_dir(model_run_name)
-        if self._model_dir_complete(model_dir) and not self.force_rerun:
+        if model_dir_complete_for_recipe(model_dir, expected_recipe) and not self.force_rerun:
             return {
                 "branch_id": branch.branch_id,
                 "status": "reused_existing_branch",
@@ -341,14 +342,6 @@ class InitModeSensitivityR1Service:
             "source_geometry_path": str(self.case.provenance_layer.processed_vector_path(self.case.run_name)),
             "point_release_surrogate": branch.seed_overrides.get("point_release_surrogate", ""),
         }
-
-    @staticmethod
-    def _model_dir_complete(model_dir: Path) -> bool:
-        return (
-            (model_dir / "forecast" / "forecast_manifest.json").exists()
-            and (model_dir / "ensemble" / "ensemble_manifest.json").exists()
-            and bool(list((model_dir / "ensemble").glob("member_*.nc")))
-        )
 
     def _build_utc_date_composites(self, branch: InitBranch, model_dir: Path) -> Path:
         composite_dir = self.output_dir / branch.output_slug / "forecast_datecomposites"

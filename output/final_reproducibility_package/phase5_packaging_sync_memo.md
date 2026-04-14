@@ -28,6 +28,7 @@ Phase 5 reuses the existing final validation package, Phase 1 audit, Phase 2 aud
 - DWH Phase 3C remains a separate external transfer-validation lane under `config/case_dwh_retro_2010_72h.yaml` with forcing fixed to `HYCOM GOFS 3.1 currents + ERA5 winds + CMEMS wave/Stokes` and no thesis-facing drifter baseline.
 - The separate focused 2016-2023 Mindoro drifter rerun now supplies the active B1 recipe-provenance story, not the raw generation history of the stored March 13 -> March 14 science bundle.
 - The legacy `prototype_2016` lane is framed as Phase 1 / 2 / 3A / 4 / 5 support, with its dedicated curated package rooted at `output/2016 Legacy Runs FINAL Figures`; it has no thesis-facing Phase 3B or Phase 3C.
+- Its historical-origin note keeps the shared first-code search box `[108.6465, 121.3655, 6.1865, 20.3515]` explicit for the first three 2016 drifters on the west coast of the Philippines, while the stored per-case local prototype extents remain operative.
 - The launcher/menu is now organized around current track categories instead of the older monolithic Mindoro full-chain story.
 - The first dashboard version is intentionally read-only and does not add scientific run buttons.
 

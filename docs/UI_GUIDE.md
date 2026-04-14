@@ -71,7 +71,7 @@ Advanced-only page:
 ## Output Roots Behind The Main Pages
 
 - `Home / Overview`: curated package roots plus `output/figure_package_publication/`
-- `Phase 1 Recipe Selection`: `output/phase1_mindoro_focus_pre_spill_2016_2023/` and `output/phase1_production_rerun/`
+- `Phase 1 Recipe Selection`: `output/phase1_mindoro_focus_pre_spill_2016_2023/`, `output/phase1_production_rerun/`, and the shared thesis study-box reference figure set with per-box geography panels from `output/figure_package_publication/`
 - `Mindoro B1 Primary Validation`: `output/Phase 3B March13-14 Final Output/`
 - `Mindoro Cross-Model Comparator`: `output/Phase 3B March13-14 Final Output/publication/comparator_pygnome/`
 - `DWH Phase 3C Transfer Validation`: `output/Phase 3C DWH Final Output/`

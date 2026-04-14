@@ -244,7 +244,7 @@ def _probe_phase1_monthly_caches() -> list[dict[str, Any]]:
                 "cache_family": "phase1_monthly_drifter_chunks",
                 "source_id": "phase1_drifter_monthly_chunk",
                 "path": str(path),
-                "summary": "existing monthly drifter chunk cache",
+                "summary": "existing local monthly drifter input store",
             }
         )
     for path in sorted(service.forcing_cache_root.rglob("*.nc")):
@@ -253,7 +253,7 @@ def _probe_phase1_monthly_caches() -> list[dict[str, Any]]:
                 "cache_family": "phase1_monthly_forcing_cache",
                 "source_id": "phase1_monthly_forcing_file",
                 "path": str(path),
-                "summary": "existing monthly forcing cache",
+                "summary": "existing local monthly forcing input store",
             }
         )
     return hits

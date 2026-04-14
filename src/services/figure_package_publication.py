@@ -21,7 +21,7 @@ import yaml
 from matplotlib import pyplot as plt
 from matplotlib.colors import ListedColormap
 from matplotlib.lines import Line2D
-from matplotlib.patches import Patch, Rectangle
+from matplotlib.patches import Patch, Polygon, Rectangle
 from pyproj import Transformer
 from rasterio.plot import show
 from rasterio.warp import transform_bounds
@@ -29,6 +29,7 @@ from shapely.geometry import MultiPoint
 
 from src.core.artifact_status import artifact_status_columns, artifact_status_columns_for_key
 from src.services.mindoro_primary_validation_metadata import (
+    MINDORO_BASE_CASE_CONFIG_PATH,
     MINDORO_PHASE1_CONFIRMATION_CANDIDATE_BASELINE_PATH,
     MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE,
     MINDORO_SHARED_IMAGERY_CAVEAT,
@@ -42,6 +43,11 @@ LOCAL_FONT_DIR = Path("output") / "_local_fonts"
 STYLE_CONFIG_PATH = Path("config") / "publication_figure_style.yaml"
 MINDORO_LABELS_PATH = Path("config") / "publication_map_labels_mindoro.csv"
 DWH_LABELS_PATH = Path("config") / "publication_map_labels_dwh.csv"
+PHASE1_BASELINE_SELECTION_PATH = Path("config") / "phase1_baseline_selection.yaml"
+DOMAIN_GLOSSARY_PATH = Path("docs") / "DOMAIN_GLOSSARY.md"
+PROTOTYPE_2016_PROVENANCE_METADATA_PATH = (
+    Path("output") / "2016 Legacy Runs FINAL Figures" / "manifests" / "prototype_2016_provenance_metadata.json"
+)
 
 FINAL_REPRO_DIR = Path("output") / "final_reproducibility_package"
 FINAL_PHASE_STATUS_CSV = FINAL_REPRO_DIR / "final_phase_status_registry.csv"
@@ -99,6 +105,7 @@ FIGURE_FAMILIES: dict[str, str] = {
     "I": "DWH OpenDrift vs PyGNOME publication package",
     "J": "DWH trajectory publication package",
     "K": "Prototype accepted-segment OpenDrift vs PyGNOME support package",
+    "L": "Thesis study-box reference package",
 }
 
 
@@ -400,6 +407,8 @@ class FigurePackagePublicationService:
         self.font_audit = self._configure_typography()
         self.mindoro_labels = _read_csv(self.repo_root / MINDORO_LABELS_PATH)
         self.dwh_labels = _read_csv(self.repo_root / DWH_LABELS_PATH)
+        self.mindoro_base_case_config = _read_yaml(self.repo_root / MINDORO_BASE_CASE_CONFIG_PATH)
+        self.phase1_baseline_selection = _read_yaml(self.repo_root / PHASE1_BASELINE_SELECTION_PATH)
         self.mindoro_forecast_manifest = _read_json(self.repo_root / MINDORO_FORECAST_MANIFEST)
         self.mindoro_phase3b_summary = _read_csv(self.repo_root / MINDORO_PHASE3B_SUMMARY)
         self.mindoro_reinit_summary = _read_csv(self.repo_root / MINDORO_REINIT_SUMMARY)
@@ -410,6 +419,7 @@ class FigurePackagePublicationService:
         self.mindoro_reinit_crossmodel_summary = _read_csv(self.repo_root / MINDORO_REINIT_CROSSMODEL_SUMMARY)
         self.mindoro_reinit_crossmodel_manifest = _read_json(self.repo_root / MINDORO_REINIT_CROSSMODEL_RUN_MANIFEST)
         self.mindoro_phase4_manifest = _read_json(self.repo_root / MINDORO_PHASE4_MANIFEST)
+        self.prototype_2016_provenance_metadata = _read_json(self.repo_root / PROTOTYPE_2016_PROVENANCE_METADATA_PATH)
         self.dwh_run_manifest = _read_json(self.repo_root / DWH_RUN_MANIFEST)
         self.dwh_summary = _read_csv(self.repo_root / DWH_SUMMARY)
         self.dwh_all_results = _read_csv(self.repo_root / DWH_ALL_RESULTS)
@@ -1472,6 +1482,375 @@ class FigurePackagePublicationService:
         source_paths = [_relative_to_repo(self.repo_root, self._resolve(item)) for item in spec.get("source_paths", [])]
         return {"source_paths": source_paths, "crop_bounds": None, "target_crs": None}
 
+    def _coerce_wgs84_bounds(self, value: Any) -> tuple[float, float, float, float] | None:
+        if not isinstance(value, (list, tuple)) or len(value) != 4:
+            return None
+        try:
+            min_lon, max_lon, min_lat, max_lat = [float(item) for item in value]
+        except (TypeError, ValueError):
+            return None
+        return (min_lon, max_lon, min_lat, max_lat)
+
+    def _format_wgs84_bounds(self, bounds: tuple[float, float, float, float] | None) -> str:
+        if bounds is None:
+            return "Unavailable"
+        return "[" + ", ".join(format(value, ".6f").rstrip("0").rstrip(".") for value in bounds) + "]"
+
+    def _thesis_study_box_entries(self) -> list[dict[str, Any]]:
+        focused_box = self._coerce_wgs84_bounds(
+            (self.phase1_baseline_selection.get("chapter3_finalization_audit") or {}).get("phase1_validation_box")
+            or self.phase1_baseline_selection.get("phase1_validation_box")
+        ) or (118.751, 124.305, 10.620, 16.026)
+        mindoro_case_domain = self._coerce_wgs84_bounds(self.mindoro_base_case_config.get("mindoro_case_domain")) or (
+            115.0,
+            122.0,
+            6.0,
+            14.5,
+        )
+        scoring_bounds = self._coerce_wgs84_bounds((self.mindoro_forecast_manifest.get("grid") or {}).get("display_bounds_wgs84")) or (
+            120.90964677179262,
+            122.0621541786303,
+            12.249384840763462,
+            13.783655303175253,
+        )
+        first_code_box = self._coerce_wgs84_bounds(
+            self.prototype_2016_provenance_metadata.get("prototype_2016_initial_capture_box")
+        ) or (108.6465, 121.3655, 6.1865, 20.3515)
+        return [
+            {
+                "tag": "1",
+                "label": "Focused Mindoro Phase 1 validation box",
+                "short_label": "Focused Phase 1",
+                "bounds": focused_box,
+                "color": "#d97706",
+                "fill_alpha": 0.10,
+                "line_width": 2.2,
+                "text_anchor": (focused_box[0] + 0.06, focused_box[3] - 0.10),
+            },
+            {
+                "tag": "2",
+                "label": "`mindoro_case_domain` fallback transport/overview extent",
+                "short_label": "mindoro_case_domain",
+                "bounds": mindoro_case_domain,
+                "color": "#165ba8",
+                "fill_alpha": 0.07,
+                "line_width": 2.0,
+                "text_anchor": (mindoro_case_domain[0] + 0.10, mindoro_case_domain[2] + 0.16),
+            },
+            {
+                "tag": "3",
+                "label": "Mindoro scoring-grid display bounds",
+                "short_label": "Scoring-grid bounds",
+                "bounds": scoring_bounds,
+                "color": "#b42318",
+                "fill_alpha": 0.16,
+                "line_width": 2.4,
+                "text_anchor": (scoring_bounds[1] + 0.12, scoring_bounds[3] + 0.30),
+                "arrow_to_center": True,
+            },
+            {
+                "tag": "4",
+                "label": "prototype_2016 first-code search box",
+                "short_label": "First-code search box",
+                "bounds": first_code_box,
+                "color": "#7c3aed",
+                "fill_alpha": 0.05,
+                "line_width": 1.9,
+                "text_anchor": (first_code_box[0] + 0.20, first_code_box[3] - 0.30),
+            },
+        ]
+
+    def _study_box_geography_features(self) -> list[dict[str, Any]]:
+        return [
+            {
+                "name": "Palawan",
+                "label": "Palawan",
+                "label_pos": (118.35, 9.85),
+                "coordinates": [
+                    (117.10, 11.85),
+                    (117.35, 11.10),
+                    (117.55, 10.25),
+                    (117.78, 9.35),
+                    (118.05, 8.55),
+                    (118.32, 7.80),
+                    (118.62, 7.25),
+                    (118.92, 7.38),
+                    (118.78, 8.05),
+                    (118.54, 8.95),
+                    (118.28, 9.85),
+                    (118.02, 10.70),
+                    (117.78, 11.38),
+                    (117.45, 11.98),
+                ],
+            },
+            {
+                "name": "Mindoro",
+                "label": "Mindoro",
+                "label_pos": (121.05, 12.92),
+                "coordinates": [
+                    (120.30, 13.52),
+                    (120.55, 13.15),
+                    (120.82, 12.82),
+                    (121.05, 12.40),
+                    (121.35, 12.18),
+                    (121.52, 12.42),
+                    (121.46, 12.85),
+                    (121.35, 13.18),
+                    (121.12, 13.45),
+                    (120.78, 13.62),
+                    (120.48, 13.65),
+                ],
+            },
+            {
+                "name": "Busuanga",
+                "label": "Calamian",
+                "label_pos": (120.02, 12.02),
+                "coordinates": [
+                    (119.55, 12.20),
+                    (119.78, 11.95),
+                    (120.05, 11.82),
+                    (120.30, 11.96),
+                    (120.12, 12.25),
+                    (119.82, 12.33),
+                ],
+            },
+            {
+                "name": "Luzon",
+                "label": "Luzon",
+                "label_pos": (120.75, 16.55),
+                "coordinates": [
+                    (119.35, 13.28),
+                    (119.72, 13.88),
+                    (120.18, 14.52),
+                    (120.65, 15.12),
+                    (121.18, 15.88),
+                    (121.85, 16.72),
+                    (122.28, 17.58),
+                    (122.34, 18.22),
+                    (121.85, 18.78),
+                    (121.02, 18.52),
+                    (120.20, 17.72),
+                    (119.68, 16.88),
+                    (119.34, 15.92),
+                    (119.18, 14.92),
+                    (119.12, 14.12),
+                ],
+            },
+            {
+                "name": "Panay",
+                "label": "Panay",
+                "label_pos": (122.22, 11.20),
+                "coordinates": [
+                    (121.92, 11.55),
+                    (122.18, 11.18),
+                    (122.45, 10.78),
+                    (122.62, 10.92),
+                    (122.56, 11.32),
+                    (122.28, 11.58),
+                ],
+            },
+            {
+                "name": "Negros",
+                "label": "Negros",
+                "label_pos": (123.10, 10.52),
+                "coordinates": [
+                    (122.86, 10.82),
+                    (123.06, 10.34),
+                    (123.24, 9.78),
+                    (123.44, 9.98),
+                    (123.36, 10.48),
+                    (123.12, 10.88),
+                ],
+            },
+            {
+                "name": "North Borneo",
+                "label": "North Borneo",
+                "label_pos": (117.05, 6.55),
+                "coordinates": [
+                    (115.78, 5.70),
+                    (116.42, 6.02),
+                    (117.12, 6.30),
+                    (117.88, 6.55),
+                    (118.55, 6.92),
+                    (119.05, 7.28),
+                    (118.52, 7.62),
+                    (117.72, 7.48),
+                    (116.92, 7.24),
+                    (116.18, 6.92),
+                    (115.72, 6.38),
+                ],
+            },
+        ]
+
+    def _draw_study_box_geography_context(
+        self,
+        ax: plt.Axes,
+        *,
+        xlim: tuple[float, float],
+        ylim: tuple[float, float],
+    ) -> None:
+        ax.set_facecolor("#dff1fb")
+        ax.axvspan(xlim[0], xlim[1], color="#dbeafe", alpha=0.16, zorder=0)
+        ax.axhspan(ylim[0], ylim[1], color="#e0f2fe", alpha=0.10, zorder=0)
+
+        for feature in self._study_box_geography_features():
+            coords = feature["coordinates"]
+            lons = [point[0] for point in coords]
+            lats = [point[1] for point in coords]
+            if max(lons) < xlim[0] or min(lons) > xlim[1] or max(lats) < ylim[0] or min(lats) > ylim[1]:
+                continue
+            patch = Polygon(
+                coords,
+                closed=True,
+                facecolor="#f6efe4",
+                edgecolor="#7c6f64",
+                linewidth=0.9,
+                alpha=0.96,
+                zorder=1,
+            )
+            ax.add_patch(patch)
+            label_lon, label_lat = feature["label_pos"]
+            if xlim[0] <= label_lon <= xlim[1] and ylim[0] <= label_lat <= ylim[1]:
+                ax.text(
+                    label_lon,
+                    label_lat,
+                    str(feature["label"]),
+                    fontsize=7.6,
+                    color="#334155",
+                    ha="center",
+                    va="center",
+                    zorder=2,
+                    bbox={"boxstyle": "round,pad=0.16", "facecolor": (1, 1, 1, 0.82), "edgecolor": "none"},
+                )
+
+        ocean_labels = [
+            ("South China Sea", (max(xlim[0] + 0.85, 112.8), min(ylim[1] - 0.85, 13.0))),
+            ("Sulu Sea", (min(xlim[1] - 0.70, 120.55), max(ylim[0] + 0.65, 10.25))),
+        ]
+        for label, (lon, lat) in ocean_labels:
+            if xlim[0] <= lon <= xlim[1] and ylim[0] <= lat <= ylim[1]:
+                ax.text(
+                    lon,
+                    lat,
+                    label,
+                    fontsize=7.2,
+                    color="#0f3d63",
+                    fontstyle="italic",
+                    ha="center",
+                    va="center",
+                    alpha=0.72,
+                    zorder=1,
+                )
+
+    def _render_study_boxes_panel(self, ax: plt.Axes, spec: dict[str, Any]) -> dict[str, Any]:
+        boxes = [item for item in spec.get("study_boxes", []) if self._coerce_wgs84_bounds(item.get("bounds"))]
+        if not boxes:
+            ax.text(0.5, 0.5, "Study-box metadata unavailable", ha="center", va="center", fontsize=12)
+            ax.axis("off")
+            return {"source_paths": [], "crop_bounds": None, "target_crs": None}
+
+        min_lon = min(float(item["bounds"][0]) for item in boxes)
+        max_lon = max(float(item["bounds"][1]) for item in boxes)
+        min_lat = min(float(item["bounds"][2]) for item in boxes)
+        max_lat = max(float(item["bounds"][3]) for item in boxes)
+        lon_span = max(max_lon - min_lon, 1.0)
+        lat_span = max(max_lat - min_lat, 1.0)
+        pad_fraction = float(spec.get("box_padding_fraction") or 0.08)
+        pad_lon = max(float(spec.get("minimum_pad_lon") or 0.9), lon_span * pad_fraction)
+        pad_lat = max(float(spec.get("minimum_pad_lat") or 0.7), lat_span * pad_fraction)
+        xlim = (min_lon - pad_lon, max_lon + pad_lon)
+        ylim = (min_lat - pad_lat, max_lat + pad_lat)
+
+        self._draw_study_box_geography_context(ax, xlim=xlim, ylim=ylim)
+        ax.text(
+            xlim[0] + 0.35,
+            ylim[0] + 0.35,
+            "West coast of the Philippines thesis context",
+            fontsize=8,
+            color="#475569",
+            ha="left",
+            va="bottom",
+            bbox={"boxstyle": "round,pad=0.18", "facecolor": (1, 1, 1, 0.85), "edgecolor": "none"},
+            zorder=1,
+        )
+
+        for item in boxes:
+            bounds = tuple(float(value) for value in item["bounds"])
+            width = bounds[1] - bounds[0]
+            height = bounds[3] - bounds[2]
+            rect = Rectangle(
+                (bounds[0], bounds[2]),
+                width,
+                height,
+                linewidth=float(item.get("line_width", 2.0)),
+                edgecolor=str(item.get("color") or "#0f172a"),
+                facecolor=matplotlib.colors.to_rgba(str(item.get("color") or "#0f172a"), alpha=float(item.get("fill_alpha", 0.08))),
+                zorder=3,
+            )
+            ax.add_patch(rect)
+            label_box = {
+                "boxstyle": "round,pad=0.16",
+                "facecolor": "#ffffff",
+                "edgecolor": str(item.get("color") or "#0f172a"),
+                "linewidth": 1.1,
+            }
+            label_text = f"{item['tag']}  {item['short_label']}"
+            if item.get("arrow_to_center"):
+                center = (bounds[0] + width / 2.0, bounds[2] + height / 2.0)
+                ax.annotate(
+                    label_text,
+                    xy=center,
+                    xytext=item["text_anchor"],
+                    textcoords="data",
+                    fontsize=8,
+                    fontweight="bold",
+                    color=str(item.get("color") or "#0f172a"),
+                    ha="left",
+                    va="bottom",
+                    bbox=label_box,
+                    arrowprops={"arrowstyle": "->", "color": str(item.get("color") or "#0f172a"), "linewidth": 1.1},
+                    zorder=5,
+                )
+            else:
+                ax.text(
+                    float(item["text_anchor"][0]),
+                    float(item["text_anchor"][1]),
+                    label_text,
+                    fontsize=8,
+                    fontweight="bold",
+                    color=str(item.get("color") or "#0f172a"),
+                    ha="left",
+                    va="bottom",
+                    bbox=label_box,
+                    zorder=5,
+                )
+            ax.text(
+                bounds[0] + (width * 0.50),
+                bounds[2] + (height * 0.50),
+                str(item["tag"]),
+                fontsize=12,
+                fontweight="bold",
+                color=str(item.get("color") or "#0f172a"),
+                ha="center",
+                va="center",
+                alpha=0.90,
+                zorder=4,
+            )
+
+        ax.set_xlim(*xlim)
+        ax.set_ylim(*ylim)
+        ax.set_title(str(spec["panel_title"]), fontsize=float((self.style.get("typography") or {}).get("panel_title_size") or 11), loc="left")
+        ax.set_xlabel("Longitude (degrees east)")
+        ax.set_ylabel("Latitude (degrees north)")
+        ax.grid(True, linestyle="--", linewidth=0.35, alpha=0.40, color=(self.style.get("layout") or {}).get("grid_color") or "#cbd5e1")
+        ax.set_aspect(self._geographic_aspect((ylim[0] + ylim[1]) / 2.0), adjustable="box")
+        for spine in ax.spines.values():
+            spine.set_color("#94a3b8")
+            spine.set_linewidth(0.8)
+
+        source_paths = [str(item) for item in spec.get("source_paths", []) if str(item).strip()]
+        return {"source_paths": source_paths, "crop_bounds": None, "target_crs": None}
+
     def _render_panel(self, ax: plt.Axes, spec: dict[str, Any]) -> dict[str, Any]:
         renderer = str(spec["renderer"])
         if renderer == "spatial":
@@ -1492,6 +1871,8 @@ class FigurePackagePublicationService:
             return self._render_shoreline_segment_panel(ax, spec)
         if renderer == "text":
             return self._render_text_panel(ax, spec)
+        if renderer == "study_boxes":
+            return self._render_study_boxes_panel(ax, spec)
         raise ValueError(f"Unsupported publication figure renderer: {renderer}")
 
     def _sample_paths(self, paths: list[Path], sample_count: int) -> list[Path]:
@@ -1627,14 +2008,22 @@ class FigurePackagePublicationService:
             if "map_panel_title" in spec:
                 panel_title = spec.get("map_panel_title") or ""
             render_info = self._render_panel(main_ax, dict(spec, panel_title=panel_title))
+            subtitle_box_lines = [
+                str(item)
+                for item in (
+                    spec.get("subtitle_box_lines")
+                    or [
+                        str(spec.get("subtitle") or ""),
+                        f"Case: {spec['case_id']}",
+                        f"Track: {spec['phase_or_track']}",
+                    ]
+                )
+                if str(item).strip()
+            ]
             self._add_note_box(
                 info_ax,
                 str(spec.get("subtitle_box_title") or "Context"),
-                [
-                    str(spec.get("subtitle") or ""),
-                    f"Case: {spec['case_id']}",
-                    f"Track: {spec['phase_or_track']}",
-                ],
+                subtitle_box_lines,
             )
             self._add_note_box(note_ax, str(spec.get("note_box_title") or "How to read this figure"), [str(item) for item in spec.get("note_lines", [])])
         fig.suptitle(str(spec["figure_title"]), x=0.05, y=0.965, ha="left", fontsize=float((self.style.get("typography") or {}).get("title_size") or 19), fontweight="bold")
@@ -2118,6 +2507,58 @@ class FigurePackagePublicationService:
             "source_paths": source_paths or [],
         }
 
+    def _study_box_spec(
+        self,
+        *,
+        spec_id: str,
+        figure_slug: str,
+        figure_title: str,
+        subtitle: str,
+        interpretation: str,
+        notes: str,
+        note_lines: list[str],
+        subtitle_box_title: str,
+        subtitle_box_lines: list[str],
+        study_boxes: list[dict[str, Any]],
+        source_paths: list[str],
+        run_type: str = "single_reference_map",
+        model_names: str = "study_boxes",
+        box_padding_fraction: float = 0.08,
+        minimum_pad_lon: float = 0.9,
+        minimum_pad_lat: float = 0.7,
+    ) -> dict[str, Any]:
+        return {
+            "spec_id": spec_id,
+            "renderer": "study_boxes",
+            "figure_family_code": "L",
+            "case_id": "THESIS_STUDY_CONTEXT",
+            "phase_or_track": "phase1_study_context",
+            "date_token": "shared_thesis_context",
+            "model_names": model_names,
+            "run_type": run_type,
+            "scenario_id": "",
+            "view_type": "single",
+            "variant": "paper",
+            "figure_slug": figure_slug,
+            "figure_title": figure_title,
+            "subtitle": subtitle,
+            "legend_keys": [],
+            "note_lines": note_lines,
+            "note_box_title": "How to read this figure",
+            "subtitle_box_title": subtitle_box_title,
+            "subtitle_box_lines": subtitle_box_lines,
+            "short_plain_language_interpretation": interpretation,
+            "recommended_for_main_defense": False,
+            "recommended_for_paper": True,
+            "notes": notes,
+            "source_paths": source_paths,
+            "study_boxes": study_boxes,
+            "status_key_override": "thesis_study_box_reference",
+            "box_padding_fraction": box_padding_fraction,
+            "minimum_pad_lon": minimum_pad_lon,
+            "minimum_pad_lat": minimum_pad_lat,
+        }
+
     def _image_spec(
         self,
         *,
@@ -2396,13 +2837,17 @@ class FigurePackagePublicationService:
         row = self._mindoro_primary_row()
         if row is None:
             return ["The March 13 -> March 14 reinit summary CSV was not available, so this figure should be read visually."]
-        confirmation_recipe = str(self.mindoro_phase1_confirmation_candidate.get("selected_recipe", "") or "")
+        official_recipe = str(self.phase1_baseline_selection.get("selected_recipe", "") or "").strip()
+        historical_winner = str(
+            self.phase1_baseline_selection.get("historical_four_recipe_winner", "")
+            or official_recipe
+        ).strip()
         return [
             f"{MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE} is now carried by the March 13 -> March 14 promoted Mindoro validation pair, seeded from the March 13 NOAA polygon and scored against the March 14 NOAA target.",
             MINDORO_SHARED_IMAGERY_CAVEAT,
             (
-                f"The separate focused 2016-2023 Mindoro drifter rerun selected the same {confirmation_recipe} recipe used by the stored B1 run and now serves as the active B1 recipe-provenance lane."
-                if confirmation_recipe
+                f"The separate focused 2016-2023 Mindoro drifter rerun found {historical_winner} as the historical four-recipe winner, and official B1 now uses {official_recipe} from that focused lane."
+                if official_recipe
                 else "The separate focused 2016-2023 Mindoro drifter provenance artifact was unavailable."
             ),
             f"The promoted OpenDrift R1 previous reinit p50 row reaches FSS beyond zero at 3/5/10 km with {int(row.get('forecast_nonzero_cells', 0))} forecast cells against {int(row.get('obs_nonzero_cells', 0))} observed cells.",
@@ -2509,10 +2954,10 @@ class FigurePackagePublicationService:
         return self._compose_note_lines(self._mindoro_comparison_context_lines(), list(score_lines))
 
     def _mindoro_recipe_provenance_line(self) -> str:
-        recipe = str(self.mindoro_phase1_confirmation_candidate.get("selected_recipe", "") or "").strip()
+        recipe = str(self.phase1_baseline_selection.get("selected_recipe", "") or "").strip()
         if not recipe:
             return "Provenance: focused Mindoro drifter recipe confirmation was unavailable."
-        return f"Provenance: focused 2016-2023 Mindoro drifter rerun confirmed `{recipe}` for the stored B1 lane."
+        return f"Provenance: focused 2016-2023 Mindoro drifter rerun promoted `{recipe}` into the active official B1 lane."
 
     def _mindoro_primary_board_layout_fields(self) -> dict[str, Any]:
         return {
@@ -2734,7 +3179,7 @@ class FigurePackagePublicationService:
                 notes=(
                     "Built from the stored March 14 observation mask, the stored March 13 seed mask "
                     "outline, and the stored OpenDrift R1 previous p50 raster only; the later "
-                    "2016-2023 Mindoro-focused drifter rerun selected the same recipe without rewriting stored run provenance."
+                    "2016-2023 Mindoro-focused drifter rerun now supplies the active B1 recipe provenance through the promoted focused winner."
                 ),
                 note_lines=self._mindoro_primary_note_lines(
                     self._mindoro_primary_branch_score_line("R1_previous", "OpenDrift R1 previous reinit p50")
@@ -3194,7 +3639,19 @@ class FigurePackagePublicationService:
         event_det = "output/CASE_MINDORO_RETRO_2023/pygnome_public_comparison/products/C1_od_deterministic/od_control_eventcorridor_model_union_2023-03-04_to_2023-03-06.tif"
         event_ensemble = "output/CASE_MINDORO_RETRO_2023/pygnome_public_comparison/products/C2_od_ensemble_consolidated/od_ensemble_consolidated_eventcorridor_model_union_2023-03-04_to_2023-03-06.tif"
         event_pygnome = "output/CASE_MINDORO_RETRO_2023/pygnome_public_comparison/products/C3_pygnome_deterministic/pygnome_eventcorridor_model_union_2023-03-04_to_2023-03-06.tif"
-        deterministic_track = "output/CASE_MINDORO_RETRO_2023/forecast/deterministic_control_cmems_era5.nc"
+        selected_recipe = str(self.phase1_baseline_selection.get("selected_recipe", "") or "").strip() or "cmems_gfs"
+        deterministic_track = f"output/CASE_MINDORO_RETRO_2023/forecast/deterministic_control_{selected_recipe}.nc"
+        if not (self.repo_root / deterministic_track).exists():
+            fallback_track = next(
+                iter(
+                    sorted(
+                        (self.repo_root / "output" / "CASE_MINDORO_RETRO_2023" / "forecast").glob("deterministic_control_*.nc")
+                    )
+                ),
+                None,
+            )
+            if fallback_track is not None:
+                deterministic_track = str(fallback_track.relative_to(self.repo_root)).replace("\\", "/")
         pygnome_track = "output/CASE_MINDORO_RETRO_2023/pygnome_public_comparison/products/C3_pygnome_deterministic/pygnome_deterministic_control.nc"
         strict_score_line = self._mindoro_strict_score_line()
         event_det_score_line = self._mindoro_event_score_line("deterministic")
@@ -3946,6 +4403,188 @@ class FigurePackagePublicationService:
             ),
         ]
         return singles, boards
+
+    def _study_box_publication_specs(self) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        study_boxes = self._thesis_study_box_entries()
+        source_paths = [
+            str(PHASE1_BASELINE_SELECTION_PATH),
+            str(MINDORO_BASE_CASE_CONFIG_PATH),
+            str(MINDORO_FORECAST_MANIFEST),
+            str(PROTOTYPE_2016_PROVENANCE_METADATA_PATH),
+            str(DOMAIN_GLOSSARY_PATH),
+        ]
+        subtitle_box_lines = [
+            f"{item['tag']}. {item['label']}: {self._format_wgs84_bounds(item['bounds'])}"
+            for item in study_boxes
+        ]
+        note_lines = [
+            "All boxes are WGS84 longitude/latitude references copied from stored repo metadata only.",
+            "The focused Mindoro Phase 1 validation box is the active thesis-facing provenance box for the B1 recipe story.",
+            "`mindoro_case_domain` remains the broader official transport/overview fallback extent, while the scoring-grid display bounds remain the narrower scoreable display extent.",
+            "The prototype_2016 first-code search box is historical-origin support metadata only; the stored case-local prototype extents remain the operative scientific/display extents for the 2016 figures.",
+        ]
+        singles = [
+            self._study_box_spec(
+                spec_id="thesis_study_boxes_reference",
+                figure_slug="thesis_study_boxes_reference",
+                figure_title="Thesis study boxes reference figure",
+                subtitle=(
+                    "Shared thesis-facing WGS84 box reference for the Mindoro provenance lane, the Mindoro spill-case "
+                    "overview domain, the scoring-grid display bounds, and the prototype_2016 historical-origin search box"
+                ),
+                interpretation=(
+                    "This figure turns the thesis-facing study boxes into one panel-ready reference image without "
+                    "pretending that the focused Mindoro box, the broader Mindoro case domain, the scoring-grid "
+                    "display bounds, and the prototype_2016 first-code search box are one operative scientific domain."
+                ),
+                notes=(
+                    "Built from stored Phase 1 baseline/config metadata, the stored Mindoro forecast manifest display "
+                    "bounds, and the curated prototype_2016 provenance metadata only; no scientific rerun or live "
+                    "extent rewriting was triggered."
+                ),
+                note_lines=note_lines,
+                subtitle_box_title="Included boxes",
+                subtitle_box_lines=subtitle_box_lines,
+                study_boxes=study_boxes,
+                source_paths=source_paths,
+            )
+        ]
+
+        detail_specs = {
+            "1": {
+                "spec_id": "focused_phase1_box_geography_reference",
+                "figure_slug": "focused_phase1_box_geography_reference",
+                "figure_title": "Focused Mindoro Phase 1 box geography reference",
+                "subtitle": (
+                    "Active thesis-facing Mindoro Phase 1 provenance box shown on a west-coast Philippines geographic "
+                    "reference backdrop"
+                ),
+                "interpretation": (
+                    "This panel isolates the active thesis-facing Mindoro Phase 1 provenance box while still showing "
+                    "the surrounding west-coast Philippine geography."
+                ),
+                "notes": (
+                    "Built from the stored focused Phase 1 baseline-selection box only, with a presentation-only "
+                    "geographic backdrop for orientation."
+                ),
+                "note_lines": [
+                    "This is the active thesis-facing provenance box for the B1 recipe-selection story.",
+                    "The geographic backdrop is reference context so the Mindoro setting stays visible in a panel-ready figure.",
+                    "Built from stored repo metadata only; no scientific rerun or live extent rewriting was triggered.",
+                ],
+                "subtitle_box_lines": [
+                    "Selected box: Focused Mindoro Phase 1 validation box",
+                    f"Bounds (WGS84): {self._format_wgs84_bounds(study_boxes[0]['bounds'])}",
+                    "Role: active thesis-facing provenance box for the B1 recipe story",
+                ],
+            },
+            "2": {
+                "spec_id": "mindoro_case_domain_geography_reference",
+                "figure_slug": "mindoro_case_domain_geography_reference",
+                "figure_title": "Mindoro case-domain geography reference",
+                "subtitle": (
+                    "Stored `mindoro_case_domain` fallback transport and overview extent shown with geographic context"
+                ),
+                "interpretation": (
+                    "This panel keeps the broader `mindoro_case_domain` visible as the fallback transport and overview "
+                    "extent without confusing it with the focused thesis-facing provenance box."
+                ),
+                "notes": (
+                    "Built from the stored `mindoro_case_domain` config only, with a presentation-only geographic "
+                    "backdrop for orientation."
+                ),
+                "note_lines": [
+                    "`mindoro_case_domain` remains the broader fallback transport and overview extent.",
+                    "It should not be collapsed into the focused Mindoro Phase 1 provenance box or the narrower scoring-grid bounds.",
+                    "Built from stored repo metadata only; no scientific rerun or live extent rewriting was triggered.",
+                ],
+                "subtitle_box_lines": [
+                    "Selected box: `mindoro_case_domain` fallback transport/overview extent",
+                    f"Bounds (WGS84): {self._format_wgs84_bounds(study_boxes[1]['bounds'])}",
+                    "Role: broader Mindoro transport and overview context, not the active thesis provenance box",
+                ],
+            },
+            "3": {
+                "spec_id": "scoring_grid_bounds_geography_reference",
+                "figure_slug": "scoring_grid_bounds_geography_reference",
+                "figure_title": "Mindoro scoring-grid bounds geography reference",
+                "subtitle": (
+                    "Stored Mindoro scoring-grid display bounds shown with geographic context for the thesis-facing "
+                    "validation area"
+                ),
+                "interpretation": (
+                    "This panel isolates the narrower scoring-grid display bounds so the scoreable Mindoro display "
+                    "extent stays visible without being mistaken for the broader case domain."
+                ),
+                "notes": (
+                    "Built from the stored Mindoro forecast-manifest display bounds only, with a presentation-only "
+                    "geographic backdrop for orientation."
+                ),
+                "note_lines": [
+                    "These are the stored scoring-grid display bounds used for the Mindoro scoreable display extent.",
+                    "They are narrower than the broader `mindoro_case_domain` and do not replace the active thesis-facing provenance box.",
+                    "Built from stored repo metadata only; no scientific rerun or live extent rewriting was triggered.",
+                ],
+                "subtitle_box_lines": [
+                    "Selected box: Mindoro scoring-grid display bounds",
+                    f"Bounds (WGS84): {self._format_wgs84_bounds(study_boxes[2]['bounds'])}",
+                    "Role: narrower scoreable display extent derived from the stored forecast manifest",
+                ],
+            },
+            "4": {
+                "spec_id": "prototype_first_code_search_box_geography_reference",
+                "figure_slug": "prototype_first_code_search_box_geography_reference",
+                "figure_title": "prototype_2016 first-code search-box geography reference",
+                "subtitle": (
+                    "Historical-origin `prototype_2016` first-code search box shown with the broader west-coast "
+                    "Philippines geography"
+                ),
+                "interpretation": (
+                    "This panel isolates the historical-origin `prototype_2016` first-code search box so the early "
+                    "west-coast Philippines focus stays visible without implying that it is an active thesis box today."
+                ),
+                "notes": (
+                    "Built from the curated `prototype_2016` provenance metadata only, with a presentation-only "
+                    "geographic backdrop for orientation."
+                ),
+                "note_lines": [
+                    "This is historical-origin support metadata from the very first prototype code, not an active thesis-facing Mindoro box.",
+                    "The stored case-local prototype extents remain the operative scientific/display extents for the 2016 figures.",
+                    "Built from stored repo metadata only; no scientific rerun or live extent rewriting was triggered.",
+                ],
+                "subtitle_box_lines": [
+                    "Selected box: `prototype_2016` first-code search box",
+                    f"Bounds (WGS84): {self._format_wgs84_bounds(study_boxes[3]['bounds'])}",
+                    "Role: historical-origin west-coast Philippines search box used by the earliest prototype code",
+                ],
+            },
+        }
+
+        for item in study_boxes:
+            detail_spec = detail_specs.get(str(item["tag"]))
+            if detail_spec is None:
+                continue
+            singles.append(
+                self._study_box_spec(
+                    spec_id=str(detail_spec["spec_id"]),
+                    figure_slug=str(detail_spec["figure_slug"]),
+                    figure_title=str(detail_spec["figure_title"]),
+                    subtitle=str(detail_spec["subtitle"]),
+                    interpretation=str(detail_spec["interpretation"]),
+                    notes=str(detail_spec["notes"]),
+                    note_lines=[str(line) for line in detail_spec["note_lines"]],
+                    subtitle_box_title="Selected box",
+                    subtitle_box_lines=[str(line) for line in detail_spec["subtitle_box_lines"]],
+                    study_boxes=[item],
+                    source_paths=source_paths,
+                    run_type="single_box_reference_map",
+                    model_names="study_box_geography",
+                    box_padding_fraction=0.22,
+                    minimum_pad_lon=1.05,
+                    minimum_pad_lat=0.85,
+                )
+            )
+        return singles, []
 
     def _dwh_publication_specs(self) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
         obs_21 = "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_setup/obs_mask_2010-05-21.tif"
@@ -5567,6 +6206,7 @@ class FigurePackagePublicationService:
         for builder in (
             self._mindoro_publication_specs,
             self._phase4_publication_specs,
+            self._study_box_publication_specs,
             self._dwh_publication_specs_v2,
             self._prototype_support_publication_specs,
         ):

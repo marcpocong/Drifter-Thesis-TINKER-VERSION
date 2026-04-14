@@ -26,7 +26,7 @@ from src.services.phase3b_extended_public_scored import (
     SHORT_DATES,
 )
 from src.services.scoring import OFFICIAL_PHASE3B_WINDOWS_KM, Phase3BScoringService
-from src.utils.io import get_case_output_dir, resolve_recipe_selection, resolve_spill_origin
+from src.utils.io import extract_manifest_recipe, get_case_output_dir, model_dir_complete_for_recipe, resolve_recipe_selection, resolve_spill_origin
 
 try:
     import matplotlib.pyplot as plt
@@ -293,19 +293,20 @@ class TransportRetentionFixService:
         scenario_dir = self.output_dir / scenario.output_slug
         scenario_dir.mkdir(parents=True, exist_ok=True)
         if scenario.reuse_existing_baseline:
-            return {
-                "scenario_id": scenario.scenario_id,
-                "scenario_slug": scenario.slug,
-                "status": "reused_existing_baseline",
-                "model_dir": str(self.short_model_dir),
-                "run_name": f"{self.case.run_name}/{EXTENDED_SCORED_DIR_NAME}/model_run",
-                "forecast_result": {"status": "reused_existing_short_extended_baseline"},
-            }
+            if model_dir_complete_for_recipe(self.short_model_dir, selection.recipe) and not self.force_rerun:
+                return {
+                    "scenario_id": scenario.scenario_id,
+                    "scenario_slug": scenario.slug,
+                    "status": "reused_existing_baseline",
+                    "model_dir": str(self.short_model_dir),
+                    "run_name": f"{self.case.run_name}/{EXTENDED_SCORED_DIR_NAME}/model_run",
+                    "forecast_result": {"status": "reused_existing_short_extended_baseline"},
+                }
 
         model_run_name = f"{self.case.run_name}/{TRANSPORT_RETENTION_DIR_NAME}/{scenario.output_slug}/model_run"
         model_dir = self.base_output / TRANSPORT_RETENTION_DIR_NAME / scenario.output_slug / "model_run"
-        member_paths = sorted((model_dir / "ensemble").glob("member_*.nc"))
-        if member_paths and (model_dir / "forecast" / "forecast_manifest.json").exists() and not self.force_rerun:
+        if model_dir_complete_for_recipe(model_dir, selection.recipe) and not self.force_rerun:
+            member_paths = sorted((model_dir / "ensemble").glob("member_*.nc"))
             return {
                 "scenario_id": scenario.scenario_id,
                 "scenario_slug": scenario.slug,
@@ -559,9 +560,25 @@ class TransportRetentionFixService:
 
     def _scenario_run_specs(self, model_dir: Path) -> list[dict]:
         specs = []
-        control = model_dir / "forecast" / "deterministic_control_cmems_era5.nc"
-        if control.exists():
+        forecast_manifest = model_dir / "forecast" / "forecast_manifest.json"
+        recorded_recipe = ""
+        if forecast_manifest.exists():
+            with open(forecast_manifest, "r", encoding="utf-8") as handle:
+                recorded_recipe = extract_manifest_recipe(json.load(handle) or {})
+        control = model_dir / "forecast" / f"deterministic_control_{recorded_recipe}.nc" if recorded_recipe else Path()
+        if control and control.exists():
             specs.append({"run_id": "deterministic_control", "run_kind": "deterministic_control", "member_id": "", "path": control})
+        else:
+            fallback_control = next(iter(sorted((model_dir / "forecast").glob("deterministic_control_*.nc"))), None)
+            if fallback_control is not None:
+                specs.append(
+                    {
+                        "run_id": "deterministic_control",
+                        "run_kind": "deterministic_control",
+                        "member_id": "",
+                        "path": fallback_control,
+                    }
+                )
         for path in sorted((model_dir / "ensemble").glob("member_*.nc")):
             label = path.stem.replace("member_", "")
             specs.append(

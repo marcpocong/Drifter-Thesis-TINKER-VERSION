@@ -201,15 +201,24 @@ class UiReadonlySemanticsTests(unittest.TestCase):
         self.assertIn("IdealSans-Bold.woff2", readme_text)
 
     def test_phase4_wording_matches_settled_decisions(self):
+        phase1_text = (REPO_ROOT / "ui" / "pages" / "phase1_recipe_selection.py").read_text(encoding="utf-8")
         phase4_text = (REPO_ROOT / "ui" / "pages" / "phase4_oiltype_and_shoreline.py").read_text(encoding="utf-8")
         legacy_text = (REPO_ROOT / "ui" / "pages" / "legacy_2016_support.py").read_text(encoding="utf-8")
 
+        self.assertIn("Study boxes used by the thesis", phase1_text)
+        self.assertIn("Per-box geography references", phase1_text)
+        self.assertIn("Shared box reference", phase1_text)
+        self.assertIn("first-code search box", phase1_text)
         self.assertIn("No matched PyGNOME Phase 4 comparison is packaged yet.", phase4_text)
         self.assertIn("Current Mindoro Phase 4 results are OpenDrift/OpenOil scenario outputs only.", phase4_text)
         self.assertIn("Budget-only deterministic PyGNOME comparator pilot.", legacy_text)
         self.assertIn("Shoreline comparison is not packaged because matched PyGNOME shoreline outputs are not available.", legacy_text)
-        self.assertIn("Early prototype capture context", legacy_text)
-        self.assertIn("Original source boxes", legacy_text)
+        self.assertIn("First-code search context", legacy_text)
+        self.assertIn("Historical origin source boxes", legacy_text)
+        self.assertIn("first-code search box", legacy_text)
+        self.assertIn("first three 2016 drifter cases", legacy_text)
+        self.assertIn("west coast of the Philippines", legacy_text)
+        self.assertIn("operative scientific/display extents", legacy_text)
 
     def test_ui_asset_branding_readme_covers_supported_paths_and_fallback(self):
         branding_text = (REPO_ROOT / "ui" / "assets" / "README.md").read_text(encoding="utf-8")

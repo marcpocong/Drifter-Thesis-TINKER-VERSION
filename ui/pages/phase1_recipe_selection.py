@@ -22,6 +22,7 @@ import streamlit as st
 
 from ui.pages.common import (
     render_export_note,
+    render_figure_gallery,
     render_markdown_block,
     render_metric_row,
     render_page_intro,
@@ -59,7 +60,17 @@ def render(state: dict, ui_state: dict) -> None:
     reference_manifest = state["phase1_reference_manifest"] or {}
     reference_ranking = state["phase1_reference_recipe_ranking"]
     reference_summary = state["phase1_reference_recipe_summary"]
+    publication_registry = state["publication_registry"]
     focused_missing = not manifest and ranking.empty and summary.empty
+    study_box_figures = publication_registry.loc[
+        publication_registry.get("status_key", pd.Series(dtype=str)).astype(str).eq("thesis_study_box_reference")
+    ].reset_index(drop=True)
+    study_box_overview_figures = study_box_figures.loc[
+        study_box_figures.get("run_type", pd.Series(dtype=str)).astype(str).eq("single_reference_map")
+    ].reset_index(drop=True)
+    study_box_detail_figures = study_box_figures.loc[
+        study_box_figures.get("run_type", pd.Series(dtype=str)).astype(str).eq("single_box_reference_map")
+    ].reset_index(drop=True)
 
     time_window = manifest.get("time_window") or {}
     subset_info = manifest.get("ranking_subset") or {}
@@ -105,7 +116,11 @@ def render(state: dict, ui_state: dict) -> None:
     )
     render_status_callout(
         "Recipe-scope note",
-        "The focused Mindoro provenance lane now evaluates the four-recipe family. If a GFS-backed recipe wins historically, the official B1 baseline still keeps the highest-ranked non-GFS fallback until a separate event-scale GFS adoption workflow is completed.",
+        (
+            "The focused Mindoro provenance lane now evaluates the four-recipe family, and the official B1 baseline promotes the focused historical winner directly."
+            if not gfs_historical_winner_not_adopted
+            else "The focused Mindoro provenance lane now evaluates the four-recipe family. If a GFS-backed recipe wins historically, the official B1 baseline still keeps the highest-ranked non-GFS fallback until a separate event-scale GFS adoption workflow is completed."
+        ),
         "info",
     )
     if gfs_historical_winner_not_adopted:
@@ -131,6 +146,35 @@ def render(state: dict, ui_state: dict) -> None:
         ],
         export_mode=export_mode,
     )
+
+    if not study_box_overview_figures.empty or not study_box_detail_figures.empty:
+        render_status_callout(
+            "Shared box reference",
+            "The thesis-facing box vocabulary is now bundled as one shared panel-ready reference figure plus separate per-box geography figures so the focused Mindoro Phase 1 box, `mindoro_case_domain`, the scoring-grid display bounds, and the legacy prototype first-code search box stay distinct.",
+            "info",
+        )
+        if not study_box_overview_figures.empty:
+            st.markdown("### Study boxes used by the thesis")
+            render_figure_gallery(
+                study_box_overview_figures,
+                title="Study boxes used by the thesis",
+                caption="This shared publication figure is built from stored config, manifest, and provenance metadata only. It keeps the active Mindoro provenance box separate from the broader Mindoro overview domain, the narrower scoring-grid display bounds, and the prototype_2016 historical-origin first-code search box.",
+                limit=1,
+                columns_per_row=1,
+                export_mode=export_mode,
+                overlay_label="Click to enlarge",
+            )
+        if not study_box_detail_figures.empty:
+            st.markdown("### Per-box geography references")
+            render_figure_gallery(
+                study_box_detail_figures,
+                title="Per-box geography references",
+                caption="These additional panel-ready figures isolate each stored thesis box while keeping the west-coast Philippines geography visible for presentation and thesis-panel use.",
+                limit=4,
+                columns_per_row=2,
+                export_mode=export_mode,
+                overlay_label="Click to enlarge",
+            )
 
     def _focused_lane() -> None:
         render_status_callout(

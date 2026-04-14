@@ -451,6 +451,15 @@ class PrototypeLegacyFinalFiguresTests(unittest.TestCase):
             self.assertEqual(service.style["typography"]["font_family"], "Arial")
             self.assertTrue(results["font_family"])
             self.assertTrue((root / "output" / "2016 Legacy Runs FINAL Figures" / "README.md").exists())
+            provenance_metadata = json.loads(
+                (
+                    root
+                    / "output"
+                    / "2016 Legacy Runs FINAL Figures"
+                    / "manifests"
+                    / "prototype_2016_provenance_metadata.json"
+                ).read_text(encoding="utf-8")
+            )
             self.assertTrue(
                 (
                     root
@@ -538,6 +547,30 @@ class PrototypeLegacyFinalFiguresTests(unittest.TestCase):
                 "A limited deterministic Phase 4 PyGNOME budget comparator pilot may be packaged when stored case-local comparator outputs exist; shoreline comparison remains unavailable in that pilot.",
                 curated_manifest["notes"],
             )
+            self.assertEqual(
+                provenance_metadata["prototype_2016_initial_capture_box"],
+                [108.6465, 121.3655, 6.1865, 20.3515],
+            )
+            self.assertEqual(
+                provenance_metadata["prototype_2016_initial_capture_source_boxes"],
+                [
+                    [113.267, 121.267, 6.3685, 14.3685],
+                    [113.3655, 121.3655, 6.1865, 14.1865],
+                    [108.6465, 116.6465, 12.3515, 20.3515],
+                ],
+            )
+            self.assertIn("first-code search box", provenance_metadata["historical_origin_summary"])
+            self.assertIn("west coast of the Philippines", provenance_metadata["historical_origin_summary"])
+            self.assertIn("operative scientific/display extents", provenance_metadata["operative_extent_note"])
+            readme_text = (root / "output" / "2016 Legacy Runs FINAL Figures" / "README.md").read_text(encoding="utf-8")
+            self.assertIn("first-code search box", readme_text)
+            self.assertIn("west coast of the Philippines", readme_text)
+            self.assertIn("operative scientific/display extents", readme_text)
+            self.assertEqual(
+                curated_manifest["provenance_metadata_json"],
+                "output/2016 Legacy Runs FINAL Figures/manifests/prototype_2016_provenance_metadata.json",
+            )
+            self.assertIn("first-code search box", " ".join(curated_manifest["notes"]))
             registry_path = root / results["legacy_final_output_registry_csv"]
             with open(registry_path, "r", encoding="utf-8", newline="") as handle:
                 reader = csv.DictReader(handle)
@@ -545,6 +578,13 @@ class PrototypeLegacyFinalFiguresTests(unittest.TestCase):
             self.assertGreater(len(registry_rows), 0)
             self.assertTrue(all("\n" not in str(row["notes"]) for row in registry_rows))
             self.assertTrue(all((root / Path(row["final_relative_path"])).exists() for row in registry_rows))
+            self.assertTrue(
+                any(
+                    row["final_relative_path"]
+                    == "output/2016 Legacy Runs FINAL Figures/manifests/prototype_2016_provenance_metadata.json"
+                    for row in registry_rows
+                )
+            )
             self.assertTrue(
                 any(row["phase_group"] == "phase4" and row["copied_vs_regenerated"] == "regenerated_from_stored_csv" for row in registry_rows)
             )

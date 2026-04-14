@@ -3,7 +3,7 @@
 Key scientific takeaway:
 
 - Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents is now carried by the Mindoro March 13 -> March 14 NOAA reinit track.
-- The separate focused 2016-2023 Mindoro drifter rerun selected `cmems_era5` as the active B1 recipe provenance.
+- The separate focused 2016-2023 Mindoro drifter rerun selected `cmems_gfs` as the active B1 recipe provenance.
 - That focused rerun searched through early 2023, but its accepted registry does not include near-2023 accepted segments.
 - DWH is the separate external transfer-validation success under the readiness-gated historical stack, not a second local drifter-calibration story.
 - Ensemble benefit is case-dependent, not universal.

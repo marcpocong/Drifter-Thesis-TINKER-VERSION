@@ -218,6 +218,7 @@ def _build_test_repo(root: Path) -> None:
             },
             "official_baseline_update": {
                 "enabled": True,
+                "promote_historical_winner_directly": True,
                 "baseline_id": "mindoro_phase1_focused_recipe_provenance_v2",
                 "description": "Current default Mindoro spill-case Phase 1 recipe provenance finalized from the separate focused pre-spill 2016-2023 Mindoro drifter rerun with the full four-recipe family",
                 "source_kind": "focused_mindoro_phase1_provenance_artifact",
@@ -726,7 +727,7 @@ class Phase1ProductionRerunTests(unittest.TestCase):
             self.assertEqual(candidate["selected_recipe"], "cmems_era5")
             self.assertFalse(adoption["gfs_historical_winner_not_adopted"])
 
-    def test_focused_run_records_gfs_historical_winner_but_adopts_non_gfs_official_recipe(self):
+    def test_focused_run_records_gfs_historical_winner_but_can_still_adopt_non_gfs_official_recipe(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
             _build_test_repo(root)
@@ -816,6 +817,7 @@ class Phase1ProductionRerunTests(unittest.TestCase):
             service._build_recipe_tables = mock.Mock(
                 return_value=(recipe_summary_df, recipe_ranking_df, "cmems_gfs")
             )
+            service.official_baseline_update_config["promote_historical_winner_directly"] = False
 
             results = service.run()
 
@@ -1181,6 +1183,65 @@ class Phase1ProductionRerunTests(unittest.TestCase):
             self.assertEqual(status["missing_forcing_factors"], [])
             self.assertNotIn("gfs", status)
 
+    def test_phase1_monthly_inputs_use_persistent_local_data_store(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            _build_test_repo(root)
+
+            with mock.patch("src.services.phase1_production_rerun.get_case_context", return_value=_case_context_stub()):
+                service = Phase1ProductionRerunService(repo_root=root)
+
+            self.assertEqual(
+                service.drifter_cache_root,
+                root / "data" / "historical_validation_inputs" / "phase1_regional_2016_2022" / "drifter_chunks",
+            )
+            self.assertEqual(
+                service.forcing_cache_root,
+                root / "data" / "historical_validation_inputs" / "phase1_regional_2016_2022" / "forcing_months",
+            )
+            self.assertTrue(service.drifter_cache_root.exists())
+            self.assertTrue(service.forcing_cache_root.exists())
+
+    def test_legacy_monthly_drifter_chunk_is_promoted_to_local_store(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            _build_test_repo(root)
+
+            with mock.patch("src.services.phase1_production_rerun.get_case_context", return_value=_case_context_stub()):
+                service = Phase1ProductionRerunService(repo_root=root)
+
+            month_start = pd.Timestamp("2017-03-01T00:00:00Z")
+            legacy_path = service.output_root / "_scratch" / "drifter_chunks" / "201703.csv"
+            legacy_path.parent.mkdir(parents=True, exist_ok=True)
+            legacy_frame = pd.DataFrame(
+                {
+                    "time": ["2017-03-01T00:00:00Z"],
+                    "lat": [12.0],
+                    "lon": [121.0],
+                    "ID": ["LEGACY"],
+                    "ve": [0.0],
+                    "vn": [0.0],
+                    "drogue_lost_date": ["2018-01-01T00:00:00Z"],
+                    "deploy_date": ["2016-12-01T00:00:00Z"],
+                    "DrogueType": ["holey_sock"],
+                    "DrogueLength": ["15m"],
+                    "DrogueDetectSensor": ["yes"],
+                }
+            )
+            legacy_frame.to_csv(legacy_path, index=False)
+
+            with mock.patch("src.services.phase1_production_rerun.ERDDAP") as erddap_mock:
+                frame, metadata = service._fetch_monthly_drifter_chunk(month_start)
+
+            erddap_mock.assert_not_called()
+            self.assertEqual(metadata["status"], "staged_legacy_cache")
+            self.assertEqual(metadata["staged_from_legacy_path"], "output/phase1_production_rerun/_scratch/drifter_chunks/201703.csv")
+            self.assertEqual(frame["ID"].tolist(), ["LEGACY"])
+            self.assertEqual(
+                pd.read_csv(service.drifter_cache_root / "201703.csv")["ID"].tolist(),
+                ["LEGACY"],
+            )
+
     def test_force_refresh_bypasses_monthly_drifter_cache(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
@@ -1314,7 +1375,7 @@ class Phase1ProductionRerunTests(unittest.TestCase):
             self.assertEqual(discovered, expected_fallback)
             self.assertEqual(attempt_count["value"], 2)
 
-    def test_gfs_http_fallback_fail_fast_caps_attempts_at_one(self):
+    def test_gfs_http_fallback_retries_transient_direct_file_failures(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             root = Path(tmpdir)
             _build_test_repo(root)
@@ -1336,7 +1397,7 @@ class Phase1ProductionRerunTests(unittest.TestCase):
                         scratch_dir=root,
                     )
 
-            self.assertEqual(request_get.call_count, 1)
+            self.assertEqual(request_get.call_count, 3)
 
     def test_gfs_archived_download_prefers_http_cfgrib_before_opendap(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -1409,6 +1470,177 @@ class Phase1ProductionRerunTests(unittest.TestCase):
             self.assertIs(dataset, expected)
             http_loader.assert_called_once()
             opendap_loader.assert_called_once()
+
+    def test_partial_reusable_gfs_cache_is_staged_and_augmented(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            _build_test_repo(root)
+
+            experimental_case = _case_context_stub(
+                workflow_mode="phase1_mindoro_focus_pre_spill_2016_2023",
+                run_name="phase1_mindoro_focus_pre_spill_2016_2023",
+                validation_box=[118.751, 124.305, 10.620, 16.026],
+                description="experimental pre-spill 2016-2023 Mindoro-focused drifter-calibration rerun for trial recipe selection only",
+            )
+            with mock.patch(
+                "src.services.phase1_production_rerun.get_case_context",
+                return_value=experimental_case,
+            ):
+                service = Phase1ProductionRerunService(
+                    repo_root=root,
+                    config_path="config/phase1_mindoro_focus_pre_spill_2016_2023.yaml",
+                )
+
+            required_start = pd.Timestamp("2017-02-01T06:00:00Z")
+            required_end = pd.Timestamp("2017-02-02T06:00:00Z")
+            source_dir = (
+                root
+                / "output"
+                / "phase1_production_rerun"
+                / "_scratch"
+                / "forcing_months"
+                / "201702"
+            )
+            source_dir.mkdir(parents=True, exist_ok=True)
+            partial_ds = _apply_wind_cf_metadata(
+                xr.Dataset(
+                    data_vars={
+                        "x_wind": (("time", "lat", "lon"), [[[1.0]], [[1.5]]]),
+                        "y_wind": (("time", "lat", "lon"), [[[2.0]], [[2.5]]]),
+                    },
+                    coords={
+                        "time": [
+                            pd.Timestamp("2017-02-02T00:00:00"),
+                            pd.Timestamp("2017-02-02T06:00:00"),
+                        ],
+                        "lat": [12.0],
+                        "lon": [121.0],
+                    },
+                )
+            )
+            partial_ds.to_netcdf(source_dir / "gfs_wind.nc")
+
+            target_dir = (
+                service.forcing_cache_root
+                / "201702"
+            )
+            staged = service._stage_reusable_gfs_cache(
+                month_key="201702",
+                forcing_dir=target_dir,
+                required_start=required_start,
+                required_end=required_end,
+            )
+
+            self.assertIsNotNone(staged)
+            self.assertEqual(staged["status"], "staged_partial_cache")
+            self.assertTrue((target_dir / "gfs_wind.nc").exists())
+
+            def _write_prefix_patch(**kwargs):
+                patch_ds = _apply_wind_cf_metadata(
+                    xr.Dataset(
+                        data_vars={
+                            "x_wind": (("time", "lat", "lon"), [[[0.1]], [[0.2]], [[0.3]]]),
+                            "y_wind": (("time", "lat", "lon"), [[[0.4]], [[0.5]], [[0.6]]]),
+                        },
+                        coords={
+                            "time": [
+                                pd.Timestamp("2017-02-01T06:00:00"),
+                                pd.Timestamp("2017-02-01T12:00:00"),
+                                pd.Timestamp("2017-02-01T18:00:00"),
+                            ],
+                            "lat": [12.0],
+                            "lon": [121.0],
+                        },
+                    )
+                )
+                patch_ds.to_netcdf(kwargs["output_path"])
+                return {
+                    "status": "downloaded",
+                    "path": str(kwargs["output_path"]),
+                    "source_system": "ucar_gdex_d084001",
+                    "source_tier": "secondary",
+                    "source_inferred": False,
+                    "primary_failure": "GFSAcquisitionError: simulated primary failure",
+                }
+
+            with mock.patch.object(service, "_acquire_gfs_cache_file", side_effect=_write_prefix_patch):
+                record = service._download_gfs_winds(
+                    required_start,
+                    required_end,
+                    target_dir,
+                )
+
+            self.assertEqual(record["status"], "augmented_partial_cache")
+            self.assertEqual(record["source_system"], "mixed")
+            inspection = service._inspect_gfs_cache(
+                target_dir / "gfs_wind.nc",
+                required_start=required_start,
+                required_end=required_end,
+            )
+            self.assertTrue(inspection["valid"])
+
+            payload = json.loads((target_dir / "gfs_wind.provenance.json").read_text(encoding="utf-8"))
+            self.assertEqual(payload["source_system"], "mixed")
+            self.assertEqual(payload["source_tier"], "mixed")
+            self.assertEqual(len(payload["source_components"]), 2)
+
+            with xr.open_dataset(target_dir / "gfs_wind.nc") as combined:
+                time_values = list(pd.to_datetime(combined["time"].values))
+            self.assertEqual(
+                time_values,
+                [
+                    pd.Timestamp("2017-02-01T06:00:00"),
+                    pd.Timestamp("2017-02-01T12:00:00"),
+                    pd.Timestamp("2017-02-01T18:00:00"),
+                    pd.Timestamp("2017-02-02T00:00:00"),
+                    pd.Timestamp("2017-02-02T06:00:00"),
+                ],
+            )
+
+    def test_write_local_input_inventory_records_persistent_store_rows(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            root = Path(tmpdir)
+            _build_test_repo(root)
+
+            with mock.patch("src.services.phase1_production_rerun.get_case_context", return_value=_case_context_stub()):
+                service = Phase1ProductionRerunService(repo_root=root)
+
+            inventory_path = service._write_local_input_inventory(
+                drifter_chunk_status=[
+                    {
+                        "month_key": "201703",
+                        "status": "cached",
+                        "cache_path": "data/historical_validation_inputs/phase1_regional_2016_2022/drifter_chunks/201703.csv",
+                        "chunk_start_utc": "2017-03-01T00:00:00+00:00",
+                        "chunk_end_utc": "2017-03-31T23:59:59+00:00",
+                        "row_count": 10,
+                        "staged_from_legacy_path": "",
+                    }
+                ],
+                forcing_status=[
+                    {
+                        "month_key": "201703",
+                        "start_time_utc": "2017-03-01T00:00:00+00:00",
+                        "end_time_utc": "2017-03-04T00:00:00+00:00",
+                        "required_forcing_sources": ["hycom"],
+                        "hycom": {
+                            "status": "staged_legacy_cache",
+                            "path": "data/historical_validation_inputs/phase1_regional_2016_2022/forcing_months/201703/hycom_curr.nc",
+                            "staged_from_legacy_path": "output/phase1_production_rerun/_scratch/forcing_months/201703/hycom_curr.nc",
+                            "source_system": "",
+                            "source_tier": "",
+                        },
+                    }
+                ],
+            )
+
+            inventory_df = pd.read_csv(inventory_path)
+            self.assertEqual(len(inventory_df), 2)
+            self.assertEqual(
+                sorted(inventory_df["store_scope"].tolist()),
+                ["phase1_monthly_drifter_store", "phase1_monthly_forcing_store"],
+            )
+            self.assertIn("staged_legacy_cache", inventory_df["status"].tolist())
 
     def test_apply_wind_cf_metadata_sets_reader_friendly_standard_names(self):
         ds = xr.Dataset(

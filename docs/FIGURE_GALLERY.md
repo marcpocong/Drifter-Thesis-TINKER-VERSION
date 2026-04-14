@@ -136,6 +136,7 @@ The polished board layer adds:
 - I. DWH OpenDrift vs PyGNOME singles plus comparison board
 - J. DWH trajectory singles plus trajectory board
 - K. Prototype 2021 accepted-segment support-only OpenDrift vs PyGNOME singles plus per-case side-by-side boards
+- L. Shared thesis study-box reference figure set built from stored box metadata only
 
 The publication package adds:
 
@@ -145,6 +146,7 @@ The publication package adds:
 - a promoted March 13 -> March 14 Mindoro validation presentation lane for `Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents`, with the shared March 12 imagery caveat kept explicit and the separate focused Mindoro Phase 1 drifter-based provenance note carried as provenance rather than rewritten run history
 - an explicit publication-grade note figure explaining why Phase 4 OpenDrift-versus-PyGNOME comparison is still deferred
 - support-only prototype family `K`, which now republishes the preferred accepted-segment 2021 deterministic OpenDrift-vs-PyGNOME forecast figures without elevating them into the default main-defense list
+- a shared thesis study-box reference figure plus separate per-box geography panels that keep the focused Mindoro Phase 1 box, `mindoro_case_domain`, the scoring-grid display bounds, and the prototype_2016 first-code search box explicit in panel-ready WGS84 reference images with geography shown
 - the canonical presentation layer for defense and manuscript use
 
 ## Curated B1 Final Output Export

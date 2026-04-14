@@ -354,6 +354,35 @@ class UiAppSmokeTests(unittest.TestCase):
         info_text = " ".join(element.value for element in at.warning)
         self.assertIn("falls back to the broader regional reference artifacts", info_text)
 
+    def test_phase1_page_surfaces_study_boxes_reference(self):
+        at = AppTest.from_function(_phase1_wrapper_for_test, default_timeout=60)
+        at.run()
+        self.assertFalse(at.exception)
+        text_blocks = " ".join(
+            [element.value for element in at.markdown]
+            + [element.value for element in at.info]
+            + [element.value for element in at.warning]
+        )
+        lowered = text_blocks.lower()
+        self.assertIn("study boxes used by the thesis", lowered)
+        self.assertIn("per-box geography references", lowered)
+        self.assertIn("mindoro_case_domain", lowered)
+        self.assertIn("first-code search box", lowered)
+
+    def test_legacy_page_surfaces_first_code_origin_story(self):
+        at = AppTest.from_function(_legacy_wrapper_for_test, default_timeout=60)
+        at.run()
+        self.assertFalse(at.exception)
+        text_blocks = " ".join(
+            [element.value for element in at.markdown]
+            + [element.value for element in at.info]
+            + [element.value for element in at.warning]
+        )
+        lowered = text_blocks.lower()
+        self.assertIn("first-code search box", lowered)
+        self.assertIn("west coast of the philippines", lowered)
+        self.assertIn("operative scientific/display extents", lowered)
+
 
 if __name__ == "__main__":
     unittest.main()

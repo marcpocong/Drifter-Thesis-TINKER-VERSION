@@ -439,7 +439,10 @@ def print_recipe_selection(selection, label: str = "Recipe selection"):
                 "but the candidate baseline is not yet adopted as the default frozen spill-case baseline."
             )
         if phase2_status["legacy_recipe_drift_leaks_into_official_mode"]:
-            print("Recipe-family note: official recipe-family support is still partial locally; legacy *_ncep IDs remain and gfs_wind.nc is not present.")
+            print(
+                "Recipe-family note: official work now targets the four-recipe family and can use GFS-backed winners "
+                "when the required local GFS cache is present, but legacy *_ncep IDs still remain in runtime config space."
+            )
 
 
 def run_phase1_and_2():

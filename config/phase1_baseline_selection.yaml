@@ -1,54 +1,97 @@
-baseline_id: mindoro_phase1_focused_recipe_provenance_v1
-description: "Current default Mindoro spill-case Phase 1 recipe provenance finalized from the separate focused pre-spill 2016-2023 Mindoro drifter rerun"
-selected_recipe: cmems_era5
+baseline_id: mindoro_phase1_focused_recipe_provenance_v2
+description: Current default Mindoro spill-case Phase 1 recipe provenance finalized
+  from the separate focused pre-spill 2016-2023 Mindoro drifter rerun with the full
+  four-recipe family
+selected_recipe: cmems_gfs
+historical_four_recipe_winner: cmems_gfs
+official_b1_selection_rule: historical_four_recipe_winner_used_directly_for_official_b1
+gfs_historical_winner_not_adopted: false
+non_gfs_fallback_recipe: ''
+reason_for_non_adoption: ''
 source_kind: focused_mindoro_phase1_provenance_artifact
 status_flag: valid
 valid: true
 provisional: false
 rerun_required: false
-selection_basis: "Mindoro B1 now inherits the cmems_era5 recipe selected by the separate focused pre-spill 2016-2023 Mindoro drifter rerun ranked on the February-April seasonal subset"
+selection_basis: Focused Mindoro pre-spill 2016-2023 drogued-only non-overlapping
+  72 h transport-validation rerun with the full four-recipe family ranked on the February-April
+  seasonal subset; official B1 promotes the focused historical winner directly
 workflow_scope:
-  - mindoro_retro_2023
+- mindoro_retro_2023
 historical_validation_artifacts:
-  - output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml
-  - output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv
-  - output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv
-  - output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_production_manifest.json
+- output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml
+- output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv
+- output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv
+- output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_local_input_inventory.csv
+- output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_production_manifest.json
+- output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_official_adoption_decision.json
+- output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_official_adoption_decision.md
 notes:
-  - "Official Mindoro spill-case workflows now inherit recipe provenance from the separate focused Phase 1 drifter rerun rather than from the preserved three-date 2016 prototype artifact."
-  - "This finalizes Mindoro-specific recipe provenance only; it does not rewrite the raw-generation history of the stored March 13 -> March 14 B1 output bundle."
-  - "The focused rerun was outage-constrained to the ERA5-backed family because archived NOAA/NCEI GFS access was unavailable."
-  - "The broader 2016-2022 regional rerun remains preserved as a regional reference/governance lane and currently selects cmems_gfs; it is not the active provenance for Mindoro B1."
-  - "The focused rerun searched through early 2023, but its accepted registry does not include near-2023 accepted segments."
+- Official Mindoro spill-case workflows inherit recipe provenance from this separate
+  focused Phase 1 drifter rerun rather than from the preserved three-date 2016 prototype
+  artifact.
+- The focused rerun now evaluates the full four-recipe family cmems_era5, cmems_gfs,
+  hycom_era5, and hycom_gfs after a GFS completeness preflight across all accepted
+  focused months.
+- Official B1 now promotes the focused historical winner directly so the main-validation
+  ensemble recipe matches the completed focused rerun result.
+- This finalizes Mindoro-specific recipe provenance only and does not rewrite the
+  raw-generation history of the stored March 13 -> March 14 B1 output bundle.
+- The broader 2016-2022 regional rerun remains preserved as a regional reference/governance
+  lane and is not the active provenance for Mindoro B1.
+- The focused rerun searched through early 2023, but its accepted registry does not
+  include near-2023 accepted segments.
 chapter3_finalization_audit:
   target_historical_window:
-    start_date: "2016-01-01"
-    end_date: "2023-03-02"
-  phase1_validation_box: [118.751, 124.305, 10.620, 16.026]
-  core_pool_policy: "drogued_segments_only"
+    start_date: '2016-01-01'
+    end_date: '2023-03-02'
+  phase1_validation_box:
+  - 118.751
+  - 124.305
+  - 10.62
+  - 16.026
+  core_pool_policy: drogued_segments_only
   segment_policy:
     horizon_hours: 72
-    overlap_policy: "non_overlapping"
+    overlap_policy: non_overlapping
   official_recipe_family:
-    - cmems_era5
-    - hycom_era5
-  current_local_evidence_scope: "mindoro_focused_pre_spill_2016_2023_recipe_provenance"
+  - cmems_era5
+  - cmems_gfs
+  - hycom_era5
+  - hycom_gfs
+  ranking_subset:
+    label: mindoro_pre_spill_seasonal_subset_feb_apr
+    config:
+      mode: seasonal_start_months
+      months:
+      - 2
+      - 3
+      - 4
+      label: mindoro_pre_spill_seasonal_subset_feb_apr
+      empty_subset_behavior: hard_fail
+      description: Rank recipes only on accepted segments whose start dates fall in
+        February-April.
+    accepted_segment_count: 19
+  current_local_evidence_scope: mindoro_focused_pre_spill_2016_2023_recipe_provenance
   current_local_evidence_dates:
-    - "2016-2019 and 2021 accepted drifter segments within the focused Mindoro box"
-  staged_candidate_baseline_artifact: "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml"
-  regional_reference_baseline_artifact: "output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml"
+  - 2016-2019 and 2021 accepted drifter segments within the focused Mindoro box
+  staged_candidate_baseline_artifact: output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml
+  regional_reference_baseline_artifact: output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml
   expected_phase1_artifacts:
-    accepted_segment_registry: "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv"
-    rejected_segment_registry: "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_rejected_segment_registry.csv"
-    segment_metrics: "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_segment_metrics.csv"
-    recipe_summary: "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_summary.csv"
-    recipe_ranking: "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv"
-    frozen_baseline_artifact: "config/phase1_baseline_selection.yaml"
-    frozen_baseline_candidate: "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml"
+    accepted_segment_registry: output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv
+    rejected_segment_registry: output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_rejected_segment_registry.csv
+    local_input_inventory: output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_local_input_inventory.csv
+    segment_metrics: output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_segment_metrics.csv
+    recipe_summary: output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_summary.csv
+    recipe_ranking: output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv
+    frozen_baseline_artifact: config/phase1_baseline_selection.yaml
+    frozen_baseline_candidate: output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml
+    adoption_decision_json: output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_official_adoption_decision.json
+    adoption_decision_md: output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_official_adoption_decision.md
   loading_audit_policy:
     hard_fail_on_missing_required_forcing: true
     hard_fail_on_empty_valid_recipe_set: true
   audit_status:
     classification: implemented_and_finalized_for_mindoro_recipe_provenance
     full_production_rerun_required: false
-    blocker: "The focused Mindoro-specific provenance lane is finalized, but GFS-backed recipes remain excluded there until archived NOAA/NCEI GFS access is healthy again. The broader 2016-2022 rerun remains preserved as a separate reference lane."
+    blocker: ''

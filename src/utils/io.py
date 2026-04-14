@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 ALLOW_UNVALIDATED_FALLBACK_ENV = "ALLOW_UNVALIDATED_FALLBACK"
 BASELINE_SELECTION_PATH_ENV = "BASELINE_SELECTION_PATH"
 BASELINE_RECIPE_OVERRIDE_ENV = "BASELINE_RECIPE_OVERRIDE"
-DEFAULT_VALIDATED_FALLBACK_RECIPE = "cmems_era5"
+DEFAULT_VALIDATED_FALLBACK_RECIPE = "cmems_gfs"
 DEFAULT_BASELINE_SELECTION_PATH = Path("config/phase1_baseline_selection.yaml")
 
 
@@ -226,6 +226,46 @@ def get_phase2_recipe_family_status(
         "requires_phase1_production_rerun_for_full_freeze": requires_phase1_rerun,
         "legacy_recipe_drift_leaks_into_official_mode": legacy_drift_leaks,
     }
+
+
+def extract_manifest_recipe(payload: dict[str, Any] | None) -> str:
+    """Return the recorded recipe from a forecast-style manifest payload."""
+    manifest = dict(payload or {})
+    return str(
+        manifest.get("recipe")
+        or (manifest.get("selection") or {}).get("recipe")
+        or (manifest.get("historical_baseline_provenance") or {}).get("recipe")
+        or (manifest.get("recipe_selection") or {}).get("recipe")
+        or (manifest.get("provenance") or {}).get("recipe_used")
+        or ""
+    ).strip()
+
+
+def forecast_manifest_matches_recipe(path: str | Path, expected_recipe: str | None = None) -> bool:
+    """Return whether a forecast manifest exists and records the expected recipe."""
+    recipe = str(expected_recipe or "").strip()
+    if not recipe:
+        return True
+    manifest_path = Path(path)
+    if not manifest_path.exists():
+        return False
+    try:
+        with open(manifest_path, "r", encoding="utf-8") as handle:
+            payload = json.load(handle) or {}
+    except Exception:
+        return False
+    return extract_manifest_recipe(payload) == recipe
+
+
+def model_dir_complete_for_recipe(model_dir: str | Path, expected_recipe: str | None = None) -> bool:
+    """Return whether an official model directory is complete for the expected recipe."""
+    directory = Path(model_dir)
+    forecast_manifest = directory / "forecast" / "forecast_manifest.json"
+    ensemble_manifest = directory / "ensemble" / "ensemble_manifest.json"
+    member_paths = list((directory / "ensemble").glob("member_*.nc"))
+    if not forecast_manifest.exists() or not ensemble_manifest.exists() or not member_paths:
+        return False
+    return forecast_manifest_matches_recipe(forecast_manifest, expected_recipe)
 
 
 def _validate_recipe_name(recipe_name: str, source_label: str) -> str:

@@ -28,7 +28,7 @@ from src.services.transport_retention_fix import (
     _time_reaches,
     _write_json,
 )
-from src.utils.io import get_case_output_dir, resolve_recipe_selection, resolve_spill_origin
+from src.utils.io import get_case_output_dir, model_dir_complete_for_recipe, resolve_recipe_selection, resolve_spill_origin
 
 try:
     import matplotlib.pyplot as plt
@@ -200,8 +200,9 @@ class OfficialRerunR1Service:
             raise RuntimeError("transport_retention_fix manifest must keep R3 marked diagnostic_only=true.")
 
     def _resolve_or_run_model(self, transport_manifest: dict) -> dict:
+        selection = resolve_recipe_selection()
         official_model_dir = self.case_output / OFFICIAL_RERUN_R1_DIR_NAME / "model_run"
-        if self._model_dir_complete(official_model_dir) and not self.retention.force_rerun:
+        if model_dir_complete_for_recipe(official_model_dir, selection.recipe) and not self.retention.force_rerun:
             return {
                 "status": "reused_existing_official_rerun_r1",
                 "model_dir": str(official_model_dir),
@@ -211,7 +212,7 @@ class OfficialRerunR1Service:
             }
 
         source_model_dir = self._transport_r1_model_dir(transport_manifest)
-        if self._model_dir_complete(source_model_dir) and not self.retention.force_rerun:
+        if model_dir_complete_for_recipe(source_model_dir, selection.recipe) and not self.retention.force_rerun:
             return {
                 "status": "retained_from_transport_retention_fix_r1",
                 "model_dir": str(source_model_dir),
@@ -220,8 +221,7 @@ class OfficialRerunR1Service:
                 "forecast_result": {"status": "retained_from_transport_retention_fix_r1"},
             }
 
-        selection = resolve_recipe_selection()
-        forcing_paths = transport_manifest.get("forcing_paths") or self.retention._resolve_forcing_paths(selection.recipe)
+        forcing_paths = self.retention._resolve_forcing_paths(selection.recipe)
         window = transport_manifest.get("window") or self.retention.window
         start_lat, start_lon, start_time = resolve_spill_origin()
         simulation_start = _normalize_utc(window["simulation_start_utc"])
@@ -259,14 +259,6 @@ class OfficialRerunR1Service:
             "retained_from_transport_retention_fix": False,
             "forecast_result": forecast_result,
         }
-
-    @staticmethod
-    def _model_dir_complete(model_dir: Path) -> bool:
-        return (
-            (model_dir / "forecast" / "forecast_manifest.json").exists()
-            and (model_dir / "ensemble" / "ensemble_manifest.json").exists()
-            and bool(list((model_dir / "ensemble").glob("member_*.nc")))
-        )
 
     def _transport_r1_model_dir(self, manifest: dict) -> Path:
         for row in manifest.get("summary", []):

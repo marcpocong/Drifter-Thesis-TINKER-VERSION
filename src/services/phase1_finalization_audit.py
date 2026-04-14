@@ -323,7 +323,7 @@ class Phase1FinalizationAuditService:
                     f"legacy alias map = {sorted(self.legacy_aliases)}; gfs_wind.nc present locally = {gfs_available}."
                 ),
                 blocker=(
-                    f"Core Phase 1 runtime still only defines legacy recipe IDs missing {legacy_runtime_recipe_gap}, and no local gfs_wind.nc forcing is present."
+                    f"Core Phase 1 runtime still carries legacy recipe IDs missing {legacy_runtime_recipe_gap}, even though local gfs_wind.nc forcing is now present."
                     if legacy_runtime_recipe_gap or not gfs_available
                     else "The core runtime family is present but still needs the final multi-year rerun."
                 ),

@@ -1,7 +1,7 @@
 {
   "phase": "prototype_legacy_final_figures",
   "workflow_mode": "prototype_2016",
-  "generated_at_utc": "2026-04-14T01:57:25Z",
+  "generated_at_utc": "2026-04-14T11:45:19Z",
   "output_dir": "output/2016 Legacy Runs FINAL Figures",
   "configured_case_ids": [
     "CASE_2016-09-01",
@@ -701,6 +701,7 @@
   "scientific_source_phase4_comparator_dir": "output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase4_comparator",
   "summary_phase4_comparator_dir": "output/2016 Legacy Runs FINAL Figures/summary/phase4_comparator",
   "legacy_final_output_manifest_json": "output/2016 Legacy Runs FINAL Figures/manifests/legacy_final_output_manifest.json",
+  "legacy_provenance_metadata_json": "output/2016 Legacy Runs FINAL Figures/manifests/prototype_2016_provenance_metadata.json",
   "legacy_final_output_registry_csv": "output/2016 Legacy Runs FINAL Figures/manifests/prototype_2016_final_output_registry.csv",
   "legacy_final_output_registry_json": "output/2016 Legacy Runs FINAL Figures/manifests/prototype_2016_final_output_registry.json",
   "notes": [
@@ -708,6 +709,8 @@
     "Forecast figures use exact stored raster cells and exact stored footprint geometry only; empty stored layers are omitted.",
     "prototype_2016 p50/p90 products are exact valid-time member-occupancy footprints.",
     "This folder is the authoritative curated prototype_2016 legacy support package and does not replace the final regional Phase 1 study.",
+    "Historical-origin note: the very first prototype code used the shared first-code search box [108.6465, 121.3655, 6.1865, 20.3515] on the west coast of the Philippines; the first three surfaced 2016 drifter cases were then kept as the first proof-of-pipeline focus.",
+    "This historical-origin note does not replace the stored per-case local prototype extents, which remain the operative scientific/display extents.",
     "PyGNOME remains comparator-only; matched grid wind/current forcing is used when available and degraded mode is surfaced explicitly otherwise.",
     "The optional prototype_2016 Phase 4 PyGNOME comparator pilot is budget-only and descriptive; no shoreline comparison is claimed unless matched shoreline products exist."
   ]

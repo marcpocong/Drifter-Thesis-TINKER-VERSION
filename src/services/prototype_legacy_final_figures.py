@@ -57,6 +57,13 @@ MISSING_FIGURES_FILENAME = "missing_figures.csv"
 LEGACY_PACKAGE_MANIFEST_FILENAME = "legacy_final_output_manifest.json"
 LEGACY_PACKAGE_REGISTRY_CSV_FILENAME = "prototype_2016_final_output_registry.csv"
 LEGACY_PACKAGE_REGISTRY_JSON_FILENAME = "prototype_2016_final_output_registry.json"
+PROTOTYPE_2016_PROVENANCE_METADATA_FILENAME = "prototype_2016_provenance_metadata.json"
+PROTOTYPE_2016_FIRST_CODE_SEARCH_BOX = [108.6465, 121.3655, 6.1865, 20.3515]
+PROTOTYPE_2016_FIRST_CODE_SOURCE_BOXES = [
+    [113.267, 121.267, 6.3685, 14.3685],
+    [113.3655, 121.3655, 6.1865, 14.1865],
+    [108.6465, 116.6465, 12.3515, 20.3515],
+]
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +89,10 @@ def _relative_to_repo(repo_root: Path, path: Path) -> str:
 
 def _utc_now_iso() -> str:
     return pd.Timestamp.now(tz="UTC").strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def _format_bounds(bounds: list[float]) -> str:
+    return "[" + ", ".join(format(float(value), ".4f").rstrip("0").rstrip(".") for value in bounds) + "]"
 
 
 def _write_json(path: Path, payload: dict[str, Any] | list[dict[str, Any]]) -> None:
@@ -1457,6 +1468,58 @@ class PrototypeLegacyFinalFiguresService:
     def _package_subdir(self, *parts: str) -> Path:
         return self.output_dir.joinpath(*parts)
 
+    def _prototype_2016_historical_origin_summary(self) -> str:
+        return (
+            "The very first prototype code used the shared first-code search box "
+            f"{_format_bounds(PROTOTYPE_2016_FIRST_CODE_SEARCH_BOX)} on the west coast of the Philippines "
+            "(Palawan-side western Philippine context). Because the ingestion-and-validation pipeline was still in its "
+            "early stage, that first code surfaced the first three 2016 drifter cases, and the team then intentionally "
+            "kept those three as the first study focus to build the workflow and prove the pipeline was working."
+        )
+
+    def _prototype_2016_operative_extent_note(self) -> str:
+        return (
+            "This historical-origin note does not replace the stored per-case local prototype extents, which remain "
+            "the operative scientific/display extents."
+        )
+
+    def _prototype_2016_provenance_metadata_payload(self) -> dict[str, Any]:
+        return {
+            "workflow_mode": "prototype_2016",
+            "generated_at_utc": _utc_now_iso(),
+            "prototype_2016_initial_capture_box": list(PROTOTYPE_2016_FIRST_CODE_SEARCH_BOX),
+            "prototype_2016_initial_capture_source_boxes": [list(bounds) for bounds in PROTOTYPE_2016_FIRST_CODE_SOURCE_BOXES],
+            "historical_origin_summary": self._prototype_2016_historical_origin_summary(),
+            "geographic_focus_label": "west coast of the Philippines",
+            "geographic_focus_clarifier": "Palawan-side western Philippine context",
+            "team_focus_note": (
+                "The team intentionally kept the first three surfaced 2016 drifter cases as the first study focus to "
+                "build the workflow and prove the pipeline was working."
+            ),
+            "operative_extent_note": self._prototype_2016_operative_extent_note(),
+            "notes": [
+                "Historical-origin metadata only; this does not replace the stored per-case local prototype extents.",
+                "The shared first-code search box records the earliest search/focus frame that surfaced the first three 2016 drifter cases.",
+                "prototype_2016 remains a support-only legacy lane and does not replace the final regional Phase 1 study.",
+            ],
+        }
+
+    def _write_prototype_2016_provenance_metadata(self, *, manifest_dir: Path) -> Path:
+        provenance_path = manifest_dir / PROTOTYPE_2016_PROVENANCE_METADATA_FILENAME
+        self._write_and_register_json(
+            provenance_path,
+            payload=self._prototype_2016_provenance_metadata_payload(),
+            source_relative_path="src/services/prototype_legacy_final_figures.py",
+            phase_group="phase5",
+            artifact_group="prototype_legacy_phase5_packaging",
+            scientific_vs_display_only="metadata",
+            copied_vs_regenerated="regenerated_from_existing_metadata",
+            support_only=True,
+            comparator_only=False,
+            notes="Historical-origin metadata for the prototype_2016 first-code search box and source boxes.",
+        )
+        return provenance_path
+
     def _reset_curated_package_dirs(self) -> None:
         for relative in ("publication", "scientific_source_pngs", "summary", "manifests", "phase5"):
             target = self.output_dir / relative
@@ -2113,6 +2176,9 @@ class PrototypeLegacyFinalFiguresService:
             ## What This Package Means
 
             - `prototype_2016` is legacy support-only.
+            - The very first prototype code used the shared first-code search box `[108.6465, 121.3655, 6.1865, 20.3515]` on the west coast of the Philippines (Palawan-side western Philippine context).
+            - Because the pipeline was still in its early stage, that first code surfaced the first three 2016 drifter cases, and the team then intentionally kept those three as the first study focus to build the workflow and prove the pipeline was working.
+            - This historical-origin note does not replace the stored per-case local prototype extents, which remain the operative scientific/display extents.
             - The visible legacy support flow here is `Phase 1 -> Phase 2 -> Phase 3A -> Phase 4 -> Phase 5`.
             - `Phase 3A` is comparator-only OpenDrift vs deterministic PyGNOME support.
             - `Phase 4` is the legacy weathering/fate family seeded from the selected drifter-of-record start.
@@ -2175,6 +2241,7 @@ class PrototypeLegacyFinalFiguresService:
             - What was lightly regenerated: shoreline summary PNGs from stored shoreline CSVs, package registries, package README, and packaging notes
             - What was retained for compatibility: the flat per-case PNG exports and their root compatibility manifest
             - Relation to repo-wide `phase5_sync`: this package is the dedicated `prototype_2016` Phase 5 legacy deliverable; `phase5_sync` is the broader cross-repo read-only reproducibility layer
+            - Historical-origin note: the very first prototype code used the shared first-code search box {_format_bounds(PROTOTYPE_2016_FIRST_CODE_SEARCH_BOX)} on the west coast of the Philippines, and the stored case-local prototype extents still remain the operative scientific/display extents
             - Phase 4 comparator note: {"budget-only deterministic PyGNOME comparator copied for " + ", ".join(case_id.replace("CASE_", "") for case_id in comparator_case_ids) if comparator_case_ids else "no matched PyGNOME Phase 4 legacy comparator was present to package"}
 
             Counts:
@@ -2215,6 +2282,7 @@ class PrototypeLegacyFinalFiguresService:
         registry_csv = manifest_dir / LEGACY_PACKAGE_REGISTRY_CSV_FILENAME
         registry_json = manifest_dir / LEGACY_PACKAGE_REGISTRY_JSON_FILENAME
         manifest_json = manifest_dir / LEGACY_PACKAGE_MANIFEST_FILENAME
+        provenance_metadata_path = self._write_prototype_2016_provenance_metadata(manifest_dir=manifest_dir)
         self._write_and_register_csv(
             registry_csv,
             rows=self.package_registry_rows,
@@ -2262,11 +2330,19 @@ class PrototypeLegacyFinalFiguresService:
             "phase5_dir": _relative_to_repo(self.repo_root, self._package_subdir("phase5")),
             "registry_csv": _relative_to_repo(self.repo_root, registry_csv),
             "registry_json": _relative_to_repo(self.repo_root, registry_json),
+            "provenance_metadata_json": _relative_to_repo(self.repo_root, provenance_metadata_path),
             "registry_row_count": final_registry_count,
             "figure_count": len(self.figure_rows),
             "missing_figure_count": len(self.missing_rows),
             "notes": [
                 "prototype_2016 remains legacy support-only and does not replace the final regional Phase 1 study.",
+                (
+                    "Historical-origin note: the very first prototype code used the shared first-code search box "
+                    f"{_format_bounds(PROTOTYPE_2016_FIRST_CODE_SEARCH_BOX)} on the west coast of the Philippines, "
+                    "surfaced the first three 2016 drifter cases, and the team then kept those three as the first "
+                    "proof-of-pipeline focus."
+                ),
+                self._prototype_2016_operative_extent_note(),
                 "Phase 3A is comparator-only OpenDrift vs deterministic PyGNOME support.",
                 "Phase 4 is the legacy weathering/fate family seeded from the selected drifter-of-record start.",
                 "A limited deterministic Phase 4 PyGNOME budget comparator pilot may be packaged when stored case-local comparator outputs exist; shoreline comparison remains unavailable in that pilot.",
@@ -2290,6 +2366,7 @@ class PrototypeLegacyFinalFiguresService:
             "manifest_json": manifest_json,
             "registry_csv": registry_csv,
             "registry_json": registry_json,
+            "provenance_metadata_json": provenance_metadata_path,
         }
 
     def _build_curated_package(self, *, compatibility_manifest: Path, missing_csv: Path) -> dict[str, Path]:
@@ -2374,6 +2451,10 @@ class PrototypeLegacyFinalFiguresService:
                 self.repo_root,
                 curated_manifest_paths["manifest_json"],
             ),
+            "legacy_provenance_metadata_json": _relative_to_repo(
+                self.repo_root,
+                curated_manifest_paths["provenance_metadata_json"],
+            ),
             "legacy_final_output_registry_csv": _relative_to_repo(
                 self.repo_root,
                 curated_manifest_paths["registry_csv"],
@@ -2387,6 +2468,12 @@ class PrototypeLegacyFinalFiguresService:
                 "Forecast figures use exact stored raster cells and exact stored footprint geometry only; empty stored layers are omitted.",
                 "prototype_2016 p50/p90 products are exact valid-time member-occupancy footprints.",
                 "This folder is the authoritative curated prototype_2016 legacy support package and does not replace the final regional Phase 1 study.",
+                (
+                    "Historical-origin note: the very first prototype code used the shared first-code search box "
+                    f"{_format_bounds(PROTOTYPE_2016_FIRST_CODE_SEARCH_BOX)} on the west coast of the Philippines; "
+                    "the first three surfaced 2016 drifter cases were then kept as the first proof-of-pipeline focus."
+                ),
+                self._prototype_2016_operative_extent_note(),
                 "PyGNOME remains comparator-only; matched grid wind/current forcing is used when available and degraded mode is surfaced explicitly otherwise.",
                 "The optional prototype_2016 Phase 4 PyGNOME comparator pilot is budget-only and descriptive; no shoreline comparison is claimed unless matched shoreline products exist.",
             ],
@@ -2400,6 +2487,10 @@ class PrototypeLegacyFinalFiguresService:
             "legacy_final_output_manifest_json": _relative_to_repo(
                 self.repo_root,
                 curated_manifest_paths["manifest_json"],
+            ),
+            "legacy_provenance_metadata_json": _relative_to_repo(
+                self.repo_root,
+                curated_manifest_paths["provenance_metadata_json"],
             ),
             "legacy_final_output_registry_csv": _relative_to_repo(
                 self.repo_root,

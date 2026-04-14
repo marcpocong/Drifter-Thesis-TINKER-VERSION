@@ -36,17 +36,21 @@ STATUS_REGISTRY: dict[str, ArtifactStatus] = {
         provenance_label=(
             "March 13 seed, March 14 target, explicit shared March 12 imagery caveat, and active "
             "Mindoro-specific recipe provenance from the separate focused 2016-2023 drifter rerun "
-            "selecting the same cmems_era5 recipe."
+            "whose completed four-recipe historical winner is cmems_gfs and whose official B1 "
+            "recipe now also uses cmems_gfs."
         ),
         panel_text=(
             "Main Mindoro B1 Phase 3B observation-based spatial validation view. Phase 3B itself does "
-            "not directly ingest drifters; it inherits the cmems_era5 recipe selected by the separate focused "
-            "2016-2023 Mindoro drifter rerun, while the broader 2016-2022 regional rerun stays reference-only. "
+            "not directly ingest drifters; it inherits the official cmems_gfs B1 recipe from the separate "
+            "focused 2016-2023 Mindoro drifter rerun after that four-recipe rerun found cmems_gfs as the "
+            "historical winner and promoted it directly into official B1, while the broader "
+            "2016-2022 regional rerun stays reference-only. "
             "Keep the shared March 12 imagery caveat explicit."
         ),
         dashboard_summary=(
-            "Promoted primary validation; focused 2016-2023 Mindoro drifter rerun selected the same cmems_era5 "
-            "recipe; reportable now but not fully frozen."
+            "Promoted primary validation; the focused 2016-2023 Mindoro drifter rerun found cmems_gfs as the "
+            "historical winner and official B1 now uses cmems_gfs; "
+            "reportable now but not fully frozen."
         ),
     ),
     "mindoro_crossmodel_comparator": ArtifactStatus(
@@ -96,6 +100,28 @@ STATUS_REGISTRY: dict[str, ArtifactStatus] = {
         provenance_label="Phase 2 / Phase 3 transport context built from stored trajectory outputs.",
         panel_text="Transport context before score tables; the transport story is scientifically usable, but not yet frozen.",
         dashboard_summary="Transport-context layer from a scientifically usable but not frozen branch.",
+    ),
+    "thesis_study_box_reference": ArtifactStatus(
+        key="thesis_study_box_reference",
+        label="Thesis study-box reference",
+        panel_label="Thesis study-box reference",
+        role="study_context_reference",
+        reportability="read_only_context_reference",
+        official_status="shared_thesis_box_reference",
+        frozen_status="mixed_stored_metadata_reference",
+        provenance_label=(
+            "Shared box-reference figure set built from stored thesis-facing Mindoro configuration, the stored "
+            "scoring-grid display bounds, and the curated prototype_2016 first-code search-box provenance metadata."
+        ),
+        panel_text=(
+            "Shared study-area reference only. Use these figures to distinguish the focused Mindoro Phase 1 box, the "
+            "broader Mindoro case domain, the scoring-grid display bounds, and the prototype_2016 first-code search "
+            "box without implying that they are one operative scientific domain."
+        ),
+        dashboard_summary=(
+            "Panel-ready thesis study-box reference figures built from stored config, manifest, and provenance "
+            "metadata only."
+        ),
     ),
     "mindoro_phase4_oil_budget": ArtifactStatus(
         key="mindoro_phase4_oil_budget",
@@ -237,9 +263,26 @@ STATUS_REGISTRY: dict[str, ArtifactStatus] = {
         reportability="support_only_not_final_evidence",
         official_status="legacy_support_only_not_official",
         frozen_status="not_final_phase1_study",
-        provenance_label="Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility and thesis context only, including a budget-only deterministic Phase 4 PyGNOME comparator pilot when stored outputs are present.",
-        panel_text="Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only, a budget-only Phase 4 PyGNOME pilot when packaged, and a dedicated curated final package under output/2016 Legacy Runs FINAL Figures. Not final Phase 1 evidence.",
-        dashboard_summary="Legacy debug support lane with a dedicated curated Phase 5 package and an optional budget-only Phase 4 PyGNOME pilot; not the preferred prototype lane or final Phase 1 evidence.",
+        provenance_label=(
+            "Legacy/debug regression lane preserved as a support-only Phase 1/2/3A/4/5 package for reproducibility "
+            "and thesis context only. Its historical-origin story records that the very first prototype code used "
+            "the shared first-code search box [108.6465, 121.3655, 6.1865, 20.3515], surfaced the first three 2016 "
+            "drifter cases on the west coast of the Philippines, and the team then kept those three as the first "
+            "proof-of-pipeline focus."
+        ),
+        panel_text=(
+            "Legacy debug support only; visible support flow is Phase 1/2/3A/4/5, with Phase 3A comparator-only, a "
+            "budget-only Phase 4 PyGNOME pilot when packaged, and a dedicated curated final package under "
+            "output/2016 Legacy Runs FINAL Figures. Historical-origin note: the very first prototype code used the "
+            "shared first-code search box [108.6465, 121.3655, 6.1865, 20.3515], surfaced the first three 2016 "
+            "drifter cases, and the stored per-case local prototype extents remain the operative scientific/display "
+            "extents. Not final Phase 1 evidence."
+        ),
+        dashboard_summary=(
+            "Legacy debug support lane with a dedicated curated Phase 5 package, a first-code search-box historical "
+            "origin note for the first three 2016 drifters, and an optional budget-only Phase 4 PyGNOME pilot; not "
+            "the preferred prototype lane or final Phase 1 evidence."
+        ),
     ),
 }
 
@@ -257,6 +300,7 @@ TRACK_ID_TO_STATUS_KEY = {
 }
 
 PRIMARY_STATUS_PRIORITY = [
+    "thesis_study_box_reference",
     "mindoro_phase4_deferred",
     "mindoro_phase4_shoreline",
     "mindoro_phase4_oil_budget",
@@ -356,6 +400,13 @@ def record_matches_artifact_status(record: Mapping[str, Any], status_key: str) -
         ) or track_id == "B3"
     if status_key == "mindoro_trajectory_context":
         return case_id == MINDORO_CASE_ID and phase_or_track in {"phase2_official", "phase2_phase3b"}
+    if status_key == "thesis_study_box_reference":
+        return (
+            case_id == "THESIS_STUDY_CONTEXT"
+            or phase_or_track == "phase1_study_context"
+            or "thesis_study_boxes_reference" in combined
+            or "study-box reference" in combined
+        )
     if status_key == "mindoro_phase4_oil_budget":
         return case_id == MINDORO_CASE_ID and phase_or_track == "phase4" and "shoreline" not in combined
     if status_key == "mindoro_phase4_shoreline":

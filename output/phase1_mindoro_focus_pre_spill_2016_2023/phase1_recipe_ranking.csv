@@ -1,3 +1,5 @@
 rank,recipe,recipe_rank_pool,segment_count,valid_segment_count,invalid_segment_count,mean_ncs_score,median_ncs_score,std_ncs_score,min_ncs_score,max_ncs_score,is_gfs_recipe,status,excluded_from_ranking,missing_forcing_factors
-1,cmems_era5,mindoro_pre_spill_seasonal_subset_feb_apr,19,19,0,4.623690463065895,4.59159065081077,1.3572958396329717,1.7919245936816692,6.7059862217687005,False,completed,False,
-2,hycom_era5,mindoro_pre_spill_seasonal_subset_feb_apr,19,19,0,4.756127725245334,5.010588152593461,1.8693415181034165,1.3137014057631673,8.955712096953622,False,completed,False,
+1,cmems_gfs,mindoro_pre_spill_seasonal_subset_feb_apr,19,19,0,4.588584452986011,4.630454993308714,1.2863014905610664,1.9093382788618067,6.420069551017287,True,completed,False,
+2,cmems_era5,mindoro_pre_spill_seasonal_subset_feb_apr,19,19,0,4.623690463065895,4.59159065081077,1.3572958396329717,1.7919245936816692,6.7059862217687005,False,completed,False,
+3,hycom_gfs,mindoro_pre_spill_seasonal_subset_feb_apr,19,19,0,4.702732708555586,4.92633009235389,1.8446745520771903,1.294244106397286,8.749772479090904,True,completed,False,
+4,hycom_era5,mindoro_pre_spill_seasonal_subset_feb_apr,19,19,0,4.756127725245334,5.010588152593461,1.8693415181034165,1.3137014057631673,8.955712096953622,False,completed,False,

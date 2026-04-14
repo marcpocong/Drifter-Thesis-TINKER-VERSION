@@ -2,6 +2,7 @@
 
 - Canonical Phase 3B primary validation source: true
 - Appendix-only track: false
+- Reporting role: canonical_phase3b_public_validation_source
 - Seed source key: 8f8e3944748c4772910efc9829497e20
 - Seed source name: MindoroOilSpill_NOAA_230313
 - Target source key: 10b37c42a9754363a5f7b14199b077e6

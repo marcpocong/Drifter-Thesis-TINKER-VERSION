@@ -1,6 +1,6 @@
 {
   "phase": "phase5_launcher_and_docs_sync",
-  "generated_at_utc": "2026-04-13T18:38:59.777980+00:00",
+  "generated_at_utc": "2026-04-14T14:25:48.026075+00:00",
   "repo_root": "/app",
   "output_dir": "output/final_reproducibility_package",
   "launcher_catalog": {
@@ -38,25 +38,32 @@
     "shared_imagery_caveat": "Both NOAA/NESDIS public products cite WorldView-3 imagery acquired on 2023-03-12, so the promoted March 13 -> March 14 row is a reinitialization-based public-validation pair with shared-imagery provenance rather than a fully independent day-to-day validation.",
     "dual_provenance_confirmation": {
       "stored_run_recipe_source_path": "config/phase1_baseline_selection.yaml",
-      "stored_run_selected_recipe": "cmems_era5",
+      "stored_run_selected_recipe": "cmems_gfs",
       "posthoc_phase1_confirmation_workflow_mode": "phase1_mindoro_focus_pre_spill_2016_2023",
       "posthoc_phase1_confirmation_candidate_baseline_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml",
-      "posthoc_phase1_confirmation_selected_recipe": "cmems_era5",
+      "posthoc_phase1_confirmation_selected_recipe": "cmems_gfs",
+      "posthoc_phase1_confirmation_historical_winner": "cmems_gfs",
       "mindoro_phase1_provenance_workflow_mode": "phase1_mindoro_focus_pre_spill_2016_2023",
-      "mindoro_phase1_provenance_artifact": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml",
-      "mindoro_phase1_provenance_selected_recipe": "cmems_era5",
+      "mindoro_phase1_provenance_artifact": "config/phase1_baseline_selection.yaml",
+      "mindoro_phase1_provenance_selected_recipe": "cmems_gfs",
+      "mindoro_phase1_provenance_historical_winner": "cmems_gfs",
       "mindoro_phase1_provenance_recipe_family": [
         "cmems_era5",
-        "hycom_era5"
+        "cmems_gfs",
+        "hycom_era5",
+        "hycom_gfs"
       ],
-      "mindoro_phase1_provenance_gfs_outage_constrained": true,
+      "mindoro_phase1_provenance_gfs_outage_constrained": false,
+      "mindoro_phase1_provenance_gfs_historical_winner_not_adopted": false,
+      "mindoro_phase1_provenance_non_gfs_fallback_recipe": "",
+      "mindoro_phase1_provenance_reason_for_non_adoption": "",
       "mindoro_phase1_provenance_accepted_registry_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv",
       "mindoro_phase1_provenance_accepted_registry_has_2023_segments": false,
       "mindoro_phase1_provenance_searched_through_early_2023": true,
       "regional_reference_workflow_mode": "phase1_regional_2016_2022",
       "regional_reference_candidate_baseline_path": "output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml",
       "matches_stored_b1_recipe": true,
-      "confirmation_interpretation": "The separate phase1_mindoro_focus_pre_spill_2016_2023 Mindoro-focused drifter rerun selected the same recipe used by the stored B1 run (cmems_era5). It now serves as the active Mindoro-specific recipe-provenance lane for B1 without rewriting the original March 13 -> March 14 raw-generation history.",
+      "confirmation_interpretation": "The separate phase1_mindoro_focus_pre_spill_2016_2023 Mindoro-focused drifter rerun selected cmems_gfs as the active official B1 recipe after the focused four-recipe comparison. It now serves as the active Mindoro-specific recipe-provenance lane for B1 without rewriting the original March 13 -> March 14 raw-generation history.",
       "thesis_phase_title": "Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents",
       "thesis_phase_subtitle": "Mindoro March 13 -> March 14 public spill-extent reinitialization validation"
     },
@@ -119,7 +126,7 @@
       "scientifically_reportable": true,
       "scientifically_frozen": false,
       "inherited_provisional": true,
-      "main_blocker": "Phase 2 still depends on a later Phase 1 production rerun for the final frozen-baseline story, and the official recipe family remains only partially available locally because legacy *_ncep runtime IDs remain in config space while gfs_wind.nc is still absent.",
+      "main_blocker": "Phase 2 is scientifically usable on the promoted cmems_gfs baseline, but the final frozen story still depends on retiring legacy *_ncep runtime IDs from official-mode config space and closing the remaining transport-model provisionality.",
       "reportable_now": true,
       "reportability_scope": "scientifically_usable_official_forecast_products",
       "summary": "Scientifically usable as implemented, but not yet frozen.",
@@ -147,10 +154,10 @@
       "scientifically_reportable": true,
       "scientifically_frozen": false,
       "inherited_provisional": true,
-      "main_blocker": "The frozen recipe still comes from three legacy prototype dates, not from a completed 2016-2022 regional drifter-segment study.",
+      "main_blocker": "Phase 2 is scientifically usable on the promoted cmems_gfs baseline, but the final frozen story still depends on retiring legacy *_ncep runtime IDs from official-mode config space and closing the remaining transport-model provisionality.",
       "reportable_now": true,
       "reportability_scope": "main_text_primary_validation",
-      "summary": "Promoted primary validation; focused 2016-2023 Mindoro drifter rerun selected the same cmems_era5 recipe; reportable now but not fully frozen. fss_1km=0.0000, fss_3km=0.0441, fss_5km=0.1371, fss_10km=0.2490",
+      "summary": "Promoted primary validation; the focused 2016-2023 Mindoro drifter rerun found cmems_gfs as the historical winner and official B1 now uses cmems_gfs; reportable now but not fully frozen. fss_1km=0.0000, fss_3km=0.0441, fss_5km=0.1371, fss_10km=0.2490",
       "evidence_path": "output/final_validation_package/final_validation_manifest.json"
     },
     {
@@ -161,7 +168,7 @@
       "scientifically_reportable": true,
       "scientifically_frozen": false,
       "inherited_provisional": true,
-      "main_blocker": "The frozen recipe still comes from three legacy prototype dates, not from a completed 2016-2022 regional drifter-segment study.",
+      "main_blocker": "Phase 2 is scientifically usable on the promoted cmems_gfs baseline, but the final frozen story still depends on retiring legacy *_ncep runtime IDs from official-mode config space and closing the remaining transport-model provisionality.",
       "reportable_now": true,
       "reportability_scope": "legacy_sparse_reference",
       "summary": "B2 legacy honesty reference; not the promoted primary row. fss_1km=0.0000, fss_3km=0.0000, fss_5km=0.0000, fss_10km=0.0000",
@@ -175,7 +182,7 @@
       "scientifically_reportable": true,
       "scientifically_frozen": false,
       "inherited_provisional": true,
-      "main_blocker": "The frozen recipe still comes from three legacy prototype dates, not from a completed 2016-2022 regional drifter-segment study.",
+      "main_blocker": "Phase 2 is scientifically usable on the promoted cmems_gfs baseline, but the final frozen story still depends on retiring legacy *_ncep runtime IDs from official-mode config space and closing the remaining transport-model provisionality.",
       "reportable_now": true,
       "reportability_scope": "legacy_broader_support_reference",
       "summary": "B3 legacy broader-support context; not a primary row. fss_1km=0.1722, fss_3km=0.2004, fss_5km=0.2166, fss_10km=0.2438",
@@ -267,7 +274,7 @@
     }
   ],
   "manifest_index_summary": {
-    "row_count": 140,
+    "row_count": 146,
     "missing_optional_artifacts": [
       "output/phase4/CASE_DWH_RETRO_2010_72H/phase4_run_manifest.json"
     ]
@@ -276,7 +283,7 @@
     "phase5_reportable_now": true,
     "launcher_menu_honest_and_current": true,
     "final_validation_package_reused_without_recompute": true,
-    "requires_phase1_production_rerun_for_full_freeze": true,
+    "requires_phase1_production_rerun_for_full_freeze": false,
     "phase1_frozen_story_complete": false,
     "phase2_scientifically_usable": true,
     "phase2_scientifically_frozen": false,

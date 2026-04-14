@@ -342,9 +342,9 @@ class Phase2FinalizationAuditService:
     @staticmethod
     def _biggest_remaining_blocker() -> str:
         return (
-            "Phase 2 still depends on a later Phase 1 production rerun for the final frozen-baseline story, and the "
-            "official recipe family remains only partially available locally because legacy *_ncep runtime IDs remain "
-            "in config space while gfs_wind.nc is still absent."
+            "Phase 2 is scientifically usable on the promoted cmems_gfs baseline, but the final frozen story still "
+            "depends on retiring legacy *_ncep runtime IDs from official-mode config space and closing the remaining "
+            "transport-model provisionality."
         )
 
     def _build_requirements(self, output_catalog_rows: list[dict[str, Any]]) -> list[RequirementStatus]:

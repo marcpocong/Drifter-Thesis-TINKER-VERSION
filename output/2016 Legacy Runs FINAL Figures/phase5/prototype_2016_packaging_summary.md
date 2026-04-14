@@ -8,6 +8,7 @@ This Phase 5 layer curates the stored `prototype_2016` outputs into one easy-to-
 - What was lightly regenerated: shoreline summary PNGs from stored shoreline CSVs, package registries, package README, and packaging notes
 - What was retained for compatibility: the flat per-case PNG exports and their root compatibility manifest
 - Relation to repo-wide `phase5_sync`: this package is the dedicated `prototype_2016` Phase 5 legacy deliverable; `phase5_sync` is the broader cross-repo read-only reproducibility layer
+- Historical-origin note: the very first prototype code used the shared first-code search box [108.6465, 121.3655, 6.1865, 20.3515] on the west coast of the Philippines, and the stored case-local prototype extents still remain the operative scientific/display extents
 - Phase 4 comparator note: budget-only deterministic PyGNOME comparator copied for 2016-09-01, 2016-09-06, 2016-09-17
 
 Counts:

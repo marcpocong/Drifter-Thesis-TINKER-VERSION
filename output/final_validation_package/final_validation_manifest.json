@@ -177,18 +177,20 @@
       "thesis_phase_title": "Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents",
       "thesis_phase_subtitle": "Mindoro March 13 -> March 14 public spill-extent reinitialization validation",
       "stored_run_recipe_source_path": "config/phase1_baseline_selection.yaml",
-      "stored_run_selected_recipe": "cmems_era5",
+      "stored_run_selected_recipe": "cmems_gfs",
       "posthoc_phase1_confirmation_workflow_mode": "phase1_mindoro_focus_pre_spill_2016_2023",
       "posthoc_phase1_confirmation_candidate_baseline_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml",
-      "posthoc_phase1_confirmation_selected_recipe": "cmems_era5",
-      "posthoc_phase1_confirmation_historical_winner": "cmems_era5",
+      "posthoc_phase1_confirmation_selected_recipe": "cmems_gfs",
+      "posthoc_phase1_confirmation_historical_winner": "cmems_gfs",
       "mindoro_phase1_provenance_workflow_mode": "phase1_mindoro_focus_pre_spill_2016_2023",
       "mindoro_phase1_provenance_artifact": "config/phase1_baseline_selection.yaml",
-      "mindoro_phase1_provenance_selected_recipe": "cmems_era5",
-      "mindoro_phase1_provenance_historical_winner": "cmems_era5",
+      "mindoro_phase1_provenance_selected_recipe": "cmems_gfs",
+      "mindoro_phase1_provenance_historical_winner": "cmems_gfs",
       "mindoro_phase1_provenance_recipe_family": [
         "cmems_era5",
-        "hycom_era5"
+        "cmems_gfs",
+        "hycom_era5",
+        "hycom_gfs"
       ],
       "mindoro_phase1_provenance_gfs_outage_constrained": false,
       "mindoro_phase1_provenance_gfs_historical_winner_not_adopted": false,
@@ -200,8 +202,8 @@
       "regional_reference_workflow_mode": "phase1_regional_2016_2022",
       "regional_reference_candidate_baseline_path": "output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml",
       "matches_stored_b1_recipe": true,
-      "confirmation_interpretation": "The separate phase1_mindoro_focus_pre_spill_2016_2023 Mindoro-focused drifter rerun selected the same recipe used by the stored B1 run (cmems_era5). It now serves as the active Mindoro-specific recipe-provenance lane for B1 without rewriting the original March 13 -> March 14 raw-generation history.",
-      "notes": "Phase 3B observation-based spatial validation using public Mindoro spill extents now foregrounds the March 13 NOAA seed polygon and March 14 NOAA target through the completed OpenDrift R1 previous p50 branch. The base March 3 -> March 6 case definition remains frozen in config, this promoted row is authorized by a separate Phase 3B amendment. The separate focused 2016-2023 Mindoro drifter rerun selected `cmems_era5` as the active B1 recipe provenance. It does not replace the original B1 raw provenance.",
+      "confirmation_interpretation": "The separate phase1_mindoro_focus_pre_spill_2016_2023 Mindoro-focused drifter rerun selected cmems_gfs as the active official B1 recipe after the focused four-recipe comparison. It now serves as the active Mindoro-specific recipe-provenance lane for B1 without rewriting the original March 13 -> March 14 raw-generation history.",
+      "notes": "Phase 3B observation-based spatial validation using public Mindoro spill extents now foregrounds the March 13 NOAA seed polygon and March 14 NOAA target through the completed OpenDrift R1 previous p50 branch. The base March 3 -> March 6 case definition remains frozen in config, this promoted row is authorized by a separate Phase 3B amendment. The separate focused 2016-2023 Mindoro drifter rerun selected `cmems_gfs` as the active B1 recipe provenance. It does not replace the original B1 raw provenance.",
       "source_summary_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_summary.csv",
       "source_pairing_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_branch_pairing_manifest.csv",
       "forecast_product_type": "mask_p50_2023-03-14_localdate.tif"
@@ -547,8 +549,8 @@
       "transport_model": "oceandrift",
       "provisional_transport_model": true,
       "initialization_mode": "accepted_march13_noaa_processed_polygon_reinit",
-      "current_source": "same frozen hycom_era5 OpenDrift recipe currents as upstream reinit",
-      "wind_source": "same frozen hycom_era5 OpenDrift recipe winds as upstream reinit",
+      "current_source": "same frozen cmems_gfs OpenDrift recipe currents as upstream reinit",
+      "wind_source": "same frozen cmems_gfs OpenDrift recipe winds as upstream reinit",
       "wave_stokes_status": "same OpenDrift wave/Stokes stack reused from the completed March 13 -> March 14 reinit phase",
       "structural_limitations": "This comparator reuses the completed March 13 -> March 14 OpenDrift branch p50 product rather than rerunning OpenDrift.",
       "forecast_product": "mask_p50_2023-03-14_localdate.tif",
@@ -631,18 +633,20 @@
     "shared_imagery_caveat": "Both NOAA/NESDIS public products cite WorldView-3 imagery acquired on 2023-03-12, so the promoted March 13 -> March 14 row is a reinitialization-based public-validation pair with shared-imagery provenance rather than a fully independent day-to-day validation.",
     "dual_provenance_confirmation": {
       "stored_run_recipe_source_path": "config/phase1_baseline_selection.yaml",
-      "stored_run_selected_recipe": "cmems_era5",
+      "stored_run_selected_recipe": "cmems_gfs",
       "posthoc_phase1_confirmation_workflow_mode": "phase1_mindoro_focus_pre_spill_2016_2023",
       "posthoc_phase1_confirmation_candidate_baseline_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml",
-      "posthoc_phase1_confirmation_selected_recipe": "cmems_era5",
-      "posthoc_phase1_confirmation_historical_winner": "cmems_era5",
+      "posthoc_phase1_confirmation_selected_recipe": "cmems_gfs",
+      "posthoc_phase1_confirmation_historical_winner": "cmems_gfs",
       "mindoro_phase1_provenance_workflow_mode": "phase1_mindoro_focus_pre_spill_2016_2023",
       "mindoro_phase1_provenance_artifact": "config/phase1_baseline_selection.yaml",
-      "mindoro_phase1_provenance_selected_recipe": "cmems_era5",
-      "mindoro_phase1_provenance_historical_winner": "cmems_era5",
+      "mindoro_phase1_provenance_selected_recipe": "cmems_gfs",
+      "mindoro_phase1_provenance_historical_winner": "cmems_gfs",
       "mindoro_phase1_provenance_recipe_family": [
         "cmems_era5",
-        "hycom_era5"
+        "cmems_gfs",
+        "hycom_era5",
+        "hycom_gfs"
       ],
       "mindoro_phase1_provenance_gfs_outage_constrained": false,
       "mindoro_phase1_provenance_gfs_historical_winner_not_adopted": false,
@@ -654,7 +658,7 @@
       "regional_reference_workflow_mode": "phase1_regional_2016_2022",
       "regional_reference_candidate_baseline_path": "output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml",
       "matches_stored_b1_recipe": true,
-      "confirmation_interpretation": "The separate phase1_mindoro_focus_pre_spill_2016_2023 Mindoro-focused drifter rerun selected the same recipe used by the stored B1 run (cmems_era5). It now serves as the active Mindoro-specific recipe-provenance lane for B1 without rewriting the original March 13 -> March 14 raw-generation history.",
+      "confirmation_interpretation": "The separate phase1_mindoro_focus_pre_spill_2016_2023 Mindoro-focused drifter rerun selected cmems_gfs as the active official B1 recipe after the focused four-recipe comparison. It now serves as the active Mindoro-specific recipe-provenance lane for B1 without rewriting the original March 13 -> March 14 raw-generation history.",
       "thesis_phase_title": "Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents",
       "thesis_phase_subtitle": "Mindoro March 13 -> March 14 public spill-extent reinitialization validation"
     },
@@ -733,7 +737,7 @@
         "scientific_vs_display_only": "display_only",
         "primary_vs_secondary": "primary",
         "comparator_only": false,
-        "provenance_note": "Curated publication export over stored B1 OpenDrift artifacts. B1 inherits recipe provenance from the The separate focused 2016-2023 Mindoro drifter rerun selected `cmems_era5` as the active B1 recipe provenance."
+        "provenance_note": "Curated publication export over stored B1 OpenDrift artifacts. B1 inherits recipe provenance from the The separate focused 2016-2023 Mindoro drifter rerun selected `cmems_gfs` as the active B1 recipe provenance."
       },
       {
         "group": "publication/opendrift_primary",
@@ -743,7 +747,7 @@
         "scientific_vs_display_only": "display_only",
         "primary_vs_secondary": "primary",
         "comparator_only": false,
-        "provenance_note": "Curated publication export over stored B1 OpenDrift artifacts. B1 inherits recipe provenance from the The separate focused 2016-2023 Mindoro drifter rerun selected `cmems_era5` as the active B1 recipe provenance."
+        "provenance_note": "Curated publication export over stored B1 OpenDrift artifacts. B1 inherits recipe provenance from the The separate focused 2016-2023 Mindoro drifter rerun selected `cmems_gfs` as the active B1 recipe provenance."
       },
       {
         "group": "publication/opendrift_primary",
@@ -753,7 +757,7 @@
         "scientific_vs_display_only": "display_only",
         "primary_vs_secondary": "primary",
         "comparator_only": false,
-        "provenance_note": "Curated publication export over stored B1 OpenDrift artifacts. B1 inherits recipe provenance from the The separate focused 2016-2023 Mindoro drifter rerun selected `cmems_era5` as the active B1 recipe provenance."
+        "provenance_note": "Curated publication export over stored B1 OpenDrift artifacts. B1 inherits recipe provenance from the The separate focused 2016-2023 Mindoro drifter rerun selected `cmems_gfs` as the active B1 recipe provenance."
       },
       {
         "group": "publication/comparator_pygnome",

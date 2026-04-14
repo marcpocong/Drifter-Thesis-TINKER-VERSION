@@ -592,10 +592,13 @@ class Phase5LauncherAndDocsSyncService:
         dwh_ensemble = get_artifact_status("dwh_ensemble_transfer")
         dwh_comparator = get_artifact_status("dwh_crossmodel_comparator")
         phase4_oil = get_artifact_status("mindoro_phase4_oil_budget")
-        upstream_blocker = (
-            _coerce_text(phase4_overall.get("biggest_remaining_phase4_blocker"))
-            or _coerce_text(phase2_overall.get("biggest_remaining_phase2_provisional_item"))
+        mindoro_upstream_blocker = (
+            _coerce_text(phase2_overall.get("biggest_remaining_phase2_provisional_item"))
             or _coerce_text(phase1_overall.get("biggest_remaining_blocker"))
+        )
+        phase4_blocker = (
+            _coerce_text(phase4_overall.get("biggest_remaining_phase4_blocker"))
+            or mindoro_upstream_blocker
         )
 
         def _headline_note(headline_key: str, fallback: str) -> str:
@@ -662,7 +665,7 @@ class Phase5LauncherAndDocsSyncService:
                 "scientifically_reportable": True,
                 "scientifically_frozen": False,
                 "inherited_provisional": True,
-                "main_blocker": upstream_blocker or "Primary validation remains inherited-provisional from upstream transport state and carries a shared-imagery caveat.",
+                "main_blocker": mindoro_upstream_blocker or "Primary validation remains inherited-provisional from upstream transport state and carries a shared-imagery caveat.",
                 "reportable_now": True,
                 "reportability_scope": "main_text_primary_validation",
                 "summary": _headline_note(
@@ -679,7 +682,7 @@ class Phase5LauncherAndDocsSyncService:
                 "scientifically_reportable": True,
                 "scientifically_frozen": False,
                 "inherited_provisional": True,
-                "main_blocker": upstream_blocker or "Legacy sparse reference; upstream transport baseline still not frozen.",
+                "main_blocker": mindoro_upstream_blocker or "Legacy sparse reference; upstream transport baseline still not frozen.",
                 "reportable_now": True,
                 "reportability_scope": "legacy_sparse_reference",
                 "summary": _headline_note(
@@ -696,7 +699,7 @@ class Phase5LauncherAndDocsSyncService:
                 "scientifically_reportable": True,
                 "scientifically_frozen": False,
                 "inherited_provisional": True,
-                "main_blocker": upstream_blocker or "Legacy broader-support reference; upstream transport baseline still not frozen.",
+                "main_blocker": mindoro_upstream_blocker or "Legacy broader-support reference; upstream transport baseline still not frozen.",
                 "reportable_now": True,
                 "reportability_scope": "legacy_broader_support_reference",
                 "summary": _headline_note(
@@ -764,7 +767,7 @@ class Phase5LauncherAndDocsSyncService:
                 "scientifically_reportable": bool(phase4_overall.get("scientifically_reportable_now")),
                 "scientifically_frozen": False,
                 "inherited_provisional": bool(phase4_overall.get("provisional_inherited_from_transport", True)),
-                "main_blocker": _coerce_text(phase4_overall.get("biggest_remaining_phase4_blocker")),
+                "main_blocker": phase4_blocker,
                 "reportable_now": bool(phase4_overall.get("scientifically_reportable_now")),
                 "reportability_scope": "mindoro_oil_type_and_shoreline_interpretation",
                 "summary": phase4_oil.dashboard_summary,
@@ -1004,7 +1007,7 @@ class Phase5LauncherAndDocsSyncService:
                 ),
                 (
                     f"- The thesis-facing B1 title is `{MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE}`, and the "
-                    "separate focused 2016-2023 Mindoro drifter rerun selected the same `cmems_era5` recipe "
+                    "separate focused 2016-2023 Mindoro drifter rerun now promotes the focused winner `cmems_gfs` "
                     "without rewriting the stored B1 raw provenance."
                 ),
                 (
@@ -1017,6 +1020,7 @@ class Phase5LauncherAndDocsSyncService:
                     "PyGNOME comparator figures, canonical scientific source PNGs, and summary/manifests without rerunning science."
                 ),
                 f"- `prototype_2016` is cataloged here as a legacy Phase 1 / 2 / 3A / 4 / 5 support lane, with the dedicated curated package rooted at `{PROTOTYPE_2016_FINAL_OUTPUT_DIR.as_posix()}` and repo-wide `phase5_sync` kept as a separate cross-repo reproducibility layer.",
+                "- Its historical-origin note keeps the shared first-code search box `[108.6465, 121.3655, 6.1865, 20.3515]` explicit for the first three 2016 drifters on the west coast of the Philippines, while the stored per-case local prototype extents remain operative.",
                 "- Mindoro Phase 4 now participates in the reproducibility/package layer via the current `phase4_run_manifest.json` and verdict bundle.",
                 "- The static `output/trajectory_gallery/` bundle now participates in the reproducibility/package layer as a read-only technical figure set.",
                 "- The static `output/trajectory_gallery_panel/` bundle now participates in the reproducibility/package layer as the polished panel-ready figure pack.",
@@ -1076,6 +1080,7 @@ class Phase5LauncherAndDocsSyncService:
             f"- DWH Phase 3C remains a separate external transfer-validation lane under `{DWH_BASE_CASE_CONFIG_PATH.as_posix()}` with forcing fixed to `{DWH_PHASE3C_FORCING_STACK}` and no thesis-facing drifter baseline.",
             "- The separate focused 2016-2023 Mindoro drifter rerun now supplies the active B1 recipe-provenance story, not the raw generation history of the stored March 13 -> March 14 science bundle.",
             f"- The legacy `prototype_2016` lane is framed as Phase 1 / 2 / 3A / 4 / 5 support, with its dedicated curated package rooted at `{PROTOTYPE_2016_FINAL_OUTPUT_DIR.as_posix()}`; it has no thesis-facing Phase 3B or Phase 3C.",
+            "- Its historical-origin note keeps the shared first-code search box `[108.6465, 121.3655, 6.1865, 20.3515]` explicit for the first three 2016 drifters on the west coast of the Philippines, while the stored per-case local prototype extents remain operative.",
             "- The launcher/menu is now organized around current track categories instead of the older monolithic Mindoro full-chain story.",
             "- The first dashboard version is intentionally read-only and does not add scientific run buttons.",
         ]
@@ -1194,6 +1199,7 @@ class Phase5LauncherAndDocsSyncService:
                 "",
                 "- `prototype_2016` remains available for debugging and regression only; it is not the final Phase 1 study.",
                 f"- `prototype_2016` is thesis-facing only as Phase 1 / 2 / 3A / 4 / 5, with its dedicated curated package rooted at `{PROTOTYPE_2016_FINAL_OUTPUT_DIR.as_posix()}` and no thesis-facing 3B/3C lane. Repo-wide `phase5_sync` remains a separate cross-repo reproducibility layer.",
+                "- Its historical-origin note keeps the shared first-code search box `[108.6465, 121.3655, 6.1865, 20.3515]` explicit for the first three 2016 drifters on the west coast of the Philippines, while the stored per-case local prototype extents remain operative.",
                 "- `mindoro_reportable_core` and `dwh_reportable_bundle` are intentional scientific reruns and are not safe defaults.",
                 "- The read-only utilities do not recompute scientific scores and are the safest launcher options for routine status refreshes.",
                 "",

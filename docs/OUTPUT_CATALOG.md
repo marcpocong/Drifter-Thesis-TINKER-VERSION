@@ -69,6 +69,7 @@ Expected files:
 - `phase1_drifter_registry.csv`
 - `phase1_accepted_segment_registry.csv`
 - `phase1_rejected_segment_registry.csv`
+- `phase1_local_input_inventory.csv`
 - `phase1_loading_audit.csv`
 - `phase1_segment_metrics.csv`
 - `phase1_recipe_summary.csv`
@@ -79,6 +80,7 @@ Expected files:
 Interpretation:
 
 - `phase1_drifter_registry.csv` is the consolidated candidate-segment registry and includes accepted/rejected status, reject reason, drifter ID, time window, drogue status fields, non-overlap status, and regional-box status
+- `phase1_local_input_inventory.csv` records the workflow-scoped persisted monthly drifter and forcing store under `data/historical_validation_inputs/<workflow_mode>/...`, including any month files staged forward from legacy `output/.../_scratch` locations
 - the official recipe family for this lane is only `cmems_era5`, `cmems_gfs`, `hycom_era5`, and `hycom_gfs`
 - this directory is the scientific evidence bundle for the completed regional rerun and is separate from Mindoro or DWH spill-case outputs
 - `phase1_baseline_selection_candidate.yaml` is staged only; it does not overwrite `config/phase1_baseline_selection.yaml`
@@ -159,12 +161,12 @@ Interpretation:
 - `publication/phase4_comparator/` packages the budget-only deterministic PyGNOME Phase 4 pilot when stored case-local comparator outputs exist
 - `scientific_source_pngs/` keeps the exact stored source PNGs used by the curated publication family
 - `summary/` keeps the copied similarity tables, per-case pairing artifacts, weathering CSVs, the Phase 4 comparator decision note, and packaging notes
-- `manifests/prototype_2016_provenance_metadata.json` records the earliest first-ingested three-case prototype capture box `[108.6465, 121.3655, 6.1865, 20.3515]` and the three original source boxes as provenance-only metadata
+- `manifests/prototype_2016_provenance_metadata.json` records the shared first-code search box `[108.6465, 121.3655, 6.1865, 20.3515]`, the three original source boxes, and the historical-origin note explaining why the first three 2016 drifter cases became the team’s initial proof-of-pipeline focus on the west coast of the Philippines
 - `prototype_2016` remains support-only, with visible thesis-facing support flow `Phase 1 -> Phase 2 -> Phase 3A -> Phase 4 -> Phase 5`
 - this lane has no thesis-facing `Phase 3B` or `Phase 3C`
 - the generic `output/figure_package_publication/` package remains mostly a 2016 Phase 3A figure source; the dedicated 2016 Phase 4/Phase 5 packaging now lives here
 - the Phase 4 comparator pilot stays budget-only and descriptive; shoreline comparison is not packaged unless matched PyGNOME shoreline products exist
-- the shared wide initial capture box is provenance-only and does not replace the stored case-local prototype scientific/display extents
+- the shared first-code search box is historical-origin metadata only and does not replace the stored case-local prototype scientific/display extents
 
 ## Phase 4 Support Outputs
 
@@ -249,6 +251,7 @@ Expected files:
 - `CASE_MINDORO_RETRO_2023__...__slide__*.png`
 - `CASE_DWH_RETRO_2010_72H__...__paper__*.png`
 - `CASE_DWH_RETRO_2010_72H__...__slide__*.png`
+- `THESIS_STUDY_CONTEXT__...__paper__*.png`
 - `CASE_2016_09_01__...*.png`
 - `CASE_2016_09_06__...*.png`
 - `CASE_2016_09_17__...*.png`
@@ -260,6 +263,7 @@ Interpretation:
 - filenames remain machine-readable, with case, phase/track, model, run type, date/date-range, scenario, view type, and variant tokens
 - recommended-for-defense and recommended-for-paper flags are recorded in the publication registry and manifest
 - Phase 3 OpenDrift-versus-PyGNOME comparison figures are included where those comparator products exist now
+- the package also includes a shared thesis study-box reference figure plus separate per-box geography panels built from stored Phase 1 baseline/config metadata, the stored Mindoro scoring-grid display bounds, and the curated prototype_2016 first-code search-box provenance metadata only
 - Mindoro Phase 4 is shown as OpenDrift/OpenOil-only support/context material; the package includes a no-matched-PyGNOME note figure instead of a fake Phase 4 OpenDrift-versus-PyGNOME board
 - publication family `K` republishes the preferred accepted-segment 2021 deterministic OpenDrift-vs-PyGNOME forecast figures as support-only material rather than main-defense evidence, while the 2016 prototype package remains preserved as legacy output
 - Mindoro publication figures now report the promoted March 13 -> March 14 B1 validation while explicitly inheriting recipe provenance from the separate focused 2016-2023 Mindoro Phase 1 rerun; DWH figures remain transfer-validation/support visuals
@@ -315,10 +319,10 @@ Interpretation:
 
 - this directory is an alias/export layer, not the canonical scientific directory
 - it packages the B1 publication figures, the stored canonical March 13 -> March 14 QA/source PNGs, and the summary artifacts in one thesis-facing location with primary OpenDrift and comparator-only PyGNOME groups kept separate
-- the stored B1 raw-generation outputs remain preserved in their canonical scientific directories, while the active thesis-facing recipe provenance now points to the separate focused `phase1_mindoro_focus_pre_spill_2016_2023` rerun selecting `cmems_era5`
+- the stored B1 raw-generation outputs remain preserved in their canonical scientific directories, while the active thesis-facing recipe provenance now points to the separate focused `phase1_mindoro_focus_pre_spill_2016_2023` rerun
 - the broader `phase1_regional_2016_2022` rerun remains preserved as a regional reference/governance lane rather than the active provenance for B1
 - the focused rerun searched through early 2023 but its accepted registry does not include near-2023 accepted segments
-- GFS-backed recipes were excluded in the focused rerun while archived NOAA/NCEI GFS access remained unavailable
+- the focused rerun now evaluates the full four-recipe family after a GFS completeness preflight; its raw historical winner is `cmems_gfs`, and official B1 now also uses `cmems_gfs`
 - the shared-imagery caveat remains explicit; do not describe March 13 -> March 14 as independent day-to-day validation
 
 ## Curated DWH Phase 3C Final Output Export

@@ -1,6 +1,6 @@
 {
   "phase": "phase1_finalization_audit",
-  "generated_at_utc": "2026-04-10T22:16:51.147970+00:00",
+  "generated_at_utc": "2026-04-14T11:36:26.779984+00:00",
   "repo_root": "/app",
   "smoke_checks": [
     {
@@ -20,46 +20,80 @@
     },
     {
       "check_id": "prototype_mode_preserved",
-      "passed": true,
+      "passed": false,
       "evidence": "config/settings.yaml"
     },
     {
       "check_id": "legacy_phase1_audits_regenerated_with_new_schema",
-      "passed": false,
-      "evidence": "output/CASE_2016-09-01/validation/phase1_loading_audit.csv, output/CASE_2016-09-06/validation/phase1_loading_audit.csv, output/CASE_2016-09-17/validation/phase1_loading_audit.csv"
+      "passed": true,
+      "evidence": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv, output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv, output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv, output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv, output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv, output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv, output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv"
     }
   ],
   "current_local_prototype_rankings": [
     {
-      "run_name": "CASE_2016-09-01",
-      "run_date": "2016-09-01",
-      "year": 2016,
-      "ranking_path": "output/CASE_2016-09-01/validation/validation_ranking.csv",
-      "winning_recipe": "cmems_era5",
-      "winning_score": 4.6466102747052815
+      "run_name": "output",
+      "run_date": "output",
+      "year": null,
+      "ranking_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml",
+      "winning_recipe": "",
+      "winning_score": NaN
     },
     {
-      "run_name": "CASE_2016-09-06",
-      "run_date": "2016-09-06",
-      "year": 2016,
-      "ranking_path": "output/CASE_2016-09-06/validation/validation_ranking.csv",
-      "winning_recipe": "cmems_ncep",
-      "winning_score": 5.072017701855068
+      "run_name": "output",
+      "run_date": "output",
+      "year": null,
+      "ranking_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+      "winning_recipe": "cmems_gfs",
+      "winning_score": NaN
     },
     {
-      "run_name": "CASE_2016-09-17",
-      "run_date": "2016-09-17",
-      "year": 2016,
-      "ranking_path": "output/CASE_2016-09-17/validation/validation_ranking.csv",
-      "winning_recipe": "cmems_era5",
-      "winning_score": 2.549707376934076
+      "run_name": "output",
+      "run_date": "output",
+      "year": null,
+      "ranking_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv",
+      "winning_recipe": "",
+      "winning_score": NaN
+    },
+    {
+      "run_name": "output",
+      "run_date": "output",
+      "year": null,
+      "ranking_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_local_input_inventory.csv",
+      "winning_recipe": "",
+      "winning_score": NaN
+    },
+    {
+      "run_name": "output",
+      "run_date": "output",
+      "year": null,
+      "ranking_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_production_manifest.json",
+      "winning_recipe": "",
+      "winning_score": NaN
+    },
+    {
+      "run_name": "output",
+      "run_date": "output",
+      "year": null,
+      "ranking_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_official_adoption_decision.json",
+      "winning_recipe": "",
+      "winning_score": NaN
+    },
+    {
+      "run_name": "output",
+      "run_date": "output",
+      "year": null,
+      "ranking_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_official_adoption_decision.md",
+      "winning_recipe": "",
+      "winning_score": NaN
     }
   ],
   "current_local_phase1_loading_audits": [
     {
-      "run_name": "CASE_2016-09-01",
-      "audit_path": "output/CASE_2016-09-01/validation/phase1_loading_audit.csv",
+      "run_name": "output",
+      "audit_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
       "columns": [
+        "loading_audit_schema_version",
+        "loading_audit_policy",
         "case_name",
         "recipe",
         "description",
@@ -75,17 +109,27 @@
         "wave_forcing_present",
         "wave_loading_status",
         "validity_flag",
+        "status_flag",
+        "hard_fail",
+        "hard_fail_reason",
         "invalidity_reason",
         "output_path",
         "map_file",
-        "ncs_score"
+        "ncs_score",
+        "segment_id",
+        "drifter_id",
+        "start_time_utc",
+        "end_time_utc",
+        "month_key"
       ],
-      "row_count": 4
+      "row_count": 76
     },
     {
-      "run_name": "CASE_2016-09-06",
-      "audit_path": "output/CASE_2016-09-06/validation/phase1_loading_audit.csv",
+      "run_name": "output",
+      "audit_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
       "columns": [
+        "loading_audit_schema_version",
+        "loading_audit_policy",
         "case_name",
         "recipe",
         "description",
@@ -101,17 +145,27 @@
         "wave_forcing_present",
         "wave_loading_status",
         "validity_flag",
+        "status_flag",
+        "hard_fail",
+        "hard_fail_reason",
         "invalidity_reason",
         "output_path",
         "map_file",
-        "ncs_score"
+        "ncs_score",
+        "segment_id",
+        "drifter_id",
+        "start_time_utc",
+        "end_time_utc",
+        "month_key"
       ],
-      "row_count": 4
+      "row_count": 76
     },
     {
-      "run_name": "CASE_2016-09-17",
-      "audit_path": "output/CASE_2016-09-17/validation/phase1_loading_audit.csv",
+      "run_name": "output",
+      "audit_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
       "columns": [
+        "loading_audit_schema_version",
+        "loading_audit_policy",
         "case_name",
         "recipe",
         "description",
@@ -127,28 +181,180 @@
         "wave_forcing_present",
         "wave_loading_status",
         "validity_flag",
+        "status_flag",
+        "hard_fail",
+        "hard_fail_reason",
         "invalidity_reason",
         "output_path",
         "map_file",
-        "ncs_score"
+        "ncs_score",
+        "segment_id",
+        "drifter_id",
+        "start_time_utc",
+        "end_time_utc",
+        "month_key"
       ],
-      "row_count": 4
+      "row_count": 76
+    },
+    {
+      "run_name": "output",
+      "audit_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
+      "columns": [
+        "loading_audit_schema_version",
+        "loading_audit_policy",
+        "case_name",
+        "recipe",
+        "description",
+        "intended_current_source",
+        "intended_wind_source",
+        "intended_wave_source",
+        "actual_current_reader",
+        "actual_wind_reader",
+        "actual_wave_reader",
+        "current_fallback_used",
+        "wind_fallback_used",
+        "wave_fallback_used",
+        "wave_forcing_present",
+        "wave_loading_status",
+        "validity_flag",
+        "status_flag",
+        "hard_fail",
+        "hard_fail_reason",
+        "invalidity_reason",
+        "output_path",
+        "map_file",
+        "ncs_score",
+        "segment_id",
+        "drifter_id",
+        "start_time_utc",
+        "end_time_utc",
+        "month_key"
+      ],
+      "row_count": 76
+    },
+    {
+      "run_name": "output",
+      "audit_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
+      "columns": [
+        "loading_audit_schema_version",
+        "loading_audit_policy",
+        "case_name",
+        "recipe",
+        "description",
+        "intended_current_source",
+        "intended_wind_source",
+        "intended_wave_source",
+        "actual_current_reader",
+        "actual_wind_reader",
+        "actual_wave_reader",
+        "current_fallback_used",
+        "wind_fallback_used",
+        "wave_fallback_used",
+        "wave_forcing_present",
+        "wave_loading_status",
+        "validity_flag",
+        "status_flag",
+        "hard_fail",
+        "hard_fail_reason",
+        "invalidity_reason",
+        "output_path",
+        "map_file",
+        "ncs_score",
+        "segment_id",
+        "drifter_id",
+        "start_time_utc",
+        "end_time_utc",
+        "month_key"
+      ],
+      "row_count": 76
+    },
+    {
+      "run_name": "output",
+      "audit_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
+      "columns": [
+        "loading_audit_schema_version",
+        "loading_audit_policy",
+        "case_name",
+        "recipe",
+        "description",
+        "intended_current_source",
+        "intended_wind_source",
+        "intended_wave_source",
+        "actual_current_reader",
+        "actual_wind_reader",
+        "actual_wave_reader",
+        "current_fallback_used",
+        "wind_fallback_used",
+        "wave_fallback_used",
+        "wave_forcing_present",
+        "wave_loading_status",
+        "validity_flag",
+        "status_flag",
+        "hard_fail",
+        "hard_fail_reason",
+        "invalidity_reason",
+        "output_path",
+        "map_file",
+        "ncs_score",
+        "segment_id",
+        "drifter_id",
+        "start_time_utc",
+        "end_time_utc",
+        "month_key"
+      ],
+      "row_count": 76
+    },
+    {
+      "run_name": "output",
+      "audit_path": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
+      "columns": [
+        "loading_audit_schema_version",
+        "loading_audit_policy",
+        "case_name",
+        "recipe",
+        "description",
+        "intended_current_source",
+        "intended_wind_source",
+        "intended_wave_source",
+        "actual_current_reader",
+        "actual_wind_reader",
+        "actual_wave_reader",
+        "current_fallback_used",
+        "wind_fallback_used",
+        "wave_fallback_used",
+        "wave_forcing_present",
+        "wave_loading_status",
+        "validity_flag",
+        "status_flag",
+        "hard_fail",
+        "hard_fail_reason",
+        "invalidity_reason",
+        "output_path",
+        "map_file",
+        "ncs_score",
+        "segment_id",
+        "drifter_id",
+        "start_time_utc",
+        "end_time_utc",
+        "month_key"
+      ],
+      "row_count": 76
     }
   ],
   "baseline_artifact": {
     "path": "config/phase1_baseline_selection.yaml",
-    "selected_recipe": "cmems_era5",
-    "source_kind": "frozen_historical_artifact",
+    "selected_recipe": "cmems_gfs",
+    "source_kind": "focused_mindoro_phase1_provenance_artifact",
     "chapter3_finalization_audit": {
       "target_historical_window": {
         "start_date": "2016-01-01",
-        "end_date": "2022-12-31"
+        "end_date": "2023-03-02"
       },
-      "regional_validation_box": [
-        115.0,
-        122.0,
-        6.0,
-        14.5
+      "phase1_validation_box": [
+        118.751,
+        124.305,
+        10.62,
+        16.026
       ],
       "core_pool_policy": "drogued_segments_only",
       "segment_policy": {
@@ -161,28 +367,47 @@
         "hycom_era5",
         "hycom_gfs"
       ],
-      "current_local_evidence_scope": "legacy_three_case_prototype_debugging_only",
+      "ranking_subset": {
+        "label": "mindoro_pre_spill_seasonal_subset_feb_apr",
+        "config": {
+          "mode": "seasonal_start_months",
+          "months": [
+            2,
+            3,
+            4
+          ],
+          "label": "mindoro_pre_spill_seasonal_subset_feb_apr",
+          "empty_subset_behavior": "hard_fail",
+          "description": "Rank recipes only on accepted segments whose start dates fall in February-April."
+        },
+        "accepted_segment_count": 19
+      },
+      "current_local_evidence_scope": "mindoro_focused_pre_spill_2016_2023_recipe_provenance",
       "current_local_evidence_dates": [
-        "2016-09-01",
-        "2016-09-06",
-        "2016-09-17"
+        "2016-2019 and 2021 accepted drifter segments within the focused Mindoro box"
       ],
+      "staged_candidate_baseline_artifact": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml",
+      "regional_reference_baseline_artifact": "output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml",
       "expected_phase1_artifacts": {
-        "accepted_segment_registry": "",
-        "rejected_segment_registry": "",
-        "segment_metrics": "",
-        "recipe_summary": "",
-        "recipe_ranking": "",
-        "frozen_baseline_artifact": "config/phase1_baseline_selection.yaml"
+        "accepted_segment_registry": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv",
+        "rejected_segment_registry": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_rejected_segment_registry.csv",
+        "local_input_inventory": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_local_input_inventory.csv",
+        "segment_metrics": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_segment_metrics.csv",
+        "recipe_summary": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_summary.csv",
+        "recipe_ranking": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+        "frozen_baseline_artifact": "config/phase1_baseline_selection.yaml",
+        "frozen_baseline_candidate": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml",
+        "adoption_decision_json": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_official_adoption_decision.json",
+        "adoption_decision_md": "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_official_adoption_decision.md"
       },
       "loading_audit_policy": {
         "hard_fail_on_missing_required_forcing": true,
         "hard_fail_on_empty_valid_recipe_set": true
       },
       "audit_status": {
-        "classification": "implemented_but_provisional",
-        "full_production_rerun_required": true,
-        "blocker": "The frozen recipe still comes from three legacy prototype dates, not from a completed 2016-2022 regional drifter-segment study."
+        "classification": "implemented_and_finalized_for_mindoro_recipe_provenance",
+        "full_production_rerun_required": false,
+        "blocker": ""
       }
     }
   },
@@ -195,8 +420,10 @@
     ],
     "runtime_recipe_ids": [
       "cmems_era5",
+      "cmems_gfs",
       "cmems_ncep",
       "hycom_era5",
+      "hycom_gfs",
       "hycom_ncep"
     ],
     "legacy_recipe_name_aliases": {
@@ -221,23 +448,27 @@
       "scientifically_ready": false,
       "full_production_rerun_required": true,
       "low_risk_patch_applied": false,
-      "evidence_summary": "Local Phase 1 rankings exist for 3 prototype dates covering year(s): 2016. The target Chapter 3 window is 2016-2022.",
+      "evidence_summary": "Local Phase 1 rankings exist for 7 prototype dates covering year(s): none. The target Chapter 3 window is 2016-2022.",
       "blocker": "Only the legacy three-date prototype evidence is present locally; the multi-year regional pool has not been built.",
       "evidence_paths": [
-        "output/CASE_2016-09-01/validation/validation_ranking.csv",
-        "output/CASE_2016-09-06/validation/validation_ranking.csv",
-        "output/CASE_2016-09-17/validation/validation_ranking.csv"
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_local_input_inventory.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_production_manifest.json",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_official_adoption_decision.json",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_official_adoption_decision.md"
       ]
     },
     {
-      "requirement_id": "fixed_regional_validation_box",
+      "requirement_id": "fixed_phase1_validation_box",
       "requirement_group": "core_architecture",
-      "chapter3_requirement": "Phase 1 uses a fixed regional validation box.",
+      "chapter3_requirement": "Phase 1 uses a fixed phase1_validation_box.",
       "classification": "implemented_but_provisional",
       "scientifically_ready": false,
       "full_production_rerun_required": true,
       "low_risk_patch_applied": true,
-      "evidence_summary": "Fixed regional-box metadata is present with bounds [115.0, 122.0, 6.0, 14.5].",
+      "evidence_summary": "Fixed Phase 1 validation-box metadata is present with bounds [118.751, 124.305, 10.62, 16.026].",
       "blocker": "The box is frozen in metadata but has not yet been exercised through the final 2016-2022 accepted/rejected segment study.",
       "evidence_paths": [
         "config/phase1_baseline_selection.yaml",
@@ -267,12 +498,16 @@
       "scientifically_ready": false,
       "full_production_rerun_required": true,
       "low_risk_patch_applied": true,
-      "evidence_summary": "Prototype Phase 1 runs are 72 h windows for dates ['2016-09-01', '2016-09-06', '2016-09-17'], but no accepted/rejected segment registry exists.",
+      "evidence_summary": "Prototype Phase 1 runs are 72 h windows for dates ['output', 'output', 'output', 'output', 'output', 'output', 'output'], but no accepted/rejected segment registry exists.",
       "blocker": "The repo does not yet materialize a general non-overlapping segment registry for the 2016-2022 regional pool.",
       "evidence_paths": [
-        "output/CASE_2016-09-01/validation/validation_ranking.csv",
-        "output/CASE_2016-09-06/validation/validation_ranking.csv",
-        "output/CASE_2016-09-17/validation/validation_ranking.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_local_input_inventory.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_production_manifest.json",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_official_adoption_decision.json",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_official_adoption_decision.md",
         "config/phase1_baseline_selection.yaml"
       ]
     },
@@ -284,8 +519,8 @@
       "scientifically_ready": false,
       "full_production_rerun_required": true,
       "low_risk_patch_applied": true,
-      "evidence_summary": "Target recipe family metadata = ['cmems_era5', 'cmems_gfs', 'hycom_era5', 'hycom_gfs']; runtime Phase 1 recipe IDs = ['cmems_era5', 'cmems_ncep', 'hycom_era5', 'hycom_ncep']; legacy alias map = ['cmems_ncep', 'hycom_ncep']; gfs_wind.nc present locally = False.",
-      "blocker": "Core Phase 1 runtime still only defines legacy recipe IDs missing ['cmems_gfs', 'hycom_gfs'], and no local gfs_wind.nc forcing is present.",
+      "evidence_summary": "Target recipe family metadata = ['cmems_era5', 'cmems_gfs', 'hycom_era5', 'hycom_gfs']; runtime Phase 1 recipe IDs = ['cmems_era5', 'cmems_gfs', 'cmems_ncep', 'hycom_era5', 'hycom_gfs', 'hycom_ncep']; legacy alias map = ['cmems_ncep', 'hycom_ncep']; gfs_wind.nc present locally = True.",
+      "blocker": "The core runtime family is present but still needs the final multi-year rerun.",
       "evidence_paths": [
         "config/recipes.yaml"
       ]
@@ -294,16 +529,20 @@
       "requirement_id": "loading_audit_hard_fail_behavior",
       "requirement_group": "core_architecture",
       "chapter3_requirement": "Phase 1 writes an explicit loading audit and hard-fails when required forcing support is invalid.",
-      "classification": "implemented_but_provisional",
-      "scientifically_ready": false,
-      "full_production_rerun_required": true,
+      "classification": "implemented_and_scientifically_ready",
+      "scientifically_ready": true,
+      "full_production_rerun_required": false,
       "low_risk_patch_applied": true,
-      "evidence_summary": "Validation service exposes phase1_loading_audit_v2 with policy `invalidate_recipe_on_required_forcing_or_simulation_failure_and_raise_if_no_valid_recipes_remain`. Existing on-disk Phase 1 audits already carry the new fields = False.",
-      "blocker": "Regenerate the historical Phase 1 audits during the real 2016-2022 production run so the new hard-fail/status fields exist on disk.",
+      "evidence_summary": "Validation service exposes phase1_loading_audit_v2 with policy `invalidate_recipe_on_required_forcing_or_simulation_failure_and_raise_if_no_valid_recipes_remain`. Existing on-disk Phase 1 audits already carry the new fields = True.",
+      "blocker": "",
       "evidence_paths": [
-        "output/CASE_2016-09-01/validation/phase1_loading_audit.csv",
-        "output/CASE_2016-09-06/validation/phase1_loading_audit.csv",
-        "output/CASE_2016-09-17/validation/phase1_loading_audit.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
         "src/services/validation.py"
       ]
     },
@@ -311,49 +550,61 @@
       "requirement_id": "accepted_segment_registry",
       "requirement_group": "required_artifacts",
       "chapter3_requirement": "Accepted regional Phase 1 segments are recorded in an explicit registry.",
-      "classification": "missing",
+      "classification": "implemented_but_provisional",
       "scientifically_ready": false,
       "full_production_rerun_required": true,
       "low_risk_patch_applied": false,
-      "evidence_summary": "No accepted-segment registry was found under output/.",
+      "evidence_summary": "Accepted-segment registry candidates: ['output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv', 'output/phase1_production_rerun/phase1_accepted_segment_registry.csv'].",
       "blocker": "The final 2016-2022 accepted regional segment registry has not been produced locally.",
-      "evidence_paths": []
+      "evidence_paths": [
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv",
+        "output/phase1_production_rerun/phase1_accepted_segment_registry.csv"
+      ]
     },
     {
       "requirement_id": "rejected_segment_registry",
       "requirement_group": "required_artifacts",
       "chapter3_requirement": "Rejected regional Phase 1 segments are recorded in an explicit registry.",
-      "classification": "missing",
+      "classification": "implemented_but_provisional",
       "scientifically_ready": false,
       "full_production_rerun_required": true,
       "low_risk_patch_applied": false,
-      "evidence_summary": "No rejected-segment registry was found under output/.",
+      "evidence_summary": "Rejected-segment registry candidates: ['output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_rejected_segment_registry.csv', 'output/phase1_production_rerun/phase1_rejected_segment_registry.csv'].",
       "blocker": "The final 2016-2022 rejected regional segment registry has not been produced locally.",
-      "evidence_paths": []
+      "evidence_paths": [
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_rejected_segment_registry.csv",
+        "output/phase1_production_rerun/phase1_rejected_segment_registry.csv"
+      ]
     },
     {
       "requirement_id": "segment_metrics",
       "requirement_group": "required_artifacts",
       "chapter3_requirement": "Phase 1 exports segment-level metrics for the accepted/rejected regional pool.",
-      "classification": "missing",
+      "classification": "implemented_but_provisional",
       "scientifically_ready": false,
       "full_production_rerun_required": true,
       "low_risk_patch_applied": false,
-      "evidence_summary": "No dedicated Phase 1 segment-metrics artifact was found under output/.",
+      "evidence_summary": "Segment-metrics candidates: ['output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_segment_metrics.csv', 'output/phase1_production_rerun/phase1_segment_metrics.csv'].",
       "blocker": "The final regional accepted/rejected segment metrics still require the dedicated 2016-2022 run.",
-      "evidence_paths": []
+      "evidence_paths": [
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_segment_metrics.csv",
+        "output/phase1_production_rerun/phase1_segment_metrics.csv"
+      ]
     },
     {
       "requirement_id": "recipe_summary",
       "requirement_group": "required_artifacts",
       "chapter3_requirement": "Phase 1 exports a summary table across the regional segment study before final recipe ranking.",
-      "classification": "missing",
+      "classification": "implemented_but_provisional",
       "scientifically_ready": false,
       "full_production_rerun_required": true,
       "low_risk_patch_applied": false,
-      "evidence_summary": "No dedicated Phase 1 recipe-summary artifact was found.",
+      "evidence_summary": "Phase 1 recipe-summary candidates: ['output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_summary.csv', 'output/phase1_production_rerun/phase1_recipe_summary.csv'].",
       "blocker": "The regional recipe-summary layer still needs to be generated from the final segment registry.",
-      "evidence_paths": []
+      "evidence_paths": [
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_summary.csv",
+        "output/phase1_production_rerun/phase1_recipe_summary.csv"
+      ]
     },
     {
       "requirement_id": "recipe_ranking",
@@ -363,12 +614,16 @@
       "scientifically_ready": false,
       "full_production_rerun_required": true,
       "low_risk_patch_applied": false,
-      "evidence_summary": "Validation rankings exist for 3 prototype runs; the current frozen recipe is `cmems_era5`.",
+      "evidence_summary": "Validation rankings exist for 7 prototype runs; the current frozen recipe is `cmems_gfs`.",
       "blocker": "Current rankings come from the old prototype cases, not from the final 2016-2022 regional segment corpus.",
       "evidence_paths": [
-        "output/CASE_2016-09-01/validation/validation_ranking.csv",
-        "output/CASE_2016-09-06/validation/validation_ranking.csv",
-        "output/CASE_2016-09-17/validation/validation_ranking.csv"
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_local_input_inventory.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_production_manifest.json",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_official_adoption_decision.json",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_official_adoption_decision.md"
       ]
     },
     {
@@ -379,13 +634,17 @@
       "scientifically_ready": false,
       "full_production_rerun_required": true,
       "low_risk_patch_applied": true,
-      "evidence_summary": "Frozen baseline artifact exists and currently selects `cmems_era5`.",
+      "evidence_summary": "Frozen baseline artifact exists and currently selects `cmems_gfs`.",
       "blocker": "The artifact is real, but its evidence base is still the legacy three-date prototype rather than the final regional study.",
       "evidence_paths": [
         "config/phase1_baseline_selection.yaml",
-        "output/CASE_2016-09-01/validation/validation_ranking.csv",
-        "output/CASE_2016-09-06/validation/validation_ranking.csv",
-        "output/CASE_2016-09-17/validation/validation_ranking.csv"
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_local_input_inventory.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_production_manifest.json",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_official_adoption_decision.json",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_official_adoption_decision.md"
       ]
     },
     {

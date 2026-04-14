@@ -5,6 +5,9 @@ This folder is the authoritative curated `prototype_2016` legacy support export.
 ## What This Package Means
 
 - `prototype_2016` is legacy support-only.
+- The very first prototype code used the shared first-code search box `[108.6465, 121.3655, 6.1865, 20.3515]` on the west coast of the Philippines (Palawan-side western Philippine context).
+- Because the pipeline was still in its early stage, that first code surfaced the first three 2016 drifter cases, and the team then intentionally kept those three as the first study focus to build the workflow and prove the pipeline was working.
+- This historical-origin note does not replace the stored per-case local prototype extents, which remain the operative scientific/display extents.
 - The visible legacy support flow here is `Phase 1 -> Phase 2 -> Phase 3A -> Phase 4 -> Phase 5`.
 - `Phase 3A` is comparator-only OpenDrift vs deterministic PyGNOME support.
 - `Phase 4` is the legacy weathering/fate family seeded from the selected drifter-of-record start.

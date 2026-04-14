@@ -102,16 +102,24 @@ def render(state: dict, ui_state: dict) -> None:
     initial_capture_box = provenance.get("prototype_2016_initial_capture_box", [])
     source_boxes = provenance.get("prototype_2016_initial_capture_source_boxes", [])
     initial_capture_box_text = _format_box(initial_capture_box)
+    historical_origin_summary = str(provenance.get("historical_origin_summary") or "").strip()
+    operative_extent_note = str(provenance.get("operative_extent_note") or "").strip()
     render_status_callout(
-        "Early prototype capture context",
+        "First-code search context",
         (
-            f"The earliest first-ingested prototype_2016 cases sat inside the shared provenance-only initial capture box "
-            f"[{initial_capture_box_text}] when only the first three 2016 cases had been ingested. Later ingestion widened "
-            "and refined the study, and the stored case-local prototype extents remain the operative scientific/display extents."
+            " ".join(part for part in (historical_origin_summary, operative_extent_note) if part)
+            if historical_origin_summary
+            else (
+                f"The very first prototype code used the shared first-code search box [{initial_capture_box_text}] on the "
+                "west coast of the Philippines (Palawan-side western Philippine context). Because the ingestion-and-validation "
+                "pipeline was still in its early stage, that first code surfaced the first three 2016 drifter cases, and the "
+                "team then intentionally kept those three as the first study focus to build the workflow and prove the "
+                "pipeline was working. The stored case-local prototype extents remain the operative scientific/display extents."
+            )
         )
         if initial_capture_box_text
         else (
-            "The earliest prototype_2016 capture-box provenance metadata is not available in the current package copy. "
+            "The historical first-code search metadata is not available in the current package copy. "
             "Stored case-local prototype extents still remain the operative scientific/display extents."
         ),
         "info",
@@ -122,20 +130,22 @@ def render(state: dict, ui_state: dict) -> None:
             for index, box in enumerate(source_boxes, start=1)
             if _format_box(box)
         )
+        source_box_note = (
+            "These source boxes support the historical first-code narrative and did not replace the stored case-local "
+            "prototype extents."
+        )
         if export_mode:
             render_markdown_block(
-                "Original source boxes",
+                "Historical origin source boxes",
                 source_box_lines
-                + "\n\nThese source boxes are provenance-only and did not replace the stored per-case local prototype extents.",
+                + f"\n\n{source_box_note}",
                 collapsed=False,
                 export_mode=export_mode,
             )
         else:
-            with st.expander("Original source boxes", expanded=False):
+            with st.expander("Historical origin source boxes", expanded=False):
                 st.markdown(source_box_lines)
-                st.caption(
-                    "These source boxes are provenance-only and did not replace the stored per-case local prototype extents."
-                )
+                st.caption(source_box_note)
 
     filtered_registry = _filter_case(registry, selected_case)
     phase3a_figures = filtered_registry.loc[

@@ -1,0 +1,40 @@
+{
+  "workflow_mode": "prototype_2016",
+  "generated_at_utc": "2026-04-14T11:45:19Z",
+  "prototype_2016_initial_capture_box": [
+    108.6465,
+    121.3655,
+    6.1865,
+    20.3515
+  ],
+  "prototype_2016_initial_capture_source_boxes": [
+    [
+      113.267,
+      121.267,
+      6.3685,
+      14.3685
+    ],
+    [
+      113.3655,
+      121.3655,
+      6.1865,
+      14.1865
+    ],
+    [
+      108.6465,
+      116.6465,
+      12.3515,
+      20.3515
+    ]
+  ],
+  "historical_origin_summary": "The very first prototype code used the shared first-code search box [108.6465, 121.3655, 6.1865, 20.3515] on the west coast of the Philippines (Palawan-side western Philippine context). Because the ingestion-and-validation pipeline was still in its early stage, that first code surfaced the first three 2016 drifter cases, and the team then intentionally kept those three as the first study focus to build the workflow and prove the pipeline was working.",
+  "geographic_focus_label": "west coast of the Philippines",
+  "geographic_focus_clarifier": "Palawan-side western Philippine context",
+  "team_focus_note": "The team intentionally kept the first three surfaced 2016 drifter cases as the first study focus to build the workflow and prove the pipeline was working.",
+  "operative_extent_note": "This historical-origin note does not replace the stored per-case local prototype extents, which remain the operative scientific/display extents.",
+  "notes": [
+    "Historical-origin metadata only; this does not replace the stored per-case local prototype extents.",
+    "The shared first-code search box records the earliest search/focus frame that surfaced the first three 2016 drifter cases.",
+    "prototype_2016 remains a support-only legacy lane and does not replace the final regional Phase 1 study."
+  ]
+}

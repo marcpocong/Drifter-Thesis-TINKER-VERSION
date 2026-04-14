@@ -38,6 +38,7 @@ from src.services.scoring import OFFICIAL_PHASE3B_WINDOWS_KM, Phase3BScoringServ
 from src.utils.forcing_outage_policy import (
     FORCING_OUTAGE_POLICY_CONTINUE_DEGRADED,
     resolve_forcing_outage_policy,
+    resolve_forcing_source_budget_seconds,
     source_id_for_recipe_component,
 )
 from src.utils.io import _resolve_polygon_reference_point, find_current_vars, get_case_output_dir, resolve_recipe_selection
@@ -526,6 +527,125 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
         selection = resolve_recipe_selection()
         return selection, "frozen_resolved_baseline_no_completed_event_recipe_sensitivity_found"
 
+    def _required_gfs_time_bounds(self) -> tuple[pd.Timestamp, pd.Timestamp]:
+        return (
+            _normalize_utc(self.window.required_forcing_start_utc),
+            _normalize_utc(self.window.required_forcing_end_utc),
+        )
+
+    def _gfs_cache_ready_record(self, gfs_path: Path) -> dict[str, Any] | None:
+        required_start, required_end = self._required_gfs_time_bounds()
+        inspection = _forcing_time_and_vars(
+            gfs_path,
+            ["x_wind", "y_wind"],
+            required_start,
+            required_end,
+        )
+        if inspection["status"] != "ready":
+            return None
+        return {
+            "status": "reused_local_file",
+            "path": str(gfs_path),
+            "source_id": "gfs",
+            "forcing_factor": gfs_path.name,
+            "upstream_outage_detected": False,
+            "source_system": "existing_local_cache",
+            "source_tier": "staged",
+            "requested_start_utc": inspection["required_start_utc"],
+            "requested_end_utc": inspection["required_end_utc"],
+            "cache_time_start_utc": inspection["time_start_utc"],
+            "cache_time_end_utc": inspection["time_end_utc"],
+        }
+
+    def _download_required_gfs_wind(
+        self,
+        service: DataIngestionService,
+        *,
+        gfs_path: Path,
+    ) -> dict[str, Any]:
+        cached_record = self._gfs_cache_ready_record(gfs_path)
+        if cached_record is not None:
+            return cached_record
+
+        required_start, required_end = self._required_gfs_time_bounds()
+        gfs_path.unlink(missing_ok=True)
+        budget_seconds = resolve_forcing_source_budget_seconds()
+        primary_failure = ""
+        primary_outage = False
+
+        try:
+            record = dict(
+                service.gfs_downloader.download(
+                    start_time=required_start,
+                    end_time=required_end,
+                    output_path=gfs_path,
+                    scratch_dir=self.forcing_dir,
+                    budget_seconds=budget_seconds,
+                )
+                or {}
+            )
+            record.setdefault("status", "downloaded")
+            record["source_system"] = "ncei_thredds_archive"
+            record["source_tier"] = "primary"
+        except Exception as primary_exc:
+            primary_failure = f"{type(primary_exc).__name__}: {primary_exc}"
+            primary_outage = service._is_remote_outage_error(primary_exc)
+            try:
+                record = dict(
+                    service.gfs_downloader.download_secondary_historical(
+                        start_time=required_start,
+                        end_time=required_end,
+                        output_path=gfs_path,
+                        scratch_dir=self.forcing_dir,
+                        budget_seconds=budget_seconds,
+                    )
+                    or {}
+                )
+                record.setdefault("status", "downloaded")
+                record["source_system"] = "ucar_gdex_d084001"
+                record["source_tier"] = "secondary"
+                record["primary_failure"] = primary_failure
+            except Exception as secondary_exc:
+                secondary_outage = service._is_remote_outage_error(secondary_exc)
+                gfs_path.unlink(missing_ok=True)
+                return {
+                    "status": "failed",
+                    "path": str(gfs_path),
+                    "source_id": "gfs",
+                    "forcing_factor": gfs_path.name,
+                    "upstream_outage_detected": bool(primary_outage or secondary_outage),
+                    "failure_stage": str(getattr(secondary_exc, "failure_stage", "secondary_gfs_acquisition")),
+                    "error": (
+                        "Primary GFS acquisition failed: "
+                        f"{primary_failure}. Secondary GFS acquisition failed: "
+                        f"{type(secondary_exc).__name__}: {secondary_exc}"
+                    ),
+                    "requested_start_utc": _iso_z(required_start),
+                    "requested_end_utc": _iso_z(required_end),
+                }
+
+        record["path"] = str(gfs_path)
+        record["source_id"] = "gfs"
+        record["forcing_factor"] = gfs_path.name
+        record["upstream_outage_detected"] = False
+        record["requested_start_utc"] = _iso_z(required_start)
+        record["requested_end_utc"] = _iso_z(required_end)
+        record["primary_failure"] = str(record.get("primary_failure") or primary_failure)
+
+        readiness = self._gfs_cache_ready_record(gfs_path)
+        if readiness is None:
+            return {
+                **record,
+                "status": "failed",
+                "error": (
+                    "GFS wind cache download finished but the staged file does not cover the required "
+                    f"window {record['requested_start_utc']} -> {record['requested_end_utc']}."
+                ),
+            }
+        record["cache_time_start_utc"] = readiness["cache_time_start_utc"]
+        record["cache_time_end_utc"] = readiness["cache_time_end_utc"]
+        return record
+
     def _prepare_extended_forcing(self, recipe_name: str) -> dict:
         with open("config/recipes.yaml", "r", encoding="utf-8") as handle:
             recipes = yaml.safe_load(handle) or {}
@@ -578,12 +698,39 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
             raise RuntimeError(f"March 13 -> March 14 reinit forcing download failed: {downloads['currents']}")
 
         if wind_file.startswith("gfs"):
-            gfs_path = self.forcing_dir / wind_file
-            if not gfs_path.exists():
-                raise FileNotFoundError(
-                    "GFS wind forcing was requested for the March 13 -> March 14 reinit rerun "
-                    f"but is not available locally: {gfs_path}."
-                )
+            downloads["wind"] = self._download_required_gfs_wind(
+                service,
+                gfs_path=self.forcing_dir / wind_file,
+            )
+            if downloads["wind"]["status"] not in {"downloaded", "cached", "reused_local_file"}:
+                if (
+                    downloads["wind"].get("upstream_outage_detected")
+                    and self.forcing_outage_policy == FORCING_OUTAGE_POLICY_CONTINUE_DEGRADED
+                ):
+                    manifest_path = self._write_download_failure_manifest(
+                        recipe_name,
+                        downloads,
+                        status="degraded_skipped_forcing_outage",
+                        degraded_continue_used=True,
+                        upstream_outage_detected=True,
+                        missing_forcing_factors=[downloads["wind"]["forcing_factor"]],
+                        stop_reason=str(downloads["wind"].get("error", "")),
+                    )
+                    raise ForcingOutagePhaseSkipped(
+                        phase=self.phase_id,
+                        workflow_mode=self.case.workflow_mode,
+                        forcing_outage_policy=self.forcing_outage_policy,
+                        reason=str(downloads["wind"].get("error", "")),
+                        missing_forcing_factors=[downloads["wind"]["forcing_factor"]],
+                        skipped_branch_ids=[branch.branch_id for branch in BRANCHES],
+                        manifest_path=str(manifest_path),
+                        budget_seconds=downloads["wind"].get("budget_seconds"),
+                        elapsed_seconds=downloads["wind"].get("elapsed_seconds"),
+                        budget_exhausted=bool(downloads["wind"].get("budget_exhausted", False)),
+                        failure_stage=str(downloads["wind"].get("failure_stage") or ""),
+                    )
+                self._write_download_failure_manifest(recipe_name, downloads)
+                raise RuntimeError(f"March 13 -> March 14 reinit forcing download failed: {downloads['wind']}")
         else:
             wind_source_id = source_id_for_recipe_component(forcing_kind="wind", filename=wind_file)
             downloads["wind"] = service.download_required_forcing_record(wind_source_id)
@@ -616,15 +763,6 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
                     )
                 self._write_download_failure_manifest(recipe_name, downloads)
                 raise RuntimeError(f"March 13 -> March 14 reinit forcing download failed: {downloads['wind']}")
-        if wind_file.startswith("gfs"):
-            downloads["wind"] = {
-                "status": "reused_local_file",
-                "path": str(self.forcing_dir / wind_file),
-                "source_id": "gfs",
-                "forcing_factor": wind_file,
-                "upstream_outage_detected": False,
-            }
-
         if wave_file:
             wave_source_id = source_id_for_recipe_component(forcing_kind="wave", filename=wave_file)
             downloads["wave"] = service.download_required_forcing_record(wave_source_id)
@@ -763,7 +901,11 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
         model_dir = get_case_output_dir(model_run_name)
         member_paths = sorted((model_dir / "ensemble").glob("member_*.nc"))
         forecast_manifest = model_dir / "forecast" / "forecast_manifest.json"
-        can_reuse_members = self._branch_outputs_are_reusable(member_paths, forecast_manifest)
+        can_reuse_members = self._branch_outputs_are_reusable(
+            member_paths,
+            forecast_manifest,
+            expected_recipe=selection.recipe,
+        )
         if can_reuse_members and not self.force_rerun:
             requested, actual = self._element_count_from_manifests(model_dir)
             return {
@@ -828,9 +970,26 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
         }
 
     @staticmethod
-    def _branch_outputs_are_reusable(member_paths: list[Path], forecast_manifest: Path) -> bool:
+    def _branch_outputs_are_reusable(
+        member_paths: list[Path],
+        forecast_manifest: Path,
+        *,
+        expected_recipe: str | None = None,
+    ) -> bool:
         if forecast_manifest.exists():
+            payload = _read_json(forecast_manifest)
+            if expected_recipe:
+                recorded_recipe = str(
+                    payload.get("recipe")
+                    or (payload.get("selection") or {}).get("recipe")
+                    or (payload.get("historical_baseline_provenance") or {}).get("recipe")
+                    or ""
+                ).strip()
+                if recorded_recipe != str(expected_recipe).strip():
+                    return False
             return bool(member_paths)
+        if expected_recipe:
+            return False
         if not member_paths:
             return False
         member_names = {path.stem for path in member_paths}

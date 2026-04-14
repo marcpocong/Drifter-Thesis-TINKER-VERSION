@@ -2,7 +2,7 @@
 
 ## Current Project Verdict
 
-- Phase 1: Mindoro-specific recipe provenance is now finalized through the separate focused `2016-2023` drifter rerun selecting `cmems_era5`; the broader `2016-2022` regional rerun remains preserved as a reference/governance lane and currently selects `cmems_gfs`.
+- Phase 1: Mindoro-specific recipe provenance is now finalized through the separate focused `2016-2023` drifter rerun, which recorded `cmems_gfs` as the historical four-recipe winner and now promotes `cmems_gfs` directly into the official B1 artifact; the broader `2016-2022` regional rerun remains preserved as a reference/governance lane and currently selects `cmems_gfs`.
 - Phase 2: scientifically usable, not frozen.
 - Mindoro Phase 3: validation-focused and reportable; `Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents` is now carried by the March 13 -> March 14 B1 row, March 6 remains the preserved sparse-reference honesty case, the promotion is tracked by amendment rather than by rewriting the frozen March 3 -> March 6 case file, and B1 now inherits its recipe provenance from the separate focused `2016-2023` Mindoro drifter rerun without claiming direct drifter ingestion inside Phase 3B itself.
 - DWH Phase 3C: frozen validation-only external rich-data transfer case kept separate from drifter-calibration governance.
@@ -18,12 +18,12 @@
 
 - Plain-language status: the focused `2016-2023` Mindoro rerun now provides the active spill-case recipe provenance in `config/phase1_baseline_selection.yaml`, while the dedicated `2016-2022` historical/regional production rerun is preserved as a broader reference/governance lane and still stages its own regional candidate artifact.
 - Scientifically reportable: `true`
-- Scientifically frozen: `candidate_staged_but_not_promoted`
+- Scientifically frozen: `mindoro_specific_b1_provenance_finalized_broader_regional_reference_not_frozen`
 - Inherited provisional: `false`
 - Official Phase 1 audit box/window: `119.5-124.5E / 11.5-16.5N`, `2016-2022`
 - Forcing-outage policy: strict/reportable by default. If a provider outage removes part of the official recipe family, the dedicated scientific lane now fails hard unless you explicitly set `FORCING_OUTAGE_POLICY=continue_degraded`.
 - Forcing-provider acquisition is also fail-fast now: each forcing source gets a shared `FORCING_SOURCE_BUDGET_SECONDS` wall-clock budget with a default of `300` seconds, while drifter truth and ArcGIS/observation truth remain strict inputs outside that timeout policy.
-- Biggest remaining follow-up: archived NOAA/NCEI GFS access is still blocking a full four-recipe rerun of the focused Mindoro provenance lane, so the active Mindoro story remains explicitly outage-constrained to the ERA5-backed family for now.
+- Biggest remaining follow-up: the focused Mindoro provenance lane is complete and official B1 now uses `cmems_gfs`; the remaining Phase 1 science follow-up is the broader `2016-2022` regional/reference lane, which is still not finalized as a completed multi-year frozen study.
 - Separate Mindoro-focused note: the `phase1_mindoro_focus_pre_spill_2016_2023` rerun is now the active Mindoro-specific recipe-provenance lane for B1. It searched through early 2023, but its accepted registry does not include near-2023 accepted segments.
 
 What is already in place:
@@ -31,6 +31,7 @@ What is already in place:
 - dedicated `WORKFLOW_MODE=phase1_regional_2016_2022` and `PIPELINE_PHASE=phase1_production_rerun`
 - consolidated `output/phase1_production_rerun/phase1_drifter_registry.csv` with accepted/rejected status, reject reasons, drogue fields, non-overlap status, and regional-box status
 - accepted/rejected segment registries, loading audit, segment metrics, recipe summary, recipe ranking, run manifest, and staged candidate baseline artifact under `output/phase1_production_rerun/`
+- workflow-scoped persisted monthly drifter and forcing stores under `data/historical_validation_inputs/<workflow_mode>/...`, with `phase1_local_input_inventory.csv` exposing what is locally reusable for the rerun
 - strict gate implementation for drogued-only, full-duration, continuous, non-overlapping, in-box 72 h segments
 - preferred `prototype_2021` debug lane frozen from the two accepted 2021 strict-gate segments
 - preserved `prototype_2016` workflow for debugging/regression
@@ -40,8 +41,8 @@ What is already in place:
 
 What still remains:
 
-- deliberate downstream trial runs using `BASELINE_SELECTION_PATH=output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml`
-- explicit promotion only if you decide to replace `config/phase1_baseline_selection.yaml`
+- deliberate downstream trial runs only if you want to test the separate broader `2016-2022` regional/reference candidate artifact under `BASELINE_SELECTION_PATH=output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml`
+- explicit governance only if you later decide to replace the now-official Mindoro-focused B1 baseline with the broader regional/reference candidate
 - optional read-only follow-up refreshes through `phase1_audit` and `phase5_sync`
 
 ## Phase 2
@@ -50,7 +51,7 @@ What still remains:
 - Scientifically reportable: `true`
 - Scientifically frozen: `false`
 - Inherited provisional: `true`
-- Biggest blocker: the staged Phase 1 candidate baseline has not yet been promoted into the default spill-case baseline file (`config/phase1_baseline_selection.yaml`, still sourced from `2016-09-01`, `2016-09-06`, and `2016-09-17`), and local official recipe-family support for the spill-case lane is still partial.
+- Biggest blocker: Phase 2 remains scientifically usable but not fully frozen because the broader upstream Phase 1 regional/reference lane is still not finalized as the completed multi-year study, and legacy recipe-family drift still exists in parts of config/runtime space.
 
 What is already in place:
 
@@ -63,18 +64,17 @@ What is already in place:
 
 What remains provisional:
 
-- the default spill-case baseline file still remains the older canonical artifact until you manually promote or override it, and that canonical file still cites the preserved `2016-09-01`, `2016-09-06`, and `2016-09-17` prototype rankings as its evidence base
+- the default Mindoro spill-case baseline file now selects `cmems_gfs`, but the broader upstream `2016-2022` regional/reference lane is still not frozen as the completed multi-year study
 - legacy `*_ncep` recipe-family drift still exists in config/runtime space, even though the dedicated Phase 1 production lane now evaluates only the Chapter 3 official family
-- no local `gfs_wind.nc` is present for the current spill-case lane, so the full official GFS-capable family is not yet locally available there by default
-- existing stored Phase 2 manifests predate the new candidate-baseline story and were not regenerated by default
+- the canonical March 13 -> March 14 B1 rerun and its curated final-output export were refreshed to `cmems_gfs`, but some older non-B1 support manifests may still predate the focused Mindoro provenance promotion
 - `prototype_2021` remains a debug/demo lane rather than the final Chapter 3 regional evidence base
 
 ## Legacy Prototype 2016 Support Lane
 
 - Plain-language status: preserved legacy support lane only, reframed thesis-facing as `Phase 1 -> Phase 2 -> Phase 3A -> Phase 4 -> Phase 5`.
 - Reportable: `false` as final evidence, `true` as legacy support/comparator context.
-- Methodological role: this preserved three-date 2016 lane captures the earliest prototype stage of the study, when the ingestion-and-validation pipeline was first exercised on 2016 drifter records in the Palawan-side western Philippine context before the study widened toward the broader west-coast Palawan/Mindoro context.
-- Early-capture provenance note: the earliest first-ingested three-case prototype stage is now recorded with the shared provenance-only initial capture box `[108.6465, 121.3655, 6.1865, 20.3515]` plus the three original source boxes that formed that union; later ingestion widened/refined the study, and the stored case-local prototype extents remain unchanged.
+- Methodological role: this preserved three-date 2016 lane captures the earliest prototype stage of the study. The very first prototype code used the shared first-code search box `[108.6465, 121.3655, 6.1865, 20.3515]` on the west coast of the Philippines (Palawan-side western Philippine context).
+- Historical-origin note: because the ingestion-and-validation pipeline was still in its early stage, that first code surfaced the first three 2016 drifter cases, and the team then intentionally kept those three as the first study focus to build the workflow and prove the pipeline was working. This historical-origin note does not replace the stored case-local prototype extents, which remain unchanged.
 - Guardrail: there is no thesis-facing `Phase 3B` or `Phase 3C` for `prototype_2016`.
 - Phase 3A package scope: deterministic plus support-only `p50`/`p90` OpenDrift tracks against deterministic PyGNOME.
 - Comparator interpretation: the Phase 3A OpenDrift-versus-deterministic-PyGNOME check is support-only. A non-zero fraction skill score means the ensemble footprint was not completely disjoint from the deterministic PyGNOME forecast; it does not make PyGNOME truth or elevate this lane into final Chapter 3 evidence.
@@ -93,6 +93,7 @@ Promotion and provenance control:
 - Shared-imagery guardrail: both NOAA/NESDIS public products cite March 12 WorldView-3 imagery, so the promoted B1 row is reportable as a reinitialization-based public-validation pair, not as an independent day-to-day validation.
 - Track semantics: `B1` is the only main-text primary Mindoro validation row; `A` is the same-case comparator-support track attached to `B1`; `B2` is the March 6 legacy honesty row; `B3` is the March 3-6 broader-support legacy row.
 - Spatial semantics: focused Phase 1 validation box `[118.751, 124.305, 10.620, 16.026]`; broad `mindoro_case_domain` fallback transport/overview extent `[115.0, 122.0, 6.0, 14.5]`; current scoring-grid display bounds `[120.90964677179262, 122.0621541786303, 12.249384840763462, 13.783655303175253]`.
+- Presentation note: `output/figure_package_publication/` now also carries a shared thesis study-box reference figure plus separate per-box geography panels so the focused Mindoro Phase 1 box, `mindoro_case_domain`, the scoring-grid display bounds, and the prototype_2016 first-code search box remain explicit and separate in the thesis-facing UI/package layer.
 
 ### Phase 3A Benchmark Comparator Support
 
@@ -107,7 +108,7 @@ Promotion and provenance control:
 - Reportable: `true`
 - Frozen: `false`
 - Provenance: the original March 3 -> March 6 base case YAML stays frozen; this promotion is authorized through the separate amendment file above.
-- Recipe-provenance note: the separate `phase1_mindoro_focus_pre_spill_2016_2023` drifter rerun selected the same `cmems_era5` recipe used by the stored B1 run; that rerun is now the active Mindoro-specific provenance lane, not a replacement raw-generation history for the stored B1 bundle.
+- Recipe-provenance note: the separate `phase1_mindoro_focus_pre_spill_2016_2023` drifter rerun is now the active Mindoro-specific provenance lane; it recorded `cmems_gfs` as the historical four-recipe winner, official B1 now also uses `cmems_gfs`, and it does not replace the raw-generation history of the stored B1 bundle.
 - Thesis framing: separate focused drifter-based Phase 1 provenance -> Phase 2 -> Phase 3B primary validation.
 - PyGNOME role on the same case: comparator-only support evidence, not truth and not the main validation claim.
 - Guardrail: present it as the canonical Mindoro validation row, but keep the shared-imagery caveat explicit and do not describe it as independent day-to-day validation.

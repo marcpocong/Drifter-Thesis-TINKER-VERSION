@@ -758,9 +758,23 @@ class TrajectoryGalleryBuildService:
         mindoro_grid = forecast_manifest.get("grid") or {}
         mindoro_target_crs = str(mindoro_grid.get("crs") or "EPSG:32651")
         mindoro_shoreline = str(mindoro_grid.get("shoreline_segments_path") or "")
+        recorded_recipe = str(
+            forecast_manifest.get("recipe")
+            or (forecast_manifest.get("selection") or {}).get("recipe")
+            or (forecast_manifest.get("historical_baseline_provenance") or {}).get("recipe")
+            or ""
+        ).strip()
+        mindoro_control_nc = f"output/CASE_MINDORO_RETRO_2023/forecast/deterministic_control_{recorded_recipe}.nc"
+        if not (self.repo_root / mindoro_control_nc).exists():
+            fallback_control = next(
+                iter(sorted((self.repo_root / "output" / "CASE_MINDORO_RETRO_2023" / "forecast").glob("deterministic_control_*.nc"))),
+                None,
+            )
+            if fallback_control is not None:
+                mindoro_control_nc = str(fallback_control.relative_to(self.repo_root)).replace("\\", "/")
 
         self._generate_track_map(
-            nc_relative_path="output/CASE_MINDORO_RETRO_2023/forecast/deterministic_control_cmems_era5.nc",
+            nc_relative_path=mindoro_control_nc,
             target_crs=mindoro_target_crs,
             background_vector_relative_path=mindoro_shoreline,
             background_raster_relative_path=None,

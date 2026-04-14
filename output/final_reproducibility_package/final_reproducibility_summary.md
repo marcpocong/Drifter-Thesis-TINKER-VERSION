@@ -13,7 +13,7 @@ This package synchronizes launcher/menu behavior, documentation, and reproducibi
 - `phase1` / `phase1_regional_baseline`: Architecture audited; the final 2016-2022 production rerun is still needed.
 - `phase2` / `phase2_machine_readable_forecast`: Scientifically usable as implemented, but not yet frozen.
 - `phase3a` / `A`: Same-case comparator-only support track attached to B1 on the promoted March 14 target. fss_1km=0.0000, fss_3km=0.0441, fss_5km=0.1371, fss_10km=0.2490
-- `phase3b` / `B1`: Promoted primary validation; focused 2016-2023 Mindoro drifter rerun selected the same cmems_era5 recipe; reportable now but not fully frozen. fss_1km=0.0000, fss_3km=0.0441, fss_5km=0.1371, fss_10km=0.2490
+- `phase3b` / `B1`: Promoted primary validation; the focused 2016-2023 Mindoro drifter rerun found cmems_gfs as the historical winner and official B1 now uses cmems_gfs; reportable now but not fully frozen. fss_1km=0.0000, fss_3km=0.0441, fss_5km=0.1371, fss_10km=0.2490
 - `phase3b` / `B2`: B2 legacy honesty reference; not the promoted primary row. fss_1km=0.0000, fss_3km=0.0000, fss_5km=0.0000, fss_10km=0.0000
 - `phase3b` / `B3`: B3 legacy broader-support context; not a primary row. fss_1km=0.1722, fss_3km=0.2004, fss_5km=0.2166, fss_10km=0.2438
 - `phase3c` / `C1`: Frozen DWH deterministic transfer-validation baseline. fss_1km=0.5033, fss_3km=0.5523, fss_5km=0.5700, fss_10km=0.6018
@@ -28,10 +28,11 @@ This package synchronizes launcher/menu behavior, documentation, and reproducibi
 - Existing scientific Mindoro and DWH outputs were reused and not recomputed here.
 - The existing `output/final_validation_package/` bundle was reused rather than rebuilt from scratch.
 - Mindoro keeps the frozen base case definition in `config/case_mindoro_retro_2023.yaml` and records the promoted March 13 -> March 14 Phase 3B primary row through the separate `config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml` amendment file.
-- The thesis-facing B1 title is `Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents`, and the separate focused 2016-2023 Mindoro drifter rerun selected the same `cmems_era5` recipe without rewriting the stored B1 raw provenance.
+- The thesis-facing B1 title is `Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents`, and the separate focused 2016-2023 Mindoro drifter rerun now promotes the focused winner `cmems_gfs` without rewriting the stored B1 raw provenance.
 - The curated read-only B1 export now lives under `output/Phase 3B March13-14 Final Output` and packages the publication figures, canonical scientific source PNGs, summary CSV, decision note, and local manifest.
 - The curated read-only DWH export now lives under `output/Phase 3C DWH Final Output` and packages the Phase 3C observation context figures, deterministic baseline figures, ensemble extension figures, PyGNOME comparator figures, canonical scientific source PNGs, and summary/manifests without rerunning science.
 - `prototype_2016` is cataloged here as a legacy Phase 1 / 2 / 3A / 4 / 5 support lane, with the dedicated curated package rooted at `output/2016 Legacy Runs FINAL Figures` and repo-wide `phase5_sync` kept as a separate cross-repo reproducibility layer.
+- Its historical-origin note keeps the shared first-code search box `[108.6465, 121.3655, 6.1865, 20.3515]` explicit for the first three 2016 drifters on the west coast of the Philippines, while the stored per-case local prototype extents remain operative.
 - Mindoro Phase 4 now participates in the reproducibility/package layer via the current `phase4_run_manifest.json` and verdict bundle.
 - The static `output/trajectory_gallery/` bundle now participates in the reproducibility/package layer as a read-only technical figure set.
 - The static `output/trajectory_gallery_panel/` bundle now participates in the reproducibility/package layer as the polished panel-ready figure pack.

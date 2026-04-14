@@ -32,6 +32,8 @@ def _service_stub(tmpdir: str) -> Phase3BExtendedPublicScoredMarch1314ReinitServ
     service.output_dir.mkdir(parents=True, exist_ok=True)
     service.precheck_dir = service.output_dir / "precheck"
     service.precheck_dir.mkdir(parents=True, exist_ok=True)
+    service.forcing_dir = service.output_dir / "forcing"
+    service.forcing_dir.mkdir(parents=True, exist_ok=True)
     service.source_extended_dir = Path(tmpdir) / EXTENDED_DIR_NAME
     service.source_extended_dir.mkdir(parents=True, exist_ok=True)
     service.track = "mindoro_phase3b_primary_public_validation_reinit"
@@ -276,6 +278,101 @@ class Phase3BExtendedPublicScoredMarch1314ReinitTests(unittest.TestCase):
             )
 
         self.assertTrue(reusable)
+
+    def test_branch_outputs_are_not_reusable_without_manifest_when_recipe_is_explicit(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            ensemble_dir = Path(tmpdir) / "ensemble"
+            ensemble_dir.mkdir(parents=True, exist_ok=True)
+            member_paths = []
+            for index in range(1, EXPECTED_ENSEMBLE_MEMBER_COUNT + 1):
+                path = ensemble_dir / f"member_{index}.nc"
+                path.write_text("placeholder", encoding="utf-8")
+                member_paths.append(path)
+            forecast_manifest = Path(tmpdir) / "forecast_manifest.json"
+
+            reusable = Phase3BExtendedPublicScoredMarch1314ReinitService._branch_outputs_are_reusable(
+                member_paths,
+                forecast_manifest,
+                expected_recipe="cmems_gfs",
+            )
+
+        self.assertFalse(reusable)
+
+    def test_branch_outputs_are_not_reusable_when_manifest_recipe_mismatches(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            ensemble_dir = Path(tmpdir) / "ensemble"
+            ensemble_dir.mkdir(parents=True, exist_ok=True)
+            member_paths = []
+            for index in range(1, EXPECTED_ENSEMBLE_MEMBER_COUNT + 1):
+                path = ensemble_dir / f"member_{index}.nc"
+                path.write_text("placeholder", encoding="utf-8")
+                member_paths.append(path)
+            forecast_manifest = Path(tmpdir) / "forecast_manifest.json"
+            forecast_manifest.write_text('{"recipe": "cmems_era5"}', encoding="utf-8")
+
+            reusable = Phase3BExtendedPublicScoredMarch1314ReinitService._branch_outputs_are_reusable(
+                member_paths,
+                forecast_manifest,
+                expected_recipe="cmems_gfs",
+            )
+
+        self.assertFalse(reusable)
+
+    def test_gfs_cache_ready_record_accepts_valid_local_cache(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            service = _service_stub(tmpdir)
+            gfs_path = service.forcing_dir / "gfs_wind.nc"
+            times = pd.date_range("2023-03-12 12:00:00", "2023-03-15 00:00:00", freq="3H")
+            ds = xr.Dataset(
+                {
+                    "x_wind": (("time", "lat", "lon"), np.ones((len(times), 1, 1), dtype=np.float32)),
+                    "y_wind": (("time", "lat", "lon"), np.ones((len(times), 1, 1), dtype=np.float32)),
+                },
+                coords={"time": times, "lat": [13.5], "lon": [121.5]},
+            )
+            ds.to_netcdf(gfs_path)
+
+            record = service._gfs_cache_ready_record(gfs_path)
+
+        self.assertIsNotNone(record)
+        self.assertEqual(record["status"], "reused_local_file")
+        self.assertEqual(record["source_system"], "existing_local_cache")
+
+    def test_download_required_gfs_wind_builds_exact_window_cache(self):
+        class _FakeDownloader:
+            def download(self, *, start_time, end_time, output_path, scratch_dir, budget_seconds):
+                times = pd.date_range(pd.Timestamp(start_time), pd.Timestamp(end_time).ceil("3H"), freq="3H")
+                ds = xr.Dataset(
+                    {
+                        "x_wind": (("time", "lat", "lon"), np.ones((len(times), 1, 1), dtype=np.float32)),
+                        "y_wind": (("time", "lat", "lon"), np.ones((len(times), 1, 1), dtype=np.float32)),
+                    },
+                    coords={"time": times, "lat": [13.5], "lon": [121.5]},
+                )
+                ds.to_netcdf(output_path)
+                return {"status": "downloaded", "analysis_count": len(times)}
+
+            def download_secondary_historical(self, **kwargs):
+                raise AssertionError("secondary fallback should not be used when primary download succeeds")
+
+        class _FakeIngestionService:
+            def __init__(self):
+                self.gfs_downloader = _FakeDownloader()
+
+            @staticmethod
+            def _is_remote_outage_error(exc):
+                return False
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            service = _service_stub(tmpdir)
+            record = service._download_required_gfs_wind(
+                _FakeIngestionService(),
+                gfs_path=service.forcing_dir / "gfs_wind.nc",
+            )
+
+        self.assertEqual(record["status"], "downloaded")
+        self.assertEqual(record["source_system"], "ncei_thredds_archive")
+        self.assertEqual(record["source_tier"], "primary")
 
 
 if __name__ == "__main__":

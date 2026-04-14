@@ -34,7 +34,7 @@
       "scientific_vs_display_only": "display_only",
       "primary_vs_secondary": "primary",
       "comparator_only": false,
-      "provenance_note": "Curated publication export over stored B1 OpenDrift artifacts. B1 inherits recipe provenance from the The separate focused 2016-2023 Mindoro drifter rerun selected `cmems_era5` as the active B1 recipe provenance."
+      "provenance_note": "Curated publication export over stored B1 OpenDrift artifacts. B1 inherits recipe provenance from the The separate focused 2016-2023 Mindoro drifter rerun selected `cmems_gfs` as the active B1 recipe provenance."
     },
     {
       "final_relative_path": "output/Phase 3B March13-14 Final Output/publication/opendrift_primary/march14_r1_previous_overlay.png",
@@ -43,7 +43,7 @@
       "scientific_vs_display_only": "display_only",
       "primary_vs_secondary": "primary",
       "comparator_only": false,
-      "provenance_note": "Curated publication export over stored B1 OpenDrift artifacts. B1 inherits recipe provenance from the The separate focused 2016-2023 Mindoro drifter rerun selected `cmems_era5` as the active B1 recipe provenance."
+      "provenance_note": "Curated publication export over stored B1 OpenDrift artifacts. B1 inherits recipe provenance from the The separate focused 2016-2023 Mindoro drifter rerun selected `cmems_gfs` as the active B1 recipe provenance."
     },
     {
       "final_relative_path": "output/Phase 3B March13-14 Final Output/publication/opendrift_primary/mindoro_primary_validation_board.png",
@@ -52,7 +52,7 @@
       "scientific_vs_display_only": "display_only",
       "primary_vs_secondary": "primary",
       "comparator_only": false,
-      "provenance_note": "Curated publication export over stored B1 OpenDrift artifacts. B1 inherits recipe provenance from the The separate focused 2016-2023 Mindoro drifter rerun selected `cmems_era5` as the active B1 recipe provenance."
+      "provenance_note": "Curated publication export over stored B1 OpenDrift artifacts. B1 inherits recipe provenance from the The separate focused 2016-2023 Mindoro drifter rerun selected `cmems_gfs` as the active B1 recipe provenance."
     },
     {
       "final_relative_path": "output/Phase 3B March13-14 Final Output/publication/comparator_pygnome/march14_crossmodel_r0_overlay.png",

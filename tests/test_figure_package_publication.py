@@ -206,7 +206,41 @@ class FigurePackagePublicationTests(unittest.TestCase):
         )
         _write_text(
             root / "output" / "phase1_mindoro_focus_pre_spill_2016_2023" / "phase1_baseline_selection_candidate.yaml",
-            "selected_recipe: cmems_era5\n",
+            "selected_recipe: cmems_gfs\n",
+        )
+        _write_text(
+            root / "config" / "phase1_baseline_selection.yaml",
+            "\n".join(
+                [
+                    "selected_recipe: cmems_gfs",
+                    "historical_four_recipe_winner: cmems_gfs",
+                    "gfs_historical_winner_not_adopted: false",
+                    "chapter3_finalization_audit:",
+                    "  phase1_validation_box: [118.751, 124.305, 10.620, 16.026]",
+                ]
+            )
+            + "\n",
+        )
+        _write_text(
+            root / "config" / "case_mindoro_retro_2023.yaml",
+            "mindoro_case_domain: [115.0, 122.0, 6.0, 14.5]\n",
+        )
+        _write_text(
+            root / "docs" / "DOMAIN_GLOSSARY.md",
+            "# Domain Glossary\n\n- Focused Mindoro Phase 1 validation box\n- mindoro_case_domain\n- scoring_grid.display_bounds_wgs84\n- prototype_2016 first-code search box\n",
+        )
+        _write_json(
+            root / "output" / "2016 Legacy Runs FINAL Figures" / "manifests" / "prototype_2016_provenance_metadata.json",
+            {
+                "prototype_2016_initial_capture_box": [108.6465, 121.3655, 6.1865, 20.3515],
+                "prototype_2016_initial_capture_source_boxes": [
+                    [113.267, 121.267, 6.3685, 14.3685],
+                    [113.3655, 121.3655, 6.1865, 14.1865],
+                    [108.6465, 116.6465, 12.3515, 20.3515],
+                ],
+                "historical_origin_summary": "The very first prototype code used the shared first-code search box [108.6465, 121.3655, 6.1865, 20.3515] on the west coast of the Philippines and surfaced the first three 2016 drifter cases.",
+                "operative_extent_note": "The stored case-local prototype extents remain the operative scientific/display extents.",
+            },
         )
         for rel_path, value in (
             ("output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_seed_mask_on_grid.tif", 1),
@@ -307,7 +341,7 @@ class FigurePackagePublicationTests(unittest.TestCase):
                 specs["mindoro_primary_board"]["note_lines"],
             )
             self.assertIn(
-                "The separate focused 2016-2023 Mindoro drifter rerun selected the same cmems_era5 recipe used by the stored B1 run and now serves as the active B1 recipe-provenance lane.",
+                "The separate focused 2016-2023 Mindoro drifter rerun found cmems_gfs as the historical four-recipe winner, and official B1 now uses cmems_gfs from that focused lane.",
                 specs["mindoro_primary_board"]["note_lines"],
             )
             self.assertIn(
@@ -416,6 +450,57 @@ class FigurePackagePublicationTests(unittest.TestCase):
                 specs["dwh_24h_48h_72h_mask_p50_mask_p90_vs_pygnome_three_row_overview_board"]["guide_bullets"],
             )
 
+    def test_study_box_publication_spec_uses_stored_repo_box_metadata(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            service = self._build_service_fixture(Path(tmpdir))
+            singles, boards = service._study_box_publication_specs()
+            self.assertEqual(boards, [])
+            self.assertEqual(len(singles), 5)
+            spec = _find_spec(singles, "thesis_study_boxes_reference")
+            focused_spec = _find_spec(singles, "focused_phase1_box_geography_reference")
+            prototype_spec = _find_spec(singles, "prototype_first_code_search_box_geography_reference")
+
+            self.assertEqual(spec["figure_family_code"], "L")
+            self.assertEqual(spec["status_key_override"], "thesis_study_box_reference")
+            self.assertEqual(spec["case_id"], "THESIS_STUDY_CONTEXT")
+            self.assertEqual(spec["renderer"], "study_boxes")
+            self.assertEqual(len(spec["study_boxes"]), 4)
+            self.assertIn(
+                "1. Focused Mindoro Phase 1 validation box: [118.751, 124.305, 10.62, 16.026]",
+                spec["subtitle_box_lines"],
+            )
+            self.assertIn(
+                "2. `mindoro_case_domain` fallback transport/overview extent: [115, 122, 6, 14.5]",
+                spec["subtitle_box_lines"],
+            )
+            self.assertIn(
+                "4. prototype_2016 first-code search box: [108.6465, 121.3655, 6.1865, 20.3515]",
+                spec["subtitle_box_lines"],
+            )
+            self.assertIn(
+                "The prototype_2016 first-code search box is historical-origin support metadata only; the stored case-local prototype extents remain the operative scientific/display extents for the 2016 figures.",
+                spec["note_lines"],
+            )
+            self.assertIn("config/phase1_baseline_selection.yaml", spec["source_paths"])
+            self.assertIn(
+                "output/2016 Legacy Runs FINAL Figures/manifests/prototype_2016_provenance_metadata.json",
+                spec["source_paths"],
+            )
+            self.assertEqual(focused_spec["run_type"], "single_box_reference_map")
+            self.assertEqual(focused_spec["model_names"], "study_box_geography")
+            self.assertEqual(len(focused_spec["study_boxes"]), 1)
+            self.assertEqual(focused_spec["figure_slug"], "focused_phase1_box_geography_reference")
+            self.assertIn("Selected box: Focused Mindoro Phase 1 validation box", focused_spec["subtitle_box_lines"])
+            self.assertIn(
+                "The geographic backdrop is reference context so the Mindoro setting stays visible in a panel-ready figure.",
+                focused_spec["note_lines"],
+            )
+            self.assertEqual(prototype_spec["figure_slug"], "prototype_first_code_search_box_geography_reference")
+            self.assertIn(
+                "Role: historical-origin west-coast Philippines search box used by the earliest prototype code",
+                prototype_spec["subtitle_box_lines"],
+            )
+
     def test_case_context_normalizes_mindoro_manifest_extent_order(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             service = self._build_service_fixture(Path(tmpdir))
@@ -505,6 +590,7 @@ class FigurePackagePublicationTests(unittest.TestCase):
             self.assertTrue(manifest["publication_package_built_from_existing_outputs_only"])
             self.assertIn("A", manifest["figure_families_generated"])
             self.assertIn("F", manifest["figure_families_generated"])
+            self.assertIn("L", manifest["figure_families_generated"])
             self.assertIn("recommended_main_defense_figures", manifest)
             self.assertTrue(manifest["phase4_deferred_comparison_note_figure_produced"])
             self.assertIn("font_audit", manifest)
@@ -518,6 +604,20 @@ class FigurePackagePublicationTests(unittest.TestCase):
             self.assertIn("status_key", registry_df.columns)
             self.assertIn("status_provenance", registry_df.columns)
             self.assertEqual(len(registry_df), len(manifest["figures"]))
+            thesis_boxes_row = registry_df[
+                (registry_df["case_id"] == "THESIS_STUDY_CONTEXT")
+                & registry_df["figure_id"].str.contains("thesis_study_boxes_reference", na=False)
+            ].iloc[0]
+            thesis_detail_rows = registry_df[
+                (registry_df["case_id"] == "THESIS_STUDY_CONTEXT")
+                & registry_df["run_type"].astype(str).eq("single_box_reference_map")
+            ].copy()
+            self.assertEqual(thesis_boxes_row["status_key"], "thesis_study_box_reference")
+            self.assertIn("stored Phase 1 baseline/config metadata", thesis_boxes_row["notes"])
+            self.assertEqual(thesis_boxes_row["figure_family_code"], "L")
+            self.assertEqual(len(thesis_detail_rows), 4)
+            self.assertTrue(thesis_detail_rows["figure_id"].astype(str).str.contains("focused_phase1_box_geography_reference", na=False).any())
+            self.assertTrue(thesis_detail_rows["figure_id"].astype(str).str.contains("prototype_first_code_search_box_geography_reference", na=False).any())
 
             font_audit_df = pd.read_csv(results["font_audit_csv"])
             self.assertEqual(font_audit_df.iloc[0]["requested_font_family"], "Arial")

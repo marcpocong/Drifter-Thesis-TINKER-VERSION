@@ -72,7 +72,7 @@ def render(state: dict, ui_state: dict) -> None:
     )
     render_status_callout(
         "Recipe provenance",
-        "B1 inherits the cmems_era5 recipe selected by the separate focused 2016-2023 Mindoro Phase 1 rerun. Phase 3B itself does not directly ingest drifters.",
+        "B1 inherits the official cmems_gfs recipe from the separate focused 2016-2023 Mindoro Phase 1 rerun, which completed the four-recipe comparison and promoted the focused historical winner directly into official B1. Phase 3B itself does not directly ingest drifters.",
         "info",
     )
 

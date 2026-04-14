@@ -47,15 +47,17 @@ guardrails:
 phase1_recipe_provenance:
   active_provenance_workflow_mode: phase1_mindoro_focus_pre_spill_2016_2023
   active_provenance_artifact: output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml
-  active_selected_recipe: cmems_era5
+  active_selected_recipe: cmems_gfs
   active_recipe_family_tested:
     - cmems_era5
+    - cmems_gfs
     - hycom_era5
+    - hycom_gfs
   direct_drifter_ingestion_in_phase3b: false
-  gfs_outage_note: >
-    Archived NOAA/NCEI GFS access was unavailable during the focused Mindoro
-    provenance lane, so GFS-backed recipes were excluded there rather than
-    being silently treated as if they had passed.
+  provenance_alignment_note: >
+    The focused Mindoro provenance lane now evaluates the full four-recipe family
+    and directly promotes the focused historical winner into the official B1
+    baseline when that winner is spill-usable for the main validation track.
   accepted_registry_near_2023_segments: false
 
 backward_compatibility:

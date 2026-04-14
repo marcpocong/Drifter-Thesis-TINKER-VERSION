@@ -1,6 +1,6 @@
 {
   "phase": "phase2_finalization_audit",
-  "generated_at_utc": "2026-04-10T23:01:01.455082+00:00",
+  "generated_at_utc": "2026-04-14T11:35:45.991752+00:00",
   "repo_root": "/app",
   "run_name": "CASE_MINDORO_RETRO_2023",
   "manifest_paths": {
@@ -48,12 +48,12 @@
     {
       "check_id": "official_user_facing_help_mentions_canonical_products",
       "passed": true,
-      "evidence": "README.md, start.ps1, src/__main__.py"
+      "evidence": "README.md, docs/PHASE_STATUS.md, docs/ARCHITECTURE.md, docs/OUTPUT_CATALOG.md, start.ps1, src/__main__.py"
     }
   ],
   "current_output_state": {
-    "current_manifest_has_phase2_finalization": false,
-    "current_loading_audit_has_phase2_finalization": false,
+    "current_manifest_has_phase2_finalization": true,
+    "current_loading_audit_has_phase2_finalization": true,
     "forecast_grid_id": "EPSG:32651:1000.0:124x169:274000:1355000:398000:1524000",
     "ensemble_grid_id": "EPSG:32651:1000.0:124x169:274000:1355000:398000:1524000",
     "member_runs": 50,
@@ -68,26 +68,18 @@
     ],
     "official_recipe_family_runtime_defined": [
       "cmems_era5",
-      "hycom_era5"
+      "cmems_gfs",
+      "hycom_era5",
+      "hycom_gfs"
     ],
     "official_recipe_family_locally_available": [
       "cmems_era5",
-      "hycom_era5"
-    ],
-    "official_recipe_family_unavailable": [
       "cmems_gfs",
+      "hycom_era5",
       "hycom_gfs"
     ],
-    "official_recipe_family_unavailable_reasons": {
-      "cmems_gfs": [
-        "missing_gfs_wind_nc",
-        "recipe_id_not_defined_in_runtime_config"
-      ],
-      "hycom_gfs": [
-        "missing_gfs_wind_nc",
-        "recipe_id_not_defined_in_runtime_config"
-      ]
-    },
+    "official_recipe_family_unavailable": [],
+    "official_recipe_family_unavailable_reasons": {},
     "legacy_recipe_ids_present_in_runtime": [
       "cmems_ncep",
       "hycom_ncep"
@@ -95,9 +87,9 @@
     "legacy_recipe_id_detected": true,
     "selected_recipe_id_is_legacy_alias": false,
     "selected_recipe_chapter3_target": "",
-    "gfs_wind_present_for_active_case": false,
-    "phase1_finalization_classification": "implemented_but_provisional",
-    "requires_phase1_production_rerun_for_full_freeze": true,
+    "gfs_wind_present_for_active_case": true,
+    "phase1_finalization_classification": "implemented_and_finalized_for_mindoro_recipe_provenance",
+    "requires_phase1_production_rerun_for_full_freeze": false,
     "legacy_recipe_drift_leaks_into_official_mode": true
   },
   "drift_inspection": {
@@ -114,47 +106,47 @@
       },
       {
         "path": "config/recipes.yaml",
-        "line": 18,
+        "line": 26,
         "text": "cmems_ncep:"
       },
       {
         "path": "config/recipes.yaml",
-        "line": 21,
+        "line": 29,
         "text": "wind_file: \"ncep_wind.nc\""
       },
       {
         "path": "config/recipes.yaml",
-        "line": 41,
+        "line": 52,
+        "text": "- cmems_ncep"
+      },
+      {
+        "path": "config/recipes.yaml",
+        "line": 55,
+        "text": "- hycom_ncep"
+      },
+      {
+        "path": "config/recipes.yaml",
+        "line": 64,
         "text": "cmems_ncep:"
       },
       {
         "path": "config/recipes.yaml",
-        "line": 44,
+        "line": 67,
         "text": "note: \"Prototype validation still uses ncep_wind.nc. Do not present this as final Chapter 3 GFS evidence.\""
       },
       {
         "path": "config/recipes.yaml",
-        "line": 45,
+        "line": 68,
         "text": "hycom_ncep:"
       },
       {
         "path": "config/recipes.yaml",
-        "line": 48,
+        "line": 71,
         "text": "note: \"Prototype validation still uses ncep_wind.nc. Do not present this as final Chapter 3 GFS evidence.\""
-      },
-      {
-        "path": "src/services/source_history_reconstruction_r1.py",
-        "line": 417,
-        "text": "downloads[\"wind\"] = service.download_ncep()"
-      },
-      {
-        "path": "src/services/phase3b_extended_public_scored.py",
-        "line": 354,
-        "text": "downloads[\"wind\"] = service.download_ncep()"
       }
     ],
     "phase2_manifest_honesty_fields_supported_in_code": true,
-    "current_official_outputs_predate_honesty_block": true
+    "current_official_outputs_predate_honesty_block": false
   },
   "output_catalog": [
     {
@@ -256,7 +248,7 @@
       "chapter3_requirement": "Deterministic control is kept separate from the ensemble products.",
       "classification": "implemented_and_scientifically_ready",
       "scientifically_usable": true,
-      "requires_phase1_production_rerun_for_full_freeze": true,
+      "requires_phase1_production_rerun_for_full_freeze": false,
       "low_risk_patch_applied": false,
       "evidence_summary": "Forecast manifest exposes a deterministic-control NetCDF plus a separate ensemble manifest reference.",
       "blocker": "",
@@ -271,7 +263,7 @@
       "chapter3_requirement": "Phase 2 uses canonical product names with stable mask_p50 and mask_p90 semantics.",
       "classification": "implemented_and_scientifically_ready",
       "scientifically_usable": true,
-      "requires_phase1_production_rerun_for_full_freeze": true,
+      "requires_phase1_production_rerun_for_full_freeze": false,
       "low_risk_patch_applied": true,
       "evidence_summary": "Canonical products present = ['control_density_norm', 'control_footprint_mask', 'mask_p50', 'mask_p50_datecomposite', 'mask_p90', 'prob_presence']. Product catalog rows = 7.",
       "blocker": "",
@@ -287,7 +279,7 @@
       "chapter3_requirement": "Official Phase 2 uses the fixed 50-member ensemble design.",
       "classification": "implemented_and_scientifically_ready",
       "scientifically_usable": true,
-      "requires_phase1_production_rerun_for_full_freeze": true,
+      "requires_phase1_production_rerun_for_full_freeze": false,
       "low_risk_patch_applied": false,
       "evidence_summary": "Ensemble manifest records ensemble_size=50 and member_runs=50.",
       "blocker": "",
@@ -302,7 +294,7 @@
       "chapter3_requirement": "Official Phase 2 writes date-composite products without changing the meaning of mask_p50.",
       "classification": "implemented_and_scientifically_ready",
       "scientifically_usable": true,
-      "requires_phase1_production_rerun_for_full_freeze": true,
+      "requires_phase1_production_rerun_for_full_freeze": false,
       "low_risk_patch_applied": true,
       "evidence_summary": "Date-composite products present: prob_presence_datecomposite=True, mask_p50_datecomposite=True for 2023-03-06.",
       "blocker": "",
@@ -317,7 +309,7 @@
       "chapter3_requirement": "Deterministic and ensemble Phase 2 products share the same canonical scoring grid.",
       "classification": "implemented_and_scientifically_ready",
       "scientifically_usable": true,
-      "requires_phase1_production_rerun_for_full_freeze": true,
+      "requires_phase1_production_rerun_for_full_freeze": false,
       "low_risk_patch_applied": false,
       "evidence_summary": "Forecast grid_id = EPSG:32651:1000.0:124x169:274000:1355000:398000:1524000; ensemble grid_id = EPSG:32651:1000.0:124x169:274000:1355000:398000:1524000.",
       "blocker": "",
@@ -332,7 +324,7 @@
       "chapter3_requirement": "Phase 2 writes machine-readable manifests and loading audits with hard-fail coverage discipline.",
       "classification": "implemented_and_scientifically_ready",
       "scientifically_usable": true,
-      "requires_phase1_production_rerun_for_full_freeze": true,
+      "requires_phase1_production_rerun_for_full_freeze": false,
       "low_risk_patch_applied": false,
       "evidence_summary": "Forecast manifest exists = True, ensemble manifest exists = True, loading audit rows = 51.",
       "blocker": "",
@@ -347,12 +339,12 @@
       "requirement_id": "explicit_provenance_status_fields",
       "requirement_group": "auditability",
       "chapter3_requirement": "Phase 2 exposes explicit provenance and status fields, including finalization honesty fields.",
-      "classification": "implemented_but_provisional",
+      "classification": "implemented_and_scientifically_ready",
       "scientifically_usable": true,
-      "requires_phase1_production_rerun_for_full_freeze": true,
+      "requires_phase1_production_rerun_for_full_freeze": false,
       "low_risk_patch_applied": true,
-      "evidence_summary": "Existing manifests expose status_flags/recipe provenance = True. Current on-disk phase2_finalization block present = False. Code support for the honesty block = True.",
-      "blocker": "The read-only audit patched the manifest schema in code, but the existing official Phase 2 manifests were not regenerated by default.",
+      "evidence_summary": "Existing manifests expose status_flags/recipe provenance = True. Current on-disk phase2_finalization block present = True. Code support for the honesty block = True.",
+      "blocker": "",
       "evidence_paths": [
         "output/CASE_MINDORO_RETRO_2023/forecast/forecast_manifest.json",
         "output/CASE_MINDORO_RETRO_2023/ensemble/ensemble_manifest.json",
@@ -366,7 +358,7 @@
       "chapter3_requirement": "Official Phase 2 user-facing output names and launcher/help text use the canonical product story instead of obsolete prototype labels.",
       "classification": "implemented_and_scientifically_ready",
       "scientifically_usable": true,
-      "requires_phase1_production_rerun_for_full_freeze": true,
+      "requires_phase1_production_rerun_for_full_freeze": false,
       "low_risk_patch_applied": true,
       "evidence_summary": "README, docs, launcher help, and __main__ now point official users to forecast manifests, loading audits, prob_presence, mask_p50, and mask_p90 while keeping prototype outputs explicitly legacy/debug-only.",
       "blocker": "",
@@ -385,9 +377,9 @@
       "chapter3_requirement": "Phase 2 explicitly discloses remaining Phase 1 recipe-family drift instead of implying the full official family is already frozen locally.",
       "classification": "implemented_but_provisional",
       "scientifically_usable": true,
-      "requires_phase1_production_rerun_for_full_freeze": true,
+      "requires_phase1_production_rerun_for_full_freeze": false,
       "low_risk_patch_applied": true,
-      "evidence_summary": "Official recipe family expected = ['cmems_era5', 'cmems_gfs', 'hycom_era5', 'hycom_gfs']; runtime-defined = ['cmems_era5', 'hycom_era5']; locally available = ['cmems_era5', 'hycom_era5']; legacy runtime IDs = ['cmems_ncep', 'hycom_ncep']; gfs_wind.nc present for the official case = False.",
+      "evidence_summary": "Official recipe family expected = ['cmems_era5', 'cmems_gfs', 'hycom_era5', 'hycom_gfs']; runtime-defined = ['cmems_era5', 'cmems_gfs', 'hycom_era5', 'hycom_gfs']; locally available = ['cmems_era5', 'cmems_gfs', 'hycom_era5', 'hycom_gfs']; legacy runtime IDs = ['cmems_ncep', 'hycom_ncep']; gfs_wind.nc present for the official case = True.",
       "blocker": "The current repo state still carries legacy *_ncep recipe IDs in config space and does not yet include gfs_wind.nc, so the Phase 2 frozen-baseline story remains upstream-provisional.",
       "evidence_paths": [
         "config/phase1_baseline_selection.yaml",
@@ -400,12 +392,12 @@
       "requirement_id": "missing_gfs_not_silent",
       "requirement_group": "upstream_dependency",
       "chapter3_requirement": "Missing GFS support is stated honestly instead of silently distorting official-mode behavior.",
-      "classification": "implemented_but_provisional",
+      "classification": "implemented_and_scientifically_ready",
       "scientifically_usable": true,
-      "requires_phase1_production_rerun_for_full_freeze": true,
+      "requires_phase1_production_rerun_for_full_freeze": false,
       "low_risk_patch_applied": true,
-      "evidence_summary": "Explicit GFS-missing guard messages found = 2; current official case has gfs_wind.nc = False.",
-      "blocker": "Official GFS forcing is still absent locally, so the audit can only document the gap and enforce clearer failure messages.",
+      "evidence_summary": "Explicit GFS-missing guard messages found = 2; current official case has gfs_wind.nc = True.",
+      "blocker": "",
       "evidence_paths": [
         "src/services/source_history_reconstruction_r1.py",
         "src/services/phase3b_extended_public_scored.py",
@@ -418,14 +410,12 @@
       "chapter3_requirement": "Legacy recipe naming drift is inventoried instead of being hidden.",
       "classification": "implemented_but_provisional",
       "scientifically_usable": true,
-      "requires_phase1_production_rerun_for_full_freeze": true,
+      "requires_phase1_production_rerun_for_full_freeze": false,
       "low_risk_patch_applied": true,
       "evidence_summary": "Legacy recipe-related code/config hits currently inventoried = 10.",
       "blocker": "Legacy naming drift still exists in config space and a few official-support branches; this patch makes that explicit but does not fully remove the drift.",
       "evidence_paths": [
-        "config/recipes.yaml",
-        "src/services/phase3b_extended_public_scored.py",
-        "src/services/source_history_reconstruction_r1.py"
+        "config/recipes.yaml"
       ]
     }
   ],
@@ -433,12 +423,12 @@
     "scientifically_usable_as_implemented": true,
     "scientifically_frozen": false,
     "transport_model_provisional": true,
-    "requires_phase1_production_rerun_for_full_freeze": true,
+    "requires_phase1_production_rerun_for_full_freeze": false,
     "legacy_recipe_drift_leaks_into_official_mode": true,
-    "missing_gfs_wind_assumption_still_present": true,
+    "missing_gfs_wind_assumption_still_present": false,
     "legacy_recipe_drift_fully_removed": false,
     "legacy_recipe_drift_only_documented": true,
-    "biggest_remaining_phase2_provisional_item": "Phase 2 still depends on a later Phase 1 production rerun for the final frozen-baseline story, and the official recipe family remains only partially available locally because legacy *_ncep runtime IDs remain in config space while gfs_wind.nc is still absent.",
+    "biggest_remaining_phase2_provisional_item": "Phase 2 is scientifically usable on the promoted cmems_gfs baseline, but the final frozen story still depends on retiring legacy *_ncep runtime IDs from official-mode config space and closing the remaining transport-model provisionality.",
     "verdict_label": "scientifically_usable_but_provisional"
   }
 }
