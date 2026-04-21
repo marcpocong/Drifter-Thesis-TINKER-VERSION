@@ -41,6 +41,9 @@ eccodeslib = ">=2.46.0.12,<2.47"
 pyyaml = "^6.0"
 loguru = "^0.7.0"
 streamlit = "^1.44.1"
+# Streamlit allows newer pyarrow releases than this Python 3.10/aarch64 image
+# can install, so keep Docker builds on the latest compatible wheel line.
+pyarrow = ">=7.0.0,<24.0.0"
 
 [build-system]
 requires = ["poetry-core"]

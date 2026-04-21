@@ -67,6 +67,40 @@ Compatibility note:
 
 See [docs/COMMAND_MATRIX.md](/c:/Users/marcp/Downloads/drifter-validated-oilspill-forecasting-rc-v1.0/drifter-validated-oilspill-forecasting-rc-v1.0/docs/COMMAND_MATRIX.md) for exact prompt-free container mappings.
 
+## Fresh Clone Docker Setup
+
+Install Docker Desktop first, then run these commands from the repository root.
+
+macOS / Linux:
+
+```bash
+cd ~/Documents/GitHub/Drifter-Thesis-TINKER-VERSION
+[ -f .env ] || cp .env.example .env
+docker compose up -d --build
+docker compose ps
+```
+
+Windows PowerShell:
+
+```powershell
+cd C:\path\to\Drifter-Thesis-TINKER-VERSION
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+docker compose up -d --build
+docker compose ps
+```
+
+Use `docker compose` with current Docker Desktop. If you are on an older Compose v1 install, replace `docker compose` with `docker-compose`.
+
+The guarded `.env` command creates the local environment file only when it is missing, so it does not overwrite existing secrets or local settings. On zsh/macOS, avoid pasting inline comments after the `cp` command; use the guarded command above instead.
+
+Launch the read-only dashboard after the containers are up:
+
+```bash
+docker compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
+```
+
+Then open `http://localhost:8501`.
+
 ## Mindoro Phase 3 Promotion Rule
 
 - The frozen Mindoro base case definition remains `config/case_mindoro_retro_2023.yaml` and still represents the original March 3 -> March 6 case.
@@ -89,7 +123,7 @@ The local UI is intentionally read-only in this first version. It reads the exis
 Launch command:
 
 ```bash
-docker-compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
+docker compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
 ```
 
 Then open `http://localhost:8501`.
@@ -133,7 +167,7 @@ Branding:
 Use one prompt-free container pattern for scripts, CI, or manual phase-level reruns:
 
 ```bash
-docker-compose exec -T -e WORKFLOW_MODE=<workflow_mode> -e PIPELINE_PHASE=<phase> <pipeline|gnome> python -m src
+docker compose exec -T -e WORKFLOW_MODE=<workflow_mode> -e PIPELINE_PHASE=<phase> <pipeline|gnome> python -m src
 ```
 
 Read-only audit and packaging workflows:
@@ -169,10 +203,10 @@ Support and archive workflows:
 The Streamlit UI stays outside the launcher and launches directly:
 
 ```bash
-docker-compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
+docker compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
 ```
 
-The launcher command and the direct `docker-compose exec` form without `-T` are the interactive startup-prompt paths. The `-T` form stays non-interactive by design and now prints the resolved startup policy so you can see whether it used explicit env values or silent defaults. Use [docs/COMMAND_MATRIX.md](/c:/Users/marcp/Downloads/drifter-validated-oilspill-forecasting-rc-v1.0/drifter-validated-oilspill-forecasting-rc-v1.0/docs/COMMAND_MATRIX.md) for the exact phase-by-phase `-T` mappings behind each launcher entry.
+The launcher command and the direct `docker compose exec` form without `-T` are the interactive startup-prompt paths. The `-T` form stays non-interactive by design and now prints the resolved startup policy so you can see whether it used explicit env values or silent defaults. Use [docs/COMMAND_MATRIX.md](/c:/Users/marcp/Downloads/drifter-validated-oilspill-forecasting-rc-v1.0/drifter-validated-oilspill-forecasting-rc-v1.0/docs/COMMAND_MATRIX.md) for the exact phase-by-phase `-T` mappings behind each launcher entry.
 
 ## Scientific Boundaries To Keep
 

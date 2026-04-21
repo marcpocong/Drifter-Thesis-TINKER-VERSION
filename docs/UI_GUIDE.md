@@ -8,14 +8,24 @@ The local Streamlit app is a read-only thesis presentation layer over the artifa
 
 Start the pipeline container if needed:
 
+macOS / Linux:
+
 ```bash
-docker-compose up -d pipeline
+[ -f .env ] || cp .env.example .env
+docker compose up -d pipeline
+```
+
+Windows PowerShell:
+
+```powershell
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+docker compose up -d pipeline
 ```
 
 Launch the UI:
 
 ```bash
-docker-compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
+docker compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
 ```
 
 Open:
@@ -23,6 +33,8 @@ Open:
 ```text
 http://localhost:8501
 ```
+
+Use `docker compose` with current Docker Desktop. If you are on an older Compose v1 install, replace `docker compose` with `docker-compose`.
 
 ## How It Fits With The Launcher
 

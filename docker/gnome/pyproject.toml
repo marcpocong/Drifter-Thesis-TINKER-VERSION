@@ -21,6 +21,8 @@ opendrift = "^1.11.0"
 psutil = "7.2.2"
 rasterio = "^1.3.0"
 rioxarray = "^0.15.0"
+# Keep ARM/Python 3.10 Docker builds on the latest compatible pyarrow wheel.
+pyarrow = ">=7.0.0,<24.0.0"
 
 # NOAA Transitive Deps
 colander = "<2.0.0"

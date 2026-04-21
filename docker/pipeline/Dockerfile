@@ -10,6 +10,7 @@ LABEL description="Phase 1: Ingestion & Validation"
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     git \
+    cmake \
     libnetcdf-dev \
     libhdf5-dev \
     libproj-dev \
@@ -17,8 +18,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry
-RUN pip install --no-cache-dir poetry==1.7.0
+# Install Python build tooling. maturin is needed when ARM images build
+# Rust-backed transitive wheels such as roaring-landmask from source.
+RUN pip install --no-cache-dir poetry==1.7.0 maturin
 
 WORKDIR /app
 

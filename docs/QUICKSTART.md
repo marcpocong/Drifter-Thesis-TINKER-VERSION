@@ -2,9 +2,29 @@
 
 ## 1. Start The Containers
 
+Install Docker Desktop first, then run the setup from the repository root.
+
+macOS / Linux:
+
 ```bash
-docker-compose up -d
+cd ~/Documents/GitHub/Drifter-Thesis-TINKER-VERSION
+[ -f .env ] || cp .env.example .env
+docker compose up -d --build
+docker compose ps
 ```
+
+Windows PowerShell:
+
+```powershell
+cd C:\path\to\Drifter-Thesis-TINKER-VERSION
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+docker compose up -d --build
+docker compose ps
+```
+
+Use `docker compose` with current Docker Desktop. If you are on an older Compose v1 install, replace `docker compose` with `docker-compose`.
+
+The guarded `.env` command does not overwrite an existing local environment file. On zsh/macOS, do not paste inline comments after the `cp` command; use the guarded command above.
 
 ## 2. List The Current Launcher Entries
 
@@ -14,6 +34,8 @@ docker-compose up -d
 ```
 
 These commands are the safe way to inspect the current launcher catalog before running anything.
+
+On macOS or Linux with PowerShell 7 installed, use `pwsh ./start.ps1 -List -NoPause` and `pwsh ./start.ps1 -Help -NoPause`.
 
 ## 3. Use The Canonical Interactive Launcher Path
 
@@ -71,20 +93,20 @@ Compatibility note:
 ## 6. Use The Canonical Prompt-Free Container Path For Scripts Or CI
 
 ```bash
-docker-compose exec -T -e WORKFLOW_MODE=<workflow_mode> -e PIPELINE_PHASE=<phase> <pipeline|gnome> python -m src
+docker compose exec -T -e WORKFLOW_MODE=<workflow_mode> -e PIPELINE_PHASE=<phase> <pipeline|gnome> python -m src
 ```
 
 Common read-only examples:
 
 ```bash
-docker-compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=phase1_finalization_audit pipeline python -m src
-docker-compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=phase2_finalization_audit pipeline python -m src
-docker-compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=final_validation_package pipeline python -m src
-docker-compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=phase5_launcher_and_docs_sync pipeline python -m src
-docker-compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=trajectory_gallery_build pipeline python -m src
-docker-compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=trajectory_gallery_panel_polish pipeline python -m src
-docker-compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=figure_package_publication pipeline python -m src
-docker-compose exec -T -e WORKFLOW_MODE=prototype_2016 -e PIPELINE_PHASE=prototype_legacy_final_figures pipeline python -m src
+docker compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=phase1_finalization_audit pipeline python -m src
+docker compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=phase2_finalization_audit pipeline python -m src
+docker compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=final_validation_package pipeline python -m src
+docker compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=phase5_launcher_and_docs_sync pipeline python -m src
+docker compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=trajectory_gallery_build pipeline python -m src
+docker compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=trajectory_gallery_panel_polish pipeline python -m src
+docker compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=figure_package_publication pipeline python -m src
+docker compose exec -T -e WORKFLOW_MODE=prototype_2016 -e PIPELINE_PHASE=prototype_legacy_final_figures pipeline python -m src
 ```
 
 Use [docs/COMMAND_MATRIX.md](/c:/Users/marcp/Downloads/drifter-validated-oilspill-forecasting-rc-v1.0/drifter-validated-oilspill-forecasting-rc-v1.0/docs/COMMAND_MATRIX.md) for the exact prompt-free phase sequences behind each multi-step launcher entry.
@@ -92,7 +114,7 @@ Use [docs/COMMAND_MATRIX.md](/c:/Users/marcp/Downloads/drifter-validated-oilspil
 ## 7. Launch The Read-Only Local Dashboard
 
 ```bash
-docker-compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
+docker compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
 ```
 
 Then open `http://localhost:8501`.

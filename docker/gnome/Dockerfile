@@ -26,7 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Added scikit-build-core and ninja which are required for the latest cell_tree2d.
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir --root-user-action ignore \
-    poetry==1.7.0 setuptools wheel hatchling scikit-build-core ninja \
+    poetry==1.7.0 setuptools wheel hatchling scikit-build-core ninja maturin \
     "cython<3.0.0" "numpy>=1.26.0,<2.0.0"
 
 WORKDIR /app
@@ -43,22 +43,23 @@ RUN poetry config virtualenvs.create false && \
 ENV CMAKE_PREFIX_PATH="/usr/local/lib/python3.10/site-packages/Cython/CMake:${CMAKE_PREFIX_PATH}"
 
 # Gridded (Stable pre-NumPy 2)
-RUN pip install --no-build-isolation --root-user-action ignore git+https://github.com/NOAA-ORR-ERD/gridded.git@v0.7.4
+RUN pip install --no-build-isolation --no-deps --root-user-action ignore git+https://github.com/NOAA-ORR-ERD/gridded.git@v0.7.4
 
 # PyGD (The C++ drawing engine)
-RUN pip install --no-build-isolation --root-user-action ignore git+https://github.com/NOAA-ORR-ERD/py_gd.git@v2.3.2
+RUN pip install --no-build-isolation --no-deps --root-user-action ignore git+https://github.com/NOAA-ORR-ERD/py_gd.git@v2.3.2
 
 # PyNucos (Unit conversion)
-RUN pip install --no-build-isolation --root-user-action ignore git+https://github.com/NOAA-ORR-ERD/pynucos.git@v3.4.1
+RUN pip install --no-build-isolation --no-deps --root-user-action ignore git+https://github.com/NOAA-ORR-ERD/pynucos.git@v3.4.1
 
 # CellTree2D (Using stable PyPI version to avoid broken scikit-build-core logic in main branch)
 RUN pip install --no-build-isolation --root-user-action ignore cell_tree2d==0.3.0
 
 # Adios Oil Database (The core oil library)
-RUN pip install --no-build-isolation --root-user-action ignore "git+https://github.com/NOAA-ORR-ERD/adios_oil_database.git@v1.2.7#subdirectory=adios_db"
+RUN pip install --no-build-isolation --no-deps --root-user-action ignore "git+https://github.com/NOAA-ORR-ERD/adios_oil_database.git@v1.2.7#subdirectory=adios_db"
 
 # 5. Final Step: PyGNOME
-RUN pip install --no-build-isolation --root-user-action ignore "git+https://github.com/NOAA-ORR-ERD/PyGNOME.git@v1.1.18#egg=gnome&subdirectory=py_gnome"
+RUN CXXFLAGS="${CXXFLAGS} -Wno-narrowing" \
+    pip install --no-build-isolation --no-deps --root-user-action ignore "git+https://github.com/NOAA-ORR-ERD/PyGNOME.git@v1.1.18#egg=gnome&subdirectory=py_gnome"
 
 # 6. Final Project Setup
 COPY . .
