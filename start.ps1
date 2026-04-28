@@ -724,19 +724,38 @@ function Invoke-LauncherEntry {
 }
 
 function Invoke-ReadOnlyUi {
-    Write-Host "Starting Docker containers..." -ForegroundColor Yellow
+    param([switch]$RestartPipeline)
+
+    if ($RestartPipeline) {
+        Write-Host "Restarting compose services for a clean UI refresh..." -ForegroundColor Yellow
+    } else {
+        Write-Host "Starting Docker containers..." -ForegroundColor Yellow
+    }
+
     $previousErrorActionPreference = $ErrorActionPreference
     try {
         # Docker may emit routine status lines to stderr even on success.
         $ErrorActionPreference = "Continue"
-        docker-compose up -d pipeline 2>&1 | ForEach-Object { Write-ProcessLine $_ }
-        $composeExitCode = $LASTEXITCODE
+        if ($RestartPipeline) {
+            docker-compose up -d 2>&1 | ForEach-Object { Write-ProcessLine $_ }
+            $composeExitCode = $LASTEXITCODE
+            if ($composeExitCode -eq 0) {
+                docker-compose restart pipeline gnome 2>&1 | ForEach-Object { Write-ProcessLine $_ }
+                $composeExitCode = $LASTEXITCODE
+            }
+        } else {
+            docker-compose up -d 2>&1 | ForEach-Object { Write-ProcessLine $_ }
+            $composeExitCode = $LASTEXITCODE
+        }
     }
     finally {
         $ErrorActionPreference = $previousErrorActionPreference
     }
     if ($composeExitCode -ne 0) {
-        throw "docker-compose up -d pipeline failed with exit code $composeExitCode."
+        if ($RestartPipeline) {
+            throw "docker-compose up/restart for the full compose stack failed with exit code $composeExitCode."
+        }
+        throw "docker-compose up -d failed with exit code $composeExitCode."
     }
 
     Write-Host ""
@@ -787,6 +806,7 @@ function Show-LauncherList {
     Write-Host "Interactive run: .\start.ps1 -Entry <entry_id>" -ForegroundColor Yellow
     Write-Host "Prompt-free container run: docker-compose exec -T -e WORKFLOW_MODE=<workflow_mode> -e PIPELINE_PHASE=<phase> <pipeline|gnome> python -m src" -ForegroundColor Yellow
     Write-Host "Read-only UI: docker-compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501" -ForegroundColor Yellow
+    Write-Host "Full UI refresh: docker-compose up -d ; docker-compose restart pipeline gnome ; then rerun the same Streamlit command." -ForegroundColor Yellow
     Write-Host ""
 
     foreach ($category in Get-LauncherCategories) {
@@ -831,6 +851,7 @@ function Show-Help {
     Write-Host "  .\start.ps1 -Entry <entry_id>" -ForegroundColor Green
     Write-Host "  docker-compose exec -T -e WORKFLOW_MODE=<workflow_mode> -e PIPELINE_PHASE=<phase> <pipeline|gnome> python -m src" -ForegroundColor Green
     Write-Host "  docker-compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501" -ForegroundColor Green
+    Write-Host "  docker-compose up -d ; docker-compose restart pipeline gnome ; docker-compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501" -ForegroundColor Green
     Write-Host ""
     Write-Host "Recommended read-only launcher entries:" -ForegroundColor Yellow
     foreach ($entry in $readOnlyEntries) {
@@ -888,7 +909,7 @@ function Show-Menu {
         Clear-Host
         Write-Section "DRIFTER-VALIDATED OIL SPILL FORECASTING"
         Write-Host ""
-        Write-Host "Choose a launcher entry. Read-only utilities are the safest first choice, or press U for the read-only UI." -ForegroundColor Yellow
+        Write-Host "Choose a launcher entry. Read-only utilities are the safest first choice, or press U for the UI and R for a full UI refresh." -ForegroundColor Yellow
         Write-Host ""
 
         foreach ($category in Get-LauncherCategories) {
@@ -905,6 +926,7 @@ function Show-Menu {
 
         Write-Host "  L. List catalog only" -ForegroundColor Yellow
         Write-Host "  U. Launch read-only UI" -ForegroundColor Yellow
+        Write-Host "  R. Full restart read-only UI" -ForegroundColor Yellow
         Write-Host "  H. Help" -ForegroundColor Yellow
         Write-Host "  Q. Exit" -ForegroundColor Yellow
         Write-Host ""
@@ -923,6 +945,17 @@ function Show-Menu {
                 Write-Section "READ-ONLY UI"
                 try {
                     Invoke-ReadOnlyUi
+                }
+                catch {
+                    Pause-IfNeeded
+                }
+                Pause-IfNeeded
+                continue
+            }
+            "R" {
+                Write-Section "FULL UI REFRESH"
+                try {
+                    Invoke-ReadOnlyUi -RestartPipeline
                 }
                 catch {
                     Pause-IfNeeded
@@ -954,7 +987,7 @@ function Show-Menu {
             continue
         }
 
-        Write-Host "Invalid option. Use a menu number, U, L, H, or Q." -ForegroundColor Red
+        Write-Host "Invalid option. Use a menu number, U, R, L, H, or Q." -ForegroundColor Red
         Start-Sleep -Seconds 2
     }
 }

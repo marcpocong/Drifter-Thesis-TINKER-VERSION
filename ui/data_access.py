@@ -871,6 +871,34 @@ HOME_STORY_PAGE_ORDER: dict[str, int] = {
     "legacy_2016_support": 60,
 }
 
+HOME_FEATURED_EXCLUDED_MINDORO_STATUS_KEYS: frozenset[str] = frozenset(
+    {
+        "mindoro_b1_r0_archive",
+        "mindoro_legacy_march6",
+        "mindoro_legacy_support",
+        "mindoro_phase4_oil_budget",
+        "mindoro_phase4_shoreline",
+        "mindoro_phase4_deferred",
+    }
+)
+
+HOME_FEATURED_EXCLUDED_MINDORO_PAGE_TARGETS: frozenset[str] = frozenset(
+    {
+        "mindoro_validation_archive",
+        "phase4_oiltype_and_shoreline",
+        "phase4_crossmodel_status",
+    }
+)
+
+HOME_FEATURED_EXCLUDED_MINDORO_PHASES: frozenset[str] = frozenset(
+    {
+        "phase3b_legacy_strict",
+        "phase3b_support",
+        "phase4",
+        "phase4_crossmodel_comparability_audit",
+    }
+)
+
 
 def _sort_home_story_rows(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
@@ -917,6 +945,30 @@ def _home_overview_featured_patterns() -> list[str]:
         "24h_48h_72h_mask_p90_vs_pygnome_overview_board",
         "24h_48h_72h_mask_p50_mask_p90_dual_threshold_vs_pygnome_overview_board",
     ]
+
+
+def _filter_home_featured_candidates(df: pd.DataFrame) -> pd.DataFrame:
+    if df.empty:
+        return df.copy()
+    payload = df.copy()
+    blocked_mask = pd.Series(False, index=payload.index)
+
+    if "archive_only" in payload.columns:
+        blocked_mask |= payload["archive_only"].fillna(False).astype(bool)
+    if "legacy_support" in payload.columns:
+        blocked_mask |= payload["legacy_support"].fillna(False).astype(bool)
+
+    case_ids = payload.get("case_id", pd.Series("", index=payload.index)).fillna("").astype(str)
+    status_keys = payload.get("status_key", pd.Series("", index=payload.index)).fillna("").astype(str)
+    page_targets = payload.get("page_target", pd.Series("", index=payload.index)).fillna("").astype(str)
+    phases = payload.get("phase_or_track", pd.Series("", index=payload.index)).fillna("").astype(str)
+    mindoro_mask = case_ids.eq(MINDORO_CASE_ID)
+
+    blocked_mask |= mindoro_mask & status_keys.isin(HOME_FEATURED_EXCLUDED_MINDORO_STATUS_KEYS)
+    blocked_mask |= mindoro_mask & page_targets.isin(HOME_FEATURED_EXCLUDED_MINDORO_PAGE_TARGETS)
+    blocked_mask |= mindoro_mask & phases.isin(HOME_FEATURED_EXCLUDED_MINDORO_PHASES)
+
+    return payload.loc[~blocked_mask].reset_index(drop=True)
 
 
 def parse_source_paths(value: Any, repo_root: str | Path | None = None) -> list[Path]:
@@ -971,12 +1023,9 @@ def home_featured_publication_figures(repo_root: str | Path | None = None) -> pd
     if "thesis_surface" in phase1_context.columns:
         phase1_context = phase1_context.loc[phase1_context["thesis_surface"].fillna(False).astype(bool)].copy()
     featured = pd.concat([phase1_context, featured], ignore_index=True)
+    featured = _filter_home_featured_candidates(featured)
     if featured.empty:
         return featured
-    if "archive_only" in featured.columns:
-        featured = featured.loc[~featured["archive_only"].fillna(False).astype(bool)].copy()
-    if "legacy_support" in featured.columns:
-        featured = featured.loc[~featured["legacy_support"].fillna(False).astype(bool)].copy()
     if "figure_id" in featured.columns:
         featured = featured.drop_duplicates(subset=["figure_id"], keep="first")
     return _sort_home_story_rows(featured)

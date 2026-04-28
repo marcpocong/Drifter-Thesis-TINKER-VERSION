@@ -34,6 +34,7 @@ from src.services.phase3c_external_case_run import (
     rasterize_particles_to_spec,
     window_cells_for_km,
 )
+from src.utils.ensemble_config import get_official_ensemble_block, load_ensemble_config
 from src.utils.io import find_wind_vars
 
 try:
@@ -155,9 +156,7 @@ class DWHPhase3CEnsembleComparisonService:
         self.scorer = DWHPhase3CExternalCaseRunService(output_dir=self.output_dir)
         forecast_cfg = self.cfg.get("forecast") or {}
         ensemble_cfg = (self.cfg.get("phase3c_external_case_ensemble_comparison") or {}).get("ensemble") or {}
-        with open(Path("config") / "ensemble.yaml", "r", encoding="utf-8") as handle:
-            ensemble_yaml = yaml.safe_load(handle) or {}
-        thesis_ensemble = (ensemble_yaml.get("official_forecast") or {}).get("ensemble") or {}
+        thesis_ensemble = get_official_ensemble_block(load_ensemble_config(Path("config") / "ensemble.yaml"))
         self.ensemble_size = int(ensemble_cfg.get("ensemble_size", thesis_ensemble.get("ensemble_size", 50)))
         self.wind_factor_min = float(ensemble_cfg.get("wind_factor_min", thesis_ensemble.get("wind_factor_min", 0.8)))
         self.wind_factor_max = float(ensemble_cfg.get("wind_factor_max", thesis_ensemble.get("wind_factor_max", 1.2)))

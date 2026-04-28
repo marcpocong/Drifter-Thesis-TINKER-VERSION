@@ -325,6 +325,15 @@ class UiAppSmokeTests(unittest.TestCase):
         self.assertIn("Legacy support", text_blocks)
         self.assertNotIn("Legacy 2016 support triptychs first", text_blocks)
 
+    def test_home_panel_gallery_excludes_mindoro_march3_to_march6_tiles(self):
+        at = AppTest.from_function(_home_panel_wrapper_for_test, default_timeout=60)
+        at.run()
+        self.assertFalse(at.exception)
+        text_blocks = self._visible_text(at, "markdown", "subheader", "caption")
+        self.assertIn("Mindoro archive, legacy March-family, R0, and Phase 4 figures remain available", text_blocks)
+        self.assertNotIn("Mindoro March 3 -> March 6", text_blocks)
+        self.assertNotIn("Mindoro March 6", text_blocks)
+
     def test_home_advanced_gallery_matches_panel_gallery_count(self):
         at = AppTest.from_function(_home_advanced_wrapper_for_test, default_timeout=60)
         at.run()

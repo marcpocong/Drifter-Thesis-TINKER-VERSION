@@ -47,7 +47,7 @@ def render(state: dict, ui_state: dict) -> None:
             ]
         )
 
-    recommended = state.get("home_featured_publication_figures", state["curated_recommended_figures"])
+    recommended = state["home_featured_publication_figures"]
     render_badge_strip(["Thesis-facing", "Comparator support", "Archive only", "Legacy support"])
     st.caption("These surface badges separate main thesis evidence from support, archive, and legacy lanes.")
 
@@ -215,7 +215,7 @@ def render(state: dict, ui_state: dict) -> None:
     render_figure_gallery(
         recommended,
         title="Featured thesis-facing figures",
-        caption="These figures follow the thesis story order from the publication registry governance fields: workflow/provenance context first, then Mindoro B1 primary validation, comparator support, DWH transfer-validation, and Phase 4 context. Archive-only and legacy-only outputs stay off this featured strip.",
+        caption="These figures keep the Home strip on the thesis-first story order from the publication registry governance fields: workflow/provenance context first, then Mindoro B1 March 13 -> March 14 R1 primary validation, comparator support, and DWH transfer-validation. Mindoro archive, legacy March-family, R0, and Phase 4 figures remain available on their dedicated pages and story shortcuts rather than on this featured strip.",
         limit=2 if export_mode else None,
         columns_per_row=1 if export_mode else 2,
         export_mode=export_mode,

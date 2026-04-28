@@ -1,0 +1,61 @@
+{
+    "figure_label":  "Figure 4.5",
+    "title":  "Mindoro Track A same-case OpenDrift-PyGNOME spatial comparator board",
+    "export_method":  "cleaned thesis export from stored March 13 -\u003e March 14 crossmodel publication board",
+    "source_file_paths_used":  {
+                                   "source_board_png":  "output\\Phase 3B March13-14 Final Output\\publication\\comparator_pygnome\\mindoro_crossmodel_board.png",
+                                   "observation_mask_tif":  "output\\CASE_MINDORO_RETRO_2023\\phase3b_extended_public\\accepted_obs_masks\\10b37c42a9754363a5f7b14199b077e6.tif",
+                                   "opendrift_r1_previous_mask_tif":  "output\\CASE_MINDORO_RETRO_2023\\phase3b_extended_public_scored_march13_14_reinit\\R1_previous\\forecast_datecomposites\\mask_p50_2023-03-14_localdate.tif",
+                                   "pygnome_deterministic_mask_tif":  "output\\CASE_MINDORO_RETRO_2023\\phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison\\tracks\\pygnome_reinit_deterministic\\pygnome_footprint_mask_2023-03-14_localdate.tif",
+                                   "summary_csv":  "output\\Phase 3B March13-14 Final Output\\summary\\comparator_pygnome\\march13_14_reinit_crossmodel_summary.csv",
+                                   "diagnostics_csv":  "output\\Phase 3B March13-14 Final Output\\summary\\comparator_pygnome\\march13_14_reinit_crossmodel_diagnostics.csv",
+                                   "scoring_grid_yaml":  "data_processed\\grids\\scoring_grid.yaml",
+                                   "land_mask_tif":  "data_processed\\grids\\land_mask.tif",
+                                   "sea_mask_tif":  "data_processed\\grids\\sea_mask.tif"
+                               },
+    "grid":  {
+                 "crs":  "EPSG:32651",
+                 "resolution_m":  1000,
+                 "width_cells":  124,
+                 "height_cells":  169
+             },
+    "board_source_crop":  {
+                              "source_size_px":  [
+                                                     3520,
+                                                     1980
+                                                 ],
+                              "retained_top_height_px":  1380,
+                              "axis_band_height_px":  86,
+                              "bottom_summary_band_height_px":  450,
+                              "output_size_px":  [
+                                                     3520,
+                                                     1916
+                                                 ]
+                          },
+    "output_png_path":  "output\\figure_package_publication\\Figure_4_5_Mindoro_TrackA_OpenDrift_PyGNOME_spatial_board.png",
+    "copied_png_path":  "output\\Phase 3B March13-14 Final Output\\publication\\comparator_pygnome\\Figure_4_5_Mindoro_TrackA_OpenDrift_PyGNOME_spatial_board.png",
+    "metrics_shown":  {
+                          "OpenDrift_R1_previous":  {
+                                                        "forecast_cells":  5,
+                                                        "nearest_distance_m":  1414.21,
+                                                        "fss_3km":  0.0441,
+                                                        "fss_5km":  0.1371,
+                                                        "fss_10km":  0.249,
+                                                        "mean_fss":  0.1075
+                                                    },
+                          "PyGNOME_deterministic":  {
+                                                        "forecast_cells":  6,
+                                                        "nearest_distance_m":  6082.76,
+                                                        "fss_3km":  0,
+                                                        "fss_5km":  0,
+                                                        "fss_10km":  0.0244,
+                                                        "mean_fss":  0.0061
+                                                    }
+                      },
+    "omitted_visual_row":  {
+                               "track_id":  "R0_reinit_p50",
+                               "reason":  "archived/no target-date survival",
+                               "empty_forecast_reason":  "model_survival_did_not_reach_march14_local_date"
+                           },
+    "note":  "Comparator support only; PyGNOME is not observational truth."
+}

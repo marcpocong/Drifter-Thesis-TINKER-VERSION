@@ -1,0 +1,1395 @@
+{
+    "phase1":  [
+                   {
+                       "value_name":  "phase1_winner",
+                       "exact_value":  "cmems_gfs",
+                       "units_if_any":  "",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_production_manifest.json",
+                       "row_column_or_key":  "winning_recipe",
+                       "evidence_role":  "primary_recipe_selection",
+                       "caveat":  "Focused Mindoro pre-spill seasonal subset only."
+                   },
+                   {
+                       "value_name":  "phase1_full_strict_accepted_segment_count",
+                       "exact_value":  "65",
+                       "units_if_any":  "segments",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_production_manifest.json",
+                       "row_column_or_key":  "accepted_segment_count",
+                       "evidence_role":  "subset_provenance",
+                       "caveat":  "Full strict registry count; not the ranked seasonal subset."
+                   },
+                   {
+                       "value_name":  "phase1_ranked_seasonal_segment_count",
+                       "exact_value":  "19",
+                       "units_if_any":  "segments",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_production_manifest.json",
+                       "row_column_or_key":  "ranking_subset.segment_count",
+                       "evidence_role":  "primary_recipe_selection",
+                       "caveat":  "This is the accepted February-April ranking subset used in the focused Mindoro comparison."
+                   },
+                   {
+                       "value_name":  "phase1_ranking_subset_months",
+                       "exact_value":  "2, 3, 4",
+                       "units_if_any":  "month_numbers",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_production_manifest.json",
+                       "row_column_or_key":  "ranking_subset.config.months",
+                       "evidence_role":  "subset_definition",
+                       "caveat":  "Stored focused Mindoro subset only."
+                   },
+                   {
+                       "value_name":  "phase1_final_ranking_order",
+                       "exact_value":  "cmems_gfs \u003e cmems_era5 \u003e hycom_gfs \u003e hycom_era5",
+                       "units_if_any":  "",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+                       "row_column_or_key":  "rank column order",
+                       "evidence_role":  "primary_recipe_selection",
+                       "caveat":  "Ranking comes from the focused Mindoro February-April subset."
+                   },
+                   {
+                       "value_name":  "official_b1_recipe",
+                       "exact_value":  "cmems_gfs",
+                       "units_if_any":  "",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_official_adoption_decision.json",
+                       "row_column_or_key":  "official_b1_recipe",
+                       "evidence_role":  "official_adoption",
+                       "caveat":  "Mindoro B1 uses the focused historical four-recipe winner."
+                   },
+                   {
+                       "value_name":  "staged_regional_rerun_winner",
+                       "exact_value":  "cmems_gfs",
+                       "units_if_any":  "",
+                       "source_file":  "output/phase1_production_rerun/phase1_production_manifest.json",
+                       "row_column_or_key":  "winning_recipe",
+                       "evidence_role":  "regional_reference_provenance",
+                       "caveat":  "Stored staged candidate exists, but the frozen reproducibility package still reports the regional rerun as pending."
+                   },
+                   {
+                       "value_name":  "staged_regional_rerun_accepted_segment_count",
+                       "exact_value":  "89",
+                       "units_if_any":  "segments",
+                       "source_file":  "output/phase1_production_rerun/phase1_production_manifest.json",
+                       "row_column_or_key":  "accepted_segment_count",
+                       "evidence_role":  "regional_reference_provenance",
+                       "caveat":  "Use as staged provenance only until the frozen package is synchronized."
+                   },
+                   {
+                       "value_name":  "frozen_package_phase1_status",
+                       "exact_value":  "Architecture audited; the final 2016-2022 production rerun is still needed.",
+                       "units_if_any":  "",
+                       "source_file":  "output/final_reproducibility_package/final_phase_status_registry.csv",
+                       "row_column_or_key":  "phase_id=phase1, column=summary",
+                       "evidence_role":  "governance_status",
+                       "caveat":  "This frozen status conflicts with the staged regional rerun candidate stored under output/phase1_production_rerun."
+                   },
+                   {
+                       "value_name":  "cmems_gfs_valid_segment_count",
+                       "exact_value":  "19",
+                       "units_if_any":  "segments",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+                       "row_column_or_key":  "recipe=cmems_gfs, column=valid_segment_count",
+                       "evidence_role":  "recipe_ranking_metric",
+                       "caveat":  "Focused Mindoro February-April subset."
+                   },
+                   {
+                       "value_name":  "cmems_gfs_invalid_segment_count",
+                       "exact_value":  "0",
+                       "units_if_any":  "segments",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+                       "row_column_or_key":  "recipe=cmems_gfs, column=invalid_segment_count",
+                       "evidence_role":  "recipe_ranking_metric",
+                       "caveat":  "Focused Mindoro February-April subset."
+                   },
+                   {
+                       "value_name":  "cmems_gfs_mean_ncs_score",
+                       "exact_value":  "4.588584452986011",
+                       "units_if_any":  "",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+                       "row_column_or_key":  "recipe=cmems_gfs, column=mean_ncs_score",
+                       "evidence_role":  "recipe_ranking_metric",
+                       "caveat":  "Exact stored NCS mean from the focused ranking CSV."
+                   },
+                   {
+                       "value_name":  "cmems_gfs_median_ncs_score",
+                       "exact_value":  "4.630454993308714",
+                       "units_if_any":  "",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+                       "row_column_or_key":  "recipe=cmems_gfs, column=median_ncs_score",
+                       "evidence_role":  "recipe_ranking_metric",
+                       "caveat":  "Exact stored NCS median from the focused ranking CSV."
+                   },
+                   {
+                       "value_name":  "cmems_era5_valid_segment_count",
+                       "exact_value":  "19",
+                       "units_if_any":  "segments",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+                       "row_column_or_key":  "recipe=cmems_era5, column=valid_segment_count",
+                       "evidence_role":  "recipe_ranking_metric",
+                       "caveat":  "Focused Mindoro February-April subset."
+                   },
+                   {
+                       "value_name":  "cmems_era5_invalid_segment_count",
+                       "exact_value":  "0",
+                       "units_if_any":  "segments",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+                       "row_column_or_key":  "recipe=cmems_era5, column=invalid_segment_count",
+                       "evidence_role":  "recipe_ranking_metric",
+                       "caveat":  "Focused Mindoro February-April subset."
+                   },
+                   {
+                       "value_name":  "cmems_era5_mean_ncs_score",
+                       "exact_value":  "4.623690463065895",
+                       "units_if_any":  "",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+                       "row_column_or_key":  "recipe=cmems_era5, column=mean_ncs_score",
+                       "evidence_role":  "recipe_ranking_metric",
+                       "caveat":  "Exact stored NCS mean from the focused ranking CSV."
+                   },
+                   {
+                       "value_name":  "cmems_era5_median_ncs_score",
+                       "exact_value":  "4.59159065081077",
+                       "units_if_any":  "",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+                       "row_column_or_key":  "recipe=cmems_era5, column=median_ncs_score",
+                       "evidence_role":  "recipe_ranking_metric",
+                       "caveat":  "Exact stored NCS median from the focused ranking CSV."
+                   },
+                   {
+                       "value_name":  "hycom_gfs_valid_segment_count",
+                       "exact_value":  "19",
+                       "units_if_any":  "segments",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+                       "row_column_or_key":  "recipe=hycom_gfs, column=valid_segment_count",
+                       "evidence_role":  "recipe_ranking_metric",
+                       "caveat":  "Focused Mindoro February-April subset."
+                   },
+                   {
+                       "value_name":  "hycom_gfs_invalid_segment_count",
+                       "exact_value":  "0",
+                       "units_if_any":  "segments",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+                       "row_column_or_key":  "recipe=hycom_gfs, column=invalid_segment_count",
+                       "evidence_role":  "recipe_ranking_metric",
+                       "caveat":  "Focused Mindoro February-April subset."
+                   },
+                   {
+                       "value_name":  "hycom_gfs_mean_ncs_score",
+                       "exact_value":  "4.702732708555586",
+                       "units_if_any":  "",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+                       "row_column_or_key":  "recipe=hycom_gfs, column=mean_ncs_score",
+                       "evidence_role":  "recipe_ranking_metric",
+                       "caveat":  "Exact stored NCS mean from the focused ranking CSV."
+                   },
+                   {
+                       "value_name":  "hycom_gfs_median_ncs_score",
+                       "exact_value":  "4.92633009235389",
+                       "units_if_any":  "",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+                       "row_column_or_key":  "recipe=hycom_gfs, column=median_ncs_score",
+                       "evidence_role":  "recipe_ranking_metric",
+                       "caveat":  "Exact stored NCS median from the focused ranking CSV."
+                   },
+                   {
+                       "value_name":  "hycom_era5_valid_segment_count",
+                       "exact_value":  "19",
+                       "units_if_any":  "segments",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+                       "row_column_or_key":  "recipe=hycom_era5, column=valid_segment_count",
+                       "evidence_role":  "recipe_ranking_metric",
+                       "caveat":  "Focused Mindoro February-April subset."
+                   },
+                   {
+                       "value_name":  "hycom_era5_invalid_segment_count",
+                       "exact_value":  "0",
+                       "units_if_any":  "segments",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+                       "row_column_or_key":  "recipe=hycom_era5, column=invalid_segment_count",
+                       "evidence_role":  "recipe_ranking_metric",
+                       "caveat":  "Focused Mindoro February-April subset."
+                   },
+                   {
+                       "value_name":  "hycom_era5_mean_ncs_score",
+                       "exact_value":  "4.756127725245334",
+                       "units_if_any":  "",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+                       "row_column_or_key":  "recipe=hycom_era5, column=mean_ncs_score",
+                       "evidence_role":  "recipe_ranking_metric",
+                       "caveat":  "Exact stored NCS mean from the focused ranking CSV."
+                   },
+                   {
+                       "value_name":  "hycom_era5_median_ncs_score",
+                       "exact_value":  "5.010588152593461",
+                       "units_if_any":  "",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+                       "row_column_or_key":  "recipe=hycom_era5, column=median_ncs_score",
+                       "evidence_role":  "recipe_ranking_metric",
+                       "caveat":  "Exact stored NCS median from the focused ranking CSV."
+                   },
+                   {
+                       "value_name":  "cmems_era5_loading_audit_valid_rows",
+                       "exact_value":  "19",
+                       "units_if_any":  "rows",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
+                       "row_column_or_key":  "recipe=cmems_era5, grouped valid rows",
+                       "evidence_role":  "loading_audit",
+                       "caveat":  "Stored loading audit for the focused Mindoro subset."
+                   },
+                   {
+                       "value_name":  "cmems_era5_loading_audit_invalid_rows",
+                       "exact_value":  "0",
+                       "units_if_any":  "rows",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
+                       "row_column_or_key":  "recipe=cmems_era5, grouped invalid rows",
+                       "evidence_role":  "loading_audit",
+                       "caveat":  "Stored loading audit for the focused Mindoro subset."
+                   },
+                   {
+                       "value_name":  "cmems_era5_loading_audit_hard_fail_rows",
+                       "exact_value":  "0",
+                       "units_if_any":  "rows",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
+                       "row_column_or_key":  "recipe=cmems_era5, grouped hard_fail rows",
+                       "evidence_role":  "loading_audit",
+                       "caveat":  "Stored loading audit for the focused Mindoro subset."
+                   },
+                   {
+                       "value_name":  "cmems_gfs_loading_audit_valid_rows",
+                       "exact_value":  "19",
+                       "units_if_any":  "rows",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
+                       "row_column_or_key":  "recipe=cmems_gfs, grouped valid rows",
+                       "evidence_role":  "loading_audit",
+                       "caveat":  "Stored loading audit for the focused Mindoro subset."
+                   },
+                   {
+                       "value_name":  "cmems_gfs_loading_audit_invalid_rows",
+                       "exact_value":  "0",
+                       "units_if_any":  "rows",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
+                       "row_column_or_key":  "recipe=cmems_gfs, grouped invalid rows",
+                       "evidence_role":  "loading_audit",
+                       "caveat":  "Stored loading audit for the focused Mindoro subset."
+                   },
+                   {
+                       "value_name":  "cmems_gfs_loading_audit_hard_fail_rows",
+                       "exact_value":  "0",
+                       "units_if_any":  "rows",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
+                       "row_column_or_key":  "recipe=cmems_gfs, grouped hard_fail rows",
+                       "evidence_role":  "loading_audit",
+                       "caveat":  "Stored loading audit for the focused Mindoro subset."
+                   },
+                   {
+                       "value_name":  "hycom_era5_loading_audit_valid_rows",
+                       "exact_value":  "19",
+                       "units_if_any":  "rows",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
+                       "row_column_or_key":  "recipe=hycom_era5, grouped valid rows",
+                       "evidence_role":  "loading_audit",
+                       "caveat":  "Stored loading audit for the focused Mindoro subset."
+                   },
+                   {
+                       "value_name":  "hycom_era5_loading_audit_invalid_rows",
+                       "exact_value":  "0",
+                       "units_if_any":  "rows",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
+                       "row_column_or_key":  "recipe=hycom_era5, grouped invalid rows",
+                       "evidence_role":  "loading_audit",
+                       "caveat":  "Stored loading audit for the focused Mindoro subset."
+                   },
+                   {
+                       "value_name":  "hycom_era5_loading_audit_hard_fail_rows",
+                       "exact_value":  "0",
+                       "units_if_any":  "rows",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
+                       "row_column_or_key":  "recipe=hycom_era5, grouped hard_fail rows",
+                       "evidence_role":  "loading_audit",
+                       "caveat":  "Stored loading audit for the focused Mindoro subset."
+                   },
+                   {
+                       "value_name":  "hycom_gfs_loading_audit_valid_rows",
+                       "exact_value":  "19",
+                       "units_if_any":  "rows",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
+                       "row_column_or_key":  "recipe=hycom_gfs, grouped valid rows",
+                       "evidence_role":  "loading_audit",
+                       "caveat":  "Stored loading audit for the focused Mindoro subset."
+                   },
+                   {
+                       "value_name":  "hycom_gfs_loading_audit_invalid_rows",
+                       "exact_value":  "0",
+                       "units_if_any":  "rows",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
+                       "row_column_or_key":  "recipe=hycom_gfs, grouped invalid rows",
+                       "evidence_role":  "loading_audit",
+                       "caveat":  "Stored loading audit for the focused Mindoro subset."
+                   },
+                   {
+                       "value_name":  "hycom_gfs_loading_audit_hard_fail_rows",
+                       "exact_value":  "0",
+                       "units_if_any":  "rows",
+                       "source_file":  "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv",
+                       "row_column_or_key":  "recipe=hycom_gfs, grouped hard_fail rows",
+                       "evidence_role":  "loading_audit",
+                       "caveat":  "Stored loading audit for the focused Mindoro subset."
+                   }
+               ],
+    "phase2":  [
+                   {
+                       "value_name":  "phase2_readiness_status",
+                       "exact_value":  "Scientifically usable as implemented, but not yet frozen.",
+                       "units_if_any":  "",
+                       "source_file":  "output/final_reproducibility_package/final_phase_status_registry.csv",
+                       "row_column_or_key":  "phase_id=phase2, column=summary",
+                       "evidence_role":  "phase_status",
+                       "caveat":  "Scientifically usable, but not yet frozen."
+                   },
+                   {
+                       "value_name":  "phase2_grid_id",
+                       "exact_value":  "",
+                       "units_if_any":  "",
+                       "source_file":  "output/phase2_finalization_audit/phase2_finalization_status.json",
+                       "row_column_or_key":  "forecast_grid_id",
+                       "evidence_role":  "grid_alignment",
+                       "caveat":  "Only scored spatial comparisons on this aligned scoring grid are reportable."
+                   },
+                   {
+                       "value_name":  "phase2_member_runs",
+                       "exact_value":  "",
+                       "units_if_any":  "members",
+                       "source_file":  "output/phase2_finalization_audit/phase2_finalization_status.json",
+                       "row_column_or_key":  "member_runs",
+                       "evidence_role":  "ensemble_inventory",
+                       "caveat":  "Stored official ensemble member count."
+                   },
+                   {
+                       "value_name":  "phase2_snapshot_hours",
+                       "exact_value":  "",
+                       "units_if_any":  "hours",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble/ensemble_manifest.json",
+                       "row_column_or_key":  "snapshot_hours",
+                       "evidence_role":  "ensemble_inventory",
+                       "caveat":  "Stored official ensemble snapshot hours."
+                   },
+                   {
+                       "value_name":  "phase2_legacy_runtime_ids_still_present",
+                       "exact_value":  "",
+                       "units_if_any":  "",
+                       "source_file":  "output/phase2_finalization_audit/phase2_finalization_status.json",
+                       "row_column_or_key":  "legacy_runtime_ids_still_present",
+                       "evidence_role":  "governance_status",
+                       "caveat":  "These legacy IDs are one reason the phase is not yet fully frozen."
+                   },
+                   {
+                       "value_name":  "_count",
+                       "exact_value":  "3",
+                       "units_if_any":  "files",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/forecast",
+                       "row_column_or_key":  "pattern=control_footprint_mask_*.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "Binary deterministic control footprint mask."
+                   },
+                   {
+                       "value_name":  "_valid_times",
+                       "exact_value":  "2023-03-04T09-59-00Z | 2023-03-05T09-59-00Z | 2023-03-06T09-59-00Z",
+                       "units_if_any":  "",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/forecast",
+                       "row_column_or_key":  "pattern=control_footprint_mask_*.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "Binary deterministic control footprint mask."
+                   },
+                   {
+                       "value_name":  "_representative_path",
+                       "exact_value":  "output/CASE_MINDORO_RETRO_2023/forecast/control_footprint_mask_2023-03-04T09-59-00Z.tif",
+                       "units_if_any":  "",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/forecast",
+                       "row_column_or_key":  "pattern=control_footprint_mask_*.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "Binary deterministic control footprint mask."
+                   },
+                   {
+                       "value_name":  "_count",
+                       "exact_value":  "3",
+                       "units_if_any":  "files",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/forecast",
+                       "row_column_or_key":  "pattern=control_density_norm_*.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "Normalized deterministic control particle density."
+                   },
+                   {
+                       "value_name":  "_valid_times",
+                       "exact_value":  "2023-03-04T09-59-00Z | 2023-03-05T09-59-00Z | 2023-03-06T09-59-00Z",
+                       "units_if_any":  "",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/forecast",
+                       "row_column_or_key":  "pattern=control_density_norm_*.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "Normalized deterministic control particle density."
+                   },
+                   {
+                       "value_name":  "_representative_path",
+                       "exact_value":  "output/CASE_MINDORO_RETRO_2023/forecast/control_density_norm_2023-03-04T09-59-00Z.tif",
+                       "units_if_any":  "",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/forecast",
+                       "row_column_or_key":  "pattern=control_density_norm_*.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "Normalized deterministic control particle density."
+                   },
+                   {
+                       "value_name":  "_count",
+                       "exact_value":  "4",
+                       "units_if_any":  "files",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=prob_presence_*T*.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "prob_presence = fraction of ensemble members with oil presence."
+                   },
+                   {
+                       "value_name":  "_valid_times",
+                       "exact_value":  "2023-03-04T09-59-00Z | 2023-03-05T09-59-00Z | 2023-03-06 | 2023-03-06T09-59-00Z",
+                       "units_if_any":  "",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=prob_presence_*T*.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "prob_presence = fraction of ensemble members with oil presence."
+                   },
+                   {
+                       "value_name":  "_representative_path",
+                       "exact_value":  "output/CASE_MINDORO_RETRO_2023/ensemble/prob_presence_2023-03-04T09-59-00Z.tif",
+                       "units_if_any":  "",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=prob_presence_*T*.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "prob_presence = fraction of ensemble members with oil presence."
+                   },
+                   {
+                       "value_name":  "_count",
+                       "exact_value":  "4",
+                       "units_if_any":  "files",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=mask_p50_*T*.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "mask_p50 = probability \u003e= 0.50."
+                   },
+                   {
+                       "value_name":  "_valid_times",
+                       "exact_value":  "2023-03-04T09-59-00Z | 2023-03-05T09-59-00Z | 2023-03-06 | 2023-03-06T09-59-00Z",
+                       "units_if_any":  "",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=mask_p50_*T*.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "mask_p50 = probability \u003e= 0.50."
+                   },
+                   {
+                       "value_name":  "_representative_path",
+                       "exact_value":  "output/CASE_MINDORO_RETRO_2023/ensemble/mask_p50_2023-03-04T09-59-00Z.tif",
+                       "units_if_any":  "",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=mask_p50_*T*.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "mask_p50 = probability \u003e= 0.50."
+                   },
+                   {
+                       "value_name":  "_count",
+                       "exact_value":  "3",
+                       "units_if_any":  "files",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=mask_p90_*T*.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "mask_p90 = probability \u003e= 0.90."
+                   },
+                   {
+                       "value_name":  "_valid_times",
+                       "exact_value":  "2023-03-04T09-59-00Z | 2023-03-05T09-59-00Z | 2023-03-06T09-59-00Z",
+                       "units_if_any":  "",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=mask_p90_*T*.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "mask_p90 = probability \u003e= 0.90."
+                   },
+                   {
+                       "value_name":  "_representative_path",
+                       "exact_value":  "output/CASE_MINDORO_RETRO_2023/ensemble/mask_p90_2023-03-04T09-59-00Z.tif",
+                       "units_if_any":  "",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=mask_p90_*T*.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "mask_p90 = probability \u003e= 0.90."
+                   },
+                   {
+                       "value_name":  "_count",
+                       "exact_value":  "1",
+                       "units_if_any":  "files",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=prob_presence_*datecomposite.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "Per-date composite probability of any member presence."
+                   },
+                   {
+                       "value_name":  "_valid_times",
+                       "exact_value":  "2023-03-06",
+                       "units_if_any":  "",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=prob_presence_*datecomposite.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "Per-date composite probability of any member presence."
+                   },
+                   {
+                       "value_name":  "_representative_path",
+                       "exact_value":  "output/CASE_MINDORO_RETRO_2023/ensemble/prob_presence_2023-03-06_datecomposite.tif",
+                       "units_if_any":  "",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=prob_presence_*datecomposite.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "Per-date composite probability of any member presence."
+                   },
+                   {
+                       "value_name":  "_count",
+                       "exact_value":  "1",
+                       "units_if_any":  "files",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=mask_p50_*datecomposite.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "Per-date composite mask at probability \u003e= 0.50."
+                   },
+                   {
+                       "value_name":  "_valid_times",
+                       "exact_value":  "2023-03-06",
+                       "units_if_any":  "",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=mask_p50_*datecomposite.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "Per-date composite mask at probability \u003e= 0.50."
+                   },
+                   {
+                       "value_name":  "_representative_path",
+                       "exact_value":  "output/CASE_MINDORO_RETRO_2023/ensemble/mask_p50_2023-03-06_datecomposite.tif",
+                       "units_if_any":  "",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=mask_p50_*datecomposite.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "Per-date composite mask at probability \u003e= 0.50."
+                   },
+                   {
+                       "value_name":  "_count",
+                       "exact_value":  "3",
+                       "units_if_any":  "files",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=ensemble_density_norm_*.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "Support-only ensemble density surface; not one of the named thesis probability products."
+                   },
+                   {
+                       "value_name":  "_valid_times",
+                       "exact_value":  "2023-03-04T09-59-00Z | 2023-03-05T09-59-00Z | 2023-03-06T09-59-00Z",
+                       "units_if_any":  "",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=ensemble_density_norm_*.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "Support-only ensemble density surface; not one of the named thesis probability products."
+                   },
+                   {
+                       "value_name":  "_representative_path",
+                       "exact_value":  "output/CASE_MINDORO_RETRO_2023/ensemble/ensemble_density_norm_2023-03-04T09-59-00Z.tif",
+                       "units_if_any":  "",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=ensemble_density_norm_*.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "Support-only ensemble density surface; not one of the named thesis probability products."
+                   },
+                   {
+                       "value_name":  "_count",
+                       "exact_value":  "0",
+                       "units_if_any":  "files",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=member_*_presence.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "Per-member support masks; support inventory only."
+                   },
+                   {
+                       "value_name":  "_valid_times",
+                       "exact_value":  "",
+                       "units_if_any":  "",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=member_*_presence.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "Per-member support masks; support inventory only."
+                   },
+                   {
+                       "value_name":  "_representative_path",
+                       "exact_value":  "",
+                       "units_if_any":  "",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=member_*_presence.tif",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "Per-member support masks; support inventory only."
+                   },
+                   {
+                       "value_name":  "_count",
+                       "exact_value":  "50",
+                       "units_if_any":  "files",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=member_*.nc",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "Per-member trajectory NetCDF files; support inventory only."
+                   },
+                   {
+                       "value_name":  "_valid_times",
+                       "exact_value":  "",
+                       "units_if_any":  "",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=member_*.nc",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "Per-member trajectory NetCDF files; support inventory only."
+                   },
+                   {
+                       "value_name":  "_representative_path",
+                       "exact_value":  "output/CASE_MINDORO_RETRO_2023/ensemble/member_01.nc",
+                       "units_if_any":  "",
+                       "source_file":  "output/CASE_MINDORO_RETRO_2023/ensemble",
+                       "row_column_or_key":  "pattern=member_*.nc",
+                       "evidence_role":  "product_inventory",
+                       "caveat":  "Per-member trajectory NetCDF files; support inventory only."
+                   }
+               ],
+    "mindoro_b1":  [
+                       {
+                           "value_name":  "track_id",
+                           "exact_value":  "B1",
+                           "units_if_any":  "",
+                           "source_file":  "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_branch_pairing_manifest.csv",
+                           "row_column_or_key":  "column=track_id",
+                           "evidence_role":  "track_identity",
+                           "caveat":  "Mindoro B1 is the only main-text primary Mindoro validation row."
+                       },
+                       {
+                           "value_name":  "validation_date_local",
+                           "exact_value":  "",
+                           "units_if_any":  "",
+                           "source_file":  "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_summary.csv",
+                           "row_column_or_key":  "branch_id=R1_previous, column=obs_date_local",
+                           "evidence_role":  "primary_validation_window",
+                           "caveat":  "Promoted March 14 target date."
+                       },
+                       {
+                           "value_name":  "forecast_product_name",
+                           "exact_value":  "mask_p50_2023-03-14_localdate.tif",
+                           "units_if_any":  "",
+                           "source_file":  "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_summary.csv",
+                           "row_column_or_key":  "branch_id=R1_previous, column=forecast_product",
+                           "evidence_role":  "primary_validation_product",
+                           "caveat":  "Promoted B1 scored product."
+                       },
+                       {
+                           "value_name":  "forecast_product_path",
+                           "exact_value":  "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/R1_previous/forecast_datecomposites/mask_p50_2023-03-14_localdate.tif",
+                           "units_if_any":  "",
+                           "source_file":  "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_summary.csv",
+                           "row_column_or_key":  "branch_id=R1_previous, column=forecast_path",
+                           "evidence_role":  "primary_validation_product",
+                           "caveat":  "Promoted B1 scored product."
+                       },
+                       {
+                           "value_name":  "observation_mask_name",
+                           "exact_value":  "10b37c42a9754363a5f7b14199b077e6.tif",
+                           "units_if_any":  "",
+                           "source_file":  "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_summary.csv",
+                           "row_column_or_key":  "branch_id=R1_previous, column=observation_product",
+                           "evidence_role":  "truth_mask",
+                           "caveat":  "Public observed mask on the same projected scoring grid."
+                       },
+                       {
+                           "value_name":  "observation_mask_path",
+                           "exact_value":  "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public/accepted_obs_masks/10b37c42a9754363a5f7b14199b077e6.tif",
+                           "units_if_any":  "",
+                           "source_file":  "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_summary.csv",
+                           "row_column_or_key":  "branch_id=R1_previous, column=observation_path",
+                           "evidence_role":  "truth_mask",
+                           "caveat":  "Public observed mask on the same projected scoring grid."
+                       },
+                       {
+                           "value_name":  "shared_imagery_caveat",
+                           "exact_value":  "Both NOAA/NESDIS public products cite WorldView-3 imagery acquired on 2023-03-12, so the promoted March 13 -\u003e March 14 row is a reinitialization-based public-validation pair with shared-imagery provenance rather than a fully independent day-to-day validation.",
+                           "units_if_any":  "",
+                           "source_file":  "output/final_validation_package/final_validation_main_table.csv",
+                           "row_column_or_key":  "track_id=B1, column=shared_imagery_caveat",
+                           "evidence_role":  "interpretation_guardrail",
+                           "caveat":  "Must remain explicit in the March 13 -\u003e March 14 main-text row."
+                       },
+                       {
+                           "value_name":  "pairing_source_semantics",
+                           "exact_value":  "march13_polygon_reinit_vs_march14_local_date_branch_p50",
+                           "units_if_any":  "",
+                           "source_file":  "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_branch_pairing_manifest.csv",
+                           "row_column_or_key":  "column=source_semantics",
+                           "evidence_role":  "pairing_manifest",
+                           "caveat":  "Shows this is the March 13 polygon reinit versus March 14 local-date branch p50 pair."
+                       },
+                       {
+                           "value_name":  "figure_board_paths",
+                           "exact_value":  "output/figure_package_publication/case_mindoro_retro_2023__phase3b_reinit_primary__opendrift__comparison_board__2023_03_13_to_2023_03_14__board__slide__mindoro_primary_validation_board.png | output/trajectory_gallery_panel/case_mindoro_retro_2023__phase3b_reinit_primary__opendrift__panel_board__2023_03_13_to_2023_03_14__panel__mindoro_primary_reinit_board.png",
+                           "units_if_any":  "",
+                           "source_file":  "output/figure_package_publication/publication_figure_manifest.json",
+                           "row_column_or_key":  "recommended_main_defense_figures and stored board paths",
+                           "evidence_role":  "figure_inventory",
+                           "caveat":  "Publication board plus panel board."
+                       },
+                       {
+                           "value_name":  "fss_1km",
+                           "exact_value":  "0.0",
+                           "units_if_any":  "",
+                           "source_file":  "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_fss_by_window.csv",
+                           "row_column_or_key":  "branch_id=R1_previous, window_km=1",
+                           "evidence_role":  "primary_validation_metric",
+                           "caveat":  "Report only because the products share the same projected grid, aligned mask, and ocean scoring domain."
+                       },
+                       {
+                           "value_name":  "fss_3km",
+                           "exact_value":  "0.04410084397715486",
+                           "units_if_any":  "",
+                           "source_file":  "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_fss_by_window.csv",
+                           "row_column_or_key":  "branch_id=R1_previous, window_km=3",
+                           "evidence_role":  "primary_validation_metric",
+                           "caveat":  "Report only because the products share the same projected grid, aligned mask, and ocean scoring domain."
+                       },
+                       {
+                           "value_name":  "fss_5km",
+                           "exact_value":  "0.13713343304839443",
+                           "units_if_any":  "",
+                           "source_file":  "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_fss_by_window.csv",
+                           "row_column_or_key":  "branch_id=R1_previous, window_km=5",
+                           "evidence_role":  "primary_validation_metric",
+                           "caveat":  "Report only because the products share the same projected grid, aligned mask, and ocean scoring domain."
+                       },
+                       {
+                           "value_name":  "fss_10km",
+                           "exact_value":  "0.2489511001092829",
+                           "units_if_any":  "",
+                           "source_file":  "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_fss_by_window.csv",
+                           "row_column_or_key":  "branch_id=R1_previous, window_km=10",
+                           "evidence_role":  "primary_validation_metric",
+                           "caveat":  "Report only because the products share the same projected grid, aligned mask, and ocean scoring domain."
+                       }
+                   ],
+    "mindoro_track_a":  [
+                            {
+                                "value_name":  "reporting_role",
+                                "exact_value":  "phase3a_comparator_only",
+                                "units_if_any":  "",
+                                "source_file":  "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_run_manifest.json",
+                                "row_column_or_key":  "reporting_role",
+                                "evidence_role":  "comparator_guardrail",
+                                "caveat":  "Track A is comparator support only; PyGNOME is never truth."
+                            },
+                            {
+                                "value_name":  "paired_primary_track_id",
+                                "exact_value":  "",
+                                "units_if_any":  "",
+                                "source_file":  "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_run_manifest.json",
+                                "row_column_or_key":  "paired_primary_track_id",
+                                "evidence_role":  "comparator_guardrail",
+                                "caveat":  "Attached to B1 only."
+                            },
+                            {
+                                "value_name":  "pygnome_used_as_truth",
+                                "exact_value":  "False",
+                                "units_if_any":  "",
+                                "source_file":  "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_run_manifest.json",
+                                "row_column_or_key":  "guardrails.pygnome_used_as_truth",
+                                "evidence_role":  "comparator_guardrail",
+                                "caveat":  "Must remain false."
+                            },
+                            {
+                                "value_name":  "validation_date_local",
+                                "exact_value":  "2023-03-14",
+                                "units_if_any":  "",
+                                "source_file":  "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_model_ranking.csv",
+                                "row_column_or_key":  "obs_date column",
+                                "evidence_role":  "comparator_window",
+                                "caveat":  "Stored same-case comparator window."
+                            },
+                            {
+                                "value_name":  "fss_windows_km",
+                                "exact_value":  "1, 3, 5, 10",
+                                "units_if_any":  "km",
+                                "source_file":  "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_model_ranking.csv",
+                                "row_column_or_key":  "windows_km column",
+                                "evidence_role":  "comparator_window",
+                                "caveat":  "Stored cross-model FSS windows."
+                            },
+                            {
+                                "value_name":  "shared_imagery_caveat",
+                                "exact_value":  "Both NOAA/NESDIS public products cite WorldView-3 imagery acquired on 2023-03-12, so the promoted March 13 -\u003e March 14 row is a reinitialization-based public-validation pair with shared-imagery provenance rather than a fully independent day-to-day validation.",
+                                "units_if_any":  "",
+                                "source_file":  "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_run_manifest.json",
+                                "row_column_or_key":  "limitations.noaa_source_limitation_note",
+                                "evidence_role":  "interpretation_guardrail",
+                                "caveat":  "Same caveat as B1; Track A is same-case comparator support."
+                            },
+                            {
+                                "value_name":  "structural_mismatch_note",
+                                "exact_value":  "PyGNOME deterministic comparator does not reproduce the exact OpenDrift gridded current/wave/Stokes stack.",
+                                "units_if_any":  "",
+                                "source_file":  "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_run_manifest.json",
+                                "row_column_or_key":  "limitations.pygnome_structural_mismatch",
+                                "evidence_role":  "comparator_guardrail",
+                                "caveat":  "PyGNOME does not reproduce the exact OpenDrift forcing stack."
+                            },
+                            {
+                                "value_name":  "figure_board_paths",
+                                "exact_value":  "output/figure_package_publication/case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift_vs_pygnome__comparison_board__2023_03_14__board__slide__mindoro_crossmodel_board.png | output/trajectory_gallery_panel/case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift_vs_pygnome__panel_board__2023_03_14__panel__mindoro_crossmodel_reinit_board.png",
+                                "units_if_any":  "",
+                                "source_file":  "output/figure_package_publication/publication_figure_manifest.json",
+                                "row_column_or_key":  "recommended_main_defense_figures and stored board paths",
+                                "evidence_role":  "figure_inventory",
+                                "caveat":  "Publication board plus panel board."
+                            },
+                            {
+                                "value_name":  "R1_previous_reinit_p50_model_name",
+                                "exact_value":  "OpenDrift R1 previous reinit p50",
+                                "units_if_any":  "",
+                                "source_file":  "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_model_ranking.csv",
+                                "row_column_or_key":  "track_id=R1_previous_reinit_p50, column=model_name",
+                                "evidence_role":  "comparator_metric",
+                                "caveat":  "Comparator support only."
+                            },
+                            {
+                                "value_name":  "R1_previous_reinit_p50_mean_fss",
+                                "exact_value":  "0.10754634428370805",
+                                "units_if_any":  "",
+                                "source_file":  "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_model_ranking.csv",
+                                "row_column_or_key":  "track_id=R1_previous_reinit_p50, column=mean_fss",
+                                "evidence_role":  "comparator_metric",
+                                "caveat":  "Comparator support only."
+                            },
+                            {
+                                "value_name":  "R1_previous_reinit_p50_forecast_product",
+                                "exact_value":  "mask_p50_2023-03-14_localdate.tif",
+                                "units_if_any":  "",
+                                "source_file":  "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_model_ranking.csv",
+                                "row_column_or_key":  "track_id=R1_previous_reinit_p50, column=forecast_product",
+                                "evidence_role":  "comparator_product",
+                                "caveat":  "Comparator support only."
+                            },
+                            {
+                                "value_name":  "pygnome_reinit_deterministic_model_name",
+                                "exact_value":  "PyGNOME deterministic March 13 reinit comparator",
+                                "units_if_any":  "",
+                                "source_file":  "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_model_ranking.csv",
+                                "row_column_or_key":  "track_id=pygnome_reinit_deterministic, column=model_name",
+                                "evidence_role":  "comparator_metric",
+                                "caveat":  "Comparator support only."
+                            },
+                            {
+                                "value_name":  "pygnome_reinit_deterministic_mean_fss",
+                                "exact_value":  "0.0060988378109674",
+                                "units_if_any":  "",
+                                "source_file":  "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_model_ranking.csv",
+                                "row_column_or_key":  "track_id=pygnome_reinit_deterministic, column=mean_fss",
+                                "evidence_role":  "comparator_metric",
+                                "caveat":  "Comparator support only."
+                            },
+                            {
+                                "value_name":  "pygnome_reinit_deterministic_forecast_product",
+                                "exact_value":  "pygnome_footprint_mask_2023-03-14_localdate.tif",
+                                "units_if_any":  "",
+                                "source_file":  "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_model_ranking.csv",
+                                "row_column_or_key":  "track_id=pygnome_reinit_deterministic, column=forecast_product",
+                                "evidence_role":  "comparator_product",
+                                "caveat":  "Comparator support only."
+                            },
+                            {
+                                "value_name":  "R0_reinit_p50_model_name",
+                                "exact_value":  "OpenDrift R0 reinit p50",
+                                "units_if_any":  "",
+                                "source_file":  "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_model_ranking.csv",
+                                "row_column_or_key":  "track_id=R0_reinit_p50, column=model_name",
+                                "evidence_role":  "comparator_metric",
+                                "caveat":  "Comparator support only."
+                            },
+                            {
+                                "value_name":  "R0_reinit_p50_mean_fss",
+                                "exact_value":  "0.0",
+                                "units_if_any":  "",
+                                "source_file":  "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_model_ranking.csv",
+                                "row_column_or_key":  "track_id=R0_reinit_p50, column=mean_fss",
+                                "evidence_role":  "comparator_metric",
+                                "caveat":  "Comparator support only."
+                            },
+                            {
+                                "value_name":  "R0_reinit_p50_forecast_product",
+                                "exact_value":  "mask_p50_2023-03-14_localdate.tif",
+                                "units_if_any":  "",
+                                "source_file":  "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_model_ranking.csv",
+                                "row_column_or_key":  "track_id=R0_reinit_p50, column=forecast_product",
+                                "evidence_role":  "comparator_product",
+                                "caveat":  "Comparator support only."
+                            }
+                        ],
+    "dwh":  [
+                {
+                    "value_name":  "forcing_stack",
+                    "exact_value":  "HYCOM GOFS 3.1 currents + ERA5 winds + CMEMS wave/Stokes",
+                    "units_if_any":  "",
+                    "source_file":  "output/final_reproducibility_package/final_reproducibility_manifest.json",
+                    "row_column_or_key":  "dwh_phase3c_freeze.forcing_stack",
+                    "evidence_role":  "forcing_stack",
+                    "caveat":  "DWH Phase 3C is a separate external transfer-validation case."
+                },
+                {
+                    "value_name":  "track_semantics",
+                    "exact_value":  "C1 deterministic transfer validation | C2 ensemble extension | C3 comparator-only",
+                    "units_if_any":  "",
+                    "source_file":  "output/final_reproducibility_package/final_phase_status_registry.csv",
+                    "row_column_or_key":  "phase3c track rows C1/C2/C3",
+                    "evidence_role":  "track_semantics",
+                    "caveat":  "DWH uses public observed daily masks as truth."
+                },
+                {
+                    "value_name":  "truth_semantics",
+                    "exact_value":  "public observed daily masks as truth",
+                    "units_if_any":  "",
+                    "source_file":  "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/phase3c_pairing_manifest.csv",
+                    "row_column_or_key":  "truth_source column",
+                    "evidence_role":  "truth_definition",
+                    "caveat":  "Public observed DWH masks remain truth for C1/C2/C3 interpretation."
+                },
+                {
+                    "value_name":  "figure_board_paths",
+                    "exact_value":  "output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__daily_deterministic_footprint_overview_board.png | output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__observed_deterministic_mask_p50_mask_p90_board.png | output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__opendrift_vs_pygnome__comparison_board__2010_05_21_to_2010_05_23__board__slide__observed_deterministic_mask_p50_pygnome_board.png",
+                    "units_if_any":  "",
+                    "source_file":  "output/figure_package_publication/publication_figure_manifest.json",
+                    "row_column_or_key":  "recommended_main_defense_figures",
+                    "evidence_role":  "figure_inventory",
+                    "caveat":  "Publication boards for C1, C2, and C3."
+                },
+                {
+                    "value_name":  "observation_mask_2010-05-21",
+                    "exact_value":  "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_setup/obs_mask_2010-05-21.tif",
+                    "units_if_any":  "",
+                    "source_file":  "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/phase3c_pairing_manifest.csv",
+                    "row_column_or_key":  "pair_id=dwh_opendrift_control_2010-05-21, column=observation_path",
+                    "evidence_role":  "truth_mask",
+                    "caveat":  "DWH uses public observed daily masks as truth."
+                },
+                {
+                    "value_name":  "observation_mask_2010-05-21_2010-05-23",
+                    "exact_value":  "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/products/obs_mask_2010-05-21_2010-05-23_eventcorridor.tif",
+                    "units_if_any":  "",
+                    "source_file":  "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/phase3c_pairing_manifest.csv",
+                    "row_column_or_key":  "pair_id=dwh_opendrift_control_eventcorridor_2010-05-21_2010-05-23, column=observation_path",
+                    "evidence_role":  "truth_mask",
+                    "caveat":  "DWH uses public observed daily masks as truth."
+                },
+                {
+                    "value_name":  "observation_mask_2010-05-22",
+                    "exact_value":  "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_setup/obs_mask_2010-05-22.tif",
+                    "units_if_any":  "",
+                    "source_file":  "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/phase3c_pairing_manifest.csv",
+                    "row_column_or_key":  "pair_id=dwh_opendrift_control_2010-05-22, column=observation_path",
+                    "evidence_role":  "truth_mask",
+                    "caveat":  "DWH uses public observed daily masks as truth."
+                },
+                {
+                    "value_name":  "observation_mask_2010-05-23",
+                    "exact_value":  "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_setup/obs_mask_2010-05-23.tif",
+                    "units_if_any":  "",
+                    "source_file":  "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/phase3c_pairing_manifest.csv",
+                    "row_column_or_key":  "pair_id=dwh_opendrift_control_2010-05-23, column=observation_path",
+                    "evidence_role":  "truth_mask",
+                    "caveat":  "DWH uses public observed daily masks as truth."
+                },
+                {
+                    "value_name":  "C1_2010-05-21_mean_fss",
+                    "exact_value":  "0.45383614120114235",
+                    "units_if_any":  "",
+                    "source_file":  "output/final_validation_package/final_validation_main_table.csv",
+                    "row_column_or_key":  "track_id=C1, model_comparator=OpenDrift deterministic control, validation_dates=2010-05-21, column=mean_fss",
+                    "evidence_role":  "transfer_validation_metric",
+                    "caveat":  "Reportable because products share the same projected grid, aligned mask, and valid-ocean scoring domain."
+                },
+                {
+                    "value_name":  "C1_2010-05-21_to_2010-05-23_mean_fss",
+                    "exact_value":  "0.5568236041788164",
+                    "units_if_any":  "",
+                    "source_file":  "output/final_validation_package/final_validation_main_table.csv",
+                    "row_column_or_key":  "track_id=C1, model_comparator=OpenDrift deterministic control, validation_dates=2010-05-21_to_2010-05-23, column=mean_fss",
+                    "evidence_role":  "transfer_validation_metric",
+                    "caveat":  "Reportable because products share the same projected grid, aligned mask, and valid-ocean scoring domain."
+                },
+                {
+                    "value_name":  "C1_2010-05-22_mean_fss",
+                    "exact_value":  "0.4807912923581656",
+                    "units_if_any":  "",
+                    "source_file":  "output/final_validation_package/final_validation_main_table.csv",
+                    "row_column_or_key":  "track_id=C1, model_comparator=OpenDrift deterministic control, validation_dates=2010-05-22, column=mean_fss",
+                    "evidence_role":  "transfer_validation_metric",
+                    "caveat":  "Reportable because products share the same projected grid, aligned mask, and valid-ocean scoring domain."
+                },
+                {
+                    "value_name":  "C1_2010-05-23_mean_fss",
+                    "exact_value":  "0.41458477225067714",
+                    "units_if_any":  "",
+                    "source_file":  "output/final_validation_package/final_validation_main_table.csv",
+                    "row_column_or_key":  "track_id=C1, model_comparator=OpenDrift deterministic control, validation_dates=2010-05-23, column=mean_fss",
+                    "evidence_role":  "transfer_validation_metric",
+                    "caveat":  "Reportable because products share the same projected grid, aligned mask, and valid-ocean scoring domain."
+                },
+                {
+                    "value_name":  "C2_2010-05-21_mean_fss",
+                    "exact_value":  "0.4529413764023437",
+                    "units_if_any":  "",
+                    "source_file":  "output/final_validation_package/final_validation_main_table.csv",
+                    "row_column_or_key":  "track_id=C2, model_comparator=OpenDrift ensemble p50, validation_dates=2010-05-21, column=mean_fss",
+                    "evidence_role":  "transfer_validation_metric",
+                    "caveat":  "Reportable because products share the same projected grid, aligned mask, and valid-ocean scoring domain."
+                },
+                {
+                    "value_name":  "C2_2010-05-21_to_2010-05-23_mean_fss",
+                    "exact_value":  "0.5388571104755553",
+                    "units_if_any":  "",
+                    "source_file":  "output/final_validation_package/final_validation_main_table.csv",
+                    "row_column_or_key":  "track_id=C2, model_comparator=OpenDrift ensemble p50, validation_dates=2010-05-21_to_2010-05-23, column=mean_fss",
+                    "evidence_role":  "transfer_validation_metric",
+                    "caveat":  "Reportable because products share the same projected grid, aligned mask, and valid-ocean scoring domain."
+                },
+                {
+                    "value_name":  "C2_2010-05-22_mean_fss",
+                    "exact_value":  "0.5407603737412167",
+                    "units_if_any":  "",
+                    "source_file":  "output/final_validation_package/final_validation_main_table.csv",
+                    "row_column_or_key":  "track_id=C2, model_comparator=OpenDrift ensemble p50, validation_dates=2010-05-22, column=mean_fss",
+                    "evidence_role":  "transfer_validation_metric",
+                    "caveat":  "Reportable because products share the same projected grid, aligned mask, and valid-ocean scoring domain."
+                },
+                {
+                    "value_name":  "C2_2010-05-23_mean_fss",
+                    "exact_value":  "0.4726856610412983",
+                    "units_if_any":  "",
+                    "source_file":  "output/final_validation_package/final_validation_main_table.csv",
+                    "row_column_or_key":  "track_id=C2, model_comparator=OpenDrift ensemble p50, validation_dates=2010-05-23, column=mean_fss",
+                    "evidence_role":  "transfer_validation_metric",
+                    "caveat":  "Reportable because products share the same projected grid, aligned mask, and valid-ocean scoring domain."
+                },
+                {
+                    "value_name":  "C2_2010-05-21_mean_fss",
+                    "exact_value":  "0.4929769435076907",
+                    "units_if_any":  "",
+                    "source_file":  "output/final_validation_package/final_validation_main_table.csv",
+                    "row_column_or_key":  "track_id=C2, model_comparator=OpenDrift ensemble p90, validation_dates=2010-05-21, column=mean_fss",
+                    "evidence_role":  "transfer_validation_metric",
+                    "caveat":  "Reportable because products share the same projected grid, aligned mask, and valid-ocean scoring domain."
+                },
+                {
+                    "value_name":  "C2_2010-05-21_to_2010-05-23_mean_fss",
+                    "exact_value":  "0.4966221860388572",
+                    "units_if_any":  "",
+                    "source_file":  "output/final_validation_package/final_validation_main_table.csv",
+                    "row_column_or_key":  "track_id=C2, model_comparator=OpenDrift ensemble p90, validation_dates=2010-05-21_to_2010-05-23, column=mean_fss",
+                    "evidence_role":  "transfer_validation_metric",
+                    "caveat":  "Reportable because products share the same projected grid, aligned mask, and valid-ocean scoring domain."
+                },
+                {
+                    "value_name":  "C2_2010-05-22_mean_fss",
+                    "exact_value":  "0.4870478270041897",
+                    "units_if_any":  "",
+                    "source_file":  "output/final_validation_package/final_validation_main_table.csv",
+                    "row_column_or_key":  "track_id=C2, model_comparator=OpenDrift ensemble p90, validation_dates=2010-05-22, column=mean_fss",
+                    "evidence_role":  "transfer_validation_metric",
+                    "caveat":  "Reportable because products share the same projected grid, aligned mask, and valid-ocean scoring domain."
+                },
+                {
+                    "value_name":  "C2_2010-05-23_mean_fss",
+                    "exact_value":  "0.4442370805229663",
+                    "units_if_any":  "",
+                    "source_file":  "output/final_validation_package/final_validation_main_table.csv",
+                    "row_column_or_key":  "track_id=C2, model_comparator=OpenDrift ensemble p90, validation_dates=2010-05-23, column=mean_fss",
+                    "evidence_role":  "transfer_validation_metric",
+                    "caveat":  "Reportable because products share the same projected grid, aligned mask, and valid-ocean scoring domain."
+                },
+                {
+                    "value_name":  "C3_2010-05-21_mean_fss",
+                    "exact_value":  "0.24341802004227403",
+                    "units_if_any":  "",
+                    "source_file":  "output/final_validation_package/final_validation_main_table.csv",
+                    "row_column_or_key":  "track_id=C3, validation_dates=2010-05-21, column=mean_fss",
+                    "evidence_role":  "comparator_metric",
+                    "caveat":  "Comparator-only; DWH observed masks remain truth."
+                },
+                {
+                    "value_name":  "C3_2010-05-21_fss_windows",
+                    "exact_value":  "1km=0.2065990439547627 | 3km=0.2318178588304653 | 5km=0.250366977977345 | 10km=0.2848881994065231",
+                    "units_if_any":  "",
+                    "source_file":  "output/final_validation_package/final_validation_main_table.csv",
+                    "row_column_or_key":  "track_id=C3, validation_dates=2010-05-21, columns=fss_1km/fss_3km/fss_5km/fss_10km",
+                    "evidence_role":  "comparator_metric",
+                    "caveat":  "Comparator-only; DWH observed masks remain truth."
+                },
+                {
+                    "value_name":  "C3_2010-05-21_to_2010-05-23_mean_fss",
+                    "exact_value":  "0.36123855964520113",
+                    "units_if_any":  "",
+                    "source_file":  "output/final_validation_package/final_validation_main_table.csv",
+                    "row_column_or_key":  "track_id=C3, validation_dates=2010-05-21_to_2010-05-23, column=mean_fss",
+                    "evidence_role":  "comparator_metric",
+                    "caveat":  "Comparator-only; DWH observed masks remain truth."
+                },
+                {
+                    "value_name":  "C3_2010-05-21_to_2010-05-23_fss_windows",
+                    "exact_value":  "1km=0.3197216063069722 | 3km=0.349499662890653 | 5km=0.3688947943200658 | 10km=0.4068381750631135",
+                    "units_if_any":  "",
+                    "source_file":  "output/final_validation_package/final_validation_main_table.csv",
+                    "row_column_or_key":  "track_id=C3, validation_dates=2010-05-21_to_2010-05-23, columns=fss_1km/fss_3km/fss_5km/fss_10km",
+                    "evidence_role":  "comparator_metric",
+                    "caveat":  "Comparator-only; DWH observed masks remain truth."
+                },
+                {
+                    "value_name":  "C3_2010-05-22_mean_fss",
+                    "exact_value":  "0.25394877735108246",
+                    "units_if_any":  "",
+                    "source_file":  "output/final_validation_package/final_validation_main_table.csv",
+                    "row_column_or_key":  "track_id=C3, validation_dates=2010-05-22, column=mean_fss",
+                    "evidence_role":  "comparator_metric",
+                    "caveat":  "Comparator-only; DWH observed masks remain truth."
+                },
+                {
+                    "value_name":  "C3_2010-05-22_fss_windows",
+                    "exact_value":  "1km=0.2193739600665557 | 3km=0.244507867165193 | 5km=0.2607432764555125 | 10km=0.2911700057170687",
+                    "units_if_any":  "",
+                    "source_file":  "output/final_validation_package/final_validation_main_table.csv",
+                    "row_column_or_key":  "track_id=C3, validation_dates=2010-05-22, columns=fss_1km/fss_3km/fss_5km/fss_10km",
+                    "evidence_role":  "comparator_metric",
+                    "caveat":  "Comparator-only; DWH observed masks remain truth."
+                },
+                {
+                    "value_name":  "C3_2010-05-23_mean_fss",
+                    "exact_value":  "0.2532064680754552",
+                    "units_if_any":  "",
+                    "source_file":  "output/final_validation_package/final_validation_main_table.csv",
+                    "row_column_or_key":  "track_id=C3, validation_dates=2010-05-23, column=mean_fss",
+                    "evidence_role":  "comparator_metric",
+                    "caveat":  "Comparator-only; DWH observed masks remain truth."
+                },
+                {
+                    "value_name":  "C3_2010-05-23_fss_windows",
+                    "exact_value":  "1km=0.2244364754098361 | 3km=0.2444718436953005 | 5km=0.257744231518907 | 10km=0.2861733216777772",
+                    "units_if_any":  "",
+                    "source_file":  "output/final_validation_package/final_validation_main_table.csv",
+                    "row_column_or_key":  "track_id=C3, validation_dates=2010-05-23, columns=fss_1km/fss_3km/fss_5km/fss_10km",
+                    "evidence_role":  "comparator_metric",
+                    "caveat":  "Comparator-only; DWH observed masks remain truth."
+                }
+            ],
+    "phase4":  [
+                   {
+                       "value_name":  "fixed_base_medium_heavy_proxy_oil_budget",
+                       "exact_value":  "surface_pct= | evaporated_pct= | dispersed_pct= | beached_pct=",
+                       "units_if_any":  "percent",
+                       "source_file":  "output/phase4/CASE_MINDORO_RETRO_2023/phase4_oil_budget_summary.csv",
+                       "row_column_or_key":  "scenario_id=fixed_base_medium_heavy_proxy",
+                       "evidence_role":  "oil_budget_metric",
+                       "caveat":  "Mindoro Phase 4 oil-type and shoreline outputs are support/context only."
+                   },
+                   {
+                       "value_name":  "fixed_base_medium_heavy_proxy_mass_balance_status",
+                       "exact_value":  "qc_passed=False | max_mass_balance_deviation_pct=4.23",
+                       "units_if_any":  "",
+                       "source_file":  "output/phase4/CASE_MINDORO_RETRO_2023/phase4_oil_budget_summary.csv",
+                       "row_column_or_key":  "scenario_id=fixed_base_medium_heavy_proxy",
+                       "evidence_role":  "mass_balance_metric",
+                       "caveat":  "The fixed-base medium-heavy proxy remains flagged for mass-balance follow-up."
+                   },
+                   {
+                       "value_name":  "fixed_base_medium_heavy_proxy_shoreline_summary",
+                       "exact_value":  "impacted_segment_count=10 | first_arrival_utc=2023-03-03T13:59:00Z | latest_first_arrival_utc=2023-03-04T05:59:00Z",
+                       "units_if_any":  "",
+                       "source_file":  "output/phase4/CASE_MINDORO_RETRO_2023/phase4_shoreline_arrival.csv",
+                       "row_column_or_key":  "scenario_id=fixed_base_medium_heavy_proxy",
+                       "evidence_role":  "shoreline_metric",
+                       "caveat":  "Support/context only."
+                   },
+                   {
+                       "value_name":  "heavier_oil_oil_budget",
+                       "exact_value":  "surface_pct= | evaporated_pct= | dispersed_pct= | beached_pct=",
+                       "units_if_any":  "percent",
+                       "source_file":  "output/phase4/CASE_MINDORO_RETRO_2023/phase4_oil_budget_summary.csv",
+                       "row_column_or_key":  "scenario_id=heavier_oil",
+                       "evidence_role":  "oil_budget_metric",
+                       "caveat":  "Mindoro Phase 4 oil-type and shoreline outputs are support/context only."
+                   },
+                   {
+                       "value_name":  "heavier_oil_mass_balance_status",
+                       "exact_value":  "qc_passed=True | max_mass_balance_deviation_pct=0.03",
+                       "units_if_any":  "",
+                       "source_file":  "output/phase4/CASE_MINDORO_RETRO_2023/phase4_oil_budget_summary.csv",
+                       "row_column_or_key":  "scenario_id=heavier_oil",
+                       "evidence_role":  "mass_balance_metric",
+                       "caveat":  "The fixed-base medium-heavy proxy remains flagged for mass-balance follow-up."
+                   },
+                   {
+                       "value_name":  "heavier_oil_shoreline_summary",
+                       "exact_value":  "impacted_segment_count=11 | first_arrival_utc=2023-03-03T13:59:00Z | latest_first_arrival_utc=2023-03-04T05:59:00Z",
+                       "units_if_any":  "",
+                       "source_file":  "output/phase4/CASE_MINDORO_RETRO_2023/phase4_shoreline_arrival.csv",
+                       "row_column_or_key":  "scenario_id=heavier_oil",
+                       "evidence_role":  "shoreline_metric",
+                       "caveat":  "Support/context only."
+                   },
+                   {
+                       "value_name":  "lighter_oil_oil_budget",
+                       "exact_value":  "surface_pct= | evaporated_pct= | dispersed_pct= | beached_pct=",
+                       "units_if_any":  "percent",
+                       "source_file":  "output/phase4/CASE_MINDORO_RETRO_2023/phase4_oil_budget_summary.csv",
+                       "row_column_or_key":  "scenario_id=lighter_oil",
+                       "evidence_role":  "oil_budget_metric",
+                       "caveat":  "Mindoro Phase 4 oil-type and shoreline outputs are support/context only."
+                   },
+                   {
+                       "value_name":  "lighter_oil_mass_balance_status",
+                       "exact_value":  "qc_passed=True | max_mass_balance_deviation_pct=0.69",
+                       "units_if_any":  "",
+                       "source_file":  "output/phase4/CASE_MINDORO_RETRO_2023/phase4_oil_budget_summary.csv",
+                       "row_column_or_key":  "scenario_id=lighter_oil",
+                       "evidence_role":  "mass_balance_metric",
+                       "caveat":  "The fixed-base medium-heavy proxy remains flagged for mass-balance follow-up."
+                   },
+                   {
+                       "value_name":  "lighter_oil_shoreline_summary",
+                       "exact_value":  "impacted_segment_count=11 | first_arrival_utc=2023-03-03T13:59:00Z | latest_first_arrival_utc=2023-03-04T05:59:00Z",
+                       "units_if_any":  "",
+                       "source_file":  "output/phase4/CASE_MINDORO_RETRO_2023/phase4_shoreline_arrival.csv",
+                       "row_column_or_key":  "scenario_id=lighter_oil",
+                       "evidence_role":  "shoreline_metric",
+                       "caveat":  "Support/context only."
+                   },
+                   {
+                       "value_name":  "phase4_crossmodel_comparison_status",
+                       "exact_value":  "no_matched_pygnome_package_yet",
+                       "units_if_any":  "",
+                       "source_file":  "output/figure_package_publication/publication_figure_manifest.json",
+                       "row_column_or_key":  "phase4_crossmodel_comparison_status",
+                       "evidence_role":  "crossmodel_audit",
+                       "caveat":  "No matched Mindoro Phase 4 PyGNOME package should be claimed unless a stored matched package is found."
+                   },
+                   {
+                       "value_name":  "figure_board_paths",
+                       "exact_value":  "output/figure_package_publication/case_mindoro_retro_2023__phase4__openoil__comparison_board__2023_03_03_to_2023_03_06__all_scenarios__board__slide__oil_budget_board.png | output/figure_package_publication/case_mindoro_retro_2023__phase4__openoil__comparison_board__2023_03_03_to_2023_03_06__all_scenarios__board__slide__shoreline_impact_board.png",
+                       "units_if_any":  "",
+                       "source_file":  "output/figure_package_publication/publication_figure_manifest.json",
+                       "row_column_or_key":  "recommended_main_defense_figures",
+                       "evidence_role":  "figure_inventory",
+                       "caveat":  "OpenOil-only Phase 4 boards."
+                   }
+               ],
+    "reproducibility":  [
+                            {
+                                "value_name":  "final_validation_manifest_name",
+                                "exact_value":  "final_validation_manifest.json",
+                                "units_if_any":  "",
+                                "source_file":  "output/final_validation_package/final_validation_manifest.json",
+                                "row_column_or_key":  "file_name",
+                                "evidence_role":  "package_manifest",
+                                "caveat":  "Final validation package manifest."
+                            },
+                            {
+                                "value_name":  "final_reproducibility_manifest_name",
+                                "exact_value":  "final_reproducibility_manifest.json",
+                                "units_if_any":  "",
+                                "source_file":  "output/final_reproducibility_package/final_reproducibility_manifest.json",
+                                "row_column_or_key":  "file_name",
+                                "evidence_role":  "package_manifest",
+                                "caveat":  "Final reproducibility package manifest."
+                            },
+                            {
+                                "value_name":  "final_validation_package_inventory",
+                                "exact_value":  "final_validation_benchmark_table.csv | final_validation_case_registry.csv | final_validation_chapter_sync_memo.md | final_validation_claims_guardrails.md | final_validation_interpretation_memo.md | final_validation_limitations.csv | final_validation_main_table.csv | final_validation_manifest.json | final_validation_methodology_amendment_memo.md | final_validation_observation_table.csv | final_validation_oral_defense_script.md | final_validation_summary.md | mindoro_validation_archive_decision.md",
+                                "units_if_any":  "",
+                                "source_file":  "output/final_validation_package",
+                                "row_column_or_key":  "directory inventory",
+                                "evidence_role":  "artifact_inventory",
+                                "caveat":  "Stored final validation package file list."
+                            },
+                            {
+                                "value_name":  "final_reproducibility_package_inventory",
+                                "exact_value":  "final_case_registry.csv | final_config_snapshot_index.csv | final_log_index.csv | final_manifest_index.csv | final_output_catalog.csv | final_phase_status_registry.csv | final_reproducibility_manifest.json | final_reproducibility_summary.md | launcher_user_guide.md | phase5_final_verdict.md | phase5_packaging_sync_memo.md | software_versions.csv",
+                                "units_if_any":  "",
+                                "source_file":  "output/final_reproducibility_package",
+                                "row_column_or_key":  "directory inventory",
+                                "evidence_role":  "artifact_inventory",
+                                "caveat":  "Stored final reproducibility package file list."
+                            },
+                            {
+                                "value_name":  "publication_figure_inventory",
+                                "exact_value":  "figure_count=127 | thesis_surface_count=53",
+                                "units_if_any":  "",
+                                "source_file":  "output/figure_package_publication/publication_figure_manifest.json",
+                                "row_column_or_key":  "inventory.figure_count and inventory.thesis_surface_count",
+                                "evidence_role":  "artifact_inventory",
+                                "caveat":  "Stored publication figure package inventory."
+                            },
+                            {
+                                "value_name":  "trajectory_gallery_inventory",
+                                "exact_value":  "figure_count=20 | manifest=trajectory_gallery_manifest.json",
+                                "units_if_any":  "",
+                                "source_file":  "output/trajectory_gallery/trajectory_gallery_manifest.json",
+                                "row_column_or_key":  "figures.Count",
+                                "evidence_role":  "artifact_inventory",
+                                "caveat":  "Stored trajectory gallery inventory."
+                            },
+                            {
+                                "value_name":  "trajectory_gallery_panel_inventory",
+                                "exact_value":  "figure_count=10 | manifest=panel_figure_manifest.json",
+                                "units_if_any":  "",
+                                "source_file":  "output/trajectory_gallery_panel/panel_figure_manifest.json",
+                                "row_column_or_key":  "figures.Count",
+                                "evidence_role":  "artifact_inventory",
+                                "caveat":  "Stored panel gallery inventory."
+                            },
+                            {
+                                "value_name":  "final_manifest_index_count",
+                                "exact_value":  "146",
+                                "units_if_any":  "rows",
+                                "source_file":  "output/final_reproducibility_package/final_manifest_index.csv",
+                                "row_column_or_key":  "row_count",
+                                "evidence_role":  "artifact_inventory",
+                                "caveat":  "Stored manifest index row count."
+                            }
+                        ],
+    "missing_items":  [
+                          {
+                              "value_name":  "figure_5_1_result_lane_summary_diagram",
+                              "exact_value":  "missing",
+                              "units_if_any":  "",
+                              "source_file":  "output/figure_package_publication/publication_figure_registry.csv",
+                              "row_column_or_key":  "no matching result-lane board found",
+                              "evidence_role":  "absence_provenance",
+                              "caveat":  "Not blocking the main scientific claim."
+                          },
+                          {
+                              "value_name":  "figure_5_2_focused_mindoro_phase1_recipe_selection_summary",
+                              "exact_value":  "missing",
+                              "units_if_any":  "",
+                              "source_file":  "output/figure_package_publication/publication_figure_registry.csv",
+                              "row_column_or_key":  "page_target=phase1_recipe_selection contains only study-context geography figures",
+                              "evidence_role":  "absence_provenance",
+                              "caveat":  "Not blocking the main scientific claim."
+                          },
+                          {
+                              "value_name":  "phase1_regional_freeze_sync_in_frozen_reproducibility_package",
+                              "exact_value":  "blocking_missing_sync",
+                              "units_if_any":  "",
+                              "source_file":  "output/final_reproducibility_package/final_phase_status_registry.csv",
+                              "row_column_or_key":  "phase_id=phase1, column=summary",
+                              "evidence_role":  "governance_gap",
+                              "caveat":  "Blocks an unqualified claim that Phase 1 regional freeze status is already synchronized in the frozen package."
+                          },
+                          {
+                              "value_name":  "mindoro_phase4_matched_pygnome_package",
+                              "exact_value":  "missing",
+                              "units_if_any":  "",
+                              "source_file":  "output/figure_package_publication/publication_figure_manifest.json",
+                              "row_column_or_key":  "phase4_crossmodel_comparison_status",
+                              "evidence_role":  "absence_provenance",
+                              "caveat":  "Do not claim a matched Phase 4 PyGNOME package unless it is stored."
+                          }
+                      ]
+}

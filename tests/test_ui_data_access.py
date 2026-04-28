@@ -67,9 +67,39 @@ class UiDataAccessTests(unittest.TestCase):
         self.assertTrue(any(page_target == "mindoro_validation" for page_target in page_targets))
         self.assertTrue(any(page_target == "cross_model_comparison" for page_target in page_targets))
         self.assertTrue(any(page_target == "dwh_transfer_validation" for page_target in page_targets))
-        self.assertTrue(any(page_target == "phase4_oiltype_and_shoreline" for page_target in page_targets))
+        self.assertFalse(any(page_target == "phase4_oiltype_and_shoreline" for page_target in page_targets))
+        self.assertFalse(any(page_target == "phase4_crossmodel_status" for page_target in page_targets))
         self.assertFalse((featured["surface_key"].astype(str) == "archive_only").any())
         self.assertFalse((featured["surface_key"].astype(str) == "legacy_support").any())
+
+    def test_home_featured_publication_figures_exclude_mindoro_archive_and_phase4_classes(self):
+        featured = data_access.home_featured_publication_figures(REPO_ROOT)
+
+        self.assertFalse(featured.empty)
+        mindoro = featured.loc[featured["case_id"].astype(str).eq("CASE_MINDORO_RETRO_2023")].copy()
+        forbidden_statuses = {
+            "mindoro_b1_r0_archive",
+            "mindoro_legacy_march6",
+            "mindoro_legacy_support",
+            "mindoro_phase4_oil_budget",
+            "mindoro_phase4_shoreline",
+            "mindoro_phase4_deferred",
+        }
+        forbidden_pages = {
+            "mindoro_validation_archive",
+            "phase4_oiltype_and_shoreline",
+            "phase4_crossmodel_status",
+        }
+        forbidden_phases = {
+            "phase3b_legacy_strict",
+            "phase3b_support",
+            "phase4",
+            "phase4_crossmodel_comparability_audit",
+        }
+
+        self.assertFalse(mindoro["status_key"].astype(str).isin(forbidden_statuses).any())
+        self.assertFalse(mindoro["page_target"].astype(str).isin(forbidden_pages).any())
+        self.assertFalse(mindoro["phase_or_track"].astype(str).isin(forbidden_phases).any())
 
     def test_publication_registry_contains_thesis_study_box_reference(self):
         registry = data_access.publication_registry(REPO_ROOT)

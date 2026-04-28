@@ -225,7 +225,8 @@ class ForecastLoadingTests(unittest.TestCase):
             service.audit_json_path = service.forecast_dir / "forecast_loading_audit.json"
             service.audit_csv_path = service.forecast_dir / "forecast_loading_audit.csv"
             service.ensemble_size = 1
-            service.config["perturbations"] = {
+            service.config["legacy_perturbations_inactive"] = {
+                "active": True,
                 "time_shift_hours": 0.0,
                 "diffusivity_min": 1.0,
                 "diffusivity_max": 1.0,

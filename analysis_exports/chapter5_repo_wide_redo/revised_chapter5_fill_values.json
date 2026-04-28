@@ -1,0 +1,397 @@
+﻿{
+    "chapter5_redo_summary":  {
+                                  "main_reason_for_redo":  "The previous Chapter 5 inventory overfocused on the publication/final-package layer and underused the broader repo evidence base.",
+                                  "non_publication_figures_found":  "Yes. Strong non-publication boards were found in output/trajectory_gallery_panel, output/trajectory_gallery, and output/prototype_2016_pygnome_similarity.",
+                                  "2016_drifter_or_prototype_assets_found":  "Yes. Stored 2016 drifter-track, drifter-versus-ensemble, and prototype provenance assets were found.",
+                                  "recommended_chapter5_storyline":  "Result lanes and evidence boundaries -\u003e prototype/drifter testing -\u003e focused Phase 1 recipe selection -\u003e standardized Phase 2 products -\u003e Mindoro B1 main validation with Track A separated -\u003e DWH transfer validation -\u003e Phase 4 support/context -\u003e governance/reproducibility."
+                              },
+    "phase1":  {
+                   "focused_mindoro":  {
+                                           "workflow_mode":  "phase1_mindoro_focus_pre_spill_2016_2023",
+                                           "historical_window":  "2016-01-01T00:00:00Z to 2023-03-02T23:59:59Z",
+                                           "validation_box":  "[118.751, 124.305, 10.620, 16.026]",
+                                           "full_strict_accepted_segment_count":  "65",
+                                           "ranked_seasonal_segment_count":  "19",
+                                           "ranking_subset_months":  "2, 3, 4",
+                                           "recipe_winner":  "cmems_gfs",
+                                           "ranking_order":  "cmems_gfs \u003e cmems_era5 \u003e hycom_gfs \u003e hycom_era5",
+                                           "recipe_ranking_table":  [
+                                                                        {
+                                                                            "recipe":  "cmems_gfs",
+                                                                            "rank":  1,
+                                                                            "mean_ncs_score":  4.5885844529860114,
+                                                                            "segment_count":  19
+                                                                        },
+                                                                        {
+                                                                            "recipe":  "cmems_era5",
+                                                                            "rank":  2,
+                                                                            "mean_ncs_score":  4.6236904630658948,
+                                                                            "segment_count":  19
+                                                                        },
+                                                                        {
+                                                                            "recipe":  "hycom_gfs",
+                                                                            "rank":  3,
+                                                                            "mean_ncs_score":  4.7027327085555859,
+                                                                            "segment_count":  19
+                                                                        },
+                                                                        {
+                                                                            "recipe":  "hycom_era5",
+                                                                            "rank":  4,
+                                                                            "mean_ncs_score":  4.7561277252453342,
+                                                                            "segment_count":  19
+                                                                        }
+                                                                    ],
+                                           "loading_audit_summary":  [
+                                                                         {
+                                                                             "recipe":  "cmems_era5",
+                                                                             "unique_segments":  65,
+                                                                             "valid_rows":  65,
+                                                                             "invalid_rows":  0
+                                                                         },
+                                                                         {
+                                                                             "recipe":  "cmems_gfs",
+                                                                             "unique_segments":  65,
+                                                                             "valid_rows":  65,
+                                                                             "invalid_rows":  0
+                                                                         },
+                                                                         {
+                                                                             "recipe":  "hycom_era5",
+                                                                             "unique_segments":  65,
+                                                                             "valid_rows":  65,
+                                                                             "invalid_rows":  0
+                                                                         },
+                                                                         {
+                                                                             "recipe":  "hycom_gfs",
+                                                                             "unique_segments":  65,
+                                                                             "valid_rows":  65,
+                                                                             "invalid_rows":  0
+                                                                         }
+                                                                     ]
+                                       },
+                   "prototype_and_2016_results":  {
+                                                      "candidate_figures":  [
+                                                                                "output/figure_package_publication/case_legacy_2016__prototype_2016_home_overview__observation_vs_opendrift__comparison_board__2016_09_01_to_2016_09_17__board__slide__legacy_2016_drifter_vs_mask_p50_mask_p90_triptych_board.png",
+                                                                                "output/figure_package_publication/case_2016_09_06__prototype_2016_home_overview__observation_vs_opendrift__single_support_context__2016_09_06__single__paper__drifter_vs_ensemble_case_2016_09_06.png",
+                                                                                "output/figure_package_publication/thesis_study_context__phase1_study_context__study_box_geography__single_box_reference_map__shared_thesis_context__single__paper__prototype_first_code_search_box_geography_reference.png"
+                                                                            ],
+                                                      "candidate_tables":  [
+                                                                               "output/2016 Legacy Runs FINAL Figures/manifests/prototype_2016_final_output_registry.csv",
+                                                                               "output/2016 Legacy Runs FINAL Figures/summary/phase3a/prototype_pygnome_fss_by_case_window.csv",
+                                                                               "output/prototype_2016_pygnome_similarity/prototype_pygnome_similarity_by_case.csv"
+                                                                           ],
+                                                      "recommended_main_text_figures":  [
+                                                                                            "output/figure_package_publication/case_legacy_2016__prototype_2016_home_overview__observation_vs_opendrift__comparison_board__2016_09_01_to_2016_09_17__board__slide__legacy_2016_drifter_vs_mask_p50_mask_p90_triptych_board.png",
+                                                                                            "output/figure_package_publication/thesis_study_context__phase1_study_context__study_box_geography__single_box_reference_map__shared_thesis_context__single__paper__prototype_first_code_search_box_geography_reference.png"
+                                                                                        ],
+                                                      "recommended_appendix_figures":  [
+                                                                                           "output/figure_package_publication/case_2016_09_06__prototype_2016_home_overview__observation_vs_opendrift__single_support_context__2016_09_06__single__paper__drifter_vs_ensemble_case_2016_09_06.png"
+                                                                                       ],
+                                                      "interpretation_note":  "Treat these as prototype-development and transport-realism support only. Drifters are not direct oil-footprint truth."
+                                                  },
+                   "regional_reference_or_governance":  {
+                                                            "available_assets":  [
+                                                                                     "output/phase1_production_rerun/phase1_recipe_ranking.csv",
+                                                                                     "output/phase1_production_rerun/phase1_loading_audit.csv",
+                                                                                     "output/phase1_production_rerun/phase1_accepted_segment_registry.csv"
+                                                                                 ],
+                                                            "allowed_use":  "Reference/governance only; not the active B1 provenance lane.",
+                                                            "caveats":  [
+                                                                            "Regional rerun is preserved as reference only.",
+                                                                            "Some older phase1_finalization_audit files predate the completed focused provenance lane."
+                                                                        ]
+                                                        }
+               },
+    "phase2":  {
+                   "product_inventory":  [
+                                             {
+                                                 "product":  "control_footprint_mask",
+                                                 "semantics":  "Binary deterministic control footprint mask."
+                                             },
+                                             {
+                                                 "product":  "control_density_norm",
+                                                 "semantics":  "Normalized deterministic density."
+                                             },
+                                             {
+                                                 "product":  "prob_presence",
+                                                 "semantics":  "Fraction of ensemble members showing oil presence."
+                                             },
+                                             {
+                                                 "product":  "mask_p50",
+                                                 "semantics":  "Probability \u003e= 0.50."
+                                             },
+                                             {
+                                                 "product":  "mask_p90",
+                                                 "semantics":  "Probability \u003e= 0.90."
+                                             }
+                                         ],
+                   "grid_summary":  {
+                                        "grid_id":  "EPSG:32651:1000.0:124x169:274000:1355000:398000:1524000",
+                                        "crs":  "EPSG:32651",
+                                        "resolution_m":  1000,
+                                        "width":  124,
+                                        "height":  169,
+                                        "display_bounds_wgs84":  [
+                                                                     120.90964677179262,
+                                                                     122.06215417863029,
+                                                                     12.249384840763462,
+                                                                     13.783655303175253
+                                                                 ]
+                                    },
+                   "deterministic_products":  [
+                                                  "control_footprint_mask",
+                                                  "control_density_norm"
+                                              ],
+                   "ensemble_products":  [
+                                             "prob_presence",
+                                             "mask_p50",
+                                             "mask_p90",
+                                             "mask_p50_datecomposite"
+                                         ],
+                   "candidate_figures":  [
+                                             "output/trajectory_gallery_panel/case_mindoro_retro_2023__phase2_official__opendrift__panel_board__2023_03_03_to_2023_03_06__panel__mindoro_trajectory_board.png",
+                                             "GENERATE_FROM: Phase 2 product-family board",
+                                             "output/figure_package_publication/thesis_study_context__phase1_study_context__study_box_geography__single_box_reference_map__shared_thesis_context__single__paper__scoring_grid_bounds_geography_reference.png"
+                                         ]
+               },
+    "mindoro_b1":  {
+                       "track_identity":  "B1",
+                       "observation_pair":  "March 13 public NOAA seed mask -\u003e March 14 public NOAA target mask",
+                       "forecast_product":  "mask_p50_2023-03-14_localdate.tif from R1_previous",
+                       "observation_mask":  "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public/accepted_obs_masks/10b37c42a9754363a5f7b14199b077e6.tif",
+                       "source_imagery_caveat":  "Both NOAA/NESDIS products cite WorldView-3 imagery acquired on 2023-03-12, so this is not a fully independent day-to-day validation.",
+                       "fss_by_window":  [
+                                             {
+                                                 "window_km":  1,
+                                                 "fss":  0
+                                             },
+                                             {
+                                                 "window_km":  3,
+                                                 "fss":  0.044100843977154858
+                                             },
+                                             {
+                                                 "window_km":  5,
+                                                 "fss":  0.13713343304839443
+                                             },
+                                             {
+                                                 "window_km":  10,
+                                                 "fss":  0.2489511001092829
+                                             }
+                                         ],
+                       "candidate_figures":  [
+                                                 "output/Phase 3B March13-14 Final Output/publication/opendrift_primary/mindoro_primary_validation_board.png",
+                                                 "output/Phase 3B March13-14 Final Output/publication/opendrift_primary/march14_r1_previous_overlay.png",
+                                                 "output/Phase 3B March13-14 Final Output/publication/observations/march13_seed_vs_march14_target.png"
+                                             ]
+                   },
+    "mindoro_track_a":  {
+                            "role":  "comparator-only",
+                            "comparator_metrics":  [
+                                                       {
+                                                           "track":  "OpenDrift R1 previous reinit p50",
+                                                           "mean_fss":  0.10754634428370805
+                                                       },
+                                                       {
+                                                           "track":  "PyGNOME deterministic comparator",
+                                                           "mean_fss":  0.0060988378109674
+                                                       },
+                                                       {
+                                                           "track":  "OpenDrift R0 reinit p50",
+                                                           "mean_fss":  0
+                                                       }
+                                                   ],
+                            "candidate_figures":  [
+                                                      "output/figure_package_publication/case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift_vs_pygnome__comparison_board__2023_03_14__board__slide__mindoro_crossmodel_board.png"
+                                                  ],
+                            "guardrails":  [
+                                               "Keep Track A separate from B1.",
+                                               "PyGNOME is comparator-only.",
+                                               "PyGNOME is never truth."
+                                           ]
+                        },
+    "dwh":  {
+                "case_definition":  {
+                                        "case_id":  "CASE_DWH_RETRO_2010_72H",
+                                        "validation_dates":  [
+                                                                 "2010-05-21",
+                                                                 "2010-05-22",
+                                                                 "2010-05-23"
+                                                             ],
+                                        "truth":  "Public observed daily masks and event corridor on a shared projected grid."
+                                    },
+                "forcing_stack":  "HYCOM GOFS 3.1 currents + ERA5 winds + CMEMS wave/Stokes",
+                "c1_deterministic_fss":  [
+                                             {
+                                                 "date":  "2010-05-21_to_2010-05-23",
+                                                 "mean_fss":  0.55682360417881638,
+                                                 "fss_1km":  0.50325075036882538,
+                                                 "fss_3km":  0.55225953646603609,
+                                                 "fss_5km":  0.56995092374313927,
+                                                 "fss_10km":  0.60183320613726476
+                                             }
+                                         ],
+                "c2_ensemble_fss":  [
+                                        {
+                                            "track":  "p50",
+                                            "date":  "2010-05-21_to_2010-05-23",
+                                            "mean_fss":  0.53885711047555529
+                                        },
+                                        {
+                                            "track":  "p90",
+                                            "date":  "2010-05-21_to_2010-05-23",
+                                            "mean_fss":  0.49662218603885722
+                                        }
+                                    ],
+                "c3_pygnome_comparator_metrics":  [
+                                                      {
+                                                          "date":  "2010-05-21_to_2010-05-23",
+                                                          "mean_fss":  0.36123855964520113
+                                                      }
+                                                  ],
+                "candidate_figures":  [
+                                          "output/trajectory_gallery_panel/case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__panel_board__2010_05_21_to_2010_05_23__panel__dwh_deterministic_board.png",
+                                          "output/trajectory_gallery_panel/case_dwh_retro_2010_72h__phase3c_ensemble__opendrift__panel_board__2010_05_21_to_2010_05_23__panel__dwh_deterministic_vs_ensemble_board.png",
+                                          "output/trajectory_gallery_panel/case_dwh_retro_2010_72h__phase3c_pygnome_comparator__opendrift_vs_pygnome__panel_board__2010_05_21_to_2010_05_23__panel__dwh_model_comparison_board.png"
+                                      ]
+            },
+    "phase4":  {
+                   "oil_budget_summary":  [
+                                              {
+                                                  "scenario":  "lighter_oil",
+                                                  "final_evaporated_pct":  0.86,
+                                                  "final_dispersed_pct":  99.12,
+                                                  "final_beached_pct":  0.02,
+                                                  "qc_passed":  true,
+                                                  "first_shoreline_arrival_h":  4,
+                                                  "impacted_segment_count":  11,
+                                                  "total_beached_kg":  5261.192
+                                              },
+                                              {
+                                                  "scenario":  "fixed_base_medium_heavy_proxy",
+                                                  "final_evaporated_pct":  0.31,
+                                                  "final_dispersed_pct":  99.08,
+                                                  "final_beached_pct":  0.61,
+                                                  "qc_passed":  false,
+                                                  "first_shoreline_arrival_h":  4,
+                                                  "impacted_segment_count":  10,
+                                                  "total_beached_kg":  34864.889
+                                              },
+                                              {
+                                                  "scenario":  "heavier_oil",
+                                                  "final_evaporated_pct":  0.23,
+                                                  "final_dispersed_pct":  99.15,
+                                                  "final_beached_pct":  0.63,
+                                                  "qc_passed":  true,
+                                                  "first_shoreline_arrival_h":  4,
+                                                  "impacted_segment_count":  11,
+                                                  "total_beached_kg":  37393.616
+                                              }
+                                          ],
+                   "shoreline_arrival_summary":  [
+                                                     {
+                                                         "scenario":  "lighter_oil",
+                                                         "first_shoreline_arrival_h":  4,
+                                                         "impacted_segment_count":  11
+                                                     },
+                                                     {
+                                                         "scenario":  "fixed_base_medium_heavy_proxy",
+                                                         "first_shoreline_arrival_h":  4,
+                                                         "impacted_segment_count":  10
+                                                     },
+                                                     {
+                                                         "scenario":  "heavier_oil",
+                                                         "first_shoreline_arrival_h":  4,
+                                                         "impacted_segment_count":  11
+                                                     }
+                                                 ],
+                   "shoreline_segment_summary":  [
+                                                     {
+                                                         "scenario":  "fixed_base_medium_heavy_proxy",
+                                                         "segment_id":  "shoreline_00324",
+                                                         "total_beached_kg":  10367.888
+                                                     },
+                                                     {
+                                                         "scenario":  "fixed_base_medium_heavy_proxy",
+                                                         "segment_id":  "shoreline_00325",
+                                                         "total_beached_kg":  6707.415
+                                                     }
+                                                 ],
+                   "candidate_figures":  [
+                                             "output/trajectory_gallery_panel/case_mindoro_retro_2023__phase4__openoil__panel_board__2023_03_03_to_2023_03_06__all_scenarios__panel__mindoro_phase4_oil_budget_board.png",
+                                             "output/trajectory_gallery_panel/case_mindoro_retro_2023__phase4__openoil__panel_board__2023_03_03_to_2023_03_06__all_scenarios__panel__mindoro_phase4_shoreline_board.png",
+                                             "output/figure_package_publication/case_mindoro_retro_2023__phase4_crossmodel_comparability_audit__openoil_only__single_note__2023_03_03_to_2023_03_06__single__paper__crossmodel_comparison_deferred.png"
+                                         ],
+                   "mass_balance_notes":  [
+                                              "Phase 4 is support/context only.",
+                                              "fixed_base_medium_heavy_proxy failed strict QC with max_mass_balance_deviation_pct = 4.23.",
+                                              "No matched Phase 4 OpenDrift-versus-PyGNOME package is stored."
+                                          ]
+               },
+    "reproducibility":  {
+                            "package_inventory":  [
+                                                      {
+                                                          "package":  "output/figure_package_publication",
+                                                          "role":  "publication-grade figure package"
+                                                      },
+                                                      {
+                                                          "package":  "output/trajectory_gallery_panel",
+                                                          "role":  "non-publication panel boards"
+                                                      },
+                                                      {
+                                                          "package":  "output/final_validation_package",
+                                                          "role":  "curated validation tables"
+                                                      },
+                                                      {
+                                                          "package":  "output/final_reproducibility_package",
+                                                          "role":  "governance and manifest package"
+                                                      },
+                                                      {
+                                                          "package":  "output/2016 Legacy Runs FINAL Figures",
+                                                          "role":  "preserved legacy-support package"
+                                                      }
+                                                  ],
+                            "manifest_paths":  [
+                                                   "output/final_reproducibility_package/final_manifest_index.csv",
+                                                   "output/final_reproducibility_package/final_output_catalog.csv",
+                                                   "output/final_reproducibility_package/final_phase_status_registry.csv",
+                                                   "output/figure_package_publication/publication_figure_inventory.md"
+                                               ],
+                            "governance_status":  [
+                                                      {
+                                                          "track":  "B1",
+                                                          "status":  "scientifically_reportable_primary_validation",
+                                                          "frozen":  false
+                                                      },
+                                                      {
+                                                          "track":  "C1",
+                                                          "status":  "scientifically_reportable_transfer_validation",
+                                                          "frozen":  true
+                                                      },
+                                                      {
+                                                          "track":  "C2",
+                                                          "status":  "scientifically_reportable_transfer_validation",
+                                                          "frozen":  true
+                                                      },
+                                                      {
+                                                          "track":  "C3",
+                                                          "status":  "scientifically_reportable_comparator",
+                                                          "frozen":  true
+                                                      },
+                                                      {
+                                                          "track":  "mindoro_phase4",
+                                                          "status":  "scientifically_reportable_inherited_provisional",
+                                                          "frozen":  false
+                                                      }
+                                                  ],
+                            "candidate_figures_or_tables":  [
+                                                                "output/final_reproducibility_package/final_phase_status_registry.csv",
+                                                                "output/final_reproducibility_package/final_manifest_index.csv",
+                                                                "docs/THESIS_SURFACE_GOVERNANCE.md"
+                                                            ]
+                        },
+    "missing_or_unverified_items":  [
+                                        "No stored result-lane schematic.",
+                                        "No stored focused Phase 1 accepted-segment map or recipe-ranking chart.",
+                                        "No stored single Phase 2 product-family board.",
+                                        "No matched Mindoro Phase 4 PyGNOME fate-and-shoreline package."
+                                    ]
+}

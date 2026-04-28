@@ -70,6 +70,7 @@ from src.utils.io import (
     get_prepared_input_manifest_json_path,
     get_prepared_input_specs,
 )
+from src.utils.ensemble_config import get_legacy_perturbations_block, load_ensemble_config
 from src.utils.local_input_store import (
     PERSISTENT_LOCAL_INPUT_STORE,
     classify_reuse_action,
@@ -326,11 +327,10 @@ class DataIngestionService(BaseService):
 
         ensemble_path = Path("config/ensemble.yaml")
         if ensemble_path.exists():
-            with open(ensemble_path, "r", encoding="utf-8") as handle:
-                ensemble_cfg = yaml.safe_load(handle) or {}
-            perturbations = ensemble_cfg.get("perturbations") or {}
-            if perturbations.get("time_shift_hours") is not None:
-                return float(perturbations["time_shift_hours"])
+            ensemble_cfg = load_ensemble_config(ensemble_path)
+            legacy_perturbations = get_legacy_perturbations_block(ensemble_cfg)
+            if bool(legacy_perturbations.get("active", False)) and legacy_perturbations.get("time_shift_hours") is not None:
+                return float(legacy_perturbations["time_shift_hours"])
 
         return PROTOTYPE_FORCING_HALO_HOURS_DEFAULT
 

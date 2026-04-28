@@ -59,6 +59,10 @@ from src.utils.io import (
     resolve_spill_origin,
     select_drifter_of_record,
 )
+from src.utils.ensemble_config import (
+    get_active_legacy_perturbations,
+    load_ensemble_config,
+)
 from src.utils.startup_prompt_policy import (
     PROTOTYPE_2016_ENSEMBLE_POLICY_ENV,
     PROTOTYPE_2016_ENSEMBLE_POLICY_FULL_RERUN,
@@ -261,8 +265,7 @@ class EnsembleForecastService:
         if not self.config_path.exists():
             raise FileNotFoundError(f"Ensemble configuration required at {self.config_path}")
 
-        with open(self.config_path, "r") as f:
-            self.config = yaml.safe_load(f) or {}
+        self.config = load_ensemble_config(self.config_path)
 
         self.ensemble_size = int((self.config.get("ensemble") or {}).get("ensemble_size", 50))
         self.official_config = self._load_official_forecast_config()
@@ -2711,7 +2714,7 @@ class EnsembleForecastService:
                 if reused_manifest is not None:
                     return reused_manifest
             rng = np.random.default_rng()
-            p_cfg = self.config["perturbations"]
+            p_cfg = get_active_legacy_perturbations(self.config)
 
             for i in range(self.ensemble_size):
                 member_id = i + 1
