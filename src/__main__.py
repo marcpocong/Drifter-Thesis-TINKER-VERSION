@@ -36,6 +36,8 @@ Container routing via the PIPELINE_PHASE environment variable:
   PIPELINE_PHASE=phase2_finalization_audit -> Read-only Chapter 3 Phase 2 semantics/manifests audit and verdict
   PIPELINE_PHASE=phase1_production_rerun -> Dedicated full 2016-2022 historical/regional Phase 1 production rerun
   PIPELINE_PHASE=mindoro_march13_14_phase1_focus_trial -> Experimental March 13 -> March 14 replay using the staged Mindoro-focused pre-spill Phase 1 candidate
+  PIPELINE_PHASE=mindoro_b1_5000_element_experiment -> Experimental March 13 -> March 14 5,000-element B1 rerun into a separate non-thesis-facing output lane
+  PIPELINE_PHASE=mindoro_b1_element_count_sensitivity_board -> Build the separate experimental 100k-vs-5k Mindoro B1 sensitivity board and metrics package
   PIPELINE_PHASE=mindoro_local_recipe_experiment -> Stage a Mindoro-local recipe candidate and replay the Mindoro event comparison with GFS
   PIPELINE_PHASE=phase4_oiltype_and_shoreline -> Mindoro support-layer oil-type fate and shoreline-impact workflow
   PIPELINE_PHASE=phase4_crossmodel_comparability_audit -> Read-only Phase 4 OpenDrift-vs-PyGNOME comparability audit
@@ -2074,6 +2076,64 @@ def run_mindoro_march13_14_phase1_focus_trial_phase():
     print(f"Comparison verdict: {results['comparison_verdict']}")
 
 
+def run_mindoro_b1_5000_element_experiment_phase():
+    from src.core.case_context import get_case_context
+    from src.services.mindoro_b1_5000_element_experiment import run_mindoro_b1_5000_element_experiment
+
+    case = get_case_context()
+    if case.workflow_mode != "mindoro_retro_2023" or not case.is_official:
+        print("mindoro_b1_5000_element_experiment requires WORKFLOW_MODE=mindoro_retro_2023.")
+        sys.exit(1)
+
+    print("Starting experimental Mindoro March 13 -> March 14 5,000-element rerun...")
+    print(
+        "This lane reruns only the March 13 -> March 14 OpenDrift branch workflow into a separate "
+        "experimental output directory, preserves the canonical B1 outputs, and keeps the run "
+        "explicitly non-thesis-facing."
+    )
+
+    results = run_mindoro_b1_5000_element_experiment()
+
+    print("\nExperimental Mindoro March 13 -> March 14 5,000-element rerun complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print(f"Summary: {results['summary_csv']}")
+    print(f"Decision note: {results['decision_note_md']}")
+    print(f"Run manifest: {results['run_manifest_json']}")
+    print(f"Actual element count detected: {results['element_count_detected_from_manifest']}")
+    print(
+        "Exact same member perturbations as canonical: "
+        f"{results['exact_same_member_perturbations_as_canonical']}"
+    )
+    print(f"Protected outputs unchanged: {results['protected_outputs_unchanged']}")
+
+
+def run_mindoro_b1_element_count_sensitivity_board_phase():
+    from src.core.case_context import get_case_context
+    from src.services.mindoro_b1_element_count_sensitivity_board import (
+        run_mindoro_b1_element_count_sensitivity_board,
+    )
+
+    case = get_case_context()
+    if case.workflow_mode != "mindoro_retro_2023" or not case.is_official:
+        print("mindoro_b1_element_count_sensitivity_board requires WORKFLOW_MODE=mindoro_retro_2023.")
+        sys.exit(1)
+
+    print("Building the experimental Mindoro 100k-vs-5k element-count sensitivity package...")
+    print(
+        "This reads the stored canonical B1 outputs and the separate 5,000-element experiment outputs, "
+        "then writes the comparison board and metrics package into a separate experimental directory."
+    )
+
+    results = run_mindoro_b1_element_count_sensitivity_board()
+
+    print("\nExperimental Mindoro 100k-vs-5k element-count sensitivity package complete.")
+    print(f"Board: {results['board_png']}")
+    print(f"Metrics CSV: {results['metrics_csv']}")
+    print(f"Pairwise CSV: {results['pairwise_similarity_csv']}")
+    print(f"Manifest: {results['manifest_json']}")
+    print(f"README: {results['readme_md']}")
+
+
 def run_mindoro_local_recipe_experiment_phase():
     from src.services.mindoro_local_recipe_experiment import run_mindoro_local_recipe_experiment
 
@@ -2311,6 +2371,12 @@ def main():
     if phase == "mindoro_march13_14_phase1_focus_trial":
         run_mindoro_march13_14_phase1_focus_trial_phase()
         return
+    if phase == "mindoro_b1_5000_element_experiment":
+        run_mindoro_b1_5000_element_experiment_phase()
+        return
+    if phase == "mindoro_b1_element_count_sensitivity_board":
+        run_mindoro_b1_element_count_sensitivity_board_phase()
+        return
     if phase == "mindoro_local_recipe_experiment":
         run_mindoro_local_recipe_experiment_phase()
         return
@@ -2444,6 +2510,10 @@ def main():
         run_phase1_production_rerun_phase()
     elif phase == "mindoro_march13_14_phase1_focus_trial":
         run_mindoro_march13_14_phase1_focus_trial_phase()
+    elif phase == "mindoro_b1_5000_element_experiment":
+        run_mindoro_b1_5000_element_experiment_phase()
+    elif phase == "mindoro_b1_element_count_sensitivity_board":
+        run_mindoro_b1_element_count_sensitivity_board_phase()
     elif phase == "mindoro_local_recipe_experiment":
         run_mindoro_local_recipe_experiment_phase()
     elif phase == "phase4_oiltype_and_shoreline":

@@ -1,10 +1,6 @@
 # Panel / Defense Quick Start
 
-This panel mode verifies the stored thesis-facing outputs against the manuscript. It does not rerun expensive scientific simulations by default. Full scientific reruns remain available through the advanced launcher for audit purposes.
-
-## Start here
-
-For thesis defense or panel inspection, run:
+If you are reviewing the software for the defense, start here:
 
 ```powershell
 .\panel.ps1
@@ -16,38 +12,36 @@ or:
 .\start.ps1 -Panel
 ```
 
-## Recommended panel checks
+This opens the panel menu instead of the full research launcher.
 
-1. Open the read-only dashboard.
-2. Verify paper numbers against stored scorecards.
-3. Rebuild publication figures from stored outputs only.
-4. Refresh the final validation package from stored outputs only.
-5. Refresh the final reproducibility package and command documentation from stored outputs only.
-6. Show the paper-to-output registry.
+## What panel mode is for
 
-## What is safe in panel mode
+Panel mode is meant to help a reviewer do the practical checks first:
 
-- Opening the dashboard is read-only.
-- Paper-result verification writes only to `output/panel_review_check/`.
-- Figure, validation, and reproducibility refresh options are packaging-only commands built from stored outputs.
+1. open the read-only dashboard
+2. check that the stored numbers match the manuscript
+3. rebuild figures from stored outputs only
+4. refresh the final validation package from stored outputs only
+5. refresh the reproducibility package and command docs from stored outputs only
+6. open the paper-to-output registry
 
 ## What panel mode does not do by default
 
-- It does not rerun expensive scientific phases.
-- It does not promote experimental or sensitivity-only outputs into thesis-facing results.
-- It does not include the 5,000-element personal experiment in the default panel menu.
+- It does not rerun the expensive science.
+- It does not pull experimental or sensitivity-only outputs into the thesis-facing path.
+- It does not include the 5,000-element personal experiment in the default review menu.
 
-## Key interpretation guardrails
+## Keep these boundaries in mind
 
-- `B1` is the only main Mindoro validation row.
-- `Track A` is comparator support only.
-- `PyGNOME` is never observational truth in the thesis-facing panel story.
-- `DWH` is external transfer validation, not Mindoro recalibration.
-- `Oil-type` and `shoreline` outputs are support/context only.
+- `B1` is the main Mindoro validation row.
+- `Track A` is comparator support, not a second main result.
+- `PyGNOME` is comparator-only.
+- `DWH` is an external transfer-validation case, not a Mindoro recalibration.
+- Oil-type and shoreline results are support/context only.
 
-## Advanced launcher
+## If you want the full launcher
 
-If a panelist or auditor wants the full research launcher, use the `Advanced` option from panel mode or run:
+Choose `Advanced` from the panel menu, or run:
 
 ```powershell
 .\start.ps1

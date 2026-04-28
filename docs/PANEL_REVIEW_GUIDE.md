@@ -1,52 +1,56 @@
 # Panel Review Guide
 
-This panel mode verifies the stored thesis-facing outputs against the manuscript. It does not rerun expensive scientific simulations by default. Full scientific reruns remain available through the advanced launcher for audit purposes.
+This guide is for panel members who want to open the software, inspect the stored thesis outputs, and check that the numbers shown by the software agree with the manuscript.
+
+The important point is simple: panel mode is for review, not for rerunning the full science. By default it stays on the safe side and works from outputs that are already stored in the repository.
 
 ## 1. What the software does
 
-This repository packages a read-only defense and review surface over stored thesis outputs for:
+The repository contains the final stored outputs for several parts of the study:
 
-- Mindoro `B1` public-observation validation
-- Mindoro `Track A` OpenDrift-vs-PyGNOME comparator support
-- DWH external transfer validation
-- Mindoro oil-type and shoreline support/context outputs
-- Final validation, reproducibility, and publication figure packaging
+- Mindoro `B1`, which is the main public-observation validation row
+- Mindoro `Track A`, which is a same-case OpenDrift vs PyGNOME comparison
+- DWH, which is the external transfer-validation case
+- Mindoro oil-type and shoreline outputs, which are kept as support/context
+- final validation, figure, and reproducibility packages
 
-The panel path is meant for inspection and verification, not for fresh scientific reruns.
+For defense purposes, the fastest path is to inspect those stored results first.
 
 ## 2. What the panel can safely run
 
-Recommended startup:
+Start with:
 
 ```powershell
 .\panel.ps1
 ```
 
-Equivalent startup:
+or:
 
 ```powershell
 .\start.ps1 -Panel
 ```
 
-Safe panel actions:
+From there, the recommended panel actions are:
 
-- Open read-only dashboard
-- Verify paper numbers against stored scorecards
-- Rebuild publication figures from stored outputs only
-- Refresh final validation package from stored outputs only
-- Refresh final reproducibility package / command documentation from stored outputs only
-- Show paper-to-output registry
+1. Open the read-only dashboard.
+2. Check the stored paper numbers against the stored scorecards.
+3. Rebuild the publication figures from stored outputs only.
+4. Refresh the final validation package from stored outputs only.
+5. Refresh the final reproducibility package and command documentation from stored outputs only.
+6. Open the paper-to-output registry.
+
+None of those are meant to launch a fresh scientific rerun.
 
 ## 3. What results should match the paper
 
-The panel verification script checks stored outputs for:
+The verification step checks stored values for:
 
-- Mindoro `B1` FSS, mean FSS, forecast/observed cells, distance diagnostics, IoU, and Dice
-- Mindoro `Track A` OpenDrift and PyGNOME comparator summary values
-- DWH event-corridor FSS and IoU values for `C1`, `C2 p50`, `C2 p90`, and `C3`
-- Mindoro oil-type support percentages and first shoreline-arrival times, when stored in machine-readable outputs
+- Mindoro `B1`: FSS, mean FSS, forecast and observed cells, distance diagnostics, IoU, and Dice
+- Mindoro `Track A`: the OpenDrift and PyGNOME comparator summaries
+- DWH: event-corridor FSS and IoU for `C1`, `C2 p50`, `C2 p90`, and `C3`
+- Mindoro oil-type support values, where machine-readable outputs exist
 
-Verification outputs are written only to:
+The verification files are written only to:
 
 - `output/panel_review_check/panel_results_match_check.csv`
 - `output/panel_review_check/panel_results_match_check.json`
@@ -55,7 +59,7 @@ Verification outputs are written only to:
 
 ## 4. Which commands are read-only
 
-Read-only panel entrypoints:
+These are the main read-only entry points:
 
 ```powershell
 .\panel.ps1
@@ -64,13 +68,13 @@ Read-only panel entrypoints:
 .\start.ps1 -Help -NoPause
 ```
 
-Read-only dashboard:
+The dashboard itself is also read-only:
 
 ```powershell
 docker-compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
 ```
 
-Read-only package and sync commands available from the launcher:
+The package refresh options exposed in panel mode are packaging steps built from stored outputs:
 
 ```powershell
 .\start.ps1 -Entry final_validation_package
@@ -82,7 +86,7 @@ Read-only package and sync commands available from the launcher:
 
 ## 5. Which commands are expensive scientific reruns
 
-These remain available through the advanced launcher and are not part of the default panel path:
+These belong to the advanced launcher and are not part of the default defense path:
 
 ```powershell
 .\start.ps1 -Entry phase1_production_rerun
@@ -92,46 +96,43 @@ These remain available through the advanced launcher and are not part of the def
 .\start.ps1 -Entry mindoro_appendix_sensitivity_bundle
 ```
 
-These commands can rerun stored science or expensive validation phases and are therefore researcher/audit paths, not default defense paths.
+Those commands can rerun major workflow phases and are better treated as audit or researcher commands.
 
 ## 6. Why PyGNOME is comparator-only
 
-PyGNOME is shown as a comparator because:
+PyGNOME is included because it helps answer a reasonable panel question: how does the OpenDrift result compare with another model on the same case?
 
-- it is useful for same-case cross-model discussion;
-- it is not the observational truth source;
-- it does not reproduce the exact OpenDrift forcing and wave/Stokes stack used in the main thesis-facing OpenDrift lanes.
-
-This matters in both Mindoro `Track A` and DWH `C3`.
+It is not treated as truth. In both Mindoro `Track A` and DWH `C3`, PyGNOME is there for comparison only. The observational reference stays the same, and the main OpenDrift lanes remain the thesis-facing results.
 
 ## 7. Why B1 is the only main Mindoro validation row
 
-`B1` is the promoted March 13 -> March 14 `R1_previous` public-observation validation row.
+`B1` is the promoted March 13 -> March 14 `R1_previous` row, and it is the one carried into the main thesis-facing argument.
 
-It is the only thesis-facing main Mindoro validation row because:
+The reason for that boundary is straightforward:
 
-- it is the manuscript-facing primary validation claim;
-- the March 13 -> March 14 `R0` branch is preserved for archive/provenance only;
-- the older March-family rows remain honesty/provenance support, not replacements for `B1`.
+- `B1` is the row used for the main Mindoro validation claim
+- the March 13 -> March 14 `R0` branch is preserved for archive and provenance
+- the other March-family rows remain useful background, but they are not replacements for `B1`
+
+So if a panelist asks, “Which Mindoro row should I compare with the paper first?”, the answer is `B1`.
 
 ## 8. Why the March 13-14 B1 pair has a shared-imagery caveat
 
-The March 13 and March 14 NOAA/NESDIS products cite the same March 12 WorldView-3 imagery. That means:
+The March 13 and March 14 NOAA/NESDIS products both cite March 12 WorldView-3 imagery.
 
-- the pair is still useful as a reinitialization-based validation row;
-- it should not be overclaimed as a fully independent day-to-day validation pair.
-
-The panel mode keeps that caveat visible on purpose.
+That does not make the row useless, but it does place a limit on how it should be described. It is fair to discuss it as a reinitialization-based validation pair. It is not fair to present it as a fully independent day-to-day validation pair. The panel mode keeps that caveat visible because it matters to an honest defense.
 
 ## 9. Why the 5,000-element personal experiment is excluded
 
-The 5,000-element personal experiment is excluded from the default panel-facing mode because:
+The 5,000-element run is not part of the thesis-facing result set, so it is left out of the default panel menu on purpose.
 
-- it is not part of the thesis-facing frozen result set;
-- it is experimental/sensitivity work rather than the canonical defense path;
-- including it in the default menu would blur the boundary between main results and personal experimentation.
+The goal of panel mode is to keep the review path clean:
 
-It remains outside the default panel registry and menu.
+- main thesis outputs first
+- support and comparator outputs second
+- experimental work outside the default path
+
+That way a panelist is not forced to sort through personal trials before reaching the stored defense materials.
 
 ## 10. How to open the full advanced launcher
 
@@ -139,16 +140,18 @@ From panel mode, choose:
 
 - `A. Open full research launcher`
 
-Or start directly with:
+Or run:
 
 ```powershell
 .\start.ps1
 ```
 
-## Defense-friendly summary
+## Short version
 
-- Start with `.\panel.ps1`.
-- Use option `1` for the dashboard.
-- Use option `2` to verify paper numbers.
-- Use options `3`, `4`, and `5` only for packaging/sync refreshes from stored outputs.
-- Use `A` only when the panel intentionally wants the full research/developer launcher.
+If you only want the practical defense path:
+
+1. Run `.\panel.ps1`.
+2. Open the dashboard.
+3. Run the paper-number check.
+4. Use the registry if you want to trace a table or figure back to its stored source.
+5. Open the full launcher only if you intentionally want the research-side commands.

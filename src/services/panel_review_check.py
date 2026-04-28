@@ -19,6 +19,7 @@ CSV_OUTPUT_PATH = OUTPUT_DIR / "panel_results_match_check.csv"
 JSON_OUTPUT_PATH = OUTPUT_DIR / "panel_results_match_check.json"
 MARKDOWN_OUTPUT_PATH = OUTPUT_DIR / "panel_results_match_check.md"
 MANIFEST_OUTPUT_PATH = OUTPUT_DIR / "panel_review_manifest.json"
+OPTIONAL_WORKBOOK_OUTPUT_PATH = OUTPUT_DIR / "panel_results_match_check.xlsx"
 
 
 def _utc_now() -> str:
@@ -289,6 +290,7 @@ def _write_manifest(summary: dict[str, Any]) -> None:
 
 def main() -> int:
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    OPTIONAL_WORKBOOK_OUTPUT_PATH.unlink(missing_ok=True)
     config = _read_yaml(CONFIG_PATH)
     entries = list(config.get("panel_review_expected_values") or [])
     results = [_build_result(entry) for entry in entries]

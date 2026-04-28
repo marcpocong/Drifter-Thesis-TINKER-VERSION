@@ -309,6 +309,33 @@
       ]
     },
     {
+      "entry_id": "phase3b_mindoro_march13_14_reinit_5000_experiment",
+      "menu_order": 43,
+      "category_id": "sensitivity_appendix_tracks",
+      "workflow_mode": "mindoro_retro_2023",
+      "label": "Experimental Mindoro B1 5,000-element rerun",
+      "description": "Personal March 13 -> March 14 B1 element-count sensitivity rerun at 5,000 elements, plus a separate 100k-vs-5k comparison board and metrics package; not thesis-facing.",
+      "service_profile": "pipeline_only",
+      "rerun_cost": "expensive",
+      "safe_default": false,
+      "reportable": false,
+      "thesis_facing": false,
+      "experimental_only": true,
+      "notes": "Experimental-only launcher entry. Writes only to output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_5000_experiment and output/CASE_MINDORO_RETRO_2023/phase3b_march13_14_element_count_sensitivity, does not overwrite the canonical B1 row or the final/publication packages, and preserves the existing March 13 -> March 14 reinitialization workflow except for the requested element count. Requires the stored canonical/source support artifacts to already exist; if they do not, the experiment will block rather than rerun thesis-facing support tracks.",
+      "steps": [
+        {
+          "phase": "mindoro_b1_5000_element_experiment",
+          "service": "pipeline",
+          "description": "Run the separate March 13 -> March 14 B1 reinitialization experiment with OFFICIAL_ELEMENT_COUNT_OVERRIDE=5000 and experimental-only output routing"
+        },
+        {
+          "phase": "mindoro_b1_element_count_sensitivity_board",
+          "service": "pipeline",
+          "description": "Build the separate experimental 100k-vs-5k comparison board, metrics tables, manifest, and README"
+        }
+      ]
+    },
+    {
       "entry_id": "mindoro_march6_recovery_sensitivity",
       "menu_order": 45,
       "category_id": "sensitivity_appendix_tracks",

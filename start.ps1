@@ -831,6 +831,153 @@ function Invoke-ContainerPythonScript {
     }
 }
 
+function Get-DisplayPath {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $resolved = Resolve-Path -LiteralPath $Path -ErrorAction SilentlyContinue
+    if ($resolved) {
+        return $resolved.Path
+    }
+
+    return (Join-Path $Script:RepoRoot $Path)
+}
+
+function Open-FileInDefaultApp {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$Label
+    )
+
+    $resolved = Resolve-Path -LiteralPath $Path -ErrorAction SilentlyContinue
+    if (-not $resolved) {
+        Write-Host "$Label was not found." -ForegroundColor DarkYellow
+        Write-Host "  $(Get-DisplayPath -Path $Path)" -ForegroundColor Yellow
+        return
+    }
+
+    try {
+        Invoke-Item -LiteralPath $resolved.Path
+        Write-Host "Opened $Label in your default app:" -ForegroundColor Yellow
+        Write-Host "  $($resolved.Path)" -ForegroundColor Green
+    }
+    catch {
+        Write-Host "Could not open $Label automatically. Use this path instead:" -ForegroundColor DarkYellow
+        Write-Host "  $($resolved.Path)" -ForegroundColor Green
+    }
+}
+
+function Show-PanelVerificationQuickActions {
+    param([Parameter(Mandatory = $true)][array]$PanelOutputs)
+
+    while ($true) {
+        Write-Host ""
+        Write-Host "Open another verification file?" -ForegroundColor Yellow
+        Write-Host ("  1. {0} (recommended)" -f $PanelOutputs[0].Label) -ForegroundColor White
+        Write-Host "  2. Readable summary (.md)" -ForegroundColor White
+        Write-Host "  3. JSON report" -ForegroundColor White
+        Write-Host "  4. Output folder" -ForegroundColor White
+        if ($PanelOutputs[1].Path -ne $PanelOutputs[0].Path) {
+            Write-Host ("  5. {0}" -f $PanelOutputs[1].Label) -ForegroundColor White
+        }
+        Write-Host "  Enter. Return to panel menu" -ForegroundColor White
+        Write-Host ""
+
+        $choice = (Read-Host "Open").Trim()
+        switch ($choice.ToUpperInvariant()) {
+            "" { return }
+            "1" { Open-FileInDefaultApp -Path $PanelOutputs[0].Path -Label $PanelOutputs[0].Label }
+            "2" { Open-FileInDefaultApp -Path $PanelOutputs[2].Path -Label $PanelOutputs[2].Label }
+            "3" { Open-FileInDefaultApp -Path $PanelOutputs[3].Path -Label $PanelOutputs[3].Label }
+            "4" { Open-FileInDefaultApp -Path $PanelOutputs[5].Path -Label $PanelOutputs[5].Label }
+            "5" {
+                if ($PanelOutputs[1].Path -ne $PanelOutputs[0].Path) {
+                    Open-FileInDefaultApp -Path $PanelOutputs[1].Path -Label $PanelOutputs[1].Label
+                } else {
+                    Write-Host "There is no separate fallback file for this run." -ForegroundColor DarkYellow
+                }
+            }
+            default {
+                if ($PanelOutputs[1].Path -ne $PanelOutputs[0].Path) {
+                    Write-Host "Use 1-5, or press Enter to return." -ForegroundColor Red
+                } else {
+                    Write-Host "Use 1-4, or press Enter to return." -ForegroundColor Red
+                }
+            }
+        }
+    }
+}
+
+function Export-CsvToExcelWorkbook {
+    param(
+        [Parameter(Mandatory = $true)][string]$CsvPath,
+        [Parameter(Mandatory = $true)][string]$WorkbookPath
+    )
+
+    $resolvedCsv = Resolve-Path -LiteralPath $CsvPath -ErrorAction SilentlyContinue
+    if (-not $resolvedCsv) {
+        Write-Host "Could not create the Excel workbook because the CSV report was not found." -ForegroundColor DarkYellow
+        Write-Host "  $(Get-DisplayPath -Path $CsvPath)" -ForegroundColor Yellow
+        return $null
+    }
+
+    $resolvedWorkbookPath = Get-DisplayPath -Path $WorkbookPath
+    $workbookDir = Split-Path -Parent $resolvedWorkbookPath
+    if (-not (Test-Path -LiteralPath $workbookDir)) {
+        New-Item -ItemType Directory -Force -Path $workbookDir | Out-Null
+    }
+
+    Remove-Item -LiteralPath $resolvedWorkbookPath -Force -ErrorAction SilentlyContinue
+
+    $excel = $null
+    $workbook = $null
+    try {
+        $excel = New-Object -ComObject Excel.Application
+        $excel.Visible = $false
+        $excel.DisplayAlerts = $false
+
+        $workbook = $excel.Workbooks.Open($resolvedCsv.Path)
+        $worksheet = $workbook.Worksheets.Item(1)
+        $worksheet.Name = "Panel Review Check"
+        $worksheet.Rows.Item(1).Font.Bold = $true
+        $worksheet.Application.ActiveWindow.SplitRow = 1
+        $worksheet.Application.ActiveWindow.FreezePanes = $true
+        $worksheet.Columns.AutoFit() | Out-Null
+
+        # 51 = xlOpenXMLWorkbook (.xlsx)
+        $workbook.SaveAs($resolvedWorkbookPath, 51)
+        $workbook.Close($false)
+        $excel.Quit()
+
+        return $resolvedWorkbookPath
+    }
+    catch {
+        Remove-Item -LiteralPath $resolvedWorkbookPath -Force -ErrorAction SilentlyContinue
+        Write-Host "Excel workbook creation failed. Falling back to the CSV report." -ForegroundColor DarkYellow
+        Write-Host "  $($_.Exception.Message)" -ForegroundColor Yellow
+        return $null
+    }
+    finally {
+        if ($workbook) {
+            try {
+                [void]$workbook.Close($false)
+            }
+            catch {
+            }
+            [System.Runtime.InteropServices.Marshal]::ReleaseComObject($workbook) | Out-Null
+        }
+        if ($excel) {
+            try {
+                [void]$excel.Quit()
+            }
+            catch {
+            }
+            [System.Runtime.InteropServices.Marshal]::ReleaseComObject($excel) | Out-Null
+        }
+        [GC]::Collect()
+        [GC]::WaitForPendingFinalizers()
+    }
+}
+
 function Show-LauncherList {
     $matrix = Get-LauncherMatrix
     $entries = Get-LauncherEntries
@@ -988,12 +1135,44 @@ function Invoke-PanelPaperVerification {
     Invoke-ContainerPythonScript `
         -Description "Read-only paper-results verification from stored outputs only" `
         -ScriptPath "src/services/panel_review_check.py"
+
+    $csvPath = "output\panel_review_check\panel_results_match_check.csv"
+    $jsonPath = "output\panel_review_check\panel_results_match_check.json"
+    $markdownPath = "output\panel_review_check\panel_results_match_check.md"
+    $manifestPath = "output\panel_review_check\panel_review_manifest.json"
+    $workbookPath = "output\panel_review_check\panel_results_match_check.xlsx"
+    $createdWorkbookPath = Export-CsvToExcelWorkbook -CsvPath $csvPath -WorkbookPath $workbookPath
+    $preferredLabel = if ($createdWorkbookPath) { "Excel workbook" } else { "Spreadsheet report (.csv)" }
+    $preferredPath = if ($createdWorkbookPath) { $workbookPath } else { $csvPath }
+
+    $panelOutputs = @(
+        @{ Label = $preferredLabel; Path = $preferredPath },
+        @{ Label = "CSV export"; Path = $csvPath },
+        @{ Label = "Readable markdown summary"; Path = $markdownPath },
+        @{ Label = "Machine-readable JSON report"; Path = $jsonPath },
+        @{ Label = "Run manifest"; Path = $manifestPath },
+        @{ Label = "Panel review output folder"; Path = "output\panel_review_check" }
+    )
+
     Write-Host ""
-    Write-Host "Panel verification outputs:" -ForegroundColor Yellow
-    Write-Host "  output\panel_review_check\panel_results_match_check.csv" -ForegroundColor Green
-    Write-Host "  output\panel_review_check\panel_results_match_check.json" -ForegroundColor Green
-    Write-Host "  output\panel_review_check\panel_results_match_check.md" -ForegroundColor Green
-    Write-Host "  output\panel_review_check\panel_review_manifest.json" -ForegroundColor Green
+    Write-Host "Recommended review file:" -ForegroundColor Yellow
+    Write-Host ("  {0}: {1}" -f $panelOutputs[0].Label, (Get-DisplayPath -Path $panelOutputs[0].Path)) -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Also available:" -ForegroundColor Yellow
+    foreach ($panelOutput in $panelOutputs) {
+        if ($panelOutput.Path -ne $panelOutputs[0].Path) {
+            Write-Host ("  {0}: {1}" -f $panelOutput.Label, (Get-DisplayPath -Path $panelOutput.Path)) -ForegroundColor Green
+        }
+    }
+
+    if (-not $NoPause) {
+        Write-Host ""
+        Write-Host ("Opening the {0} for you now..." -f $preferredLabel.ToLowerInvariant()) -ForegroundColor Yellow
+        Open-FileInDefaultApp `
+            -Path $preferredPath `
+            -Label $preferredLabel
+        Show-PanelVerificationQuickActions -PanelOutputs $panelOutputs
+    }
 }
 
 function Show-PanelMenu {
@@ -1006,7 +1185,7 @@ function Show-PanelMenu {
         Write-Host "  1. Open read-only dashboard [READ-ONLY]" -ForegroundColor White
         Write-Host "     Opens the Streamlit dashboard over stored outputs only." -ForegroundColor DarkGray
         Write-Host "  2. Verify paper numbers against stored scorecards [READ-ONLY]" -ForegroundColor White
-        Write-Host "     Writes only to output\panel_review_check\ and never reruns science." -ForegroundColor DarkGray
+        Write-Host "     Writes only to output\panel_review_check\, never reruns science, and opens the spreadsheet result." -ForegroundColor DarkGray
         Write-Host "  3. Rebuild publication figures from stored outputs [PACKAGING ONLY]" -ForegroundColor White
         Write-Host "     Uses the existing read-only figure-package builder." -ForegroundColor DarkGray
         Write-Host "  4. Refresh final validation package from stored outputs [PACKAGING ONLY]" -ForegroundColor White
