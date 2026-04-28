@@ -31,7 +31,7 @@ class PageDefinition:
 
 
 PAGE_DEFINITIONS = [
-    PageDefinition("home", "Home / Overview", home.render, navigation_section="Study", url_path="home"),
+    PageDefinition("home", "Defense / Panel Review", home.render, navigation_section="Study", url_path="home"),
     PageDefinition("phase1_recipe_selection", "Phase 1 Recipe Selection", phase1_recipe_selection.render, navigation_section="Study", url_path="phase1-recipe-selection"),
     PageDefinition("mindoro_validation", "Mindoro B1 Primary Validation", mindoro_validation.render, navigation_section="Study", url_path="mindoro-b1-primary-validation"),
     PageDefinition("cross_model_comparison", "Mindoro Cross-Model Comparator", cross_model_comparison.render, navigation_section="Study", url_path="mindoro-cross-model-comparator"),

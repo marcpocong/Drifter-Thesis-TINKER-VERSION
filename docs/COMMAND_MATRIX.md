@@ -2,6 +2,13 @@
 
 ## Canonical Paths
 
+Start the panel-facing launcher:
+
+```powershell
+.\panel.ps1
+.\start.ps1 -Panel
+```
+
 List the current launcher entries:
 
 ```powershell
@@ -27,6 +34,12 @@ Launch the read-only UI directly:
 
 ```bash
 docker-compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
+```
+
+Run the read-only paper-result verification directly:
+
+```bash
+docker-compose exec -T pipeline python src/services/panel_review_check.py
 ```
 
 ## Launcher Entry Map

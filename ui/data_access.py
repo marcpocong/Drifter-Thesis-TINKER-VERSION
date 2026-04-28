@@ -27,11 +27,13 @@ from src.core.publication_figure_governance import publication_figure_governance
 REPO_ROOT = Path(__file__).resolve().parents[1]
 FINAL_REPRO_DIR = Path("output") / "final_reproducibility_package"
 FINAL_VALIDATION_DIR = Path("output") / "final_validation_package"
+PANEL_REVIEW_DIR = Path("output") / "panel_review_check"
 MINDORO_FINAL_DIR = Path("output") / "Phase 3B March13-14 Final Output"
 MINDORO_FINAL_ARCHIVE_DIR = Path("output") / "Phase 3B March13-14 Final Output Archive R0 Legacy"
 DWH_FINAL_DIR = Path("output") / "Phase 3C DWH Final Output"
 LEGACY_2016_FINAL_DIR = Path("output") / "2016 Legacy Runs FINAL Figures"
 MINDORO_ARCHIVE_DECISION_PATH = FINAL_VALIDATION_DIR / "mindoro_validation_archive_decision.md"
+PAPER_OUTPUT_REGISTRY_PATH = Path("docs") / "PAPER_OUTPUT_REGISTRY.md"
 RAW_GALLERY_DIR = Path("output") / "trajectory_gallery"
 PANEL_GALLERY_DIR = Path("output") / "trajectory_gallery_panel"
 PUBLICATION_DIR = Path("output") / "figure_package_publication"
@@ -51,9 +53,13 @@ DASHBOARD_STATE_PATHS: tuple[Path, ...] = (
     FINAL_REPRO_DIR / "final_manifest_index.csv",
     FINAL_REPRO_DIR / "final_log_index.csv",
     FINAL_REPRO_DIR / "final_reproducibility_summary.md",
+    PAPER_OUTPUT_REGISTRY_PATH,
     FINAL_VALIDATION_DIR / "final_validation_manifest.json",
     FINAL_VALIDATION_DIR / "final_validation_case_registry.csv",
     FINAL_VALIDATION_DIR / "final_validation_limitations.csv",
+    PANEL_REVIEW_DIR / "panel_results_match_check.csv",
+    PANEL_REVIEW_DIR / "panel_results_match_check.md",
+    PANEL_REVIEW_DIR / "panel_review_manifest.json",
     PUBLICATION_DIR / "publication_figure_registry.csv",
     PUBLICATION_DIR / "publication_figure_manifest.json",
     PUBLICATION_DIR / "publication_figure_captions.md",
@@ -443,6 +449,22 @@ def final_case_registry(repo_root: str | Path | None = None) -> pd.DataFrame:
 
 def final_reproducibility_summary(repo_root: str | Path | None = None) -> str:
     return read_text(FINAL_REPRO_DIR / "final_reproducibility_summary.md", repo_root)
+
+
+def paper_output_registry_markdown(repo_root: str | Path | None = None) -> str:
+    return read_text(PAPER_OUTPUT_REGISTRY_PATH, repo_root)
+
+
+def panel_review_check_table(repo_root: str | Path | None = None) -> pd.DataFrame:
+    return read_csv(PANEL_REVIEW_DIR / "panel_results_match_check.csv", repo_root)
+
+
+def panel_review_check_markdown(repo_root: str | Path | None = None) -> str:
+    return read_text(PANEL_REVIEW_DIR / "panel_results_match_check.md", repo_root)
+
+
+def panel_review_check_manifest(repo_root: str | Path | None = None) -> dict[str, Any]:
+    return read_json(PANEL_REVIEW_DIR / "panel_review_manifest.json", repo_root)
 
 
 def final_validation_case_registry(repo_root: str | Path | None = None) -> pd.DataFrame:
@@ -1169,6 +1191,10 @@ def build_dashboard_state(repo_root: str | Path | None = None) -> dict[str, Any]
         "final_manifest_index": final_manifest_index(root),
         "final_log_index": final_log_index(root),
         "final_reproducibility_summary": final_reproducibility_summary(root),
+        "paper_output_registry_markdown": paper_output_registry_markdown(root),
+        "panel_review_check_table": panel_review_check_table(root),
+        "panel_review_check_markdown": panel_review_check_markdown(root),
+        "panel_review_check_manifest": panel_review_check_manifest(root),
         "final_validation_manifest": final_validation_manifest(root),
         "final_validation_case_registry": final_validation_case_registry(root),
         "final_validation_limitations": final_validation_limitations(root),

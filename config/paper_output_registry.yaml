@@ -1,0 +1,177 @@
+paper_output_registry:
+  - manuscript_item: "Table 4.5"
+    item_type: "table"
+    thesis_facing: true
+    interpretation_role: "main Mindoro public-observation validation"
+    plain_language_statement: "This table is reproduced from the stored B1 scorecard for the promoted March 13 -> March 14 R1 row."
+    stored_source_paths:
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_summary.csv"
+      - "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_summary.csv"
+    packaging_role: "read_only_packaging"
+    notes:
+      - "This output is read-only packaging and score reporting."
+      - "B1 is the only main Mindoro validation row."
+
+  - manuscript_item: "Table 4.6"
+    item_type: "table"
+    thesis_facing: true
+    interpretation_role: "Mindoro B1 branch survival / displacement support"
+    plain_language_statement: "This table is reproduced from the stored B1 branch-survival and displacement diagnostics."
+    stored_source_paths:
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_branch_survival_summary.csv"
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_summary.csv"
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_branch_pairing_manifest.csv"
+    packaging_role: "read_only_packaging"
+    notes:
+      - "This output is read-only packaging over stored branch diagnostics."
+      - "The March 13 -> March 14 pair carries the shared-imagery caveat."
+
+  - manuscript_item: "Table 4.7"
+    item_type: "table"
+    thesis_facing: true
+    interpretation_role: "Mindoro B1 overlap and FSS summary"
+    plain_language_statement: "This table is reproduced from the stored B1 overlap and neighborhood-skill outputs."
+    stored_source_paths:
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_fss_by_window.csv"
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_summary.csv"
+    packaging_role: "read_only_packaging"
+    notes:
+      - "This output is read-only packaging and score reporting."
+      - "B1 supports neighborhood-scale usefulness, not exact 1 km reproduction."
+
+  - manuscript_item: "Figure 4.4"
+    item_type: "figure"
+    thesis_facing: true
+    interpretation_role: "Mindoro B1 main presentation board"
+    plain_language_statement: "This figure is rebuilt from the stored B1 board package and the publication figure registry."
+    stored_source_paths:
+      - "output/figure_package_publication/case_mindoro_retro_2023__phase3b_reinit_primary__opendrift__comparison_board__2023_03_13_to_2023_03_14__board__slide__mindoro_primary_validation_board.png"
+      - "output/figure_package_publication/publication_figure_registry.csv"
+    packaging_role: "read_only_packaging"
+    notes:
+      - "This figure is rebuilt from stored outputs only."
+      - "This is the thesis-facing B1 board."
+
+  - manuscript_item: "Table 4.9"
+    item_type: "table"
+    thesis_facing: true
+    interpretation_role: "Mindoro Track A comparator support"
+    plain_language_statement: "This table is reproduced from the stored Track A OpenDrift-vs-PyGNOME comparator scorecards."
+    stored_source_paths:
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/march13_14_reinit_crossmodel_summary.csv"
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/march13_14_reinit_crossmodel_model_ranking.csv"
+      - "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_summary.csv"
+    packaging_role: "read_only_packaging"
+    notes:
+      - "This output is comparator support only."
+      - "This output is not observational truth."
+      - "PyGNOME remains comparator-only."
+
+  - manuscript_item: "Figure 4.5"
+    item_type: "figure"
+    thesis_facing: true
+    interpretation_role: "Mindoro Track A spatial comparator board"
+    plain_language_statement: "This figure is rebuilt from the stored Track A publication board."
+    stored_source_paths:
+      - "output/figure_package_publication/Figure_4_5_Mindoro_TrackA_OpenDrift_PyGNOME_spatial_board.png"
+      - "output/figure_package_publication/case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift_vs_pygnome__comparison_board__2023_03_14__board__slide__mindoro_crossmodel_board.png"
+      - "output/figure_package_publication/publication_figure_registry.csv"
+    packaging_role: "read_only_packaging"
+    notes:
+      - "This figure is rebuilt from stored outputs only."
+      - "This output is comparator support only."
+
+  - manuscript_item: "Figure 4.6"
+    item_type: "figure"
+    thesis_facing: true
+    interpretation_role: "Mindoro Track A ranking / comparator support"
+    plain_language_statement: "This figure is backed by the stored Track A ranking CSV. A dedicated bar-chart PNG is not currently stored as a separate canonical file."
+    stored_source_paths:
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/march13_14_reinit_crossmodel_model_ranking.csv"
+      - "output/figure_package_publication/case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift__single_model_overlay__2023_03_14__single__paper__march14_crossmodel_r1_overlay.png"
+      - "output/figure_package_publication/case_mindoro_retro_2023__phase3a_reinit_crossmodel__pygnome__single_model_overlay__2023_03_14__single__paper__march14_crossmodel_pygnome_overlay.png"
+    packaging_role: "read_only_support_reference"
+    notes:
+      - "No dedicated Track A bar-chart PNG was found in the current canonical stored package."
+      - "Use the ranking CSV as the authoritative machine-readable source."
+
+  - manuscript_item: "Table 4.10"
+    item_type: "table"
+    thesis_facing: true
+    interpretation_role: "DWH daily and corridor FSS results"
+    plain_language_statement: "This table is reproduced from the stored DWH deterministic, ensemble, and comparator FSS summaries."
+    stored_source_paths:
+      - "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/phase3c_fss_by_date_window.csv"
+      - "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_ensemble_comparison/phase3c_ensemble_fss_by_date_window.csv"
+      - "output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator/phase3c_dwh_pygnome_fss_by_date_window.csv"
+      - "output/Phase 3C DWH Final Output/summary/comparison/phase3c_main_scorecard.csv"
+    packaging_role: "read_only_packaging"
+    notes:
+      - "This output is read-only packaging over stored DWH scorecards."
+      - "DWH is external transfer validation, not Mindoro recalibration."
+
+  - manuscript_item: "Table 4.11"
+    item_type: "table"
+    thesis_facing: true
+    interpretation_role: "DWH corridor geometry diagnostics"
+    plain_language_statement: "This table is reproduced from the stored DWH corridor-overlap and geometry diagnostics."
+    stored_source_paths:
+      - "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/phase3c_eventcorridor_summary.csv"
+      - "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_ensemble_comparison/phase3c_ensemble_eventcorridor_summary.csv"
+      - "output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator/phase3c_dwh_pygnome_eventcorridor_summary.csv"
+      - "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/phase3c_diagnostics.csv"
+    packaging_role: "read_only_packaging"
+    notes:
+      - "This output is read-only packaging over stored DWH corridor diagnostics."
+      - "PyGNOME remains comparator-only."
+
+  - manuscript_item: "Figure 4.7"
+    item_type: "figure"
+    thesis_facing: true
+    interpretation_role: "DWH deterministic board"
+    plain_language_statement: "This figure is rebuilt from the stored DWH deterministic publication board."
+    stored_source_paths:
+      - "output/Phase 3C DWH Final Output/publication/opendrift_deterministic/dwh_24h_48h_72h_deterministic_footprint_overview_board.png"
+      - "output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__daily_deterministic_footprint_overview_board.png"
+    packaging_role: "read_only_packaging"
+    notes:
+      - "This figure is rebuilt from stored outputs only."
+
+  - manuscript_item: "Figure 4.8"
+    item_type: "figure"
+    thesis_facing: true
+    interpretation_role: "DWH deterministic-vs-ensemble board"
+    plain_language_statement: "This figure is rebuilt from the stored DWH deterministic, mask_p50, and mask_p90 comparison board."
+    stored_source_paths:
+      - "output/Phase 3C DWH Final Output/publication/opendrift_ensemble/dwh_2010-05-21_to_2010-05-23_eventcorridor_observed_deterministic_mask_p50_mask_p90_board.png"
+      - "output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__observed_deterministic_mask_p50_mask_p90_board.png"
+    packaging_role: "read_only_packaging"
+    notes:
+      - "This figure is rebuilt from stored outputs only."
+      - "p50 is the preferred probabilistic extension; p90 is support/comparison only."
+
+  - manuscript_item: "Figure 4.9"
+    item_type: "figure"
+    thesis_facing: true
+    interpretation_role: "DWH comparator board"
+    plain_language_statement: "This figure is rebuilt from the stored DWH deterministic / p50 / PyGNOME comparator board."
+    stored_source_paths:
+      - "output/Phase 3C DWH Final Output/publication/comparator_pygnome/dwh_2010-05-21_to_2010-05-23_eventcorridor_observed_deterministic_mask_p50_pygnome_board.png"
+      - "output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__opendrift_vs_pygnome__comparison_board__2010_05_21_to_2010_05_23__board__slide__observed_deterministic_mask_p50_pygnome_board.png"
+    packaging_role: "read_only_packaging"
+    notes:
+      - "This output is comparator support only."
+      - "This output is not observational truth."
+
+  - manuscript_item: "Table F2"
+    item_type: "support_table"
+    thesis_facing: false
+    interpretation_role: "Mindoro oil-type and shoreline context"
+    plain_language_statement: "This support table is reproduced from the stored Mindoro oil-budget summary."
+    stored_source_paths:
+      - "output/phase4/CASE_MINDORO_RETRO_2023/phase4_oil_budget_summary.csv"
+      - "output/phase4/CASE_MINDORO_RETRO_2023/phase4_shoreline_arrival.csv"
+    packaging_role: "read_only_support_reference"
+    notes:
+      - "This output is support/context only."
+      - "This output is not observational truth."

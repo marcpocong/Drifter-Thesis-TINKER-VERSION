@@ -26,7 +26,7 @@ def render(state: dict, ui_state: dict) -> None:
     export_mode = bool(ui_state.get("export_mode"))
     render_page_intro(
         "Artifacts / Logs / Registries",
-        "This is the reference page for synced reproducibility indexes, manifest inventory, final case registry, and log inventory. Panel-friendly mode stays high-level; advanced mode allows direct artifact preview and download.",
+        "This is the reference page for synced reproducibility indexes, panel-result verification outputs, the paper-to-output registry, manifest inventory, final case registry, and log inventory. Panel-friendly mode stays high-level; advanced mode allows direct artifact preview and download.",
         badge="Reference page | read-only registries",
     )
 
@@ -42,6 +42,38 @@ def render(state: dict, ui_state: dict) -> None:
     case_registry = state["final_case_registry"]
     manifests = state["final_manifest_index"]
     logs = state["final_log_index"]
+    panel_review_check = state["panel_review_check_table"]
+
+    def _panel_review() -> None:
+        render_table(
+            "Panel review result check",
+            panel_review_check,
+            download_name="panel_results_match_check.csv",
+            caption="When present, this table shows the latest read-only manuscript-to-output verification written to output/panel_review_check/.",
+            height=280,
+            max_rows=None if ui_state["advanced"] else 25,
+            export_mode=export_mode,
+        )
+        render_markdown_block(
+            "Paper-to-output registry",
+            state["paper_output_registry_markdown"],
+            collapsed=not ui_state["advanced"],
+            export_mode=export_mode,
+        )
+        render_markdown_block(
+            "Panel review report",
+            state["panel_review_check_markdown"],
+            collapsed=True,
+            export_mode=export_mode,
+        )
+        if ui_state["advanced"] and not export_mode:
+            preview_options = [
+                "docs/PAPER_OUTPUT_REGISTRY.md",
+                "output/panel_review_check/panel_results_match_check.md",
+                "output/panel_review_check/panel_review_manifest.json",
+            ]
+            selected = st.selectbox("Preview panel artifact", preview_options, key="panel_artifact_preview")
+            preview_artifact(selected)
 
     def _case_registry() -> None:
         render_table(
@@ -110,6 +142,7 @@ def render(state: dict, ui_state: dict) -> None:
 
     render_section_stack(
         [
+            ("Panel review", _panel_review),
             ("Case registry", _case_registry),
             ("Output catalog", _output_catalog),
             ("Manifest index", _manifest_index),

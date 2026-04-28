@@ -82,6 +82,7 @@ PHASE3B_REINIT_REPORTING_ROLE_OVERRIDE_ENV = "PHASE3B_REINIT_REPORTING_ROLE_OVER
 PHASE3B_REINIT_APPENDIX_ONLY_ENV = "PHASE3B_REINIT_APPENDIX_ONLY"
 PHASE3B_REINIT_PRIMARY_PUBLIC_VALIDATION_ENV = "PHASE3B_REINIT_PRIMARY_PUBLIC_VALIDATION"
 PHASE3B_REINIT_LAUNCHER_ENTRY_ID_OVERRIDE_ENV = "PHASE3B_REINIT_LAUNCHER_ENTRY_ID_OVERRIDE"
+PHASE3B_REINIT_REQUESTED_ELEMENT_COUNT_ENV = "PHASE3B_REINIT_REQUESTED_ELEMENT_COUNT"
 LOCKED_OUTPUT_FILES = [
     Path("output/CASE_MINDORO_RETRO_2023/phase3b/phase3b_pairing_manifest.csv"),
     Path("output/CASE_MINDORO_RETRO_2023/phase3b/phase3b_fss_by_date_window.csv"),
@@ -277,6 +278,26 @@ def _read_json(path: Path) -> dict:
         return json.load(handle) or {}
 
 
+def _resolve_requested_element_count(value: Any = None) -> int:
+    raw_value = value
+    if raw_value is None:
+        raw_value = os.environ.get(PHASE3B_REINIT_REQUESTED_ELEMENT_COUNT_ENV, str(REQUESTED_ELEMENT_COUNT))
+    text = str(raw_value or "").strip()
+    if not text:
+        return int(REQUESTED_ELEMENT_COUNT)
+    resolved = int(text)
+    if resolved <= 0:
+        raise ValueError(f"{PHASE3B_REINIT_REQUESTED_ELEMENT_COUNT_ENV} must be > 0.")
+    return resolved
+
+
+def _consensus_int(values: dict[str, Any]) -> int | None:
+    normalized = {int(value) for value in values.values() if str(value).strip()}
+    if len(normalized) != 1:
+        return None
+    return next(iter(normalized))
+
+
 class Phase3BExtendedPublicScoredMarch1314ReinitService:
     def __init__(self):
         self.case = get_case_context()
@@ -312,6 +333,7 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
         self.launcher_entry_id_override = str(
             os.environ.get(PHASE3B_REINIT_LAUNCHER_ENTRY_ID_OVERRIDE_ENV, "")
         ).strip()
+        self.requested_element_count = _resolve_requested_element_count()
         self.is_canonical_bundle = (
             self.output_dir_name == MARCH13_14_REINIT_DIR_NAME
             and self.track == TRACK_LABEL
@@ -319,7 +341,12 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
             and self.track_label == MINDORO_PRIMARY_VALIDATION_TRACK_LABEL
             and self.reporting_role == REPORTING_ROLE
             and not self.appendix_only
+            and self.primary_public_validation
+            and self.requested_element_count == REQUESTED_ELEMENT_COUNT
         )
+        self.reportable = bool(self.is_canonical_bundle)
+        self.experimental_only = not self.reportable
+        self.thesis_facing = bool(self.reportable)
         self.case_output_dir = get_case_output_dir(self.case.run_name)
         self.source_extended_dir = self.case_output_dir / EXTENDED_DIR_NAME
         self.output_dir = self.case_output_dir / self.output_dir_name
@@ -368,6 +395,11 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
             "appendix_only": self.appendix_only,
             "reporting_role": self.reporting_role,
             "primary_public_validation": self.primary_public_validation,
+            "requested_element_count": int(self.requested_element_count),
+            "canonical_requested_element_count_default": int(REQUESTED_ELEMENT_COUNT),
+            "thesis_facing": self.thesis_facing,
+            "reportable": self.reportable,
+            "experimental_only": self.experimental_only,
             "promotion_mode": "reinit_nextday_public_validation",
             "case_freeze_amendment_path": str(MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH),
             "noaa_source_limitation_note": NOAA_SOURCE_LIMITATION_NOTE,
@@ -988,9 +1020,10 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
             member_paths,
             forecast_manifest,
             expected_recipe=selection.recipe,
+            expected_element_count=self.requested_element_count,
         )
         if can_reuse_members and not self.force_rerun:
-            requested, actual = self._element_count_from_manifests(model_dir)
+            manifest_details = self._branch_manifest_details(model_dir)
             return {
                 "branch_id": branch.branch_id,
                 "branch_description": branch.description,
@@ -1001,15 +1034,20 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
                     "status": "reused_existing_branch_run" if forecast_manifest.exists() else "reused_existing_member_outputs",
                     "member_count": len(member_paths),
                 },
-                "element_count_requested": requested,
-                "element_count_actual": actual,
+                "element_count_requested": manifest_details["element_count_requested"],
+                "element_count_actual": manifest_details["element_count_actual"],
+                "actual_member_count": manifest_details["actual_member_count"],
+                "ensemble_member_count_expected": int(EXPECTED_ENSEMBLE_MEMBER_COUNT),
+                "manifest_path": manifest_details["ensemble_manifest_path"],
+                "forecast_manifest_path": manifest_details["forecast_manifest_path"],
+                "reused_existing_run": True,
             }
 
         simulation_start = _normalize_utc(self.window.simulation_start_utc)
         simulation_end = _normalize_utc(self.window.simulation_end_utc)
         duration_hours = int(math.ceil((simulation_end - simulation_start).total_seconds() / 3600.0))
         snapshot_hours = sorted(set([24, 48, duration_hours]))
-        with _temporary_element_count_override(REQUESTED_ELEMENT_COUNT):
+        with _temporary_element_count_override(self.requested_element_count):
             result = run_official_spill_forecast(
                 selection=selection,
                 start_time=seed_release["release_start_utc"],
@@ -1040,7 +1078,7 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
             )
         if result.get("status") != "success":
             raise RuntimeError(f"March 13 -> March 14 reinit forecast failed for {branch.branch_id}: {result}")
-        requested, actual = self._element_count_from_manifests(model_dir)
+        manifest_details = self._branch_manifest_details(model_dir)
         return {
             "branch_id": branch.branch_id,
             "branch_description": branch.description,
@@ -1048,16 +1086,22 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
             "model_dir": str(model_dir),
             "model_run_name": model_run_name,
             "forecast_result": result,
-            "element_count_requested": requested,
-            "element_count_actual": actual,
+            "element_count_requested": manifest_details["element_count_requested"],
+            "element_count_actual": manifest_details["element_count_actual"],
+            "actual_member_count": manifest_details["actual_member_count"],
+            "ensemble_member_count_expected": int(EXPECTED_ENSEMBLE_MEMBER_COUNT),
+            "manifest_path": manifest_details["ensemble_manifest_path"],
+            "forecast_manifest_path": manifest_details["forecast_manifest_path"],
+            "reused_existing_run": False,
         }
 
-    @staticmethod
     def _branch_outputs_are_reusable(
+        self,
         member_paths: list[Path],
         forecast_manifest: Path,
         *,
         expected_recipe: str | None = None,
+        expected_element_count: int | None = None,
     ) -> bool:
         if forecast_manifest.exists():
             payload = _read_json(forecast_manifest)
@@ -1070,6 +1114,10 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
                 ).strip()
                 if recorded_recipe != str(expected_recipe).strip():
                     return False
+            if expected_element_count is not None:
+                manifest_details = self._branch_manifest_details(forecast_manifest.parent.parent)
+                if int(manifest_details["element_count_actual"]) != int(expected_element_count):
+                    return False
             return bool(member_paths)
         if expected_recipe:
             return False
@@ -1078,23 +1126,35 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
         member_names = {path.stem for path in member_paths}
         return f"member_{EXPECTED_ENSEMBLE_MEMBER_COUNT}" in member_names and len(member_paths) >= EXPECTED_ENSEMBLE_MEMBER_COUNT
 
-    @staticmethod
-    def _element_count_from_manifests(model_dir: Path) -> tuple[int, int]:
+    def _branch_manifest_details(self, model_dir: Path) -> dict[str, Any]:
         forecast_manifest_path = model_dir / "forecast" / "forecast_manifest.json"
         ensemble_manifest_path = model_dir / "ensemble" / "ensemble_manifest.json"
         forecast_manifest = _read_json(forecast_manifest_path) if forecast_manifest_path.exists() else {}
         ensemble_manifest = _read_json(ensemble_manifest_path) if ensemble_manifest_path.exists() else {}
+        member_runs = list(ensemble_manifest.get("member_runs") or [])
+        member_paths = sorted((model_dir / "ensemble").glob("member_*.nc"))
         requested = int(
             (ensemble_manifest.get("ensemble_configuration") or {}).get("element_count")
             or (forecast_manifest.get("ensemble") or {}).get("actual_element_count")
-            or REQUESTED_ELEMENT_COUNT
+            or self.requested_element_count
         )
         actual = int(
             (forecast_manifest.get("ensemble") or {}).get("actual_element_count")
             or (forecast_manifest.get("deterministic_control") or {}).get("actual_element_count")
             or requested
         )
-        return requested, actual
+        actual_member_count = int(
+            (forecast_manifest.get("ensemble") or {}).get("actual_member_count")
+            or len(member_runs)
+            or len(member_paths)
+        )
+        return {
+            "forecast_manifest_path": str(forecast_manifest_path) if forecast_manifest_path.exists() else "",
+            "ensemble_manifest_path": str(ensemble_manifest_path) if ensemble_manifest_path.exists() else "",
+            "element_count_requested": requested,
+            "element_count_actual": actual,
+            "actual_member_count": actual_member_count,
+        }
 
     def _sync_branch_model_run_manifests(self, branch: ReinitBranchConfig, run_info: dict, recipe_source: str) -> None:
         model_dir = Path(str(run_info["model_dir"]))
@@ -1218,8 +1278,8 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
             "reached_march14_local_date": bool(per_date_active_timestamps[MARCH14_NOAA_SOURCE_DATE]),
             "empty_forecast_reason": empty_forecast_reason,
             "forecast_nonzero_cells_from_march14_localdate_mask": forecast_nonzero_by_date[target_date],
-            "element_count_requested": int(run_info.get("element_count_requested") or REQUESTED_ELEMENT_COUNT),
-            "element_count_actual": int(run_info.get("element_count_actual") or REQUESTED_ELEMENT_COUNT),
+            "element_count_requested": int(run_info.get("element_count_requested") or self.requested_element_count),
+            "element_count_actual": int(run_info.get("element_count_actual") or self.requested_element_count),
         }
 
     def _build_branch_pairings(self, target_row: pd.Series, branch_products: list[dict]) -> pd.DataFrame:
@@ -1399,7 +1459,7 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
             f"- Scored target date: {MARCH14_NOAA_SOURCE_DATE}",
             f"- Release start UTC: {seed_release['release_start_utc']}",
             f"- Seed release geometry: {seed_release['release_geometry_label']}",
-            f"- Requested element count: {REQUESTED_ELEMENT_COUNT}",
+            f"- Requested element count: {self.requested_element_count}",
             f"- Best branch by mean FSS: {best_row['branch_id']}",
             f"- Best branch mean FSS: {float(best_row['mean_fss']):.6f}",
             (
@@ -1546,6 +1606,21 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
         recipe_source: str,
     ) -> Path:
         path = self.output_dir / "march13_14_reinit_run_manifest.json"
+        branch_requested_counts = {
+            str(run.get("branch_id") or ""): int(run.get("element_count_requested") or self.requested_element_count)
+            for run in branch_runs
+            if str(run.get("branch_id") or "").strip()
+        }
+        branch_actual_counts = {
+            str(run.get("branch_id") or ""): int(run.get("element_count_actual") or self.requested_element_count)
+            for run in branch_runs
+            if str(run.get("branch_id") or "").strip()
+        }
+        branch_member_counts = {
+            str(run.get("branch_id") or ""): int(run.get("actual_member_count") or 0)
+            for run in branch_runs
+            if str(run.get("branch_id") or "").strip()
+        }
         payload = {
             "generated_at_utc": datetime.now(timezone.utc).isoformat(),
             "track": self.track,
@@ -1554,6 +1629,20 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
             "phase_or_track": PHASE_OR_TRACK,
             "appendix_only": self.appendix_only,
             "reporting_role": self.reporting_role,
+            "primary_public_validation": self.primary_public_validation,
+            "thesis_facing": self.thesis_facing,
+            "reportable": self.reportable,
+            "experimental_only": self.experimental_only,
+            "artifact_class": "experimental_only" if self.experimental_only else "canonical_public_validation_source",
+            "requested_element_count": int(self.requested_element_count),
+            "canonical_requested_element_count_default": int(REQUESTED_ELEMENT_COUNT),
+            "expected_ensemble_member_count": int(EXPECTED_ENSEMBLE_MEMBER_COUNT),
+            "actual_member_count_detected": _consensus_int(branch_member_counts),
+            "actual_member_count_detected_by_branch": branch_member_counts,
+            "element_count_detected_from_manifest": _consensus_int(branch_actual_counts),
+            "element_count_detected_from_manifest_by_branch": branch_actual_counts,
+            "requested_element_count_by_branch": branch_requested_counts,
+            "shared_imagery_caveat_preserved": True,
             "workflow_mode": self.case.workflow_mode,
             "run_name": self.case.run_name,
             "launcher_entry_ids": self._launcher_entry_ids(),

@@ -2,6 +2,24 @@
 
 Thesis workflow for transport validation, machine-readable forecast generation, public-observation validation, external-case transfer validation, and read-only support packaging using OpenDrift and PyGNOME. Legacy `prototype_2016` alone extends that story into thesis-facing `Phase 4` and `Phase 5` legacy runs.
 
+## Panel / Defense Quick Start
+
+For thesis defense or panel inspection, start with:
+
+```powershell
+.\panel.ps1
+```
+
+or:
+
+```powershell
+.\start.ps1 -Panel
+```
+
+This opens a read-only review mode that verifies stored software outputs against the manuscript and opens the dashboard. The full research launcher remains available under `Advanced`.
+
+See [PANEL_QUICK_START.md](/c:/Users/marcp/Downloads/drifter-validated-oilspill-forecasting-rc-v1.0/drifter-validated-oilspill-forecasting-rc-v1.0/PANEL_QUICK_START.md) and [docs/PANEL_REVIEW_GUIDE.md](/c:/Users/marcp/Downloads/drifter-validated-oilspill-forecasting-rc-v1.0/drifter-validated-oilspill-forecasting-rc-v1.0/docs/PANEL_REVIEW_GUIDE.md) for the panel-facing walkthrough.
+
 ## Plain-Language Status
 
 - Phase 1: Mindoro-specific recipe provenance is now finalized through the separate focused `2016-2023` drifter rerun, which evaluated the full four-recipe family and now promotes `cmems_gfs` directly into official B1. The broader `2016-2022` regional rerun is retained for historical reference only and is not the active Mindoro B1 provenance path.
@@ -45,6 +63,13 @@ Use one launcher pattern for interactive workflow runs:
 
 ```powershell
 .\start.ps1 -Entry <entry_id>
+```
+
+Recommended panel-facing launcher paths:
+
+```powershell
+.\panel.ps1
+.\start.ps1 -Panel
 ```
 
 Use these safe inspection commands to list the current entry IDs:

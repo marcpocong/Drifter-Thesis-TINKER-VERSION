@@ -1,0 +1,586 @@
+panel_review_expected_values:
+  - paper_table: "Table 4.5"
+    paper_section: "Mindoro Case B1"
+    metric: "FSS_1km"
+    expected_value: 0.0000
+    tolerance: 0.0001
+    units: "fraction"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_summary.csv"
+      - "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        branch_id: "R1_previous"
+      value_column: "fss_1km"
+    interpretation_role: "main Mindoro public-observation validation"
+    thesis_facing: true
+    notes: "B1 supports neighborhood-scale usefulness and does not claim exact 1 km reproduction."
+
+  - paper_table: "Table 4.5"
+    paper_section: "Mindoro Case B1"
+    metric: "FSS_3km"
+    expected_value: 0.0441
+    tolerance: 0.0001
+    units: "fraction"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_summary.csv"
+      - "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        branch_id: "R1_previous"
+      value_column: "fss_3km"
+    interpretation_role: "main Mindoro public-observation validation"
+    thesis_facing: true
+    notes: "Stored B1 scorecard value."
+
+  - paper_table: "Table 4.5"
+    paper_section: "Mindoro Case B1"
+    metric: "FSS_5km"
+    expected_value: 0.1371
+    tolerance: 0.0001
+    units: "fraction"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_summary.csv"
+      - "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        branch_id: "R1_previous"
+      value_column: "fss_5km"
+    interpretation_role: "main Mindoro public-observation validation"
+    thesis_facing: true
+    notes: "Stored B1 scorecard value."
+
+  - paper_table: "Table 4.5"
+    paper_section: "Mindoro Case B1"
+    metric: "FSS_10km"
+    expected_value: 0.2490
+    tolerance: 0.0001
+    units: "fraction"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_summary.csv"
+      - "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        branch_id: "R1_previous"
+      value_column: "fss_10km"
+    interpretation_role: "main Mindoro public-observation validation"
+    thesis_facing: true
+    notes: "Stored B1 scorecard value."
+
+  - paper_table: "Table 4.7"
+    paper_section: "Mindoro Case B1"
+    metric: "mean_FSS"
+    expected_value: 0.1075
+    tolerance: 0.0001
+    units: "fraction"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_summary.csv"
+      - "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        branch_id: "R1_previous"
+      value_column: "mean_fss"
+    interpretation_role: "main Mindoro public-observation validation"
+    thesis_facing: true
+    notes: "Mean FSS reported for the promoted B1 row."
+
+  - paper_table: "Table 4.6"
+    paper_section: "Mindoro Case B1"
+    metric: "R1_previous_forecast_cells"
+    expected_value: 5
+    tolerance: 0
+    units: "cells"
+    comparison_mode: "integer"
+    source_output_path_candidates:
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_branch_survival_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        branch_id: "R1_previous"
+      value_column: "forecast_nonzero_cells_from_march14_localdate_mask"
+    interpretation_role: "branch survival / retained target footprint"
+    thesis_facing: true
+    notes: "Read from the stored branch-survival summary."
+
+  - paper_table: "Table 4.5"
+    paper_section: "Mindoro Case B1"
+    metric: "observed_cells"
+    expected_value: 22
+    tolerance: 0
+    units: "cells"
+    comparison_mode: "integer"
+    source_output_path_candidates:
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_summary.csv"
+      - "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        branch_id: "R1_previous"
+      value_column: "obs_nonzero_cells"
+    interpretation_role: "main Mindoro public-observation validation"
+    thesis_facing: true
+    notes: "Observed March 14 target mask cell count on the scoring grid."
+
+  - paper_table: "Table 4.6"
+    paper_section: "Mindoro Case B1"
+    metric: "nearest_distance_m"
+    expected_value: 1414.21
+    tolerance: 0.05
+    units: "m"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_summary.csv"
+      - "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        branch_id: "R1_previous"
+      value_column: "nearest_distance_to_obs_m"
+    interpretation_role: "branch displacement / public-observation proximity"
+    thesis_facing: true
+    notes: "Nearest forecast-to-observation distance for the promoted B1 row."
+
+  - paper_table: "Table 4.6"
+    paper_section: "Mindoro Case B1"
+    metric: "centroid_distance_m"
+    expected_value: 7358.16
+    tolerance: 0.05
+    units: "m"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_summary.csv"
+      - "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        branch_id: "R1_previous"
+      value_column: "centroid_distance_m"
+    interpretation_role: "branch displacement / public-observation proximity"
+    thesis_facing: true
+    notes: "Centroid distance for the promoted B1 row."
+
+  - paper_table: "Table 4.7"
+    paper_section: "Mindoro Case B1"
+    metric: "IoU"
+    expected_value: 0.0
+    tolerance: 0.0001
+    units: "fraction"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_summary.csv"
+      - "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        branch_id: "R1_previous"
+      value_column: "iou"
+    interpretation_role: "overlap diagnostic for the promoted B1 row"
+    thesis_facing: true
+    notes: "Stored B1 overlap score."
+
+  - paper_table: "Table 4.7"
+    paper_section: "Mindoro Case B1"
+    metric: "Dice"
+    expected_value: 0.0
+    tolerance: 0.0001
+    units: "fraction"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_summary.csv"
+      - "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        branch_id: "R1_previous"
+      value_column: "dice"
+    interpretation_role: "overlap diagnostic for the promoted B1 row"
+    thesis_facing: true
+    notes: "Stored B1 overlap score."
+
+  - paper_table: "Table 4.9"
+    paper_section: "Mindoro Track A comparator support"
+    metric: "OpenDrift_R1_previous_forecast_cells"
+    expected_value: 5
+    tolerance: 0
+    units: "cells"
+    comparison_mode: "integer"
+    source_output_path_candidates:
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/march13_14_reinit_crossmodel_summary.csv"
+      - "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        track_id: "R1_previous_reinit_p50"
+      value_column: "forecast_nonzero_cells"
+    interpretation_role: "same-case OpenDrift comparator support"
+    thesis_facing: true
+    notes: "Track A remains comparator-only and is not observational truth."
+
+  - paper_table: "Table 4.9"
+    paper_section: "Mindoro Track A comparator support"
+    metric: "OpenDrift_R1_previous_nearest_distance_m"
+    expected_value: 1414.21
+    tolerance: 0.05
+    units: "m"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/march13_14_reinit_crossmodel_summary.csv"
+      - "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        track_id: "R1_previous_reinit_p50"
+      value_column: "nearest_distance_to_obs_m"
+    interpretation_role: "same-case OpenDrift comparator support"
+    thesis_facing: true
+    notes: "Matches the promoted OpenDrift branch because the same stored forecast mask is reused."
+
+  - paper_table: "Table 4.9"
+    paper_section: "Mindoro Track A comparator support"
+    metric: "OpenDrift_R1_previous_mean_FSS"
+    expected_value: 0.1075
+    tolerance: 0.0001
+    units: "fraction"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/march13_14_reinit_crossmodel_summary.csv"
+      - "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        track_id: "R1_previous_reinit_p50"
+      value_column: "mean_fss"
+    interpretation_role: "same-case OpenDrift comparator support"
+    thesis_facing: true
+    notes: "Track A OpenDrift row is support-only, not a second primary validation claim."
+
+  - paper_table: "Table 4.9"
+    paper_section: "Mindoro Track A comparator support"
+    metric: "PyGNOME_deterministic_forecast_cells"
+    expected_value: 6
+    tolerance: 0
+    units: "cells"
+    comparison_mode: "integer"
+    source_output_path_candidates:
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/march13_14_reinit_crossmodel_summary.csv"
+      - "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        track_id: "pygnome_reinit_deterministic"
+      value_column: "forecast_nonzero_cells"
+    interpretation_role: "same-case PyGNOME comparator support"
+    thesis_facing: false
+    notes: "PyGNOME remains comparator-only."
+
+  - paper_table: "Table 4.9"
+    paper_section: "Mindoro Track A comparator support"
+    metric: "PyGNOME_deterministic_nearest_distance_m"
+    expected_value: 6082.76
+    tolerance: 0.05
+    units: "m"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/march13_14_reinit_crossmodel_summary.csv"
+      - "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        track_id: "pygnome_reinit_deterministic"
+      value_column: "nearest_distance_to_obs_m"
+    interpretation_role: "same-case PyGNOME comparator support"
+    thesis_facing: false
+    notes: "Comparator-only distance check."
+
+  - paper_table: "Table 4.9"
+    paper_section: "Mindoro Track A comparator support"
+    metric: "PyGNOME_deterministic_mean_FSS"
+    expected_value: 0.0061
+    tolerance: 0.0001
+    units: "fraction"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/march13_14_reinit_crossmodel_summary.csv"
+      - "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        track_id: "pygnome_reinit_deterministic"
+      value_column: "mean_fss"
+    interpretation_role: "same-case PyGNOME comparator support"
+    thesis_facing: false
+    notes: "Comparator-only mean FSS check."
+
+  - paper_table: "Table 4.10"
+    paper_section: "DWH external transfer validation"
+    metric: "C1_corridor_FSS"
+    expected_value: 0.5568
+    tolerance: 0.0001
+    units: "fraction"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/Phase 3C DWH Final Output/summary/comparison/phase3c_main_scorecard.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        track_id: "C1"
+        model_product_label: "OpenDrift deterministic control"
+        result_scope: "event_corridor"
+      value_column: "mean_fss"
+    interpretation_role: "DWH deterministic event-corridor transfer validation"
+    thesis_facing: true
+    notes: "C1 is the clean DWH deterministic baseline."
+
+  - paper_table: "Table 4.10"
+    paper_section: "DWH external transfer validation"
+    metric: "C2_p50_corridor_FSS"
+    expected_value: 0.5389
+    tolerance: 0.0001
+    units: "fraction"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/Phase 3C DWH Final Output/summary/comparison/phase3c_main_scorecard.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        track_id: "C2"
+        model_product_label: "OpenDrift ensemble p50"
+        result_scope: "event_corridor"
+      value_column: "mean_fss"
+    interpretation_role: "DWH ensemble p50 event-corridor extension"
+    thesis_facing: true
+    notes: "C2 p50 is the preferred probabilistic extension."
+
+  - paper_table: "Table 4.10"
+    paper_section: "DWH external transfer validation"
+    metric: "C2_p90_corridor_FSS"
+    expected_value: 0.4966
+    tolerance: 0.0001
+    units: "fraction"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/Phase 3C DWH Final Output/summary/comparison/phase3c_main_scorecard.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        track_id: "C2"
+        model_product_label: "OpenDrift ensemble p90"
+        result_scope: "event_corridor"
+      value_column: "mean_fss"
+    interpretation_role: "DWH ensemble p90 event-corridor extension"
+    thesis_facing: false
+    notes: "C2 p90 remains support/comparison only."
+
+  - paper_table: "Table 4.10"
+    paper_section: "DWH external transfer validation"
+    metric: "C3_PyGNOME_corridor_FSS"
+    expected_value: 0.3612
+    tolerance: 0.0001
+    units: "fraction"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/Phase 3C DWH Final Output/summary/comparison/phase3c_main_scorecard.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        track_id: "C3"
+        model_product_label: "PyGNOME deterministic comparator"
+        result_scope: "event_corridor"
+      value_column: "mean_fss"
+    interpretation_role: "DWH PyGNOME comparator support"
+    thesis_facing: false
+    notes: "C3 is comparator-only."
+
+  - paper_table: "Table 4.11"
+    paper_section: "DWH external transfer validation"
+    metric: "C1_corridor_IoU"
+    expected_value: 0.3362
+    tolerance: 0.0001
+    units: "fraction"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/phase3c_eventcorridor_summary.csv"
+      - "output/Phase 3C DWH Final Output/summary/comparison/phase3c_main_scorecard.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        track_id: "opendrift_control"
+      value_column: "iou"
+    interpretation_role: "DWH deterministic corridor overlap diagnostic"
+    thesis_facing: true
+    notes: "C1 overlap metric."
+
+  - paper_table: "Table 4.11"
+    paper_section: "DWH external transfer validation"
+    metric: "C2_p50_corridor_IoU"
+    expected_value: 0.3331
+    tolerance: 0.0001
+    units: "fraction"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_ensemble_comparison/phase3c_ensemble_eventcorridor_summary.csv"
+      - "output/Phase 3C DWH Final Output/summary/comparison/phase3c_main_scorecard.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        track_id: "ensemble_p50"
+      value_column: "iou"
+    interpretation_role: "DWH ensemble p50 corridor overlap diagnostic"
+    thesis_facing: true
+    notes: "C2 p50 overlap metric."
+
+  - paper_table: "Table 4.11"
+    paper_section: "DWH external transfer validation"
+    metric: "C2_p90_corridor_IoU"
+    expected_value: 0.2938
+    tolerance: 0.0001
+    units: "fraction"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_ensemble_comparison/phase3c_ensemble_eventcorridor_summary.csv"
+      - "output/Phase 3C DWH Final Output/summary/comparison/phase3c_main_scorecard.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        track_id: "ensemble_p90"
+      value_column: "iou"
+    interpretation_role: "DWH ensemble p90 corridor overlap diagnostic"
+    thesis_facing: false
+    notes: "C2 p90 remains support/comparison only."
+
+  - paper_table: "Table 4.11"
+    paper_section: "DWH external transfer validation"
+    metric: "C3_PyGNOME_corridor_IoU"
+    expected_value: 0.1903
+    tolerance: 0.0001
+    units: "fraction"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator/phase3c_dwh_pygnome_eventcorridor_summary.csv"
+      - "output/Phase 3C DWH Final Output/summary/comparison/phase3c_main_scorecard.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        track_id: "pygnome_deterministic"
+      value_column: "iou"
+    interpretation_role: "DWH PyGNOME comparator overlap diagnostic"
+    thesis_facing: false
+    notes: "C3 is comparator-only."
+
+  - paper_table: "Table F2"
+    paper_section: "Mindoro oil-type support"
+    metric: "Light_oil_beached_percent"
+    expected_value: 0.02
+    tolerance: 0.01
+    units: "percentage points"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/phase4/CASE_MINDORO_RETRO_2023/phase4_oil_budget_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        scenario_id: "lighter_oil"
+      value_column: "final_beached_pct"
+    interpretation_role: "support-only oil-type context"
+    thesis_facing: false
+    notes: "Support/context only; not observational truth."
+
+  - paper_table: "Table F2"
+    paper_section: "Mindoro oil-type support"
+    metric: "Fixed_base_medium_heavy_proxy_beached_percent"
+    expected_value: 0.61
+    tolerance: 0.01
+    units: "percentage points"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/phase4/CASE_MINDORO_RETRO_2023/phase4_oil_budget_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        scenario_id: "fixed_base_medium_heavy_proxy"
+      value_column: "final_beached_pct"
+    interpretation_role: "support-only oil-type context"
+    thesis_facing: false
+    notes: "Support/context only; not observational truth."
+
+  - paper_table: "Table F2"
+    paper_section: "Mindoro oil-type support"
+    metric: "Heavier_oil_beached_percent"
+    expected_value: 0.63
+    tolerance: 0.01
+    units: "percentage points"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/phase4/CASE_MINDORO_RETRO_2023/phase4_oil_budget_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        scenario_id: "heavier_oil"
+      value_column: "final_beached_pct"
+    interpretation_role: "support-only oil-type context"
+    thesis_facing: false
+    notes: "Support/context only; not observational truth."
+
+  - paper_table: "Table F2"
+    paper_section: "Mindoro oil-type support"
+    metric: "Light_oil_first_shoreline_arrival_h"
+    expected_value: 4
+    tolerance: 0.01
+    units: "hours"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/phase4/CASE_MINDORO_RETRO_2023/phase4_oil_budget_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        scenario_id: "lighter_oil"
+      value_column: "first_shoreline_arrival_h"
+    interpretation_role: "support-only shoreline context"
+    thesis_facing: false
+    notes: "Support/context only; not observational truth."
+
+  - paper_table: "Table F2"
+    paper_section: "Mindoro oil-type support"
+    metric: "Fixed_base_medium_heavy_proxy_first_shoreline_arrival_h"
+    expected_value: 4
+    tolerance: 0.01
+    units: "hours"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/phase4/CASE_MINDORO_RETRO_2023/phase4_oil_budget_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        scenario_id: "fixed_base_medium_heavy_proxy"
+      value_column: "first_shoreline_arrival_h"
+    interpretation_role: "support-only shoreline context"
+    thesis_facing: false
+    notes: "Support/context only; not observational truth."
+
+  - paper_table: "Table F2"
+    paper_section: "Mindoro oil-type support"
+    metric: "Heavier_oil_first_shoreline_arrival_h"
+    expected_value: 4
+    tolerance: 0.01
+    units: "hours"
+    comparison_mode: "float"
+    source_output_path_candidates:
+      - "output/phase4/CASE_MINDORO_RETRO_2023/phase4_oil_budget_summary.csv"
+    source_lookup:
+      file_format: "csv"
+      match:
+        scenario_id: "heavier_oil"
+      value_column: "first_shoreline_arrival_h"
+    interpretation_role: "support-only shoreline context"
+    thesis_facing: false
+    notes: "Support/context only; not observational truth."

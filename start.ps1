@@ -20,6 +20,7 @@ param(
     [switch]$List,
     [switch]$Help,
     [string]$Entry,
+    [switch]$Panel,
     [switch]$NoPause
 )
 
@@ -793,14 +794,53 @@ function Invoke-ReadOnlyUi {
     }
 }
 
+function Invoke-ContainerPythonScript {
+    param(
+        [Parameter(Mandatory = $true)][string]$Description,
+        [Parameter(Mandatory = $true)][string]$ScriptPath,
+        [string]$Service = "pipeline",
+        [string[]]$ScriptArgs = @(),
+        [hashtable]$ExtraEnv = @{}
+    )
+
+    Write-Host ""
+    Write-Host ">>> $Description" -ForegroundColor Yellow
+    Write-Host "    SERVICE=$Service SCRIPT=$ScriptPath" -ForegroundColor DarkGray
+
+    $dockerArgs = @("exec", "-T")
+    foreach ($key in ($ExtraEnv.Keys | Sort-Object)) {
+        $dockerArgs += @("-e", "$key=$($ExtraEnv[$key])")
+    }
+    $dockerArgs += @($Service, "python", $ScriptPath)
+    if ($ScriptArgs) {
+        $dockerArgs += $ScriptArgs
+    }
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = "Continue"
+        & docker-compose @dockerArgs 2>&1 | ForEach-Object { Write-ProcessLine $_ }
+        $scriptExitCode = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+
+    if ($scriptExitCode -ne 0) {
+        throw "Container Python script exited with code $scriptExitCode."
+    }
+}
+
 function Show-LauncherList {
     $matrix = Get-LauncherMatrix
     $entries = Get-LauncherEntries
     Clear-Host
     Write-Section "CURRENT LAUNCHER CATALOG"
     Write-Host ""
+    Write-Host "Recommended defense path: .\panel.ps1 or .\start.ps1 -Panel" -ForegroundColor Green
     Write-Host "Entrypoint: .\start.ps1" -ForegroundColor Green
     Write-Host "Catalog: $($matrix.catalog_version)" -ForegroundColor Yellow
+    Write-Host "Panel mode: .\start.ps1 -Panel -NoPause" -ForegroundColor Yellow
     Write-Host "List entries: .\start.ps1 -List -NoPause" -ForegroundColor Yellow
     Write-Host "Launcher help: .\start.ps1 -Help -NoPause" -ForegroundColor Yellow
     Write-Host "Interactive run: .\start.ps1 -Entry <entry_id>" -ForegroundColor Yellow
@@ -846,14 +886,19 @@ function Show-Help {
     Write-Section "LAUNCHER HELP"
     Write-Host ""
     Write-Host "Canonical startup paths:" -ForegroundColor Yellow
+    Write-Host "  .\panel.ps1" -ForegroundColor Green
+    Write-Host "  .\start.ps1 -Panel -NoPause" -ForegroundColor Green
     Write-Host "  .\start.ps1 -List -NoPause" -ForegroundColor Green
     Write-Host "  .\start.ps1 -Help -NoPause" -ForegroundColor Green
     Write-Host "  .\start.ps1 -Entry <entry_id>" -ForegroundColor Green
     Write-Host "  docker-compose exec -T -e WORKFLOW_MODE=<workflow_mode> -e PIPELINE_PHASE=<phase> <pipeline|gnome> python -m src" -ForegroundColor Green
+    Write-Host "  docker-compose exec -T pipeline python src/services/panel_review_check.py" -ForegroundColor Green
     Write-Host "  docker-compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501" -ForegroundColor Green
     Write-Host "  docker-compose up -d ; docker-compose restart pipeline gnome ; docker-compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501" -ForegroundColor Green
     Write-Host ""
     Write-Host "Recommended read-only launcher entries:" -ForegroundColor Yellow
+    Write-Host "  .\panel.ps1  # recommended defense/panel path" -ForegroundColor Green
+    Write-Host "  .\start.ps1 -Panel -NoPause" -ForegroundColor Green
     foreach ($entry in $readOnlyEntries) {
         Write-Host ("  .\start.ps1 -Entry {0}" -f $entry.entry_id) -ForegroundColor Green
     }
@@ -900,7 +945,173 @@ function Show-Help {
     Pause-IfNeeded
 }
 
+function Show-PanelGuide {
+    Clear-Host
+    Write-Section "PANEL REVIEW GUIDE"
+    Write-Host ""
+    Write-Host "Panel quick start file:" -ForegroundColor Yellow
+    Write-Host "  PANEL_QUICK_START.md" -ForegroundColor Green
+    Write-Host "Detailed guide:" -ForegroundColor Yellow
+    Write-Host "  docs/PANEL_REVIEW_GUIDE.md" -ForegroundColor Green
+    Write-Host "Paper/output registry:" -ForegroundColor Yellow
+    Write-Host "  docs/PAPER_OUTPUT_REGISTRY.md" -ForegroundColor Green
+    Write-Host ""
+    if (Test-Path "PANEL_QUICK_START.md") {
+        Get-Content "PANEL_QUICK_START.md" | ForEach-Object { Write-Host $_ }
+    } else {
+        Write-Host "PANEL_QUICK_START.md is missing." -ForegroundColor Red
+    }
+    Write-Host ""
+    Write-Host "This panel mode verifies stored thesis-facing outputs against the manuscript." -ForegroundColor White
+    Write-Host "It does not rerun expensive scientific simulations by default." -ForegroundColor White
+    Write-Host "Full scientific reruns remain available through the advanced launcher for audit purposes." -ForegroundColor White
+    Pause-IfNeeded
+}
+
+function Show-PaperOutputRegistry {
+    Clear-Host
+    Write-Section "PAPER-TO-OUTPUT REGISTRY"
+    Write-Host ""
+    Write-Host "Registry config: config\paper_output_registry.yaml" -ForegroundColor Yellow
+    Write-Host "Registry guide:  docs\PAPER_OUTPUT_REGISTRY.md" -ForegroundColor Yellow
+    Write-Host ""
+    if (Test-Path "docs\PAPER_OUTPUT_REGISTRY.md") {
+        Get-Content "docs\PAPER_OUTPUT_REGISTRY.md" | ForEach-Object { Write-Host $_ }
+    } else {
+        Write-Host "docs\PAPER_OUTPUT_REGISTRY.md is missing." -ForegroundColor Red
+    }
+    Pause-IfNeeded
+}
+
+function Invoke-PanelPaperVerification {
+    Write-Section "VERIFY PAPER NUMBERS AGAINST STORED SCORECARDS"
+    Invoke-ContainerPythonScript `
+        -Description "Read-only paper-results verification from stored outputs only" `
+        -ScriptPath "src/services/panel_review_check.py"
+    Write-Host ""
+    Write-Host "Panel verification outputs:" -ForegroundColor Yellow
+    Write-Host "  output\panel_review_check\panel_results_match_check.csv" -ForegroundColor Green
+    Write-Host "  output\panel_review_check\panel_results_match_check.json" -ForegroundColor Green
+    Write-Host "  output\panel_review_check\panel_results_match_check.md" -ForegroundColor Green
+    Write-Host "  output\panel_review_check\panel_review_manifest.json" -ForegroundColor Green
+}
+
+function Show-PanelMenu {
+    while ($true) {
+        Clear-Host
+        Write-Section "DRIFTER-VALIDATED OIL SPILL FORECASTING"
+        Write-Host "   PANEL REVIEW MODE" -ForegroundColor White
+        Write-Host ""
+        Write-Host "Recommended panel checks:" -ForegroundColor Yellow
+        Write-Host "  1. Open read-only dashboard [READ-ONLY]" -ForegroundColor White
+        Write-Host "     Opens the Streamlit dashboard over stored outputs only." -ForegroundColor DarkGray
+        Write-Host "  2. Verify paper numbers against stored scorecards [READ-ONLY]" -ForegroundColor White
+        Write-Host "     Writes only to output\panel_review_check\ and never reruns science." -ForegroundColor DarkGray
+        Write-Host "  3. Rebuild publication figures from stored outputs [PACKAGING ONLY]" -ForegroundColor White
+        Write-Host "     Uses the existing read-only figure-package builder." -ForegroundColor DarkGray
+        Write-Host "  4. Refresh final validation package from stored outputs [PACKAGING ONLY]" -ForegroundColor White
+        Write-Host "     Uses the existing read-only validation-package refresh." -ForegroundColor DarkGray
+        Write-Host "  5. Refresh final reproducibility package / command documentation [PACKAGING ONLY]" -ForegroundColor White
+        Write-Host "     Uses the existing read-only launcher/docs/package sync." -ForegroundColor DarkGray
+        Write-Host "  6. Show paper-to-output registry [READ-ONLY]" -ForegroundColor White
+        Write-Host "     Opens the plain-language manuscript/output map." -ForegroundColor DarkGray
+        Write-Host ""
+        Write-Host "Advanced:" -ForegroundColor Yellow
+        Write-Host "  A. Open full research launcher [ADVANCED ONLY]" -ForegroundColor White
+        Write-Host "  H. Help / interpretation guide [READ-ONLY]" -ForegroundColor White
+        Write-Host "  Q. Exit" -ForegroundColor White
+        Write-Host ""
+
+        $choice = (Read-Host "Select an option").Trim()
+        if ([string]::IsNullOrWhiteSpace($choice)) {
+            continue
+        }
+
+        switch ($choice.ToUpperInvariant()) {
+            "1" {
+                Write-Section "READ-ONLY DASHBOARD"
+                try {
+                    Invoke-ReadOnlyUi
+                }
+                catch {
+                    Pause-IfNeeded
+                }
+                Pause-IfNeeded
+                continue
+            }
+            "2" {
+                try {
+                    Invoke-PanelPaperVerification
+                }
+                catch {
+                    Pause-IfNeeded
+                }
+                Pause-IfNeeded
+                continue
+            }
+            "3" {
+                $launcherEntry = Get-LauncherEntryById -EntryId "figure_package_publication"
+                Write-Section $launcherEntry.label
+                try {
+                    Invoke-LauncherEntry -LauncherEntry $launcherEntry
+                }
+                catch {
+                    Pause-IfNeeded
+                }
+                Pause-IfNeeded
+                continue
+            }
+            "4" {
+                $launcherEntry = Get-LauncherEntryById -EntryId "final_validation_package"
+                Write-Section $launcherEntry.label
+                try {
+                    Invoke-LauncherEntry -LauncherEntry $launcherEntry
+                }
+                catch {
+                    Pause-IfNeeded
+                }
+                Pause-IfNeeded
+                continue
+            }
+            "5" {
+                $launcherEntry = Get-LauncherEntryById -EntryId "phase5_sync"
+                Write-Section $launcherEntry.label
+                try {
+                    Invoke-LauncherEntry -LauncherEntry $launcherEntry
+                }
+                catch {
+                    Pause-IfNeeded
+                }
+                Pause-IfNeeded
+                continue
+            }
+            "6" {
+                Show-PaperOutputRegistry
+                continue
+            }
+            "A" {
+                Show-Menu -ReturnToCaller
+                continue
+            }
+            "H" {
+                Show-PanelGuide
+                continue
+            }
+            "Q" {
+                Write-Host ""
+                Write-Host "Goodbye." -ForegroundColor DarkGray
+                exit 0
+            }
+        }
+
+        Write-Host "Invalid option. Use 1-6, A, H, or Q." -ForegroundColor Red
+        Start-Sleep -Seconds 2
+    }
+}
+
 function Show-Menu {
+    param([switch]$ReturnToCaller)
+
     while ($true) {
         $entries = Get-LauncherEntries
         $selectionMap = @{}
@@ -909,7 +1120,10 @@ function Show-Menu {
         Clear-Host
         Write-Section "DRIFTER-VALIDATED OIL SPILL FORECASTING"
         Write-Host ""
-        Write-Host "Choose a launcher entry. Read-only utilities are the safest first choice, or press U for the UI and R for a full UI refresh." -ForegroundColor Yellow
+        Write-Host "For defense/panel review, use PANEL REVIEW MODE first." -ForegroundColor Yellow
+        Write-Host "The scientific tracks below can be expensive and may rerun parts of the workflow. They are provided for audit and researcher use." -ForegroundColor DarkYellow
+        Write-Host ""
+        Write-Host "Choose a launcher entry. Read-only utilities are the safest first choice, or press P for panel review mode." -ForegroundColor Yellow
         Write-Host ""
 
         foreach ($category in Get-LauncherCategories) {
@@ -924,10 +1138,14 @@ function Show-Menu {
             Write-Host ""
         }
 
+        Write-Host "  P. Panel review mode (recommended for defense)" -ForegroundColor Yellow
         Write-Host "  L. List catalog only" -ForegroundColor Yellow
         Write-Host "  U. Launch read-only UI" -ForegroundColor Yellow
         Write-Host "  R. Full restart read-only UI" -ForegroundColor Yellow
         Write-Host "  H. Help" -ForegroundColor Yellow
+        if ($ReturnToCaller) {
+            Write-Host "  B. Back" -ForegroundColor Yellow
+        }
         Write-Host "  Q. Exit" -ForegroundColor Yellow
         Write-Host ""
 
@@ -937,6 +1155,10 @@ function Show-Menu {
         }
 
         switch ($choice.ToUpperInvariant()) {
+            "P" {
+                Show-PanelMenu
+                continue
+            }
             "L" {
                 Show-LauncherList
                 continue
@@ -967,6 +1189,11 @@ function Show-Menu {
                 Show-Help
                 continue
             }
+            "B" {
+                if ($ReturnToCaller) {
+                    return
+                }
+            }
             "Q" {
                 Write-Host ""
                 Write-Host "Goodbye." -ForegroundColor DarkGray
@@ -987,7 +1214,11 @@ function Show-Menu {
             continue
         }
 
-        Write-Host "Invalid option. Use a menu number, U, R, L, H, or Q." -ForegroundColor Red
+        if ($ReturnToCaller) {
+            Write-Host "Invalid option. Use a menu number, P, U, R, L, H, B, or Q." -ForegroundColor Red
+        } else {
+            Write-Host "Invalid option. Use a menu number, P, U, R, L, H, or Q." -ForegroundColor Red
+        }
         Start-Sleep -Seconds 2
     }
 }
@@ -1008,6 +1239,11 @@ try {
         Write-Section $launcherEntry.label
         Invoke-LauncherEntry -LauncherEntry $launcherEntry
         Pause-IfNeeded
+        exit 0
+    }
+
+    if ($Panel) {
+        Show-PanelMenu
         exit 0
     }
 
