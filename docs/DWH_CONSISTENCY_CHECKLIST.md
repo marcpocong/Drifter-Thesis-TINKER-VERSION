@@ -8,5 +8,5 @@
 - [x] The May 21-23 observed DWH daily masks are treated as truth for scoring.
 - [x] The DWH cumulative composite remains context-only and the wellhead remains provenance-only.
 - [x] OpenDrift deterministic remains the main DWH result and the ensemble remains a support/comparative branch.
-- [x] PyGNOME is described consistently as comparator-only and never as truth.
+- [x] PyGNOME is described consistently as comparator-only and never as the scoring reference.
 - [x] Publication, panel, and launcher notes keep DWH visible as external transfer evidence without presenting it as the main thesis case.

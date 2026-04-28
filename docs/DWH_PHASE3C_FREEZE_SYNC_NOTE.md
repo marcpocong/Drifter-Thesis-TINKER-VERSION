@@ -14,6 +14,6 @@ Guardrails that stay explicit:
 - truth = public observation-derived daily masks and the event-corridor union
 - forcing = `HYCOM GOFS 3.1 currents + ERA5 winds + CMEMS wave/Stokes`
 - date-composite honesty remains required
-- PyGNOME is comparator-only and never truth
+- PyGNOME is comparator-only and never the scoring reference
 
 This sync is metadata/docs/config cleanup only. It does not reopen forcing selection, ingest new drifter data, rerun OpenDrift, or rerun PyGNOME.

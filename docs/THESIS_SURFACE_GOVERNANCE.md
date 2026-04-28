@@ -2,53 +2,47 @@
 
 ## Purpose
 
-This repo keeps one canonical artifact-surface vocabulary in `src/core/artifact_status.py` so the UI, publication registry, and validation/export packaging all agree on what is thesis-facing, support-only, archive-only, legacy/prototype support, or advanced-only.
+This repo keeps one canonical artifact-surface vocabulary in `src/core/artifact_status.py` so the UI, publication registry, launcher, and validation/export packaging all agree on what is main evidence, comparator support, archive-only, legacy/archive support, or advanced-only.
 
-Surface keys:
+## Current Manuscript Evidence Order
 
-- `thesis_main`: eligible for thesis-facing home and main presentation surfaces.
-- `comparator_support`: support, comparator, or context material that stays separate from the primary thesis claim.
-- `archive_only`: preserved for provenance, reproducibility, and audit only.
-- `legacy_support`: legacy or prototype support material that remains visible as support only.
-- `advanced_only`: lower-level inspection material that should stay out of default thesis-facing surfaces.
+1. Focused Mindoro Phase 1 provenance
+2. Phase 2 standardized forecast products
+3. Mindoro `B1` primary public-observation validation
+4. Mindoro `Track A` comparator-only support
+5. DWH external transfer validation
+6. Mindoro oil-type and shoreline support/context
+7. `prototype_2016` legacy/archive support
+8. Reproducibility / governance / read-only package layer
 
-Publication-package inventory fields:
+## Surface Keys
 
-- `thesis_surface`: whether a publication figure is part of the curated thesis-facing surface.
-- `archive_only`: whether a publication figure is indexed as archive/provenance only.
-- `legacy_support`: whether a publication figure belongs to a legacy/prototype support lane.
-- `comparator_support`: whether a publication figure is comparator-only support.
-- `display_order`: stable ordering for curated publication-package browsing.
-- `page_target`: the intended dashboard/package landing page for the figure.
-- `study_box_id`: optional stable identifier for shared study-box geography figures.
-- `study_box_numbers`: explicit study-box number or number set shown by a study-context figure.
-- `recommended_scope`: normalized scope such as `main_text`, `page_support`, `legacy_support`, `appendix_support`, or `archive_only`.
+- `thesis_main`: artifacts eligible for the curated thesis-facing route
+- `comparator_support`: support, comparator, or context material kept separate from the primary claim
+- `archive_only`: preserved for provenance, reproducibility, and audit only
+- `legacy_support`: historical/prototype support material that remains visible as support only
+- `advanced_only`: lower-level inspection material that stays out of default panel surfaces
 
-## Main Thesis Surfaces
+## Main Surface Rules
 
-Main thesis-facing surfaces should foreground only the artifacts that directly support the current thesis narrative:
+- Mindoro March 13-14 `R1_previous` is the only thesis-facing `B1` row.
+- `Track A` is comparator-only support attached to `B1`, not a co-primary result.
+- DWH `C1` and `C2 p50` remain thesis-facing transfer-validation material, while `C2 p90` and `C3` stay support/comparison only.
+- Mindoro oil-type and shoreline outputs remain support/context only.
+- UI pages, figure packages, and publication packages organize stored outputs only; they do not create new scientific results.
 
-- Mindoro March 13 -> March 14 `R1` is the only thesis-facing `B1` row.
-- Track `A` is support/comparator context attached to `B1`, not a co-primary result.
-- DWH `C1` and `C2` remain thesis-facing transfer-validation material, with `C3` staying comparator-only.
-- Study Boxes `2` and `4` are the only thesis-facing study-context boxes; Study Boxes `1` and `3` are archive/advanced/support only.
+## Archive And Legacy Rules
 
-Main thesis surfaces must not promote preserved archive rows just because an older manifest, figure flag, or board title still exists.
+- Mindoro March 13-14 `R0`, `B2`, and `B3` stay `archive_only`.
+- `prototype_2016` stays `legacy_support`.
+- Some internal package names may still contain Phase 4/Phase 5 labels inside the legacy archive surfaces, but those labels do not create new defended evidence.
 
-## Archive And Advanced Surfaces
-
-Archive or advanced surfaces are the right place for preserved but non-promoted material:
-
-- Mindoro March 13 -> March 14 `R0` is `archive_only`.
-- Preserved March-family legacy rows, including `B2` and `B3`, are `archive_only`.
-- Lower-level trajectory/context inspection stays `advanced_only` unless it has been explicitly promoted elsewhere.
-
-## Why Preserve But Not Promote
+## Why Preserve Without Promoting
 
 Archive material is preserved because it still matters for:
 
 - provenance and methods traceability
 - reproducibility and audit
-- explaining why the promoted row was chosen instead of silently erasing earlier rows
+- explaining why the promoted row was chosen
 
-Archive material is not promoted because preservation is not the same as recommendation. The thesis-facing story is intentionally narrower than the full preserved repo history.
+Preservation is not promotion. The defended thesis-facing surface is intentionally narrower than the full preserved repo history.

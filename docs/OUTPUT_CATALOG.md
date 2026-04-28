@@ -1,5 +1,7 @@
 # Output Catalog
 
+This catalog follows the final manuscript evidence order: focused Mindoro Phase 1 provenance, Phase 2 standardized forecast products, Mindoro `B1`, Mindoro `Track A` comparator-only support, DWH external transfer validation, Mindoro oil-type/shoreline support, `prototype_2016` legacy/archive support, and the read-only governance/package surfaces.
+
 ## Read-Only Audit Outputs
 
 ### `output/phase1_finalization_audit/`
@@ -114,7 +116,7 @@ Interpretation:
 - it consolidates existing deterministic benchmark artifacts from the fixed `prototype_2021` cases rather than inventing a new cross-model method
 - it now also materializes actual `24/48/72 h` deterministic OpenDrift and deterministic PyGNOME forecast figures plus one side-by-side board per case, all built from the stored benchmark rasters only and shown with neutral/case-local context rather than reusing the old Mindoro-specific prototype framing
 - when the stored prototype case assets expose a defensible provenance point, these figures also include a provenance source-point star
-- PyGNOME is a comparator, not truth
+- PyGNOME is a comparator, not the scoring reference
 - the ranking is relative within the prototype set only and uses higher mean `FSS @ 5 km` followed by lower mean `KL`
 - do not treat this package as final Chapter 3 evidence or as a substitute for the dedicated 2016-2022 Phase 1 regional production rerun
 
@@ -131,7 +133,7 @@ Interpretation:
 ### `output/2016 Legacy Runs FINAL Figures/`
 
 Purpose:
-Authoritative curated `prototype_2016` legacy support export. This is the thesis-facing legacy support package for the 2016 prototype lane and is the easiest place to browse its final Phase 5 deliverables.
+Authoritative curated `prototype_2016` legacy/archive support export. This is the easiest place to browse the preserved 2016 support package. Some internal package names still contain legacy Phase 4/Phase 5 labels, but those are not primary defended evidence.
 
 Expected structure:
 
@@ -162,9 +164,9 @@ Interpretation:
 - `scientific_source_pngs/` keeps the exact stored source PNGs used by the curated publication family
 - `summary/` keeps the copied similarity tables, per-case pairing artifacts, weathering CSVs, the Phase 4 comparator decision note, and packaging notes
 - `manifests/prototype_2016_provenance_metadata.json` records the shared first-code search box `[108.6465, 121.3655, 6.1865, 20.3515]`, the three original source boxes, and the historical-origin note explaining why the first three 2016 drifter cases became the team’s initial proof-of-pipeline focus on the west coast of the Philippines
-- `prototype_2016` remains support-only, with visible thesis-facing support flow `Phase 1 -> Phase 2 -> Phase 3A -> Phase 4 -> Phase 5`
-- this lane has no thesis-facing `Phase 3B` or `Phase 3C`
-- the generic `output/figure_package_publication/` package remains mostly a 2016 Phase 3A figure source; the dedicated 2016 Phase 4/Phase 5 packaging now lives here
+- `prototype_2016` is legacy/archive support only; some internal package names still contain Phase 4/Phase 5 labels, but those are not primary defended evidence
+- this lane has no primary Mindoro `B1` or DWH validation claim
+- the generic `output/figure_package_publication/` package remains mostly a 2016 Phase 3A figure source; the dedicated legacy archive packaging lives here
 - the Phase 4 comparator pilot stays budget-only and descriptive; shoreline comparison is not packaged unless matched PyGNOME shoreline products exist
 - the shared first-code search box is historical-origin metadata only and does not replace the stored case-local prototype scientific/display extents
 
@@ -399,7 +401,7 @@ Interpretation:
 - use this directory to audit current reproducibility/package state
 - this layer is intentionally non-scientific and does not recompute scientific scores
 - the phase-status registry is the machine-readable summary of what is reportable, frozen, or inherited-provisional
-- because this docs-only pass does not regenerate artifacts, some machine-readable files here may still use older Phase 4/5 labels until `phase5_sync` is rerun
+- because this docs-only pass does not regenerate artifacts, some machine-readable files here may still use legacy Phase 4/Phase 5 package labels until `phase5_sync` is rerun
 
 ## Read-Only Dashboard Layer
 

@@ -22,11 +22,16 @@ docker compose up -d --build
 docker compose ps
 ```
 
-Use `docker compose` with current Docker Desktop. If you are on an older Compose v1 install, replace `docker compose` with `docker-compose`.
+## 2. Start With Panel Mode
 
-The guarded `.env` command does not overwrite an existing local environment file. On zsh/macOS, do not paste inline comments after the `cp` command; use the guarded command above.
+```powershell
+.\panel.ps1
+.\start.ps1 -Panel
+```
 
-## 2. List The Current Launcher Entries
+Panel mode is review-only / stored-output-only unless you intentionally switch into researcher or audit reruns.
+
+## 3. Inspect The Current Launcher Catalog
 
 ```powershell
 .\start.ps1 -List -NoPause
@@ -34,19 +39,15 @@ The guarded `.env` command does not overwrite an existing local environment file
 .\start.ps1 -Help -NoPause
 ```
 
-These commands are the safe way to inspect the current launcher catalog before running anything.
-
 On macOS or Linux with PowerShell 7 installed, use `pwsh ./start.ps1 -List -NoPause` and `pwsh ./start.ps1 -Help -NoPause`.
 
-## 3. Use The Canonical Interactive Launcher Path
+## 4. Use The Canonical Interactive Launcher Path
 
-Run workflows through the launcher with:
+Run workflows through:
 
 ```powershell
 .\start.ps1 -Entry <entry_id>
 ```
-
-Use `-NoPause` only when you intentionally want the launcher to finish without the final pause.
 
 Read-only entries to use first:
 
@@ -62,9 +63,9 @@ Read-only entries to use first:
 .\start.ps1 -Entry prototype_legacy_final_figures
 ```
 
-## 4. Run Reportable Workflows Intentionally
+## 5. Run Scientific Reruns Intentionally
 
-These are the current main thesis evidence entries:
+Main evidence reruns:
 
 ```powershell
 .\start.ps1 -Entry phase1_mindoro_focus_provenance
@@ -73,9 +74,7 @@ These are the current main thesis evidence entries:
 .\start.ps1 -Entry mindoro_reportable_core
 ```
 
-Use them only when you want a deliberate rerun of the underlying science or reportable package.
-
-## 5. Run Support And Archive Workflows Only When Needed
+Support and archive reruns:
 
 ```powershell
 .\start.ps1 -Entry mindoro_phase4_only
@@ -90,9 +89,9 @@ Use them only when you want a deliberate rerun of the underlying science or repo
 
 Compatibility note:
 
-- `mindoro_march13_14_noaa_reinit_stress_test` still works, but it is a legacy alias only and is no longer the primary command wording.
+- `mindoro_march13_14_noaa_reinit_stress_test` still works, but it is a compatibility alias only.
 
-## 6. Use The Canonical Prompt-Free Container Path For Scripts Or CI
+## 6. Use The Canonical Prompt-Free Container Path
 
 ```bash
 docker compose exec -T -e WORKFLOW_MODE=<workflow_mode> -e PIPELINE_PHASE=<phase> <pipeline|gnome> python -m src
@@ -112,8 +111,6 @@ docker compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=fig
 docker compose exec -T -e WORKFLOW_MODE=prototype_2016 -e PIPELINE_PHASE=prototype_legacy_final_figures pipeline python -m src
 ```
 
-Use [docs/COMMAND_MATRIX.md](docs/COMMAND_MATRIX.md) for the exact prompt-free phase sequences behind each multi-step launcher entry.
-
 ## 7. Launch The Read-Only Local Dashboard
 
 ```bash
@@ -132,16 +129,12 @@ If you want the UI to reflect the latest packaged read-only outputs first, refre
 .\start.ps1 -Entry figure_package_publication
 ```
 
-The dashboard stays read-only and does not expose scientific rerun controls.
+## 8. Current Guardrails
 
-## 8. Current Caution Notes
-
-- Phase 1 dedicated `2016-2022` rerun outputs now exist and stage a candidate baseline, but the default spill-case baseline remains a manual promotion or trial decision.
-- Phase 2 is scientifically usable, but not scientifically frozen.
-- The frozen Mindoro March 3 -> March 6 base case remains in `config/case_mindoro_retro_2023.yaml`; the promoted March 13 -> March 14 R1 primary validation row is tracked in `config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml`.
-- The March 13 -> March 14 R0 archived baseline, March 6 B2, and March 3 -> March 6 B3 remain repo-preserved as archive-only provenance material rather than thesis-facing Mindoro validation rows.
-- March 13 -> March 14 must keep the shared-imagery caveat explicit, so do not describe it as independent day-to-day validation.
-- `Phase 3B` and `Phase 3C` are validation-only lanes.
-- Outside `prototype_2016`, `phase4_oiltype_and_shoreline`, `phase5_sync`, the galleries, and the dashboard are support layers rather than main thesis phases.
-- Phase 4 cross-model comparison is still deferred; the UI surfaces that status directly and does not fake Phase 4 PyGNOME comparison pages.
-- Prototype mode remains for debugging and regression only.
+- `B1` is the only main-text primary Mindoro validation row.
+- March 13-14 keeps the shared-imagery caveat explicit and must not be described as independent day-to-day validation.
+- `Track A` and every PyGNOME branch remain comparator-only support.
+- DWH remains a separate external transfer-validation story.
+- Mindoro oil-type and shoreline outputs remain support/context only.
+- `prototype_2016` is legacy/archive support only; some internal package names may still contain Phase 4/Phase 5 labels, but those are not primary defended evidence.
+- The dashboard stays read-only and does not expose scientific rerun controls.

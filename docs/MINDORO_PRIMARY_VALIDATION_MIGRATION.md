@@ -56,4 +56,4 @@ The synced Phase 5 case registry now also carries:
 ## Claim Guardrail
 
 Both NOAA/NESDIS public products for the promoted March 13 -> March 14 pair cite WorldView-3 imagery acquired on `2023-03-12`.
-That means the promoted B1 row is a reinitialization-based public-validation pair with shared-imagery provenance, not a fully independent day-to-day validation.
+That means the promoted B1 row is a reinitialization-based public-validation pair with shared-imagery provenance, not an independent day-to-day validation pair.

@@ -4,12 +4,23 @@
 
 - Panel mode is the defense-safe default path.
 - The full launcher is the researcher / audit path.
-- Raw phase names are not the primary user-facing startup commands.
-- Use the launcher entry IDs and thesis-role categories shown below.
+- Use launcher entry IDs from [config/launcher_matrix.json](../config/launcher_matrix.json) as the user-facing vocabulary.
+- Panel mode stays review-only / stored-output-only unless you intentionally choose a scientific rerun.
+
+## Current Manuscript Evidence Order
+
+1. Focused Mindoro Phase 1 provenance
+2. Phase 2 standardized forecast products
+3. Mindoro `B1` primary public-observation validation
+4. Mindoro `Track A` comparator-only support
+5. DWH external transfer validation
+6. Mindoro oil-type and shoreline support/context
+7. `prototype_2016` legacy/archive support
+8. Reproducibility / governance / read-only package layer
 
 ## Panel Default
 
-Start here for defense or panel inspection:
+Start here:
 
 ```powershell
 .\panel.ps1
@@ -31,28 +42,28 @@ Safe inspection helpers:
 | --- | --- |
 | Defense / panel inspection | `.\panel.ps1` |
 | Open dashboard only | panel option `1`, or `docker compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501` |
-| Inspect drifter provenance behind B1 | panel option `7`, or `.\start.ps1 -Entry b1_drifter_context_panel` |
+| Inspect drifter provenance behind `B1` | panel option `7`, or `.\start.ps1 -Entry b1_drifter_context_panel` |
 | Verify manuscript numbers | panel option `2` |
-| Rebuild publication figures only | panel option `3`, or `.\start.ps1 -Entry figure_package_publication` |
-| Rebuild B1 validation | `.\start.ps1 -Entry mindoro_phase3b_primary_public_validation` |
-| Focused Phase 1 provenance rerun | `.\start.ps1 -Entry phase1_mindoro_focus_provenance` |
-| DWH external transfer rerun | `.\start.ps1 -Entry dwh_reportable_bundle` |
-| Mindoro oil-type / shoreline support | `.\start.ps1 -Entry mindoro_phase4_only` |
-| Legacy 2016 support | `.\start.ps1 -Entry prototype_legacy_bundle` or `.\start.ps1 -Entry prototype_legacy_final_figures` |
+| Rebuild publication figures from stored outputs only | panel option `3`, or `.\start.ps1 -Entry figure_package_publication` |
+| Run focused Phase 1 provenance rerun intentionally | `.\start.ps1 -Entry phase1_mindoro_focus_provenance` |
+| Run `B1` rerun intentionally | `.\start.ps1 -Entry mindoro_phase3b_primary_public_validation` |
+| Run DWH rerun intentionally | `.\start.ps1 -Entry dwh_reportable_bundle` |
+| Run Mindoro oil-type / shoreline support intentionally | `.\start.ps1 -Entry mindoro_phase4_only` |
+| Open legacy/archive support intentionally | `.\start.ps1 -Entry prototype_legacy_final_figures` or `.\start.ps1 -Entry prototype_legacy_bundle` |
 
 ## Role Groups
 
 | Launcher group | Preferred entries | Notes |
 | --- | --- | --- |
-| Main thesis evidence reruns | `phase1_mindoro_focus_provenance`, `mindoro_phase3b_primary_public_validation`, `dwh_reportable_bundle`, `mindoro_reportable_core` | Intentional scientific reruns only. |
-| Support/context and appendix reruns | `mindoro_phase4_only`, `mindoro_appendix_sensitivity_bundle` | Support/context only; not main-text primary validation. |
+| Main evidence reruns | `phase1_mindoro_focus_provenance`, `mindoro_phase3b_primary_public_validation`, `dwh_reportable_bundle`, `mindoro_reportable_core` | Intentional scientific reruns only. |
+| Support/context reruns | `mindoro_phase4_only`, `mindoro_appendix_sensitivity_bundle` | Support/context only; not main-text validation. |
 | Archive/provenance reruns | `phase1_regional_reference_rerun`, `mindoro_march13_14_phase1_focus_trial`, `mindoro_march6_recovery_sensitivity`, `mindoro_march23_extended_public_stress_test` | Archive, provenance, or governance lanes only. |
-| Legacy prototype/debug reruns | `prototype_legacy_final_figures`, `prototype_2021_bundle`, `prototype_legacy_bundle` | Legacy support/debug only. |
-| Read-only packaging, audits, dashboard, and docs | `b1_drifter_context_panel`, `phase1_audit`, `phase2_audit`, `final_validation_package`, `phase5_sync`, `trajectory_gallery`, `trajectory_gallery_panel`, `figure_package_publication` | Stored-output-only or packaging-only actions. |
+| Legacy/archive support | `prototype_legacy_final_figures`, `prototype_2021_bundle`, `prototype_legacy_bundle` | Legacy support/debug only. |
+| Read-only governance | `b1_drifter_context_panel`, `phase1_audit`, `phase2_audit`, `final_validation_package`, `phase5_sync`, `trajectory_gallery`, `trajectory_gallery_panel`, `figure_package_publication` | Stored-output-only or packaging-only actions. |
 
 ## Launcher Entry Map
 
-| Entry ID | Thesis role | Run kind | Recommended for | Interactive launcher command | Prompt-free phase mapping |
+| Entry ID | Thesis role | Run kind | Recommended for | Interactive command | Prompt-free phase mapping |
 | --- | --- | --- | --- | --- | --- |
 | `phase1_mindoro_focus_provenance` | primary evidence | scientific rerun | researcher | `.\start.ps1 -Entry phase1_mindoro_focus_provenance` | `pipeline: phase1_production_rerun` |
 | `mindoro_phase3b_primary_public_validation` | primary evidence | scientific rerun | researcher | `.\start.ps1 -Entry mindoro_phase3b_primary_public_validation` | `pipeline: phase3b_extended_public -> phase3b_extended_public_scored_march13_14_reinit` |
@@ -78,13 +89,11 @@ Safe inspection helpers:
 
 ## Compatibility Aliases
 
-These IDs still work, but they are no longer the preferred wording:
-
 | Alias ID | Prefer instead | Notes |
 | --- | --- | --- |
 | `phase1_mindoro_focus_pre_spill_experiment` | `phase1_mindoro_focus_provenance` | Same focused Mindoro provenance workflow. |
 | `phase1_production_rerun` | `phase1_regional_reference_rerun` | Same broader regional reference/governance workflow. |
-| `mindoro_march13_14_noaa_reinit_stress_test` | `mindoro_phase3b_primary_public_validation` | Legacy validation + comparator bundle kept for older scripts only. |
+| `mindoro_march13_14_noaa_reinit_stress_test` | `mindoro_phase3b_primary_public_validation` | Compatibility alias for older scripts only. |
 
 ## Exact Prompt-Free Read-Only Commands
 
@@ -128,9 +137,9 @@ docker compose exec -T -e WORKFLOW_MODE=dwh_retro_2010 -e PIPELINE_PHASE=phase3c
 ## Guardrails
 
 - `B1` is the only main-text primary Mindoro validation row.
-- The March 13 -> March 14 `B1` pair keeps the shared-imagery caveat explicit.
-- Track `A` and every PyGNOME branch remain comparator-only support.
+- The March 13-14 `B1` pair keeps the shared-imagery caveat explicit.
+- `Track A` and every PyGNOME branch remain comparator-only support.
 - DWH is external transfer validation, not Mindoro recalibration.
-- Mindoro Phase 4 oil-type and shoreline outputs remain support/context only.
-- `prototype_2016` remains legacy support only.
-- `output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml` remains a staged candidate artifact only; promotion into `config/phase1_baseline_selection.yaml` stays explicit and manual.
+- Mindoro oil-type and shoreline outputs remain support/context only.
+- `prototype_2016` is legacy/archive support only; some internal package names may still contain Phase 4/Phase 5 labels, but those are not primary defended evidence.
+- `output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml` remains staged only; promotion into `config/phase1_baseline_selection.yaml` stays explicit and manual.
