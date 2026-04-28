@@ -10,7 +10,7 @@ Start with:
 .\panel.ps1
 ```
 
-or:
+Or:
 
 ```powershell
 .\start.ps1 -Panel
@@ -113,7 +113,7 @@ The launcher entrypoint is [start.ps1](start.ps1), and the current entry catalog
 - Use launcher entry IDs and role groups as the user-facing vocabulary.
 - The README entry IDs below were checked against `config/launcher_matrix.json`.
 
-Preferred entry IDs:
+### Preferred Entry IDs
 
 - Main evidence reruns: `phase1_mindoro_focus_provenance`, `mindoro_phase3b_primary_public_validation`, `dwh_reportable_bundle`, `mindoro_reportable_core`
 - Support/context reruns: `mindoro_phase4_only`, `mindoro_appendix_sensitivity_bundle`
@@ -121,13 +121,13 @@ Preferred entry IDs:
 - Read-only governance surfaces: `b1_drifter_context_panel`, `phase1_audit`, `phase2_audit`, `final_validation_package`, `phase5_sync`, `trajectory_gallery`, `trajectory_gallery_panel`, `figure_package_publication`
 - Legacy/archive support: `prototype_legacy_final_figures`, `prototype_2021_bundle`, `prototype_legacy_bundle`
 
-Compatibility aliases still work:
+### Compatibility Aliases
 
 - `phase1_mindoro_focus_pre_spill_experiment` -> prefer `phase1_mindoro_focus_provenance`
 - `phase1_production_rerun` -> prefer `phase1_regional_reference_rerun`
 - `mindoro_march13_14_noaa_reinit_stress_test` -> compatibility alias only; prefer `mindoro_phase3b_primary_public_validation`
 
-Useful commands:
+### Useful Commands
 
 ```powershell
 .\start.ps1 -List -NoPause

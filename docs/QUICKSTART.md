@@ -24,12 +24,14 @@ docker compose ps
 
 ## 2. Start With Panel Mode
 
+Use panel mode first:
+
 ```powershell
 .\panel.ps1
 .\start.ps1 -Panel
 ```
 
-Panel mode is review-only / stored-output-only unless you intentionally switch into researcher or audit reruns.
+Panel mode is the default review path. It stays review-only / stored-output-only unless you intentionally switch to researcher or audit reruns.
 
 ## 3. Inspect The Current Launcher Catalog
 
@@ -41,7 +43,20 @@ Panel mode is review-only / stored-output-only unless you intentionally switch i
 
 On macOS or Linux with PowerShell 7 installed, use `pwsh ./start.ps1 -List -NoPause` and `pwsh ./start.ps1 -Help -NoPause`.
 
-## 4. Use The Canonical Interactive Launcher Path
+## 4. Current Evidence Defaults
+
+- Preferred focused B1 provenance entry: `phase1_mindoro_focus_provenance`
+- Focused Mindoro Phase 1 selected recipe: `cmems_gfs`
+- Official `B1` adopts `cmems_gfs`
+- Broader regional/reference compatibility lane: `phase1_regional_reference_rerun`
+- Compatibility alias only: `phase1_mindoro_focus_pre_spill_experiment`
+- `B1` is the only main Philippine / Mindoro validation claim
+- `Track A` and PyGNOME branches are comparator-only support
+- DWH remains external transfer validation only
+- Mindoro oil-type and shoreline outputs remain support/context only
+- `prototype_2016` remains legacy/archive support only
+
+## 5. Use The Canonical Interactive Launcher Path
 
 Run workflows through:
 
@@ -63,7 +78,7 @@ Read-only entries to use first:
 .\start.ps1 -Entry prototype_legacy_final_figures
 ```
 
-## 5. Run Scientific Reruns Intentionally
+## 6. Run Scientific Reruns Intentionally
 
 Main evidence reruns:
 
@@ -87,11 +102,13 @@ Support and archive reruns:
 .\start.ps1 -Entry prototype_legacy_bundle
 ```
 
-Compatibility note:
+Compatibility aliases:
 
-- `mindoro_march13_14_noaa_reinit_stress_test` still works, but it is a compatibility alias only.
+- `phase1_mindoro_focus_pre_spill_experiment` still works, but it is a compatibility alias for `phase1_mindoro_focus_provenance`.
+- `phase1_production_rerun` still works as a compatibility/internal label for the broader regional/reference lane represented by `phase1_regional_reference_rerun`.
+- `mindoro_march13_14_noaa_reinit_stress_test` still works, but it is a compatibility alias for `mindoro_phase3b_primary_public_validation`.
 
-## 6. Use The Canonical Prompt-Free Container Path
+## 7. Use The Canonical Prompt-Free Container Path
 
 ```bash
 docker compose exec -T -e WORKFLOW_MODE=<workflow_mode> -e PIPELINE_PHASE=<phase> <pipeline|gnome> python -m src
@@ -111,7 +128,7 @@ docker compose exec -T -e WORKFLOW_MODE=mindoro_retro_2023 -e PIPELINE_PHASE=fig
 docker compose exec -T -e WORKFLOW_MODE=prototype_2016 -e PIPELINE_PHASE=prototype_legacy_final_figures pipeline python -m src
 ```
 
-## 7. Launch The Read-Only Local Dashboard
+## 8. Launch The Read-Only Local Dashboard
 
 ```bash
 docker compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
@@ -129,7 +146,7 @@ If you want the UI to reflect the latest packaged read-only outputs first, refre
 .\start.ps1 -Entry figure_package_publication
 ```
 
-## 8. Current Guardrails
+## 9. Current Guardrails
 
 - `B1` is the only main-text primary Mindoro validation row.
 - March 13-14 keeps the shared-imagery caveat explicit and must not be described as independent day-to-day validation.

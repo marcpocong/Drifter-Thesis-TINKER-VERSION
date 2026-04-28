@@ -367,7 +367,7 @@ $graphics.FillRectangle($badgeFillBrush, $badgeX, $badgeY, $badgeWidth, $badgeHe
 $graphics.DrawRectangle($boxPen, $badgeX, $badgeY, $badgeWidth, $badgeHeight)
 $badgeTextRect = [System.Drawing.RectangleF]::new([single]($badgeX + 18), [single]($badgeY + 14), [single]($badgeWidth - 36), [single]($badgeHeight - 28))
 $graphics.DrawString(
-    "Comparator support only; PyGNOME is not observational truth.",
+    "Comparator support only; PyGNOME is not the observational scoring reference.",
     $badgeFont,
     $darkBrush,
     $badgeTextRect
@@ -436,7 +436,7 @@ $canvas.SetResolution(300.0, 300.0)
 $canvas.Save($primaryPngPath, [System.Drawing.Imaging.ImageFormat]::Png)
 Copy-Item -LiteralPath $primaryPngPath -Destination $secondaryPngPath -Force
 
-$noteTextManifest = "Comparator support only; PyGNOME is not observational truth."
+$noteTextManifest = "Comparator support only; PyGNOME is not the observational scoring reference."
 $manifest = [ordered]@{
     figure_label = "Figure 4.5"
     title = "Mindoro Track A same-case OpenDrift-PyGNOME spatial comparator board"
