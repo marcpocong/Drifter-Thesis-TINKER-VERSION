@@ -117,6 +117,16 @@ Main panel-safe entry points:
 .\start.ps1 -Help -NoPause
 ```
 
+macOS with Homebrew:
+
+```bash
+brew install powershell
+pwsh ./panel.ps1
+pwsh ./start.ps1 -Panel
+pwsh ./start.ps1 -List -NoPause
+pwsh ./start.ps1 -Help -NoPause
+```
+
 Read-only / packaging-only launcher entries:
 
 ```powershell

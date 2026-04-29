@@ -16,6 +16,15 @@ Or:
 .\start.ps1 -Panel
 ```
 
+On macOS, install PowerShell 7 with Homebrew's formula and invoke the launcher through `pwsh`:
+
+```bash
+brew install powershell
+cd ~/Documents/GitHub/Drifter-Thesis-TINKER-VERSION
+pwsh ./panel.ps1
+pwsh ./start.ps1 -Panel
+```
+
 If the containers are already up and you only need the dashboard:
 
 ```bash
@@ -138,6 +147,15 @@ The launcher entrypoint is [start.ps1](start.ps1), and the current entry catalog
 .\start.ps1 -Help -NoPause
 .\start.ps1 -Explain mindoro_phase3b_primary_public_validation -NoPause
 .\start.ps1 -Entry mindoro_phase3b_primary_public_validation -DryRun -NoPause
+```
+
+macOS / Linux equivalents use `pwsh`:
+
+```bash
+pwsh ./panel.ps1
+pwsh ./start.ps1 -Panel
+pwsh ./start.ps1 -List -NoPause
+pwsh ./start.ps1 -Entry mindoro_phase3b_primary_public_validation -DryRun -NoPause
 ```
 
 Launcher controls:

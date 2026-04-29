@@ -22,6 +22,22 @@
 .\start.ps1 -Entry <entry_id> -DryRun -NoPause
 ```
 
+macOS with Homebrew:
+
+```bash
+brew install powershell
+pwsh ./panel.ps1
+pwsh ./start.ps1 -Panel
+pwsh ./start.ps1
+pwsh ./start.ps1 -List -NoPause
+pwsh ./start.ps1 -Entry <entry_id>
+pwsh ./start.ps1 -Entry <entry_id> -DryRun -NoPause
+```
+
+Use the stable Homebrew formula `powershell`; do not use the deprecated `powershell@preview` cask.
+
+Linux uses the same `pwsh ./start.ps1 ...` command shape after PowerShell 7 is installed through that distribution's package manager.
+
 ## Shared Controls
 
 - `B`, `BACK`, `0` go back when a previous menu exists.

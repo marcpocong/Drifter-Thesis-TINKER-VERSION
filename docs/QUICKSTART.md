@@ -3,11 +3,29 @@
 ## 1. Start The Containers
 
 Install Docker Desktop first, then run the setup from the repository root.
+On macOS, install PowerShell 7 with the Homebrew formula when you want the interactive launcher:
 
-macOS / Linux:
+```bash
+brew install powershell
+pwsh --version
+```
+
+Do not use the deprecated `powershell@preview` cask. Current Homebrew taps expose stable PowerShell as the `powershell` formula.
+
+macOS:
 
 ```bash
 cd ~/Documents/GitHub/Drifter-Thesis-TINKER-VERSION
+[ -f .env ] || cp .env.example .env
+open -a Docker
+docker compose up -d --build
+docker compose ps
+```
+
+Linux:
+
+```bash
+cd /path/to/Drifter-Thesis-TINKER-VERSION
 [ -f .env ] || cp .env.example .env
 docker compose up -d --build
 docker compose ps
@@ -29,6 +47,13 @@ Use panel mode first:
 ```powershell
 .\panel.ps1
 .\start.ps1 -Panel
+```
+
+macOS / Linux with PowerShell 7:
+
+```bash
+pwsh ./panel.ps1
+pwsh ./start.ps1 -Panel
 ```
 
 Panel mode is the default review path. It stays review-only / stored-output-only unless you intentionally switch to researcher or audit reruns.
@@ -62,6 +87,12 @@ Run workflows through:
 
 ```powershell
 .\start.ps1 -Entry <entry_id>
+```
+
+On macOS / Linux, prefix launcher calls with `pwsh`:
+
+```bash
+pwsh ./start.ps1 -Entry <entry_id>
 ```
 
 Read-only entries to use first:

@@ -12,6 +12,17 @@ or:
 .\start.ps1 -Panel
 ```
 
+macOS with Homebrew:
+
+```bash
+brew install powershell
+cd ~/Documents/GitHub/Drifter-Thesis-TINKER-VERSION
+pwsh ./panel.ps1
+pwsh ./start.ps1 -Panel
+```
+
+Linux uses the same `pwsh ./panel.ps1` and `pwsh ./start.ps1 -Panel` commands after PowerShell 7 is installed through that distribution's package manager.
+
 This opens the panel-safe review menu instead of the full research launcher. Panel mode is review-only / stored-output-only unless you intentionally switch to researcher or audit reruns.
 Use launcher entry IDs and panel options as the user-facing startup vocabulary; raw phase names are not the primary startup commands.
 
@@ -87,6 +98,12 @@ Choose `Advanced` from the panel menu, or run:
 
 ```powershell
 .\start.ps1
+```
+
+macOS / Linux with PowerShell 7:
+
+```bash
+pwsh ./start.ps1
 ```
 
 Use the full launcher only when you intentionally want researcher or audit reruns.

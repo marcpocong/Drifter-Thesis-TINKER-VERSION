@@ -8,7 +8,15 @@ The local Streamlit app is a read-only thesis presentation layer over the artifa
 
 Start the pipeline container if needed:
 
-macOS / Linux:
+macOS:
+
+```bash
+[ -f .env ] || cp .env.example .env
+open -a Docker
+docker compose up -d pipeline
+```
+
+Linux:
 
 ```bash
 [ -f .env ] || cp .env.example .env
