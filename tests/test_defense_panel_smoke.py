@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import os
+import subprocess
 
 import pytest
 
 from scripts.defense_readiness_common import (
     PANEL_PS_PATH,
+    START_PS_PATH,
     compose_command,
     detect_compose_mode,
     diff_snapshots,
@@ -68,6 +70,52 @@ def test_panel_wrapper_no_pause_delegates_cleanly():
     assert result.returncode == 0, result.combined_output
     assert "PANEL REVIEW MODE" in result.combined_output
     assert "Use .\\panel.ps1 or .\\start.ps1 -Panel for the interactive defense menu." in result.combined_output
+
+
+def test_interactive_explain_accepts_visible_menu_number():
+    process = subprocess.run(
+        [
+            "powershell",
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            str(START_PS_PATH),
+        ],
+        cwd=str(START_PS_PATH.parent),
+        input="1\nX\n3\n\nQ\n",
+        text=True,
+        capture_output=True,
+        timeout=120,
+        check=False,
+    )
+    combined_output = (process.stdout or "") + (process.stderr or "")
+    assert process.returncode == 0, combined_output
+    assert "ENTRY PREVIEW" in combined_output
+    assert "Entry ID: dwh_reportable_bundle" in combined_output
+
+
+def test_interactive_explain_invalid_reference_stays_in_menu():
+    process = subprocess.run(
+        [
+            "powershell",
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            str(START_PS_PATH),
+        ],
+        cwd=str(START_PS_PATH.parent),
+        input="1\nX\n999\nQ\n",
+        text=True,
+        capture_output=True,
+        timeout=120,
+        check=False,
+    )
+    combined_output = (process.stdout or "") + (process.stderr or "")
+    assert process.returncode == 0, combined_output
+    assert "[ERROR] Unknown selection '999'." in combined_output
+    assert "Goodbye." in combined_output
 
 
 def test_expensive_entry_stops_at_noninteractive_confirmation_guard():

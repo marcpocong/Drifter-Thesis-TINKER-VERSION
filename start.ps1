@@ -535,6 +535,73 @@ function Get-LauncherEntriesForRoleGroup {
     }
 }
 
+function Test-LauncherEntryMatchesRoleGroup {
+    param(
+        [Parameter(Mandatory = $true)]$LauncherEntry,
+        [Parameter(Mandatory = $true)][string]$GroupId
+    )
+
+    switch ($GroupId) {
+        "main_thesis_evidence" {
+            return ([string]$LauncherEntry.thesis_role -eq "primary_evidence")
+        }
+        "support_context" {
+            return ([string]$LauncherEntry.thesis_role -in @("support_context", "comparator_support"))
+        }
+        "archive_provenance" {
+            return ([string]$LauncherEntry.thesis_role -eq "archive_provenance")
+        }
+        "legacy_debug" {
+            return ([string]$LauncherEntry.thesis_role -eq "legacy_support")
+        }
+        "read_only_governance" {
+            return ([string]$LauncherEntry.thesis_role -eq "read_only_governance")
+        }
+        default {
+            return $false
+        }
+    }
+}
+
+function Resolve-LauncherRoleGroupEntryReference {
+    param(
+        [Parameter(Mandatory = $true)][string]$Reference,
+        [Parameter(Mandatory = $true)][hashtable]$SelectionMap,
+        [Parameter(Mandatory = $true)][string]$GroupId,
+        [switch]$ThrowIfUnknown
+    )
+
+    $trimmedReference = ([string]$Reference).Trim()
+    if ([string]::IsNullOrWhiteSpace($trimmedReference)) {
+        if ($ThrowIfUnknown) {
+            throw "Enter a visible menu number or an entry ID from this section."
+        }
+        return $null
+    }
+
+    if ($SelectionMap.ContainsKey($trimmedReference)) {
+        return Get-LauncherEntryById -EntryId $SelectionMap[$trimmedReference]
+    }
+
+    $launcherEntry = Get-LauncherEntries | Where-Object { $_.entry_id -eq $trimmedReference } | Select-Object -First 1
+    if ($null -eq $launcherEntry) {
+        if ($ThrowIfUnknown) {
+            $menuNumbers = (($SelectionMap.Keys | Sort-Object {[int]$_}) -join ", ")
+            throw "Unknown selection '$trimmedReference'. Use a visible menu number ($menuNumbers) or an entry ID from this section."
+        }
+        return $null
+    }
+
+    if (-not (Test-LauncherEntryMatchesRoleGroup -LauncherEntry $launcherEntry -GroupId $GroupId)) {
+        if ($ThrowIfUnknown) {
+            throw "Entry '$trimmedReference' is not part of this section. Use a visible menu number or an entry ID shown in this menu."
+        }
+        return $null
+    }
+
+    return $launcherEntry
+}
+
 function ConvertTo-Hashtable {
     param([object]$InputObject)
 
@@ -1538,7 +1605,7 @@ function Show-LauncherRoleGroupMenu {
             Write-Host ""
         }
 
-        Write-Host "  X. Explain an entry ID without running it" -ForegroundColor Yellow
+        Write-Host "  X. Explain a visible menu number or entry ID without running it" -ForegroundColor Yellow
         Write-Host "  B. Back" -ForegroundColor Yellow
         Write-Host "  Q. Exit" -ForegroundColor Yellow
         Write-Host ""
@@ -1582,11 +1649,21 @@ function Show-LauncherRoleGroupMenu {
                 }
             }
             "X" {
-                $entryId = (Read-Host "Entry ID to explain").Trim()
-                if (-not [string]::IsNullOrWhiteSpace($entryId)) {
-                    $launcherEntry = Get-LauncherEntryById -EntryId $entryId
-                    Show-LauncherEntryPreview -LauncherEntry $launcherEntry
-                    Pause-IfNeeded
+                $entryReference = (Read-Host "Menu number or entry ID to explain").Trim()
+                if (-not [string]::IsNullOrWhiteSpace($entryReference)) {
+                    try {
+                        $launcherEntry = Resolve-LauncherRoleGroupEntryReference `
+                            -Reference $entryReference `
+                            -SelectionMap $selectionMap `
+                            -GroupId $GroupId `
+                            -ThrowIfUnknown
+                        Show-LauncherEntryPreview -LauncherEntry $launcherEntry
+                        Pause-IfNeeded
+                    }
+                    catch {
+                        Write-Host "[ERROR] $($_.Exception.Message)" -ForegroundColor Red
+                        Start-Sleep -Seconds 2
+                    }
                 }
                 continue
             }
@@ -1598,8 +1675,11 @@ function Show-LauncherRoleGroupMenu {
             }
         }
 
-        if ($selectionMap.ContainsKey($choice)) {
-            $launcherEntry = Get-LauncherEntryById -EntryId $selectionMap[$choice]
+        $launcherEntry = Resolve-LauncherRoleGroupEntryReference `
+            -Reference $choice `
+            -SelectionMap $selectionMap `
+            -GroupId $GroupId
+        if ($null -ne $launcherEntry) {
             Write-Section $launcherEntry.label
             try {
                 Invoke-LauncherEntry -LauncherEntry $launcherEntry
@@ -1612,9 +1692,9 @@ function Show-LauncherRoleGroupMenu {
         }
 
         if ($GroupId -eq "read_only_governance") {
-            Write-Host "Invalid option. Use a menu number, U, R, P, X, B, or Q." -ForegroundColor Red
+            Write-Host "Invalid option. Use a visible menu number or entry ID, U, R, P, X, B, or Q." -ForegroundColor Red
         } else {
-            Write-Host "Invalid option. Use a menu number, X, B, or Q." -ForegroundColor Red
+            Write-Host "Invalid option. Use a visible menu number or entry ID, X, B, or Q." -ForegroundColor Red
         }
         Start-Sleep -Seconds 2
     }
