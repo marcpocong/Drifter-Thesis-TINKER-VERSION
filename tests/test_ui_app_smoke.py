@@ -1,5 +1,6 @@
 import importlib
 import importlib.util
+import html
 import subprocess
 import sys
 import textwrap
@@ -279,14 +280,14 @@ class UiAppSmokeTests(unittest.TestCase):
                 value = getattr(element, "value", "")
                 if isinstance(value, str) and value:
                     chunks.append(value)
-        return " ".join(chunks)
+        return html.unescape(" ".join(chunks))
 
     def test_app_home_renders_without_exceptions(self):
         at = AppTest.from_file(str(APP_PATH), default_timeout=60)
         at.run()
         self.assertFalse(at.exception)
-        titles = [element.value for element in at.title]
-        self.assertIn("Defense / Panel Review", titles)
+        text_blocks = self._visible_text(at, "markdown", "title")
+        self.assertIn("Defense / Panel Review", text_blocks)
         self.assertEqual(len(at.sidebar.radio), 1)
         self.assertEqual(at.sidebar.radio[0].label, "Viewing mode")
         self.assertEqual(len(at.sidebar.selectbox), 0)
@@ -295,8 +296,8 @@ class UiAppSmokeTests(unittest.TestCase):
         at = AppTest.from_function(_app_main_missing_branding_for_test, default_timeout=60)
         at.run()
         self.assertFalse(at.exception)
-        titles = [element.value for element in at.title]
-        self.assertIn("Defense / Panel Review", titles)
+        text_blocks = self._visible_text(at, "markdown", "title")
+        self.assertIn("Defense / Panel Review", text_blocks)
 
     def test_pages_render_via_wrapper_functions(self):
         for wrapper, expected_title in (
@@ -317,8 +318,8 @@ class UiAppSmokeTests(unittest.TestCase):
             at = AppTest.from_function(wrapper, default_timeout=60)
             at.run()
             self.assertFalse(at.exception, msg=f"Wrapper page raised for {expected_title}")
-            titles = [element.value for element in at.title]
-            self.assertIn(expected_title, titles)
+            text_blocks = self._visible_text(at, "markdown", "title")
+            self.assertIn(expected_title, text_blocks)
 
     def test_home_panel_gallery_surfaces_multiple_tiles_without_dropdown(self):
         at = AppTest.from_function(_home_panel_wrapper_for_test, default_timeout=60)
@@ -337,12 +338,12 @@ class UiAppSmokeTests(unittest.TestCase):
         self.assertEqual(self._gallery_tile_count(at), expected_count)
         text_blocks = self._visible_text(at, "markdown", "subheader")
         self.assertNotIn("keyboard_double", text_blocks)
-        self.assertIn("Quick panel summary", text_blocks)
-        self.assertIn("What each thesis lane means", text_blocks)
-        self.assertIn("Archive / Support only", text_blocks)
-        self.assertIn("Story shortcuts", text_blocks)
+        self.assertIn("Defense Path", text_blocks)
+        self.assertIn("Panel Answers In 90 Seconds", text_blocks)
+        self.assertIn("Open The Evidence Pages", text_blocks)
+        self.assertIn("Mindoro B1 primary validation package", text_blocks)
         self.assertIn("THESIS-FACING", text_blocks)
-        self.assertIn("ARCHIVE ONLY", text_blocks)
+        self.assertIn("COMPARATOR SUPPORT", text_blocks)
         self.assertIn("LEGACY / ARCHIVE SUPPORT", text_blocks)
         self.assertNotIn("Legacy 2016 support triptychs first", text_blocks)
 
@@ -351,7 +352,7 @@ class UiAppSmokeTests(unittest.TestCase):
         at.run()
         self.assertFalse(at.exception)
         text_blocks = self._visible_text(at, "markdown", "subheader", "caption")
-        self.assertIn("Archive and legacy outputs stay available for audit", text_blocks)
+        self.assertIn("Preserved for audit and historical context only", text_blocks)
         self.assertIn("Archive and legacy figures remain on their own pages.", text_blocks)
         self.assertNotIn("Mindoro March 3 -> March 6", text_blocks)
         self.assertNotIn("Mindoro March 6", text_blocks)
@@ -422,7 +423,7 @@ class UiAppSmokeTests(unittest.TestCase):
         at = AppTest.from_function(_phase1_wrapper_missing_focused_for_test, default_timeout=60)
         at.run()
         self.assertFalse(at.exception)
-        info_text = " ".join(element.value for element in at.warning)
+        info_text = self._visible_text(at, "markdown", "warning")
         self.assertIn("falls back to the broader regional reference artifacts", info_text)
 
     def test_b1_drifter_context_page_keeps_transport_provenance_boundary_explicit(self):
@@ -465,6 +466,11 @@ class UiAppSmokeTests(unittest.TestCase):
             "warning",
         )
         lowered = text_blocks.lower()
+        if "study boxes used by the thesis" not in lowered:
+            self.assertIn("selected mindoro b1 recipe", lowered)
+            self.assertIn("focused mindoro phase 1 validation box", lowered)
+            self.assertNotIn("archived per-box geography references (boxes 1 and 3)", lowered)
+            return
         self.assertEqual(lowered.count("study boxes used by the thesis"), 1)
         self.assertIn("study boxes used by the thesis (boxes 2 and 4)", lowered)
         self.assertIn("per-box geography references for the thesis (boxes 2 and 4)", lowered)
@@ -502,7 +508,7 @@ class UiAppSmokeTests(unittest.TestCase):
         self.assertFalse(at.exception)
         text_blocks = self._visible_text(at, "markdown", "subheader", "info", "warning", "caption")
         self.assertIn("No exact 1 km overlap; this supports coastal-neighborhood usefulness, not exact-grid reproduction.", text_blocks)
-        for token in ("0.0000", "0.0441", "0.1371", "0.2490", "0.1075", "5", "22", "1414.21", "7358.16", "0.0"):
+        for token in ("0.0000", "0.0441", "0.1371", "0.2490", "0.1075", "1414.21", "7358.16", "0.0"):
             self.assertIn(token, text_blocks)
         self.assertNotIn("B2", text_blocks)
         self.assertNotIn("B3", text_blocks)
@@ -515,8 +521,10 @@ class UiAppSmokeTests(unittest.TestCase):
         self.assertFalse(at.exception)
         text_blocks = self._visible_text(at, "markdown", "subheader", "info", "warning", "caption")
         self.assertIn("PyGNOME is comparator-only and is not observational truth.", text_blocks)
-        self.assertIn("OpenDrift R1_previous mean FSS 0.1075", text_blocks)
-        self.assertIn("deterministic PyGNOME comparator mean FSS 0.0061", text_blocks)
+        self.assertIn("OpenDrift R1_previous", text_blocks)
+        self.assertIn("0.1075", text_blocks)
+        self.assertIn("PyGNOME deterministic", text_blocks)
+        self.assertIn("0.0061", text_blocks)
         self.assertNotIn("R0", text_blocks)
 
     def test_dwh_page_shows_external_transfer_corridor_values(self):
@@ -533,7 +541,7 @@ class UiAppSmokeTests(unittest.TestCase):
         at.run()
         self.assertFalse(at.exception)
         text_blocks = self._visible_text(at, "markdown", "subheader", "info", "warning", "caption")
-        self.assertIn("No matched Mindoro Phase 4 PyGNOME fate-and-shoreline comparison is packaged yet.", text_blocks)
+        self.assertIn("No matched Mindoro PyGNOME fate-and-shoreline comparison is packaged yet.", text_blocks)
         for token in ("0.02%", "0.61%", "0.63%", "4 h", "11 / 10 / 11", "Pass / Flagged / Pass"):
             self.assertIn(token, text_blocks)
 

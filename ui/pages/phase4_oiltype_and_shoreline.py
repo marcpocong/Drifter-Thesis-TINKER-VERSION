@@ -1,4 +1,4 @@
-"""Phase 4 oil-type and shoreline page."""
+"""Mindoro oil-type and shoreline support/context page."""
 
 from __future__ import annotations
 
@@ -71,32 +71,32 @@ def render(state: dict, ui_state: dict) -> None:
         "Downstream oil-type and shoreline outputs show consequence sensitivity under the retained transport setup. They are support/context only, not a primary validation phase.",
         badge=ROLE_CONTEXT,
         eyebrow="Downstream support/context lane",
-        meta=["Support/context only", "OpenDrift/OpenOil scenario outputs", "No matched PyGNOME Phase 4 package"],
+        meta=["Support/context only", "OpenDrift/OpenOil scenario outputs", "No matched PyGNOME fate-and-shoreline package"],
         tone="context",
     )
 
     if export_mode:
         render_export_note(
             [
-                "Export mode keeps the Mindoro Phase 4 story on one print-friendly page.",
-                "The current package remains OpenDrift/OpenOil-only context, and no matched PyGNOME Phase 4 comparator is shown here.",
+                "Export mode keeps the Mindoro oil-type and shoreline support/context story on one print-friendly page.",
+                "The current package remains OpenDrift/OpenOil-only context, and no matched PyGNOME fate-and-shoreline comparator is shown here.",
             ]
         )
 
     render_key_takeaway(
         "Support/context only; not a primary validation phase.",
-        "Phase 4 shows how retained transport produces downstream oil-type and shoreline consequence scenarios. It does not add a second Mindoro validation claim or a matched fate-and-shoreline cross-model comparison.",
+        "This support/context layer shows how retained transport produces downstream oil-type and shoreline consequence scenarios. It does not add a second Mindoro validation claim or a matched fate-and-shoreline cross-model comparison.",
         tone="context",
         badge=ROLE_CONTEXT,
     )
     render_caveat_ribbon(
-        "Phase 4 boundary",
-        "No matched Mindoro Phase 4 PyGNOME fate-and-shoreline comparison is packaged yet. Any PyGNOME fate material in this repo belongs to archive or legacy support and does not create matched Mindoro fate-and-shoreline evidence.",
+        "Comparator boundary",
+        "No matched Mindoro PyGNOME fate-and-shoreline comparison is packaged yet. Any PyGNOME fate material in this repo belongs to archive or legacy support and does not create matched Mindoro fate-and-shoreline evidence.",
         tone="context",
     )
     render_section_header(
         "Scenario Outcomes",
-        "Panel-facing support/context values from the packaged Mindoro Phase 4 bundle.",
+        "Panel-facing support/context values from the packaged Mindoro oil-type and shoreline bundle.",
         badge=ROLE_CONTEXT,
     )
     render_feature_grid(
@@ -148,16 +148,16 @@ def render(state: dict, ui_state: dict) -> None:
 
     render_section_header(
         "Main Result",
-        "Stored budget chart and curated support/context figures are loaded read-only from the packaged Phase 4 outputs.",
+        "Stored budget chart and curated support/context figures are loaded read-only from the packaged Mindoro oil-type and shoreline outputs.",
         badge=ROLE_CONTEXT,
     )
     st.pyplot(phase4_budget_summary_figure(state["phase4_budget_summary"]), width="stretch")
-    st.caption("Stored budget summary chart from the packaged Mindoro Phase 4 bundle.")
+    st.caption("Stored budget summary chart from the packaged Mindoro oil-type and shoreline support/context bundle.")
 
     def _publication_figures() -> None:
         render_figure_gallery(
             figures,
-            title="Mindoro Phase 4 figures",
+            title="Mindoro oil-type and shoreline figures",
             caption="Panel-friendly mode now shows the oil-budget and shoreline boards directly as a gallery. Click any figure to enlarge it and read the fuller context there.",
             limit=2 if export_mode else (None if ui_state["advanced"] else 5),
             columns_per_row=1 if export_mode else 2,
@@ -184,7 +184,7 @@ def render(state: dict, ui_state: dict) -> None:
         )
         if ui_state["advanced"]:
             render_table(
-                "Stored Phase 4 oil-budget registry",
+                "Stored oil-budget support/context registry",
                 state["phase4_budget_summary"],
                 download_name="phase4_oil_budget_summary.csv",
                 caption="Advanced read-only package table. Summary values above are the panel-facing wording authority.",
@@ -192,7 +192,7 @@ def render(state: dict, ui_state: dict) -> None:
                 export_mode=export_mode,
             )
             render_table(
-                "Stored Phase 4 oil-type comparison",
+                "Stored oil-type support/context comparison",
                 state["phase4_oiltype_comparison"],
                 download_name="phase4_oiltype_comparison.csv",
                 caption="Advanced read-only delta-versus-anchor table from the stored bundle.",
@@ -202,17 +202,17 @@ def render(state: dict, ui_state: dict) -> None:
 
     def _shoreline_tables() -> None:
         render_table(
-            "Phase 4 shoreline arrival summary",
+            "Mindoro shoreline arrival summary",
             state["phase4_shoreline_arrival"],
-            download_name="phase4_shoreline_arrival.csv",
+            download_name="mindoro_shoreline_arrival.csv",
             caption="Stored first-arrival summary per scenario.",
             height=220,
             export_mode=export_mode,
         )
         render_table(
-            "Phase 4 shoreline segment impacts",
+            "Mindoro shoreline segment impacts",
             state["phase4_shoreline_segments"],
-            download_name="phase4_shoreline_segments.csv",
+            download_name="mindoro_shoreline_segments.csv",
             caption="Stored shoreline segment impact table; advanced mode can be used to inspect the full per-segment rows.",
             height=300,
             max_rows=None if ui_state["advanced"] else 25,

@@ -274,7 +274,7 @@ def _render_sidebar_controls(state: dict, branding: dict) -> dict:
                 st.metric("Publication figures indexed", len(state["publication_registry"]))
                 st.metric("Focused Phase 1 recipes tested", len(state["phase1_focused_recipe_summary"]))
 
-            with st.expander("Repo read paths", expanded=False):
+            with st.expander("Advanced stored read paths", expanded=False):
                 read_paths = [
                     "output/phase1_mindoro_focus_pre_spill_2016_2023/",
                     "output/Phase 3B March13-14 Final Output/",
@@ -290,6 +290,7 @@ def _render_sidebar_controls(state: dict, branding: dict) -> dict:
                     "output/CASE_MINDORO_RETRO_2023/",
                     "output/CASE_DWH_RETRO_2010_72H/",
                 ]
+                st.caption("Exact folder names are preserved for reproducibility; some legacy export roots still contain older phase labels.")
                 st.code("\n".join(read_paths), language="text")
         else:
             visual_layer = "publication"

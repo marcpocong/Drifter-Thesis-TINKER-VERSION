@@ -1,4 +1,4 @@
-"""DWH Phase 3C transfer-validation page."""
+"""DWH external transfer-validation page."""
 
 from __future__ import annotations
 
@@ -227,8 +227,8 @@ def render(state: dict, ui_state: dict) -> None:
         render_table(
             "C1 deterministic summary",
             state["dwh_deterministic_summary_final"],
-            download_name="phase3c_summary.csv",
-            caption="Curated DWH deterministic summary from the Phase 3C final package.",
+            download_name="dwh_transfer_validation_summary.csv",
+            caption="Curated DWH deterministic summary from the stored external transfer-validation package.",
             height=240,
             export_mode=export_mode,
         )
@@ -275,8 +275,8 @@ def render(state: dict, ui_state: dict) -> None:
         render_table(
             "C2 ensemble summary",
             state["dwh_ensemble_summary_final"],
-            download_name="phase3c_ensemble_summary.csv",
-            caption="Curated DWH ensemble summary from the Phase 3C final package.",
+            download_name="dwh_transfer_validation_ensemble_summary.csv",
+            caption="Curated DWH ensemble summary from the stored external transfer-validation package.",
             height=240,
             export_mode=export_mode,
         )
@@ -295,8 +295,8 @@ def render(state: dict, ui_state: dict) -> None:
         render_table(
             "C3 comparator summary",
             state["dwh_comparator_summary_final"],
-            download_name="phase3c_dwh_pygnome_summary.csv",
-            caption="Curated comparator summary from the DWH Phase 3C final package.",
+            download_name="dwh_pygnome_comparator_summary.csv",
+            caption="Curated comparator summary from the stored DWH external transfer-validation package.",
             height=240,
             export_mode=export_mode,
         )
@@ -331,9 +331,9 @@ def render(state: dict, ui_state: dict) -> None:
 
     def _tables_and_notes() -> None:
         render_table(
-            "Phase 3C main scorecard",
+            "DWH transfer-validation main scorecard",
             state["dwh_main_scorecard_final"],
-            download_name="phase3c_main_scorecard.csv",
+            download_name="dwh_transfer_validation_main_scorecard.csv",
             caption="This scorecard reuses the stored DWH final-validation rows across C1, C2, and C3 without recomputing the science.",
             height=260,
             export_mode=export_mode,
@@ -343,12 +343,13 @@ def render(state: dict, ui_state: dict) -> None:
         render_table(
             "Comparator results table",
             state["dwh_all_results_final"],
-            download_name="phase3c_dwh_all_results_table.csv",
+            download_name="dwh_pygnome_comparator_all_results_table.csv",
             caption="Curated DWH all-results table for advanced inspection.",
             height=260,
             export_mode=export_mode,
         )
-        render_markdown_block("DWH final-package note", state["dwh_final_readme"], collapsed=True, export_mode=export_mode)
+        if ui_state["advanced"]:
+            render_markdown_block("DWH stored export note", state["dwh_final_readme"], collapsed=True, export_mode=export_mode)
 
     render_section_stack(
         [

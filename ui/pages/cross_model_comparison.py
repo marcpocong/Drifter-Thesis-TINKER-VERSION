@@ -236,8 +236,14 @@ def render(state: dict, ui_state: dict) -> None:
             "Archived comparator outputs are not displayed here. Use Archive — Mindoro Validation Provenance for provenance-only review.",
             "warning",
         )
+        archive_card = {
+            **archive_package,
+            "description": "Archived Mindoro validation provenance is kept for audit and reproducibility only, outside the Track A comparator page.",
+            "secondary_note": "Archive-only; not Track A evidence.",
+            "button_label": "Open Mindoro validation archive",
+        }
         render_package_cards(
-            [{**archive_package, "button_label": "Open Mindoro validation archive"}],
+            [archive_card],
             columns_per_row=1,
             export_mode=export_mode,
         )

@@ -626,6 +626,17 @@ def render_badge_strip(labels: list[str]) -> None:
     st.markdown(f"<div class='ui-badge-strip'>{spans}</div>", unsafe_allow_html=True)
 
 
+def _path_caption_for(relative_path: str) -> str:
+    path_text = str(relative_path or "").strip()
+    if not path_text:
+        return ""
+    lowered = path_text.lower()
+    prefix = "Stored export root"
+    if "phase 3b" in lowered or "phase 3c" in lowered or "phase4" in lowered:
+        prefix += " (legacy folder name)"
+    return f"{prefix}: {path_text}"
+
+
 def render_package_cards(packages: list[dict[str, Any]], *, columns_per_row: int = 2, export_mode: bool = False) -> None:
     records = [package for package in packages if package]
     if not records:
@@ -655,7 +666,7 @@ def render_package_cards(packages: list[dict[str, Any]], *, columns_per_row: int
                             unsafe_allow_html=True,
                         )
                     if package.get("relative_path"):
-                        st.caption(f"Package root: {package['relative_path']}")
+                        st.caption(_path_caption_for(str(package["relative_path"])))
                     if package.get("page_label") and not export_mode:
                         button_label = package.get("button_label") or f"Open {package['page_label']}"
                         if st.button(button_label, key=f"nav::{package['package_id']}", use_container_width=True):
@@ -989,6 +1000,7 @@ def render_figure_gallery(
     export_mode: bool = False,
     overlay_label: str = "Click to enlarge",
     show_download: bool = True,
+    key_namespace: str = "",
 ) -> None:
     st.subheader(title)
     if caption:
@@ -1009,6 +1021,7 @@ def render_figure_gallery(
             title_text, subtitle = _figure_header(row)
             tile_subtitle = _gallery_tile_subtitle(row, subtitle)
             dialog_key = _figure_action_token(row, namespace=title)
+            download_namespace = f"gallery::{key_namespace or title}"
             with column:
                 with st.container(border=not export_mode):
                     st.markdown(
@@ -1044,7 +1057,7 @@ def render_figure_gallery(
                                     _binary_download_payload(str(figure_path)),
                                     file_name=figure_path.name,
                                     mime="image/png",
-                                    key=_figure_download_key(row, figure_path, namespace="gallery"),
+                                    key=_figure_download_key(row, figure_path, namespace=download_namespace),
                                     use_container_width=True,
                                 )
 

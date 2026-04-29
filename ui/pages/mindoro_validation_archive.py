@@ -124,7 +124,7 @@ def render(state: dict, ui_state: dict) -> None:
 
     render_key_takeaway(
         "Archive material stays secondary.",
-        "The March 13 -> March 14 R1 primary validation row is the only thesis-facing Mindoro Phase 3B validation row used in the main paper.",
+        "The March 13 -> March 14 R1 primary validation row is the only thesis-facing Mindoro B1 validation row used in the main paper.",
         tone="archive",
         badge=ROLE_ARCHIVE,
     )
@@ -142,7 +142,7 @@ def render(state: dict, ui_state: dict) -> None:
             },
             {
                 "title": "Naming note",
-                "body": "March 13 -> March 14 R1 refers to the Phase 3B validation branch, not the Phase 1 Recipe Code R1 family.",
+                "body": "March 13 -> March 14 R1 refers to the B1 validation branch, not the Phase 1 Recipe Code R1 family.",
                 "badge": ROLE_ARCHIVE,
                 "tone": "archive",
             },
@@ -160,12 +160,12 @@ def render(state: dict, ui_state: dict) -> None:
     render_status_callout("ARCHIVE / SUPPORT ONLY — not part of the main Mindoro validation claim.", "ARCHIVE / SUPPORT ONLY — not part of the main Mindoro validation claim.", "warning")
     render_status_callout(
         "Main paper rule",
-        "The March 13 -> March 14 R1 primary validation row will be the only thesis-facing Mindoro Phase 3B validation row used in the main paper.",
+        "The March 13 -> March 14 R1 primary validation row will be the only thesis-facing Mindoro B1 validation row used in the main paper.",
         "info",
     )
     render_status_callout(
         "Naming note",
-        "March 13 -> March 14 R1 on this page refers to the Phase 3B validation branch. It is not the same label as the Phase 1 Recipe Code R1 family.",
+        "March 13 -> March 14 R1 on this page refers to the B1 validation branch. It is not the same label as the Phase 1 Recipe Code R1 family.",
         "info",
     )
 

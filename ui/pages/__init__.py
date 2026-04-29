@@ -44,7 +44,7 @@ PAGE_DEFINITIONS = [
     PageDefinition("data_sources", "Data Sources & Provenance", data_sources.render, navigation_section="Reference", url_path="data-sources-provenance"),
     PageDefinition("artifacts_logs", "Artifacts / Logs / Registries", artifacts_logs.render, navigation_section="Reference", url_path="artifacts-logs-registries"),
     PageDefinition("b1_drifter_context", "B1 Recipe Provenance — Not Truth Mask", b1_drifter_context.render, advanced_only=True, navigation_section="Advanced", url_path="b1-recipe-provenance-not-truth-mask"),
-    PageDefinition("phase4_crossmodel_status", "Phase 4 Cross-Model Status", phase4_crossmodel_status.render, advanced_only=True, navigation_section="Advanced", url_path="phase4-crossmodel-status"),
+    PageDefinition("phase4_crossmodel_status", "Oil-Type/Shoreline Comparator Availability", phase4_crossmodel_status.render, advanced_only=True, navigation_section="Advanced", url_path="phase4-crossmodel-status"),
     PageDefinition("trajectory_explorer", "Trajectory Explorer", trajectory_explorer.render, advanced_only=True, navigation_section="Advanced", url_path="trajectory-explorer"),
 ]
 

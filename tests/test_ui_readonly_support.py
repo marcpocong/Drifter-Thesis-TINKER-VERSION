@@ -1,5 +1,6 @@
 import ast
 import importlib
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -324,7 +325,7 @@ class UiReadonlySemanticsTests(unittest.TestCase):
         self.assertIn("0.3612", dwh_text)
         self.assertIn("Mindoro Oil-Type and Shoreline Context", phase4_text)
         self.assertIn("Support/context only; not a primary validation phase.", phase4_text)
-        self.assertIn("No matched Mindoro Phase 4 PyGNOME fate-and-shoreline comparison is packaged yet.", phase4_text)
+        self.assertIn("No matched Mindoro PyGNOME fate-and-shoreline comparison is packaged yet.", phase4_text)
         self.assertIn("0.02%", phase4_text)
         self.assertIn("0.61%", phase4_text)
         self.assertIn("0.63%", phase4_text)
@@ -404,9 +405,9 @@ class UiReadonlySemanticsTests(unittest.TestCase):
         mindoro_figures = evidence_contract.filter_for_page(state["mindoro_final_registry"], "mindoro_validation", advanced=False)
         evidence_contract.assert_no_archive_leak(mindoro_figures, "mindoro_validation", advanced=False)
         joined = " ".join(mindoro_figures.astype(str).agg(" ".join, axis=1).tolist()).lower()
-        self.assertNotIn("r0", joined)
-        self.assertNotIn("b2", joined)
-        self.assertNotIn("b3", joined)
+        self.assertIsNone(re.search(r"\br0\b", joined))
+        self.assertIsNone(re.search(r"\bb2\b", joined))
+        self.assertIsNone(re.search(r"\bb3\b", joined))
 
         self.assertEqual(evidence_contract.role_badge_for_record({"surface_key": "thesis_main"}), evidence_contract.ROLE_THESIS)
         self.assertEqual(evidence_contract.role_badge_for_record({"surface_key": "comparator_support"}), evidence_contract.ROLE_COMPARATOR)

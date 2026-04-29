@@ -264,7 +264,8 @@ def render(state: dict, ui_state: dict) -> None:
             height=220,
             export_mode=export_mode,
         )
-        render_markdown_block("Mindoro B1 final-package note", state["mindoro_final_readme"], collapsed=True, export_mode=export_mode)
+        if ui_state["advanced"]:
+            render_markdown_block("Mindoro B1 stored export note", state["mindoro_final_readme"], collapsed=True, export_mode=export_mode)
 
     def _archive_note() -> None:
         render_status_callout(
@@ -273,8 +274,14 @@ def render(state: dict, ui_state: dict) -> None:
             "warning",
         )
         if archive_package:
+            archive_card = {
+                **archive_package,
+                "description": "Archived Mindoro validation provenance is kept for audit and reproducibility only, outside the B1 primary validation page.",
+                "secondary_note": "Archive-only; not B1 evidence.",
+                "button_label": "Open Mindoro validation archive",
+            }
             render_package_cards(
-                [{**archive_package, "button_label": "Open Mindoro validation archive"}],
+                [archive_card],
                 columns_per_row=1,
                 export_mode=export_mode,
             )

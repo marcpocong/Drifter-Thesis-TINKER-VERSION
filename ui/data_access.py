@@ -829,7 +829,7 @@ def curated_package_roots(repo_root: str | Path | None = None) -> list[dict[str,
     return [
         {
             "package_id": "mindoro_b1_final",
-            "label": "Mindoro B1 final package",
+            "label": "Mindoro B1 primary validation package",
             "page_label": "Mindoro B1 Primary Validation",
             "relative_path": str(MINDORO_FINAL_DIR),
             "description": "Curated thesis-facing package for the Mindoro March 13 -> March 14 R1 primary validation row built from stored outputs only.",
@@ -838,7 +838,7 @@ def curated_package_roots(repo_root: str | Path | None = None) -> list[dict[str,
         },
         {
             "package_id": "mindoro_comparator",
-            "label": "Mindoro comparator package",
+            "label": "Mindoro Track A comparator support package",
             "page_label": "Mindoro Track A Comparator Support",
             "relative_path": str(MINDORO_FINAL_DIR / "publication" / "comparator_pygnome"),
             "description": "Curated comparator-only subgroup for the thesis-facing March 14 Track A support view after archived R0-only materials were moved out of the main story.",
@@ -856,7 +856,7 @@ def curated_package_roots(repo_root: str | Path | None = None) -> list[dict[str,
         },
         {
             "package_id": "dwh_phase3c_final",
-            "label": "DWH Phase 3C final package",
+            "label": "DWH external transfer-validation package",
             "page_label": "DWH External Transfer Validation",
             "relative_path": str(DWH_FINAL_DIR),
             "description": "Curated frozen DWH transfer-validation package with C1/C2/C3 kept separate and explicit.",
@@ -874,11 +874,11 @@ def curated_package_roots(repo_root: str | Path | None = None) -> list[dict[str,
         },
         {
             "package_id": "phase4_context_status",
-            "label": "Phase 4 context",
+            "label": "Mindoro oil-type and shoreline support/context",
             "page_label": "Mindoro Oil-Type and Shoreline Context",
             "relative_path": str(PHASE4_DIR),
-            "description": "Mindoro Phase 4 OpenDrift/OpenOil context with the no-matched-comparator decision already folded into the plain-language page.",
-            "secondary_note": "No matched Phase 4 PyGNOME comparison is packaged yet.",
+            "description": "Mindoro oil-type and shoreline support/context outputs with the no-matched-comparator decision already folded into the plain-language page.",
+            "secondary_note": "No matched PyGNOME fate-and-shoreline comparison is packaged yet.",
             "artifact_count": int(
                 len(
                     publication_registry_df.loc[

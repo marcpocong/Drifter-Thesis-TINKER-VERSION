@@ -1,4 +1,4 @@
-"""Phase 4 cross-model status page."""
+"""Mindoro oil-type/shoreline comparator availability page."""
 
 from __future__ import annotations
 
@@ -39,8 +39,8 @@ def render(state: dict, ui_state: dict) -> None:
     deferred_status = get_artifact_status("mindoro_phase4_deferred")
 
     render_modern_hero(
-        "Phase 4 Cross-Model Status",
-        "Advanced status page explaining why no matched Mindoro Phase 4 PyGNOME fate-and-shoreline comparison is packaged yet.",
+        "Oil-Type/Shoreline Comparator Availability",
+        "Advanced status page explaining why no matched Mindoro PyGNOME fate-and-shoreline comparison is packaged yet.",
         badge=ROLE_ADVANCED,
         eyebrow="Advanced technical status",
         meta=["Deferred comparator", "Read-only audit", "No forced claim"],
@@ -54,7 +54,7 @@ def render(state: dict, ui_state: dict) -> None:
 
     render_key_takeaway(
         "Current verdict",
-        "No matched Phase 4 PyGNOME comparison is packaged yet.",
+        "No matched Mindoro PyGNOME fate-and-shoreline comparison is packaged yet.",
         tone="advanced",
         badge=ROLE_ADVANCED,
     )
@@ -66,7 +66,7 @@ def render(state: dict, ui_state: dict) -> None:
 
     render_section_header(
         "Comparability Status",
-        "The figure and matrix are technical audit support for the Phase 4 boundary, not a new validation claim.",
+        "The figure and matrix are technical audit support for the Mindoro oil-type/shoreline boundary, not a new validation claim.",
         badge=ROLE_ADVANCED,
     )
     st.pyplot(comparability_status_figure(matrix), width="stretch")
@@ -78,8 +78,8 @@ def render(state: dict, ui_state: dict) -> None:
     )
     render_figure_cards(
         deferred_note,
-        title="Phase 4 no-matched-PyGNOME note figure",
-        caption="This figure is the recommended panel-facing way to explain why no matched Phase 4 PyGNOME comparison is packaged yet.",
+        title="No-matched-PyGNOME note figure",
+        caption="This figure is the recommended panel-facing way to explain why no matched Mindoro PyGNOME fate-and-shoreline comparison is packaged yet.",
         limit=1,
         columns_per_row=1,
     )
@@ -88,7 +88,7 @@ def render(state: dict, ui_state: dict) -> None:
         "Comparability matrix",
         matrix,
         download_name="phase4_crossmodel_comparability_matrix.csv",
-        caption="Each requested quantity currently resolves to no matched Phase 4 PyGNOME package yet.",
+        caption="Each requested quantity currently resolves to no matched Mindoro PyGNOME fate-and-shoreline package yet.",
         height=320,
         export_mode=export_mode,
     )

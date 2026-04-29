@@ -1,4 +1,4 @@
-"""Thesis-review evidence-role contract for the read-only dashboard."""
+"""Final thesis evidence-role contract for the read-only dashboard."""
 
 from __future__ import annotations
 

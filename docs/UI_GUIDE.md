@@ -76,7 +76,7 @@ Panel-friendly mode is the default. It should show the main defense story first:
 Advanced mode exposes technical inspection layers:
 
 - B1 Recipe Provenance — Not Truth Mask
-- Phase 4 Cross-Model Status
+- Oil-Type/Shoreline Comparator Availability
 - Trajectory Explorer
 - Raw/panel galleries and registry previews where available
 
@@ -95,6 +95,8 @@ Keep these claims stable across page text, labels, captions, and export views:
 - Mindoro oil-type and shoreline outputs are support/context only.
 - Legacy/archive outputs are preserved for provenance, audit, and reproducibility only.
 - UI/publication packages are presentation and governance surfaces over stored outputs only.
+
+Legacy/internal folder names may contain Phase 3B, Phase 3C, or Phase 4, but panel-facing labels should use B1, Track A, DWH external transfer validation, and Mindoro oil-type/shoreline support/context.
 
 ## Read-Only Rules
 

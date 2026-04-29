@@ -117,7 +117,7 @@ def render(state: dict, ui_state: dict) -> None:
     )
     render_archive_notice(
         "Legacy boundary",
-        "The prototype_2016 lane has no thesis-facing Phase 3B or Phase 3C claim. Phase 3A is comparator-only support, Phase 4 is legacy weathering/fate context, and Phase 5 is packaging.",
+        "The prototype_2016 lane has no thesis-facing B1 or DWH validation claim. Phase 3A is comparator-only support, Phase 4 is legacy weathering/fate context, and Phase 5 is packaging.",
     )
     render_feature_grid(
         [
@@ -152,7 +152,7 @@ def render(state: dict, ui_state: dict) -> None:
     )
     render_status_callout(
         "Guardrail",
-        "There is no thesis-facing Phase 3B or Phase 3C in prototype_2016, and this lane does not replace the final regional Phase 1 study.",
+        "There is no thesis-facing B1 or DWH validation claim in prototype_2016, and this lane does not replace the final regional Phase 1 study.",
         "warning",
     )
     if not export_mode and not ui_state["advanced"]:

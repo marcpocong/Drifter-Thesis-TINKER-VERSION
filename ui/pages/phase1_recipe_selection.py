@@ -286,7 +286,7 @@ def render(state: dict, ui_state: dict) -> None:
                 "title": "B1 inheritance",
                 "badge": ROLE_THESIS,
                 "body": "B1 inherits the selected transport recipe from this separate provenance lane.",
-                "note": "Phase 3B itself does not directly ingest drifters.",
+                "note": "The B1 public-observation validation run itself does not directly ingest drifters; it inherits recipe provenance from the separate focused Phase 1 lane.",
             },
         ],
         columns_per_row=2,
