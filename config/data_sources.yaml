@@ -1,0 +1,490 @@
+noaa_aoml_gdp_drifter_6hour_qc:
+  id: noaa_aoml_gdp_drifter_6hour_qc
+  label: "NOAA AOML / Global Drifter Program drifter_6hour_qc"
+  provider: "NOAA AOML / Global Drifter Program via NOAA OSMC ERDDAP"
+  category: transport_validation
+  source_type: "ERDDAP tabular drifter observations"
+  product_or_layer_id: "drifter_6hour_qc"
+  official_url: "https://osmc.noaa.gov/erddap/tabledap/drifter_6hour_qc"
+  access_endpoint_or_item_url: "https://osmc.noaa.gov/erddap/tabledap/drifter_6hour_qc"
+  citation_or_attribution: "NOAA AOML Global Drifter Program / NOAA OSMC ERDDAP attribution; exact citation wording is not pinned in this repo."
+  used_in_workflows:
+    - "phase1_mindoro_focus_pre_spill_2016_2023"
+    - "phase1_regional_2016_2022"
+    - "b1_drifter_context_panel"
+  evidence_role: "Historical drifter transport validation and recipe provenance; not oil-footprint truth."
+  manuscript_role: "Supports focused Mindoro Phase 1 provenance behind the selected B1 recipe."
+  time_coverage_used: "2016-01-01 to 2023-03-02 for focused Mindoro; 2016-01-01 to 2022-12-31 for the broader regional reference lane."
+  spatial_domain_used: "Focused Mindoro validation box [118.751, 124.305, 10.620, 16.026] plus broader regional/reference boxes where configured."
+  variables_or_layers_used:
+    - time
+    - latitude
+    - longitude
+    - ID
+    - ve
+    - vn
+    - err_lat
+    - err_lon
+    - drogue_lost_date
+    - deploy_date
+    - DrogueType
+    - DrogueLength
+    - DrogueDetectSensor
+  local_repo_paths:
+    - "data/drifters/"
+    - "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/"
+    - "output/panel_drifter_context/"
+  manifest_or_inventory_paths:
+    - "config/phase1_mindoro_focus_pre_spill_2016_2023.yaml"
+    - "config/phase1_regional_2016_2022.yaml"
+    - "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_production_manifest.json"
+    - "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_local_input_inventory.csv"
+    - "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv"
+    - "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_rejected_segment_registry.csv"
+  refresh_or_credentials_note: "Public ERDDAP endpoint; workflow preserves local monthly chunks and inventories when staged."
+  caveats:
+    - "Drifters support recipe selection and transport provenance only."
+    - "Drifters are not the March 13-14 public spill-footprint truth mask."
+  status: confirmed_in_repo
+
+copernicus_cmems_global_ocean_physics:
+  id: copernicus_cmems_global_ocean_physics
+  label: "Copernicus Marine / CMEMS Global Ocean Physics currents"
+  provider: "Copernicus Marine Service"
+  category: ocean_current_forcing
+  source_type: "gridded ocean-current forcing"
+  product_or_layer_id: "GLOBAL_ANALYSISFORECAST_PHY_001_024 family; cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m; cmems_mod_glo_phy_my_0.083deg_P1D-m"
+  official_url: "https://data.marine.copernicus.eu/product/GLOBAL_ANALYSISFORECAST_PHY_001_024/description; https://data.marine.copernicus.eu/product/GLOBAL_MULTIYEAR_PHY_001_030/description"
+  access_endpoint_or_item_url: "Copernicus Marine API/file download; exact per-run subset request endpoint is not stored as a static URL in the repo."
+  citation_or_attribution: "Copernicus Marine Service attribution required; exact citation wording is not pinned in this repo."
+  used_in_workflows:
+    - "phase1_mindoro_focus_pre_spill_2016_2023 recipe family"
+    - "mindoro_phase3b_primary_public_validation selected cmems_gfs recipe"
+    - "mindoro_phase4_oiltype_and_shoreline support/context"
+    - "DWH current fallback listed in setup, not used when HYCOM is ready"
+  evidence_role: "Ocean-current forcing; not observation truth."
+  manuscript_role: "Forcing family for Phase 1 recipe comparison and the selected Mindoro cmems_gfs recipe where manifests confirm it."
+  time_coverage_used: "Phase 1 accepted-segment forcing months; Mindoro B1 forcing window 2023-03-12 to 2023-03-15; DWH fallback window listed for 2010-05-20 to 2010-05-23."
+  spatial_domain_used: "Workflow-specific Mindoro and DWH bounding boxes from configs/manifests."
+  variables_or_layers_used:
+    - uo
+    - vo
+  local_repo_paths:
+    - "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/"
+    - "data/forcing/CASE_MINDORO_RETRO_2023/"
+    - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/forcing/"
+  manifest_or_inventory_paths:
+    - "config/recipes.yaml"
+    - "config/phase1_mindoro_focus_pre_spill_2016_2023.yaml"
+    - "config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml"
+    - "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_production_manifest.json"
+    - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_forcing_window_manifest.csv"
+    - "output/CASE_DWH_RETRO_2010_72H/dwh_phase3c_scientific_forcing_ready/dwh_scientific_forcing_status.csv"
+  refresh_or_credentials_note: "Copernicus Marine access can require user credentials; no secrets or tokens are stored here."
+  caveats:
+    - "Forcing data are model inputs, not validation targets."
+    - "DWH manifests list CMEMS PHY as fallback current forcing; HYCOM is the confirmed DWH current stack when ready."
+  status: confirmed_in_repo
+
+hycom_gofs31_currents:
+  id: hycom_gofs31_currents
+  label: "HYCOM / GOFS 3.1 currents"
+  provider: "HYCOM Consortium / GOFS"
+  category: ocean_current_forcing
+  source_type: "THREDDS/OPeNDAP gridded ocean-current forcing"
+  product_or_layer_id: "GOFS 3.1 reanalysis GLBv0.08 expt_53.X and HYCOM GOFS candidate experiment families"
+  official_url: "https://www.hycom.org/dataserver/gofs-3pt1/reanalysis"
+  access_endpoint_or_item_url: "https://tds.hycom.org/thredds/dodsC/GLBv0.08/expt_53.X"
+  citation_or_attribution: "HYCOM / GOFS attribution required; exact citation wording is not pinned in this repo."
+  used_in_workflows:
+    - "phase1_mindoro_focus_pre_spill_2016_2023 recipe family"
+    - "dwh_reportable_bundle scientific forcing stack"
+  evidence_role: "Ocean-current forcing; not observation truth."
+  manuscript_role: "HYCOM current-forcing comparator family for Phase 1 and confirmed current forcing for DWH external transfer validation."
+  time_coverage_used: "Phase 1 accepted-segment forcing months; DWH 2010-05-20 to 2010-05-23."
+  spatial_domain_used: "Workflow-specific Mindoro Phase 1 and DWH bounding boxes from manifests."
+  variables_or_layers_used:
+    - water_u
+    - water_v
+    - u
+    - v
+  local_repo_paths:
+    - "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/"
+    - "output/CASE_DWH_RETRO_2010_72H/dwh_phase3c_scientific_forcing_ready/"
+  manifest_or_inventory_paths:
+    - "config/recipes.yaml"
+    - "config/case_dwh_retro_2010_72h.yaml"
+    - "output/CASE_DWH_RETRO_2010_72H/dwh_phase3c_scientific_forcing_ready/dwh_scientific_forcing_status.csv"
+    - "output/CASE_DWH_RETRO_2010_72H/dwh_phase3c_scientific_forcing_ready/dwh_scientific_prepared_forcing_manifest.csv"
+  refresh_or_credentials_note: "Public THREDDS/OPeNDAP access listed in configs/manifests; no credentials stored."
+  caveats:
+    - "HYCOM is forcing input, not observational truth."
+    - "Mindoro selected B1 recipe is cmems_gfs; HYCOM remains part of Phase 1 recipe comparison and DWH forcing where confirmed."
+  status: confirmed_in_repo
+
+ecmwf_era5_single_levels:
+  id: ecmwf_era5_single_levels
+  label: "ERA5 single-level winds"
+  provider: "ECMWF / Copernicus Climate Data Store"
+  category: wind_forcing
+  source_type: "CDS gridded atmospheric forcing"
+  product_or_layer_id: "reanalysis-era5-single-levels"
+  official_url: "https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels"
+  access_endpoint_or_item_url: "CDS API/file download; exact per-run request endpoint is not stored as a static URL in the repo."
+  citation_or_attribution: "ERA5 / Copernicus Climate Data Store attribution required; exact citation wording is not pinned in this repo."
+  used_in_workflows:
+    - "phase1_mindoro_focus_pre_spill_2016_2023 recipe family"
+    - "dwh_reportable_bundle scientific forcing stack"
+    - "mindoro_phase4_oiltype_and_shoreline support/context where manifests confirm ERA5 wind"
+  evidence_role: "Atmospheric wind forcing; not observation truth."
+  manuscript_role: "Wind-forcing family in recipe comparison and confirmed DWH wind forcing."
+  time_coverage_used: "Phase 1 accepted-segment forcing months; DWH 2010-05-20 to 2010-05-23; Phase 4 support/context where stored manifests point to ERA5."
+  spatial_domain_used: "Workflow-specific Mindoro and DWH bounding boxes from configs/manifests."
+  variables_or_layers_used:
+    - u10
+    - v10
+    - x_wind
+    - y_wind
+  local_repo_paths:
+    - "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/"
+    - "data/forcing/CASE_MINDORO_RETRO_2023/"
+    - "output/CASE_DWH_RETRO_2010_72H/dwh_phase3c_scientific_forcing_ready/"
+  manifest_or_inventory_paths:
+    - "config/recipes.yaml"
+    - "config/case_dwh_retro_2010_72h.yaml"
+    - "output/CASE_DWH_RETRO_2010_72H/dwh_phase3c_scientific_forcing_ready/dwh_scientific_forcing_status.csv"
+    - "output/phase4/CASE_MINDORO_RETRO_2023/phase4_run_manifest.json"
+  refresh_or_credentials_note: "CDS access can require user credentials; no secrets or tokens are stored here."
+  caveats:
+    - "Mindoro B1 selected cmems_gfs recipe uses GFS wind, not ERA5 wind."
+    - "ERA5 is forcing data, not a validation target."
+  status: confirmed_in_repo
+
+noaa_ncep_gfs_winds:
+  id: noaa_ncep_gfs_winds
+  label: "NOAA / NCEP GFS winds"
+  provider: "NOAA / NCEP, with UCAR GDEX fallback where configured"
+  category: wind_forcing
+  source_type: "gridded atmospheric forecast/analysis forcing"
+  product_or_layer_id: "NCEI GFS analysis files; UCAR GDEX d084001 secondary source"
+  official_url: "https://www.ncei.noaa.gov/products/weather-climate-models/global-forecast; https://gdex.ucar.edu/datasets/d084001/"
+  access_endpoint_or_item_url: "https://www.ncei.noaa.gov/thredds/dodsC/model-gfs-g4-anl-files; https://www.ncei.noaa.gov/thredds/dodsC/model-gfs-g4-anl-files-old; https://thredds.rda.ucar.edu/thredds/fileServer/files/g/d084001"
+  citation_or_attribution: "NOAA/NCEP GFS and UCAR GDEX attribution required; exact citation wording is not pinned in this repo."
+  used_in_workflows:
+    - "phase1_mindoro_focus_pre_spill_2016_2023 recipe family"
+    - "mindoro_phase3b_primary_public_validation selected cmems_gfs recipe"
+  evidence_role: "Atmospheric wind forcing; not observation truth."
+  manuscript_role: "Wind forcing for the selected Mindoro cmems_gfs B1 recipe and Phase 1 recipe comparisons."
+  time_coverage_used: "Phase 1 accepted-segment forcing months; Mindoro B1 forcing window 2023-03-12T09 to 2023-03-15."
+  spatial_domain_used: "Focused Mindoro domains from configs/manifests."
+  variables_or_layers_used:
+    - x_wind
+    - y_wind
+    - u-component wind
+    - v-component wind
+  local_repo_paths:
+    - "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/"
+    - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/forcing/"
+  manifest_or_inventory_paths:
+    - "config/recipes.yaml"
+    - "config/phase1_mindoro_focus_pre_spill_2016_2023.yaml"
+    - "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_production_manifest.json"
+    - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_forcing_window_manifest.csv"
+  refresh_or_credentials_note: "Public NOAA/UCAR access paths are listed in code/config; no credentials stored."
+  caveats:
+    - "GFS is forcing data, not a validation target."
+    - "DWH external transfer validation uses ERA5 winds in the confirmed scientific forcing stack."
+  status: confirmed_in_repo
+
+copernicus_cmems_global_waves_stokes:
+  id: copernicus_cmems_global_waves_stokes
+  label: "Copernicus Marine Global Waves / Stokes drift"
+  provider: "Copernicus Marine Service"
+  category: wave_forcing
+  source_type: "gridded wave and Stokes drift forcing"
+  product_or_layer_id: "GLOBAL_ANALYSISFORECAST_WAV_001_027 family; cmems_mod_glo_wav_anfc_0.083deg_PT3H-i; GLOBAL_MULTIYEAR_WAV_001_032 family; cmems_mod_glo_wav_my_0.2deg_PT3H-i"
+  official_url: "https://data.marine.copernicus.eu/product/GLOBAL_ANALYSISFORECAST_WAV_001_027/description; https://data.marine.copernicus.eu/product/GLOBAL_MULTIYEAR_WAV_001_032/description"
+  access_endpoint_or_item_url: "Copernicus Marine API/file download; exact per-run subset request endpoint is not stored as a static URL in the repo."
+  citation_or_attribution: "Copernicus Marine Service attribution required; exact citation wording is not pinned in this repo."
+  used_in_workflows:
+    - "phase1_mindoro_focus_pre_spill_2016_2023 recipe family"
+    - "mindoro_phase3b_primary_public_validation selected cmems_gfs recipe"
+    - "dwh_reportable_bundle scientific forcing stack"
+    - "mindoro_phase4_oiltype_and_shoreline support/context"
+  evidence_role: "Wave/Stokes forcing; not observation truth."
+  manuscript_role: "Wave and Stokes forcing in official spill-case runs where manifests confirm it."
+  time_coverage_used: "Phase 1 accepted-segment forcing months; Mindoro B1 2023-03-12 to 2023-03-15T21; DWH 2010-05-20 to 2010-05-23."
+  spatial_domain_used: "Workflow-specific Mindoro and DWH bounding boxes from configs/manifests."
+  variables_or_layers_used:
+    - VHM0
+    - VSDX
+    - VSDY
+    - significant_wave_height
+    - stokes_drift_x
+    - stokes_drift_y
+  local_repo_paths:
+    - "data/historical_validation_inputs/phase1_mindoro_focus_pre_spill_2016_2023/forcing_months/"
+    - "data/forcing/CASE_MINDORO_RETRO_2023/"
+    - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/forcing/"
+    - "output/CASE_DWH_RETRO_2010_72H/dwh_phase3c_scientific_forcing_ready/"
+  manifest_or_inventory_paths:
+    - "config/recipes.yaml"
+    - "config/ensemble.yaml"
+    - "config/case_dwh_retro_2010_72h.yaml"
+    - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_forcing_window_manifest.csv"
+    - "output/CASE_DWH_RETRO_2010_72H/dwh_phase3c_scientific_forcing_ready/dwh_scientific_forcing_status.csv"
+  refresh_or_credentials_note: "Copernicus Marine access can require user credentials; no secrets or tokens are stored here."
+  caveats:
+    - "Wave/Stokes fields are forcing inputs, not validation targets."
+  status: confirmed_in_repo
+
+mindoro_noaa_public_observation_masks:
+  id: mindoro_noaa_public_observation_masks
+  label: "Mindoro March 13-14 public spill extents"
+  provider: "NOAA/NESDIS public ArcGIS layers with repo-preserved source taxonomy"
+  category: observation_truth
+  source_type: "public ArcGIS FeatureServer observation layers processed to common-grid masks"
+  product_or_layer_id: "MindoroOilSpill_NOAA_230313 item 8f8e3944748c4772910efc9829497e20; MindoroOilSpill_NOAA_230314 item 10b37c42a9754363a5f7b14199b077e6"
+  official_url: "https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/MindoroOilSpill_NOAA_230313/FeatureServer; https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/Possible_Oil_Spills_March_14/FeatureServer"
+  access_endpoint_or_item_url: "https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/MindoroOilSpill_NOAA_230313/FeatureServer; https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/Possible_Oil_Spills_March_14/FeatureServer"
+  citation_or_attribution: "NOAA/NESDIS public product attribution as preserved in repo source taxonomy; March 13 and March 14 rows cite WorldView-3 imagery acquired on 2023-03-12."
+  used_in_workflows:
+    - "mindoro_phase3b_primary_public_validation"
+    - "mindoro Track A comparator support"
+  evidence_role: "Public-observation validation mask, initialization geometry, and source-provenance context after common-grid processing."
+  manuscript_role: "B1 is the only main Mindoro public-observation validation claim."
+  time_coverage_used: "March 13 seed and March 14 target for the B1 reinitialization-based validation row."
+  spatial_domain_used: "Mindoro public-observation scoring domain from stored run manifests."
+  variables_or_layers_used:
+    - "March 13 B1 seed polygon"
+    - "March 14 B1 target polygon"
+    - "source-point/provenance context where configured"
+  local_repo_paths:
+    - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/"
+    - "output/Phase 3B March13-14 Final Output/"
+  manifest_or_inventory_paths:
+    - "config/case_mindoro_retro_2023.yaml"
+    - "config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml"
+    - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public/extended_public_obs_inventory.csv"
+    - "output/CASE_MINDORO_RETRO_2023/phase3b_multidate_public/phase3b_public_source_taxonomy.csv"
+    - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_run_manifest.json"
+  refresh_or_credentials_note: "Public ArcGIS layers; exact layer URLs above were found in repo manifests/inventories."
+  caveats:
+    - "March 13-14 B1 has shared March 12 WorldView-3 imagery provenance and is not fully independent day-to-day validation."
+    - "Public spill extents support B1 spatial scoring only after common-grid processing."
+    - "These masks are observation truth for B1 scoring, not model comparator outputs."
+  status: confirmed_from_manifest
+
+dwh_public_daily_observation_masks:
+  id: dwh_public_daily_observation_masks
+  label: "DWH public daily observation masks"
+  provider: "NOAA OR&R / ERMA public ArcGIS service"
+  category: observation_truth
+  source_type: "public ArcGIS FeatureServer daily composite observation layers"
+  product_or_layer_id: "Deepwaterhorizon_Oilspill_WM FeatureServer layers 5-8; layer 5 initialization; layers 6-8 validation/event-corridor masks"
+  official_url: "https://services1.arcgis.com/qr14biwnHA6Vis6l/ArcGIS/rest/services/Deepwaterhorizon_Oilspill_WM/FeatureServer"
+  access_endpoint_or_item_url: "https://services1.arcgis.com/qr14biwnHA6Vis6l/ArcGIS/rest/services/Deepwaterhorizon_Oilspill_WM/FeatureServer"
+  citation_or_attribution: "NOAA OR&R / ERMA public DWH observation-mask attribution as preserved in the external-case setup inventory."
+  used_in_workflows:
+    - "dwh_reportable_bundle"
+    - "DWH C1 deterministic external transfer validation"
+    - "DWH C2 ensemble extension"
+    - "DWH C3 PyGNOME comparator-only support"
+  evidence_role: "External transfer validation observation masks and event-corridor masks."
+  manuscript_role: "DWH is external transfer validation only and does not recalibrate Mindoro."
+  time_coverage_used: "May 20, 2010 initialization and May 21-23, 2010 validation/event-corridor masks."
+  spatial_domain_used: "DWH external-case domain from config and prepared forcing manifests."
+  variables_or_layers_used:
+    - "Layer 5 T20100520_Composite initialization"
+    - "Layer 6 May 21 validation"
+    - "Layer 7 May 22 validation"
+    - "Layer 8 May 23 validation"
+    - "Layer 1 cumulative context only"
+  local_repo_paths:
+    - "output/CASE_DWH_RETRO_2010_72H/"
+    - "output/Phase 3C DWH Final Output/"
+  manifest_or_inventory_paths:
+    - "config/case_dwh_retro_2010_72h.yaml"
+    - "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_setup/external_case_service_inventory.csv"
+    - "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_setup/external_case_selected_layer_registry.csv"
+    - "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_setup/external_case_source_taxonomy.csv"
+    - "output/Phase 3C DWH Final Output/manifests/phase3c_final_output_manifest.json"
+  refresh_or_credentials_note: "Public ArcGIS service and ERMA archive reference are listed in repo configs/manifests."
+  caveats:
+    - "DWH masks support external transfer validation only."
+    - "DWH outputs are not used to recalibrate Mindoro."
+    - "PyGNOME DWH C3 remains comparator-only."
+  status: confirmed_from_manifest
+
+gshhg_shoreline_geography:
+  id: gshhg_shoreline_geography
+  label: "GSHHG shoreline/coastline data"
+  provider: "GSHHG / SOEST-hosted shoreline archive"
+  category: shoreline_geography
+  source_type: "shoreline/coastline shapefile-derived support geospatial layer"
+  product_or_layer_id: "GSHHG version 2.3.7"
+  official_url: "https://ftp.soest.hawaii.edu/gshhg/gshhg-shp-2.3.7.zip"
+  access_endpoint_or_item_url: "https://ftp.soest.hawaii.edu/gshhg/gshhg-shp-2.3.7.zip"
+  citation_or_attribution: "GSHHG attribution required; exact citation wording is not pinned in this repo."
+  used_in_workflows:
+    - "shoreline mask preparation"
+    - "mindoro_phase4_oiltype_and_shoreline support/context"
+    - "scoreable-ocean masking"
+  evidence_role: "Support geospatial layer for land/sea masks, shoreline segmentation, and scoreable-ocean masking."
+  manuscript_role: "Support/context only."
+  time_coverage_used: "Static shoreline geography."
+  spatial_domain_used: "Mindoro and configured spill-case mask domains."
+  variables_or_layers_used:
+    - shoreline polygons
+    - land/sea mask
+    - shoreline segments
+  local_repo_paths:
+    - "data_processed/grids/"
+  manifest_or_inventory_paths:
+    - "data_processed/grids/shoreline_mask_manifest.json"
+    - "output/phase4/CASE_MINDORO_RETRO_2023/phase4_run_manifest.json"
+  refresh_or_credentials_note: "Static public shoreline archive listed in the local shoreline mask manifest."
+  caveats:
+    - "Shoreline outputs are support/context only, not primary validation."
+  status: confirmed_from_manifest
+
+noaa_adios_oillibrary_oil_properties:
+  id: noaa_adios_oillibrary_oil_properties
+  label: "NOAA ADIOS / OilLibrary oil-property records"
+  provider: "NOAA ADIOS / OilLibrary and OpenOil-compatible generic oil records"
+  category: oil_property
+  source_type: "oil-property/weathering support data"
+  product_or_layer_id: "GENERIC DIESEL; GENERIC INTERMEDIATE FUEL OIL 180; GENERIC HEAVY FUEL OIL; AD03160/AD00256 constants where preserved"
+  official_url: ""
+  access_endpoint_or_item_url: "exact endpoint not found in repo; verify before defense"
+  citation_or_attribution: "NOAA ADIOS / OilLibrary attribution expected where oil-property records are cited; exact official record URLs are not pinned in this repo."
+  used_in_workflows:
+    - "mindoro_phase4_oiltype_and_shoreline support/context"
+    - "prototype_2016 legacy/archive oil-budget support where stored"
+  evidence_role: "Oil-type/weathering support/context scenarios; not primary validation."
+  manuscript_role: "Support/context only."
+  time_coverage_used: "Static oil-property records used by stored support/context scenarios."
+  spatial_domain_used: "Not spatial; used as oil-property inputs to support/context runs."
+  variables_or_layers_used:
+    - oil density/weathering properties as consumed by OpenOil
+    - generic oil labels
+    - weathering budget outputs
+  local_repo_paths:
+    - "config/oil.yaml"
+    - "config/phase4_oil_scenarios.csv"
+    - "output/phase4/CASE_MINDORO_RETRO_2023/"
+  manifest_or_inventory_paths:
+    - "output/phase4/CASE_MINDORO_RETRO_2023/phase4_run_manifest.json"
+    - "output/phase4/CASE_MINDORO_RETRO_2023/phase4_oil_budget_summary.csv"
+    - "output/phase4/CASE_MINDORO_RETRO_2023/phase4_oiltype_comparison.csv"
+  refresh_or_credentials_note: "Do not store external account details here; exact ADIOS/OilLibrary item URLs were not found in repo configs/manifests."
+  caveats:
+    - "Oil-type/weathering outputs are support/context only."
+    - "Exact official ADIOS/OilLibrary record URLs were not found in repo; verify before defense."
+  status: needs_exact_url_verification
+
+opendrift_openoil_tool:
+  id: opendrift_openoil_tool
+  label: "OpenDrift / OpenOil"
+  provider: "OpenDrift project and OpenOil model components"
+  category: model_tool
+  source_type: "oil-spill trajectory and weathering model/tool"
+  product_or_layer_id: "opendrift package pinned in pyproject; OpenOil model usage in workflow code"
+  official_url: ""
+  access_endpoint_or_item_url: "exact endpoint not found in repo; verify before defense"
+  citation_or_attribution: "OpenDrift/OpenOil citation should follow the project guidance; exact official URL is not pinned in this repo."
+  used_in_workflows:
+    - "Mindoro B1 primary OpenDrift validation"
+    - "DWH C1/C2 OpenDrift transfer validation"
+    - "Mindoro oil-type and shoreline support/context"
+  evidence_role: "Model/tool provenance; not an external observation or forcing dataset."
+  manuscript_role: "Primary modeling tool for stored OpenDrift/OpenOil outputs."
+  time_coverage_used: "Software dependency used when stored runs were produced."
+  spatial_domain_used: "All configured OpenDrift/OpenOil case domains."
+  variables_or_layers_used:
+    - trajectory outputs
+    - footprint masks
+    - oil-budget outputs
+  local_repo_paths:
+    - "pyproject.toml"
+    - "src/"
+    - "output/Phase 3B March13-14 Final Output/"
+    - "output/Phase 3C DWH Final Output/"
+    - "output/phase4/CASE_MINDORO_RETRO_2023/"
+  manifest_or_inventory_paths:
+    - "output/final_reproducibility_package/final_manifest_index.csv"
+    - "output/final_validation_package/final_validation_manifest.json"
+  refresh_or_credentials_note: "Software dependency only; no secrets or credentials."
+  caveats:
+    - "Model output is not observational truth."
+    - "Stored outputs are read-only for panel review."
+  status: needs_exact_url_verification
+
+pygnome_gnome_tool:
+  id: pygnome_gnome_tool
+  label: "PyGNOME / GNOME"
+  provider: "NOAA OR&R ERD PyGNOME/GNOME"
+  category: model_tool
+  source_type: "oil-spill trajectory model/tool"
+  product_or_layer_id: "PyGNOME v1.1.18 install source in Dockerfile.gnome"
+  official_url: "git+https://github.com/NOAA-ORR-ERD/PyGNOME.git@v1.1.18#egg=gnome&subdirectory=py_gnome"
+  access_endpoint_or_item_url: "git+https://github.com/NOAA-ORR-ERD/PyGNOME.git@v1.1.18#egg=gnome&subdirectory=py_gnome"
+  citation_or_attribution: "NOAA OR&R ERD PyGNOME/GNOME attribution; exact citation wording is not pinned in this repo."
+  used_in_workflows:
+    - "Mindoro Track A comparator support"
+    - "DWH C3 comparator support"
+    - "prototype_2016 legacy/archive support"
+  evidence_role: "Model/tool provenance for comparator-only branches."
+  manuscript_role: "Comparator-only; never observational truth and never a co-primary validation target."
+  time_coverage_used: "Software dependency used when stored comparator outputs were produced."
+  spatial_domain_used: "Configured comparator case domains."
+  variables_or_layers_used:
+    - comparator trajectory outputs
+    - comparator footprint masks
+    - comparator scorecards
+  local_repo_paths:
+    - "Dockerfile.gnome"
+    - "output/Phase 3B March13-14 Final Output/publication/comparator_pygnome/"
+    - "output/Phase 3C DWH Final Output/publication/comparator_pygnome/"
+    - "output/2016 Legacy Runs FINAL Figures/"
+  manifest_or_inventory_paths:
+    - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/march13_14_reinit_crossmodel_summary.csv"
+    - "output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator/phase3c_dwh_all_results_table.csv"
+    - "output/2016 Legacy Runs FINAL Figures/manifests/legacy_final_output_manifest.json"
+  refresh_or_credentials_note: "Software dependency only; no secrets or credentials."
+  caveats:
+    - "Track A and all PyGNOME branches are comparator-only."
+    - "PyGNOME outputs are not observation truth."
+  status: confirmed_in_repo
+
+streamlit_dashboard_tool:
+  id: streamlit_dashboard_tool
+  label: "Streamlit read-only dashboard"
+  provider: "Streamlit package used by local UI"
+  category: model_tool
+  source_type: "review UI / presentation tool"
+  product_or_layer_id: "streamlit package pinned in pyproject"
+  official_url: ""
+  access_endpoint_or_item_url: "exact endpoint not found in repo; verify before defense"
+  citation_or_attribution: "Streamlit package attribution if cited; exact official URL is not pinned in this repo."
+  used_in_workflows:
+    - "panel review UI"
+    - "read-only stored-output inspection"
+  evidence_role: "Model/tool provenance for the review surface; not a data source and not a science rerun."
+  manuscript_role: "Read-only presentation/governance layer over stored outputs."
+  time_coverage_used: "Software dependency used by the current UI."
+  spatial_domain_used: "Not spatial."
+  variables_or_layers_used:
+    - dashboard state
+    - read-only tables
+    - read-only figures
+  local_repo_paths:
+    - "pyproject.toml"
+    - "ui/"
+  manifest_or_inventory_paths:
+    - "docs/UI_GUIDE.md"
+    - "output/final_reproducibility_package/final_manifest_index.csv"
+  refresh_or_credentials_note: "Software dependency only; no secrets or credentials."
+  caveats:
+    - "The UI organizes stored outputs and provenance; it does not create new scientific results."
+  status: needs_exact_url_verification

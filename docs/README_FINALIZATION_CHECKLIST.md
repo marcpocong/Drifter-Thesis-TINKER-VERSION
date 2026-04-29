@@ -4,10 +4,12 @@
 
 - Replaced the generic repository title in `README.md` with the exact manuscript title.
 - Added a panel-ready top summary and kept panel mode commands near the top.
+- Added launcher search, dry-run/run-plan export, and panel option `8` for `docs/DATA_SOURCES.md`.
 - Rewrote the main evidence order so `README.md` and the panel docs match the final manuscript structure.
 - Added compact stored-result checklists for focused Phase 1 provenance, Mindoro `B1`, Mindoro `Track A`, DWH, and Mindoro oil-type / shoreline support.
 - Reframed `prototype_2016` as legacy/archive support only.
 - Added a lightweight docs consistency checker at [scripts/check_docs_against_manuscript_claims.py](../scripts/check_docs_against_manuscript_claims.py).
+- Added the panel-facing data-source provenance guide at [DATA_SOURCES.md](DATA_SOURCES.md), the machine-readable registry at [config/data_sources.yaml](../config/data_sources.yaml), and the registry checker at [scripts/check_data_source_registry.py](../scripts/check_data_source_registry.py).
 
 ## Exact Source-Of-Truth Manuscript Facts
 
@@ -17,6 +19,7 @@
 - Focused Mindoro Phase 1 provenance
 - Phase 2 standardized forecast products
 - Mindoro `B1` primary public-observation validation
+- `B1` supports coastal-neighborhood usefulness, not exact 1 km overlap or universal operational accuracy.
 - Mindoro `Track A` comparator-only support
 - DWH external transfer validation
 - Mindoro oil-type and shoreline support/context
@@ -46,6 +49,7 @@
 - `R0` did not reach target date; forecast cells `0`; observed cells `22`
 - `R1_previous` forecast cells `5`; observed cells `22`; nearest distance `1414.21 m`; centroid distance `7358.16 m`
 - `R1_previous` is promoted because it survives and is scoreable, not because it is an exact-grid match
+- Do not describe `B1` as exact 1 km overlap.
 - `IoU = 0.0`
 - `Dice = 0.0`
 - Caveat: March 13-14 is a reinitialization-based public-observation validation check; both public products cite the same March 12 WorldView-3 imagery provenance; do not call it independent day-to-day validation
@@ -84,7 +88,12 @@ Windows PowerShell:
 ```powershell
 python -m py_compile scripts/check_docs_against_manuscript_claims.py
 python scripts/check_docs_against_manuscript_claims.py
+python -m py_compile scripts/check_data_source_registry.py
+python scripts/check_data_source_registry.py
 python -m json.tool config/launcher_matrix.json > $null
+python -m src.utils.validate_launcher_matrix
+pwsh ./start.ps1 -ValidateMatrix -NoPause
+pwsh ./start.ps1 -Explain mindoro_phase3b_primary_public_validation -ExportPlan -NoPause
 ```
 
 Unix-like shells:
@@ -92,16 +101,23 @@ Unix-like shells:
 ```bash
 python -m py_compile scripts/check_docs_against_manuscript_claims.py
 python scripts/check_docs_against_manuscript_claims.py
+python -m py_compile scripts/check_data_source_registry.py
+python scripts/check_data_source_registry.py
 python -m json.tool config/launcher_matrix.json > /dev/null
+python -m src.utils.validate_launcher_matrix
+pwsh ./start.ps1 -ValidateMatrix -NoPause
+pwsh ./start.ps1 -Explain mindoro_phase3b_primary_public_validation -ExportPlan -NoPause
 ```
 
 ## Final Guardrails For Panel Review
 
 - Keep `B1` as the only main-text primary Philippine / Mindoro validation claim.
+- Keep `B1` framed as coastal-neighborhood usefulness, not exact 1 km overlap or universal operational accuracy.
 - Keep March 13-14 framed as reinitialization-based public-observation validation with the shared-imagery caveat visible.
 - Keep `Track A` and every PyGNOME branch comparator-only.
 - Keep DWH external only; do not present it as Mindoro recalibration.
 - Keep Mindoro oil-type and shoreline outputs as support/context only.
 - Keep `prototype_2016` legacy/archive only.
 - Keep the publication package, figure package, and UI read-only.
+- Keep dashboard, publication figures, validation packages, audits, docs, and data-source registry entries read-only or packaging-only.
 - Do not recompute scientific results as part of docs/governance cleanup.

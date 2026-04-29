@@ -96,6 +96,7 @@ class UiReadonlySemanticsTests(unittest.TestCase):
                 "Mindoro Oil-Type and Shoreline Context",
                 "Archive — Mindoro Validation Provenance",
                 "Archive — Legacy 2016 Support",
+                "Data Sources & Provenance",
                 "Artifacts / Logs / Registries",
             ],
         )
@@ -111,11 +112,12 @@ class UiReadonlySemanticsTests(unittest.TestCase):
                 "Archive / Support Only",
                 "Archive / Support Only",
                 "Reference",
+                "Reference",
             ],
         )
         self.assertEqual(panel_pages[-1].navigation_section, "Reference")
 
-    def test_page_registry_source_matches_draft22_default_map(self):
+    def test_page_registry_source_matches_panel_default_map(self):
         registry_path = REPO_ROOT / "ui" / "pages" / "__init__.py"
         tree = ast.parse(registry_path.read_text(encoding="utf-8"), filename=str(registry_path))
         definitions: list[tuple[str, str, str, bool]] = []
@@ -149,6 +151,7 @@ class UiReadonlySemanticsTests(unittest.TestCase):
                 "Mindoro Oil-Type and Shoreline Context",
                 "Archive — Mindoro Validation Provenance",
                 "Archive — Legacy 2016 Support",
+                "Data Sources & Provenance",
                 "Artifacts / Logs / Registries",
             ],
         )
@@ -188,6 +191,7 @@ class UiReadonlySemanticsTests(unittest.TestCase):
             REPO_ROOT / "ui" / "pages" / "dwh_transfer_validation.py",
             REPO_ROOT / "ui" / "pages" / "phase4_oiltype_and_shoreline.py",
             REPO_ROOT / "ui" / "pages" / "legacy_2016_support.py",
+            REPO_ROOT / "ui" / "pages" / "data_sources.py",
         )
         for path in files_to_check:
             text = path.read_text(encoding="utf-8")

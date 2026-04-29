@@ -72,37 +72,39 @@ Panel mode keeps the final evidence order visible:
 Primary pages:
 
 - `Defense / Panel Review`
-- `Phase 1 Recipe Selection`
-- `B1 Drifter Provenance`
+- `Phase 1 Transport Provenance`
 - `Mindoro B1 Primary Validation`
-- `Mindoro Cross-Model Comparator`
-- `DWH Phase 3C Transfer Validation`
-- `Phase 4 Oil-Type and Shoreline Context`
+- `Mindoro Track A Comparator Support`
+- `DWH External Transfer Validation`
+- `Mindoro Oil-Type and Shoreline Context`
 
 Secondary pages:
 
-- `Mindoro Validation Archive`
-- `Legacy 2016 Support Package`
+- `Archive - Mindoro Validation Provenance`
+- `Archive - Legacy 2016 Support`
 
-Reference page:
+Reference pages:
 
+- `Data Sources & Provenance`
 - `Artifacts / Logs / Registries`
 
 Advanced-only page:
 
+- `B1 Recipe Provenance - Not Truth Mask`
+- `Phase 4 Cross-Model Status`
 - `Trajectory Explorer`
 
 ## Output Roots Behind The Main Pages
 
 - `Defense / Panel Review`: curated package roots plus `output/figure_package_publication/`
-- `Phase 1 Recipe Selection`: `output/phase1_mindoro_focus_pre_spill_2016_2023/` and shared study-context figures
-- `B1 Drifter Provenance`: `output/phase1_mindoro_focus_pre_spill_2016_2023/` and `output/panel_drifter_context/`
+- `Phase 1 Transport Provenance`: `output/phase1_mindoro_focus_pre_spill_2016_2023/` and shared study-context figures
 - `Mindoro B1 Primary Validation`: `output/Phase 3B March13-14 Final Output/`
-- `Mindoro Validation Archive`: `output/final_validation_package/` and archive-routed March-family materials
-- `Mindoro Cross-Model Comparator`: `output/Phase 3B March13-14 Final Output/publication/comparator_pygnome/`
-- `DWH Phase 3C Transfer Validation`: `output/Phase 3C DWH Final Output/`
-- `Phase 4 Oil-Type and Shoreline Context`: `output/phase4/CASE_MINDORO_RETRO_2023/`
-- `Legacy 2016 Support Package`: `output/2016 Legacy Runs FINAL Figures/`
+- `Mindoro Track A Comparator Support`: `output/Phase 3B March13-14 Final Output/publication/comparator_pygnome/`
+- `DWH External Transfer Validation`: `output/Phase 3C DWH Final Output/`
+- `Mindoro Oil-Type and Shoreline Context`: `output/phase4/CASE_MINDORO_RETRO_2023/`
+- `Archive - Mindoro Validation Provenance`: `output/final_validation_package/` and archive-routed March-family materials
+- `Archive - Legacy 2016 Support`: `output/2016 Legacy Runs FINAL Figures/`
+- `Data Sources & Provenance`: `config/data_sources.yaml` and `docs/DATA_SOURCES.md`
 - `Artifacts / Logs / Registries`: `output/final_reproducibility_package/` and `output/final_validation_package/`
 
 ## Surface Guardrails
@@ -111,6 +113,7 @@ Advanced-only page:
 - March 13-14 keeps the shared-imagery caveat explicit.
 - `Track A` and PyGNOME views remain comparator-only support.
 - Mindoro oil-type and shoreline views remain support/context only.
+- `Data Sources & Provenance` is a read-only registry view; it does not expand claims or invent exact endpoints.
 - UI, figure packages, and publication packages organize stored outputs only; they do not create new scientific results.
 
 ## Study Box Numbering

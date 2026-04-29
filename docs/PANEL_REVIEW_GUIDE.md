@@ -2,7 +2,7 @@
 
 This guide is for panel members who want to inspect the stored thesis outputs, verify that the software matches the manuscript, and stay inside the final defended evidence boundaries.
 
-The practical rule is simple: panel mode is for review, not for launching fresh science.
+The practical rule is simple: panel mode and read-only entries do not rerun science.
 
 ## 1. Start Here
 
@@ -24,8 +24,13 @@ That opens the panel-safe launcher path instead of the full research launcher.
 5. Refresh the final validation package from stored outputs only
 6. Refresh the reproducibility / docs package from stored outputs only
 7. Open the paper-to-output registry
+8. Open the data sources and provenance registry
 
-None of those steps are meant to rerun expensive science.
+None of those steps are meant to rerun expensive science or change thesis claims.
+
+## Data Sources and Provenance
+
+Use [DATA_SOURCES.md](DATA_SOURCES.md) or the dashboard's `Data Sources & Provenance` reference page to answer what external data sources were used, where they came from, what each source was used for, and where the related manifests or stored outputs live. This is read-only governance documentation backed by [config/data_sources.yaml](../config/data_sources.yaml); it does not promote new claims or rerun science.
 
 ## 3. Current Manuscript Evidence Order
 
@@ -42,14 +47,15 @@ Panel mode is built to respect that order instead of flattening the repo into on
 
 ## 4. Key Claim Boundaries
 
-- `B1` is the only main-text primary Mindoro validation row.
+- `B1` is the only main Philippine public-observation validation claim.
+- `B1` supports coastal-neighborhood usefulness, not exact 1 km overlap or universal operational accuracy.
 - March 13-14 keeps the shared-imagery caveat explicit.
 - `Track A` is comparator-only support.
 - PyGNOME is comparator-only and never the observational scoring reference.
 - DWH is external transfer validation, not Mindoro recalibration.
 - Mindoro oil-type and shoreline outputs are support/context only.
 - `prototype_2016` is legacy/archive support only.
-- The dashboard, publication package, and figure package are read-only presentation/governance surfaces.
+- The dashboard, publication package, validation packages, audits, and docs entries are read-only or packaging-only surfaces that do not recompute science.
 
 ## 5. Result Values Checklist
 
@@ -73,7 +79,7 @@ Panel mode is built to respect that order instead of flattening the repo into on
 - `R0`: did not reach target date; forecast cells `0`; observed cells `22`
 - `R1_previous`: forecast cells `5`; observed cells `22`; nearest distance `1414.21 m`; centroid distance `7358.16 m`
 - `IoU = 0.0`; `Dice = 0.0`
-- Interpretation: `R1_previous` is promoted because it survives and is scoreable, not because it is an exact-grid match
+- Interpretation: `R1_previous` is promoted because it survives and is scoreable, not because it is an exact-grid match or exact 1 km overlap
 
 ### Mindoro `Track A`
 
@@ -115,6 +121,7 @@ Main panel-safe entry points:
 .\start.ps1 -Panel
 .\start.ps1 -List -NoPause
 .\start.ps1 -Help -NoPause
+.\start.ps1 -Explain mindoro_phase3b_primary_public_validation -ExportPlan -NoPause
 ```
 
 macOS with Homebrew:
@@ -144,6 +151,12 @@ Dashboard:
 docker compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
 ```
 
+Data sources and provenance:
+
+```powershell
+docs\DATA_SOURCES.md
+```
+
 ## 8. Inspecting Drifter Provenance Behind `B1`
 
 Panel members can use panel option `7` or:
@@ -159,21 +172,28 @@ That view stays stored-output-only.
 - It makes the claim boundary explicit: B1 drifter provenance is not the direct March 13-14 public-observation validation truth.
 - It explicitly says when no direct March 13-14 2023 accepted drifter segment is stored for `B1`.
 
-## 9. Why `B1` Is The Main Mindoro Row
+## 9. Inspecting Data Sources And Provenance
+
+Panel members can use panel option `8` to view `docs/DATA_SOURCES.md`.
+
+That registry is read-only. It never downloads inputs, reruns workflows, rewrites scientific outputs, or changes the claim boundary.
+
+## 10. Why `B1` Is The Main Mindoro Row
 
 `B1` is the promoted March 13-14 `R1_previous` row carried into the main validation argument.
 
 - It is the only main-text primary Mindoro validation row.
+- It supports coastal-neighborhood usefulness, not exact 1 km overlap.
 - The March 13-14 `R0` branch is preserved for archive/provenance.
 - The other March-family rows remain useful context, but they are not replacements for `B1`.
 
-## 10. Why The Shared-Imagery Caveat Matters
+## 11. Why The Shared-Imagery Caveat Matters
 
 The March 13 and March 14 public products both cite March 12 WorldView-3 imagery.
 
 That means the row is still useful, but it must be described honestly as a reinitialization-based public-observation validation pair rather than as independent day-to-day validation.
 
-## 11. Which Commands Are Researcher / Audit Reruns
+## 12. Which Commands Are Researcher / Audit Reruns
 
 These belong to the full launcher and are not the default defense path:
 

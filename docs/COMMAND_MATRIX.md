@@ -5,7 +5,7 @@
 - Panel mode is the defense-safe default path.
 - The full launcher is the researcher / audit path.
 - Use launcher entry IDs from [config/launcher_matrix.json](../config/launcher_matrix.json) as the user-facing vocabulary.
-- Panel mode stays review-only / stored-output-only unless you intentionally choose a scientific rerun.
+- Panel mode and read-only entries do not rerun science.
 
 ## Current Manuscript Evidence Order
 
@@ -35,6 +35,7 @@ Safe inspection helpers:
 .\start.ps1 -ValidateMatrix -NoPause
 .\start.ps1 -Help -NoPause
 .\start.ps1 -Explain mindoro_phase3b_primary_public_validation -NoPause
+.\start.ps1 -Explain mindoro_phase3b_primary_public_validation -ExportPlan -NoPause
 .\start.ps1 -Entry mindoro_phase3b_primary_public_validation -DryRun -NoPause
 ```
 
@@ -45,10 +46,12 @@ Shared menu controls:
 - `Q`, `QUIT`, `EXIT` = exit cleanly
 - `H`, `HELP` = show help
 - `L`, `LIST` = show the launcher catalog
+- `S`, `SEARCH` = search entry IDs, thesis roles, run kinds, categories, and notes
 - `P`, `PANEL` = open the defense-safe panel path
 - `U`, `UI` = open the read-only dashboard
 - `R`, `RESTART` = restart the read-only dashboard when that shortcut is available
 - `X`, `INSPECT` = inspect entries inline inside a launcher section without running them
+- `E`, `EXPORT` = after inspect/search preview, export `output/launcher_plans/<entry_id>.md` and `.json` without running science
 
 ## Which Command Should I Run?
 
@@ -58,9 +61,11 @@ Shared menu controls:
 | Audit launcher entries without Docker or science | `.\start.ps1 -ValidateMatrix -NoPause` or `python -m src.utils.validate_launcher_matrix` |
 | Open dashboard only | panel option `1` or `U` / `UI`; the dashboard launch is a shortcut, not a separate launcher entry ID. Direct container form: `docker compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501` |
 | Inspect drifter provenance behind `B1` | panel option `7`, or `.\start.ps1 -Entry b1_drifter_context_panel` |
+| Inspect data sources and provenance | panel option `8`, open [DATA_SOURCES.md](DATA_SOURCES.md), inspect [config/data_sources.yaml](../config/data_sources.yaml), or use the dashboard `Data Sources & Provenance` reference page |
 | Verify manuscript numbers | panel option `2` |
 | Rebuild publication figures from stored outputs only | panel option `3`, or `.\start.ps1 -Entry figure_package_publication` |
 | Preview a launcher entry without Docker execution | `.\start.ps1 -Entry <entry_id> -DryRun -NoPause` |
+| Export a run plan without Docker execution | `.\start.ps1 -Explain <entry_id> -ExportPlan -NoPause` |
 | Run focused Phase 1 provenance rerun intentionally | `.\start.ps1 -Entry phase1_mindoro_focus_provenance` |
 | Run `B1` rerun intentionally | `.\start.ps1 -Entry mindoro_phase3b_primary_public_validation` |
 | Run DWH rerun intentionally | `.\start.ps1 -Entry dwh_reportable_bundle` |
@@ -80,6 +85,7 @@ These labels should match the live `Show-PanelMenu` output exactly.
 | `5` | Refresh final reproducibility package / command documentation | Packaging-only governance/doc sync via `phase5_sync` |
 | `6` | Show paper-to-output registry | Read-only manuscript/output map |
 | `7` | View B1 drifter provenance/context | Read-only `B1` provenance/context panel |
+| `8` | View data sources and provenance registry | Opens `docs/DATA_SOURCES.md`; no downloads, reruns, or science rewrites |
 | `A` | Open full research launcher | Leaves panel mode for the advanced launcher |
 | `U` | Open read-only dashboard shortcut | Same dashboard shortcut as option `1` |
 | `R` | Restart the read-only dashboard | Restarts the dashboard helper |
@@ -98,6 +104,8 @@ These labels should match the live `Show-PanelMenu` output exactly.
 | Archive/provenance | `phase1_regional_reference_rerun`, `mindoro_march13_14_phase1_focus_trial`, `mindoro_march6_recovery_sensitivity`, `mindoro_march23_extended_public_stress_test` | Archive, provenance, or governance lanes only. |
 | Legacy/debug | `prototype_legacy_final_figures`, `prototype_2021_bundle`, `prototype_legacy_bundle` | Legacy support/debug only. |
 | Read-only dashboard / packaging / audits / docs | `b1_drifter_context_panel`, `phase1_audit`, `phase2_audit`, `final_validation_package`, `phase5_sync`, `trajectory_gallery`, `trajectory_gallery_panel`, `figure_package_publication` | Stored-output-only or packaging-only actions. Dashboard launch itself is a shortcut, not a catalog entry ID. |
+
+Data-source provenance is a read-only documentation/UI layer, not a launcher rerun entry. Use `docs/DATA_SOURCES.md`, `config/data_sources.yaml`, or the dashboard reference page.
 
 ## Launcher Entry Map
 
@@ -131,7 +139,7 @@ These labels should match the live `Show-PanelMenu` output exactly.
 | --- | --- | --- |
 | `phase1_mindoro_focus_pre_spill_experiment` | `phase1_mindoro_focus_provenance` | Same focused Mindoro provenance workflow. |
 | `phase1_production_rerun` | `phase1_regional_reference_rerun` | Same broader regional reference/governance workflow. |
-| `mindoro_march13_14_noaa_reinit_stress_test` | `mindoro_phase3b_primary_public_validation` | Hidden legacy March 13-14 compatibility bundle for older scripts only; prefer the canonical `B1` entry for current thesis-facing runs. |
+| `mindoro_march13_14_noaa_reinit_stress_test` | `mindoro_phase3b_primary_public_validation` | Hidden legacy ID for older scripts only; it resolves to the canonical `B1` entry and does not run the Track A/PyGNOME comparator lane. |
 
 ## Exact Prompt-Free Read-Only Commands
 
@@ -175,8 +183,10 @@ docker compose exec -T -e WORKFLOW_MODE=dwh_retro_2010 -e PIPELINE_PHASE=phase3c
 ## Guardrails
 
 - `B1` is the only main Philippine public-observation validation claim.
+- `B1` supports coastal-neighborhood usefulness, not exact 1 km overlap or universal operational accuracy.
 - The March 13-14 `B1` pair keeps the shared-imagery caveat explicit.
 - `Track A` and every PyGNOME branch remain comparator-only support.
+- PyGNOME is never observational truth.
 - DWH is external transfer validation, not Mindoro recalibration.
 - Mindoro oil-type and shoreline outputs remain support/context only.
 - Read-only dashboard, packaging, audit, and docs entries do not recompute science.

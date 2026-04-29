@@ -14,7 +14,11 @@ import numpy as np
 import pandas as pd
 import rasterio
 import xarray as xr
-import yaml
+
+try:
+    import yaml
+except ModuleNotFoundError:  # pragma: no cover - exercised only in minimal UI environments
+    yaml = None
 
 from src.core.artifact_status import (
     DWH_CASE_ID,
@@ -35,6 +39,7 @@ DWH_FINAL_DIR = Path("output") / "Phase 3C DWH Final Output"
 LEGACY_2016_FINAL_DIR = Path("output") / "2016 Legacy Runs FINAL Figures"
 MINDORO_ARCHIVE_DECISION_PATH = FINAL_VALIDATION_DIR / "mindoro_validation_archive_decision.md"
 PAPER_OUTPUT_REGISTRY_PATH = Path("docs") / "PAPER_OUTPUT_REGISTRY.md"
+DATA_SOURCE_REGISTRY_PATH = Path("config") / "data_sources.yaml"
 RAW_GALLERY_DIR = Path("output") / "trajectory_gallery"
 PANEL_GALLERY_DIR = Path("output") / "trajectory_gallery_panel"
 PUBLICATION_DIR = Path("output") / "figure_package_publication"
@@ -59,6 +64,7 @@ DASHBOARD_STATE_PATHS: tuple[Path, ...] = (
     FINAL_REPRO_DIR / "final_log_index.csv",
     FINAL_REPRO_DIR / "final_reproducibility_summary.md",
     PAPER_OUTPUT_REGISTRY_PATH,
+    DATA_SOURCE_REGISTRY_PATH,
     FINAL_VALIDATION_DIR / "final_validation_manifest.json",
     FINAL_VALIDATION_DIR / "final_validation_case_registry.csv",
     FINAL_VALIDATION_DIR / "final_validation_limitations.csv",
@@ -255,6 +261,52 @@ def read_text(path: str | Path, repo_root: str | Path | None = None) -> str:
     return _cached_text(*_path_cache_signature(path, repo_root))
 
 
+def _parse_simple_yaml_scalar(raw_value: str) -> Any:
+    text = raw_value.strip()
+    if text in {"", '""', "''"}:
+        return ""
+    if (text.startswith('"') and text.endswith('"')) or (text.startswith("'") and text.endswith("'")):
+        try:
+            return json.loads(text) if text.startswith('"') else text[1:-1]
+        except json.JSONDecodeError:
+            return text[1:-1]
+    if text.lower() in {"true", "false"}:
+        return text.lower() == "true"
+    return text
+
+
+def _parse_simple_yaml_mapping(text: str) -> dict[str, Any]:
+    """Parse the simple registry YAML shape when PyYAML is unavailable."""
+    root: dict[str, Any] = {}
+    current_entry: dict[str, Any] | None = None
+    current_list_key = ""
+    for raw_line in text.splitlines():
+        if not raw_line.strip() or raw_line.lstrip().startswith("#"):
+            continue
+        indent = len(raw_line) - len(raw_line.lstrip(" "))
+        stripped = raw_line.strip()
+        if indent == 0 and stripped.endswith(":"):
+            key = stripped[:-1].strip()
+            root[key] = {}
+            current_entry = root[key]
+            current_list_key = ""
+            continue
+        if indent == 2 and current_entry is not None and ":" in stripped:
+            key, raw_value = stripped.split(":", 1)
+            key = key.strip()
+            raw_value = raw_value.strip()
+            if raw_value == "":
+                current_entry[key] = []
+                current_list_key = key
+            else:
+                current_entry[key] = _parse_simple_yaml_scalar(raw_value)
+                current_list_key = ""
+            continue
+        if indent >= 4 and stripped.startswith("- ") and current_entry is not None and current_list_key:
+            current_entry.setdefault(current_list_key, []).append(_parse_simple_yaml_scalar(stripped[2:]))
+    return root
+
+
 @lru_cache(maxsize=64)
 def _cached_yaml(path_text: str, repo_root_text: str, _mtime_ns: int, _size: int) -> dict[str, Any]:
     path = Path(path_text)
@@ -262,8 +314,11 @@ def _cached_yaml(path_text: str, repo_root_text: str, _mtime_ns: int, _size: int
         path = resolve_repo_path(path_text, repo_root_text)
     if path is None or not path.exists():
         return {}
-    with open(path, "r", encoding="utf-8") as handle:
-        return yaml.safe_load(handle) or {}
+    text = path.read_text(encoding="utf-8")
+    if yaml is None:
+        return _parse_simple_yaml_mapping(text)
+    payload = yaml.safe_load(text) or {}
+    return payload if isinstance(payload, dict) else {}
 
 
 def read_yaml(path: str | Path, repo_root: str | Path | None = None) -> dict[str, Any]:
@@ -515,6 +570,10 @@ def final_reproducibility_summary(repo_root: str | Path | None = None) -> str:
 
 def paper_output_registry_markdown(repo_root: str | Path | None = None) -> str:
     return read_text(PAPER_OUTPUT_REGISTRY_PATH, repo_root)
+
+
+def data_source_registry(repo_root: str | Path | None = None) -> dict[str, Any]:
+    return read_yaml(DATA_SOURCE_REGISTRY_PATH, repo_root)
 
 
 def panel_review_check_table(repo_root: str | Path | None = None) -> pd.DataFrame:
@@ -1658,6 +1717,7 @@ def build_dashboard_state(repo_root: str | Path | None = None) -> dict[str, Any]
         "final_log_index": final_log_index(root),
         "final_reproducibility_summary": final_reproducibility_summary(root),
         "paper_output_registry_markdown": paper_output_registry_markdown(root),
+        "data_source_registry": data_source_registry(root),
         "panel_review_check_table": panel_review_check_table(root),
         "panel_review_check_markdown": panel_review_check_markdown(root),
         "panel_review_check_manifest": panel_review_check_manifest(root),

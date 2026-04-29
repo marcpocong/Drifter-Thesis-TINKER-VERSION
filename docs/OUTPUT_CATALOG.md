@@ -2,6 +2,17 @@
 
 This catalog follows the final manuscript evidence order: focused Mindoro Phase 1 provenance, Phase 2 standardized forecast products, Mindoro `B1`, Mindoro `Track A` comparator-only support, DWH external transfer validation, Mindoro oil-type/shoreline support, `prototype_2016` legacy/archive support, and the read-only governance/package surfaces.
 
+## Data-Source Provenance Registry
+
+The panel-facing data-source registry is [config/data_sources.yaml](../config/data_sources.yaml), with the readable guide at [DATA_SOURCES.md](DATA_SOURCES.md) and a matching `Data Sources & Provenance` dashboard page.
+
+Interpretation:
+
+- this registry is read-only governance documentation
+- it points to configs, manifests, inventories, and stored outputs instead of rerunning science
+- rows with missing exact source endpoints are marked for verification rather than guessed
+- it keeps drifter provenance, public-observation masks, forcing datasets, shoreline/oil support, and model/tool provenance in separate evidence roles
+
 ## Read-Only Audit Outputs
 
 ### `output/phase1_finalization_audit/`

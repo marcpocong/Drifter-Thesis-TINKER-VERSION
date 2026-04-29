@@ -29,6 +29,7 @@ This repo keeps one canonical artifact-surface vocabulary in `src/core/artifact_
 - `Track A` is comparator-only support attached to `B1`, not a co-primary result.
 - DWH `C1` and `C2 p50` remain thesis-facing transfer-validation material, while `C2 p90` and `C3` stay support/comparison only.
 - Mindoro oil-type and shoreline outputs remain support/context only.
+- Data-source provenance lives in the read-only registry layer: [DATA_SOURCES.md](DATA_SOURCES.md) and [config/data_sources.yaml](../config/data_sources.yaml). It explains sources and access caveats without expanding scientific claims.
 - UI pages, figure packages, and publication packages organize stored outputs only; they do not create new scientific results.
 
 ## Archive And Legacy Rules

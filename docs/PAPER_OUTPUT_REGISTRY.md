@@ -13,6 +13,7 @@ This registry maps thesis-facing tables and figures to the stored outputs alread
 - "This figure is rebuilt from..." means the current publication or defense figure is a packaging-layer rebuild from stored outputs only.
 - "Comparator support only" means the output helps explain behavior but is not observational truth and is not a co-primary validation claim.
 - "Support/context only" means the output is useful for interpretation, not for the main validation claim.
+- Data-source provenance for external observation, drifter, forcing, shoreline, oil-property, and model/tool sources is tracked separately in [DATA_SOURCES.md](DATA_SOURCES.md) and [config/data_sources.yaml](../config/data_sources.yaml).
 
 ## Registry
 

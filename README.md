@@ -31,22 +31,26 @@ If the containers are already up and you only need the dashboard:
 docker compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
 ```
 
-Panel mode is review-only / stored-output-only by default. Use the full launcher only for intentional research or audit reruns.
+Panel mode and read-only entries do not rerun science. Use the full launcher only for intentional research or audit reruns.
 
 See [PANEL_QUICK_START.md](PANEL_QUICK_START.md) and [docs/PANEL_REVIEW_GUIDE.md](docs/PANEL_REVIEW_GUIDE.md).
+
+## Data Sources and Provenance
+
+Panel reviewers can inspect the external observation, drifter, forcing, shoreline, oil-property, and model/tool sources in [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md). The machine-readable registry is [config/data_sources.yaml](config/data_sources.yaml), and the read-only Streamlit UI includes a `Data Sources & Provenance` reference page.
 
 ## Current Manuscript Alignment
 
 1. Focused Mindoro Phase 1 provenance lane = historical drifter-based transport validation and recipe selection.
 2. Phase 2 = standardized deterministic and 50-member machine-readable forecast product generation.
-3. Mindoro `B1` = March 13-14 `R1_previous` primary public-observation validation row and the only main-text primary Philippine / Mindoro validation claim.
+3. Mindoro `B1` = March 13-14 `R1_previous` primary public-observation validation row and the only main-text primary Philippine / Mindoro validation claim; it supports coastal-neighborhood usefulness, not exact 1 km overlap or universal operational accuracy.
 4. Mindoro `Track A` = same-case OpenDrift versus PyGNOME comparator-only support against the March 14 public mask; never the observational scoring reference.
 5. `DWH` = separate external rich-data transfer validation lane; not Mindoro recalibration and not a second local Phase 1.
 6. Mindoro oil-type and shoreline bundle = downstream support/context only; not a second primary validation phase and not a matched Mindoro OpenDrift-versus-PyGNOME fate / shoreline comparison.
 7. `prototype_2016` = legacy/archive support only; useful for workflow history and preserved comparator/budget-only archive, but not direct public-spill validation and not part of the defended local validation claim.
 8. Publication package, figure package, and UI = read-only presentation/governance surfaces; they organize stored outputs but do not create new scientific results.
 
-## Key Stored Results Matching Draft 22
+## Key Stored Results for Panel Review
 
 ### Focused Mindoro Phase 1 Provenance
 
@@ -66,7 +70,7 @@ See [PANEL_QUICK_START.md](PANEL_QUICK_START.md) and [docs/PANEL_REVIEW_GUIDE.md
 
 ### Mindoro `B1` Primary Public-Observation Validation
 
-- `B1` is the March 13-14 `R1_previous` row and the only main-text primary Mindoro validation claim.
+- `B1` is the March 13-14 `R1_previous` row and the only main-text primary Mindoro validation claim; it supports coastal-neighborhood usefulness, not exact 1 km overlap or universal operational accuracy.
 - FSS: `1 km = 0.0000`, `3 km = 0.0441`, `5 km = 0.1371`, `10 km = 0.2490`, `mean = 0.1075`
 - Branch diagnostics:
 - `R0` did not reach the target date; forecast cells `0`; observed cells `22`
@@ -121,6 +125,7 @@ The launcher entrypoint is [start.ps1](start.ps1), and the current entry catalog
 - The full launcher is the researcher/audit path.
 - Use launcher entry IDs and role groups as the user-facing vocabulary.
 - Read-only dashboard launch is a shortcut, not a separate matrix entry ID. Use panel option `1` or `U` / `UI`.
+- Panel option `8` opens the read-only data sources and provenance registry at `docs/DATA_SOURCES.md`.
 - The README entry IDs below were checked against `config/launcher_matrix.json`.
 
 ### Preferred Entry IDs
@@ -135,7 +140,7 @@ The launcher entrypoint is [start.ps1](start.ps1), and the current entry catalog
 
 - `phase1_mindoro_focus_pre_spill_experiment` -> prefer `phase1_mindoro_focus_provenance`
 - `phase1_production_rerun` -> prefer `phase1_regional_reference_rerun`
-- `mindoro_march13_14_noaa_reinit_stress_test` -> hidden legacy March 13-14 compatibility bundle; prefer `mindoro_phase3b_primary_public_validation`
+- `mindoro_march13_14_noaa_reinit_stress_test` -> hidden legacy ID that resolves to `mindoro_phase3b_primary_public_validation`; it does not run the Track A/PyGNOME comparator lane
 
 ### Useful Commands
 
@@ -146,6 +151,7 @@ The launcher entrypoint is [start.ps1](start.ps1), and the current entry catalog
 .\start.ps1 -ListRole primary_evidence -NoPause
 .\start.ps1 -Help -NoPause
 .\start.ps1 -Explain mindoro_phase3b_primary_public_validation -NoPause
+.\start.ps1 -Explain mindoro_phase3b_primary_public_validation -ExportPlan -NoPause
 .\start.ps1 -Entry mindoro_phase3b_primary_public_validation -DryRun -NoPause
 ```
 
@@ -164,15 +170,17 @@ Launcher controls:
 - `C`, `CANCEL` cancel the current selection cleanly.
 - `Q`, `QUIT`, `EXIT` leave the launcher cleanly.
 - `X`, `INSPECT` preview entries inline inside a launcher section without running them.
+- `S`, `SEARCH` searches entry IDs, thesis roles, run kinds, categories, and notes.
+- `E`, `EXPORT` after an inspect/search preview writes `output/launcher_plans/<entry_id>.md` and `.json` without running science.
 - Hidden aliases still work, but they resolve to the canonical entry preview before execution.
 
 ## Scientific Guardrails
 
 - `B1` is the only main Philippine public-observation validation claim.
-- `B1` supports coastal-neighborhood usefulness, not exact 1 km overlap.
+- `B1` supports coastal-neighborhood usefulness, not exact 1 km overlap or universal operational accuracy.
 - Keep the March 13-14 shared-imagery caveat explicit.
 - `Track A` and PyGNOME branches are comparator-only support, never the observational scoring reference.
-- Do not treat DWH as the main Philippine case or as a second local Phase 1.
+- DWH is external transfer validation, not Mindoro recalibration, the main Philippine case, or a second local Phase 1.
 - Do not treat Mindoro oil-type / shoreline outputs as primary validation.
 - `prototype_2016` is legacy/archive support only; some internal package names may still contain Phase 4/Phase 5 labels, but those are not primary defended evidence.
 - UI, publication packages, and figure packages are read-only presentation/governance surfaces built from stored outputs only.
@@ -195,6 +203,7 @@ Launcher controls:
 
 - [PANEL_QUICK_START.md](PANEL_QUICK_START.md)
 - [docs/PANEL_REVIEW_GUIDE.md](docs/PANEL_REVIEW_GUIDE.md)
+- [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md)
 - [docs/PHASE_STATUS.md](docs/PHASE_STATUS.md)
 - [docs/COMMAND_MATRIX.md](docs/COMMAND_MATRIX.md)
 - [docs/THESIS_SURFACE_GOVERNANCE.md](docs/THESIS_SURFACE_GOVERNANCE.md)
@@ -212,6 +221,6 @@ For questions or issues, contact `marcpocong@gmail.com`.
 
 ## Status Stamp
 
-- Last updated: `2026-04-28`
-- Current sync state: aligned to Draft 22 / final manuscript evidence structure and stored-output review package
+- Last updated: `2026-04-29`
+- Current sync state: aligned to current manuscript evidence structure and stored-output review package
 - Biggest remaining scientific follow-up: broader `2016-2022` regional/reference Phase 1 lane remains separate from finalized Mindoro-specific B1 provenance and is not the main Mindoro validation claim
