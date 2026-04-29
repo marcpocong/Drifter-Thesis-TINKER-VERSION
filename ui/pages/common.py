@@ -7,7 +7,7 @@ import hashlib
 import io
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
 try:
     from ui.bootstrap import ensure_repo_root_on_path
@@ -84,16 +84,91 @@ def render_status_callout(label: str, value: str, tone: str = "info") -> None:
         st.info(message)
 
 
-def render_metric_row(metrics: list[tuple[str, str]], *, export_mode: bool = False) -> None:
+def _normalize_metric_card(
+    metric: dict[str, Any] | Sequence[Any],
+    *,
+    compact: bool,
+    full_width: bool,
+) -> dict[str, Any]:
+    if isinstance(metric, dict):
+        label = metric.get("label", "")
+        value = metric.get("value", "")
+        note = metric.get("note", "")
+        item_compact = bool(metric.get("compact", compact))
+        item_full_width = bool(metric.get("full_width", full_width))
+    else:
+        if len(metric) < 2:
+            raise ValueError("Metric cards require at least a label and value.")
+        label = metric[0]
+        value = metric[1]
+        note = metric[2] if len(metric) > 2 else ""
+        item_compact = compact
+        item_full_width = full_width
+    return {
+        "label": _clean_text_value(label),
+        "value": _clean_text_value(value),
+        "note": _clean_text_value(note),
+        "compact": item_compact,
+        "full_width": item_full_width,
+    }
+
+
+def build_metric_row_html(
+    metrics: Sequence[dict[str, Any] | Sequence[Any]],
+    *,
+    export_mode: bool = False,
+    compact: bool = False,
+    full_width: bool = False,
+) -> str:
+    """Build escaped responsive metric-card markup for Streamlit markdown."""
+    normalized = [
+        _normalize_metric_card(metric, compact=compact or export_mode, full_width=full_width)
+        for metric in metrics
+    ]
+    grid_classes = ["ui-metric-grid"]
+    if compact or export_mode:
+        grid_classes.append("ui-metric-grid--compact")
+    cards: list[str] = []
+    for metric in normalized:
+        label = metric["label"] or "Metric"
+        value = metric["value"] or "n/a"
+        note = metric["note"]
+        card_classes = ["ui-metric-card"]
+        if metric["compact"]:
+            card_classes.append("ui-metric-card--compact")
+        if metric["full_width"]:
+            card_classes.append("ui-metric-card--full")
+        note_html = f"<div class='ui-metric-card__note'>{html.escape(note)}</div>" if note else ""
+        cards.append(
+            (
+                f"<article class='{' '.join(card_classes)}' role='listitem'>"
+                f"<div class='ui-metric-card__label'>{html.escape(label)}</div>"
+                f"<div class='ui-metric-card__value'>{html.escape(value)}</div>"
+                f"{note_html}"
+                "</article>"
+            )
+        )
+    return f"<div class='{' '.join(grid_classes)}' role='list'>{''.join(cards)}</div>"
+
+
+def render_metric_row(
+    metrics: Sequence[dict[str, Any] | Sequence[Any]],
+    *,
+    export_mode: bool = False,
+    compact: bool = False,
+    full_width: bool = False,
+) -> None:
     if not metrics:
         return
-    columns_per_row = min(2 if export_mode else 3, len(metrics))
-    for start in range(0, len(metrics), columns_per_row):
-        visible_columns = min(columns_per_row, len(metrics) - start)
-        columns = st.columns(visible_columns)
-        for column, (label, value) in zip(columns, metrics[start : start + columns_per_row]):
-            with column:
-                st.metric(label, value)
+    st.markdown(
+        build_metric_row_html(
+            metrics,
+            export_mode=export_mode,
+            compact=compact,
+            full_width=full_width,
+        ),
+        unsafe_allow_html=True,
+    )
 
 
 def render_section_stack(

@@ -149,21 +149,39 @@ def render(state: dict, ui_state: dict) -> None:
     st.subheader("Quick panel summary")
     render_metric_row(
         [
-            ("Phase 1 selected recipe", f"{selected_recipe} | {accepted_count} accepted | {subset_count} ranked"),
-            ("Mindoro B1 mean FSS", f"{_float_text((b1_row or {}).get('mean_fss'), 4)} | no exact 1 km overlap"),
-            ("Track A PyGNOME mean FSS", _float_text((track_a_pygnome or {}).get("mean_fss"), 4)),
-            (
-                "DWH corridor C1 / C2 p50 / C2 p90 / C3",
-                " / ".join(
+            {
+                "label": "Phase 1 selected recipe",
+                "value": selected_recipe,
+                "note": f"{accepted_count} accepted strict segments; {subset_count} February-April ranked segments",
+            },
+            {
+                "label": "Mindoro B1 mean FSS",
+                "value": _float_text((b1_row or {}).get("mean_fss"), 4),
+                "note": "No exact 1 km overlap",
+            },
+            {
+                "label": "Track A PyGNOME mean FSS",
+                "value": _float_text((track_a_pygnome or {}).get("mean_fss"), 4),
+                "note": "Comparator-only support",
+            },
+            {
+                "label": "DWH corridor C1 / C2 p50 / C2 p90 / C3",
+                "value": " / ".join(
                     [
-                        _float_text((dwh_c1 or {}).get("mean_fss"), 4),
-                        _float_text((dwh_c2_p50 or {}).get("mean_fss"), 4),
-                        _float_text((dwh_c2_p90 or {}).get("mean_fss"), 4),
-                        _float_text((dwh_c3 or {}).get("mean_fss"), 4),
+                        f"C1 {_float_text((dwh_c1 or {}).get('mean_fss'), 4)}",
+                        f"C2 p50 {_float_text((dwh_c2_p50 or {}).get('mean_fss'), 4)}",
+                        f"C2 p90 {_float_text((dwh_c2_p90 or {}).get('mean_fss'), 4)}",
+                        f"C3 {_float_text((dwh_c3 or {}).get('mean_fss'), 4)}",
                     ]
                 ),
-            ),
-            ("Phase 4 status", "SUPPORT / CONTEXT ONLY; no matched Mindoro Phase 4 PyGNOME fate-and-shoreline package"),
+                "note": "External transfer corridor mean FSS values; C3 remains the PyGNOME comparator.",
+            },
+            {
+                "label": "Phase 4 status",
+                "value": "SUPPORT / CONTEXT ONLY",
+                "note": "No matched Mindoro Phase 4 PyGNOME fate-and-shoreline package stored.",
+                "full_width": True,
+            },
         ],
         export_mode=export_mode,
     )

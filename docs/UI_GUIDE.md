@@ -42,6 +42,12 @@ Open `http://localhost:8501`.
 - No scientific rerun controls are exposed in the UI.
 - Missing optional artifacts fail softly so the rest of the dashboard remains available.
 
+## Responsive Review Checks
+
+- The defense dashboard uses responsive metric cards for panel-summary values so long labels, values, and status notes wrap instead of being truncated.
+- Before panel review, check the UI at browser widths near `1280`, `1440`, `1600`, and `1920` px and at zoom levels `90%`, `100%`, `125%`, and `150%`.
+- These checks are presentation-only; they must not rerun science, rewrite packaged outputs, or change thesis evidence semantics.
+
 ## Panel Mode Surface
 
 Panel mode keeps the final evidence order visible:

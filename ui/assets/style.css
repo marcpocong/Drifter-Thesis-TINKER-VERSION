@@ -44,6 +44,7 @@ body {
 
 [data-testid="stAppViewContainer"] {
   background: #f7f9f8;
+  overflow-x: hidden;
 }
 
 [data-testid="stHeader"] {
@@ -70,6 +71,7 @@ body {
   flex-direction: column;
   gap: 0.35rem;
   margin: 0.1rem 0 0.8rem;
+  min-width: 0;
 }
 
 .sidebar-brand__eyebrow {
@@ -82,17 +84,21 @@ body {
 
 .sidebar-brand__title {
   color: var(--ui-ink);
-  font-size: 1.28rem;
+  font-size: clamp(1.02rem, 1.25vw, 1.28rem);
   font-weight: 800;
   line-height: 1.15;
-  max-width: 14rem;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .sidebar-brand__subtitle {
   color: var(--ui-ink-soft);
   font-size: 0.9rem;
   line-height: 1.5;
-  max-width: 17rem;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .sidebar-note {
@@ -201,6 +207,81 @@ div[data-testid="stCaptionContainer"] {
   padding: 0.18rem 0.58rem;
 }
 
+.ui-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: clamp(0.55rem, 0.85vw, 0.85rem);
+  align-items: stretch;
+  width: 100%;
+  max-width: min(100%, 1260px);
+  margin: 0.35rem 0 1rem;
+}
+
+.ui-metric-grid--compact {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 0.5rem;
+  max-width: min(100%, 1120px);
+}
+
+.ui-metric-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0.32rem;
+  min-width: 0;
+  min-height: 0;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(15, 118, 110, 0.16);
+  border-radius: var(--ui-radius-md);
+  box-shadow: 0 9px 22px rgba(15, 42, 64, 0.045);
+  padding: clamp(0.68rem, 0.85vw, 0.95rem);
+  overflow-wrap: anywhere;
+  word-break: normal;
+  white-space: normal;
+}
+
+.ui-metric-card--compact {
+  gap: 0.24rem;
+  padding: 0.58rem 0.68rem;
+}
+
+.ui-metric-card--full {
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: min(100%, 980px);
+}
+
+.ui-metric-card__label {
+  color: var(--ui-ink-soft);
+  font-size: clamp(0.78rem, 0.8vw, 0.92rem);
+  font-weight: 800;
+  line-height: 1.28;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  white-space: normal;
+}
+
+.ui-metric-card__value {
+  color: var(--ui-ink);
+  font-size: clamp(1.05rem, 1.35vw, 1.55rem);
+  font-weight: 850;
+  letter-spacing: 0;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  white-space: normal;
+}
+
+.ui-metric-card__note {
+  color: var(--ui-ink-soft);
+  font-size: clamp(0.78rem, 0.78vw, 0.9rem);
+  font-weight: 500;
+  line-height: 1.42;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  white-space: normal;
+}
+
 .export-note {
   background: #fffaf0;
   border: 1px solid rgba(173, 127, 0, 0.22);
@@ -230,20 +311,26 @@ div[data-testid="stMetric"] {
   background: rgba(255, 255, 255, 0.85);
   border: 1px solid var(--ui-line);
   border-radius: var(--ui-radius-md);
-  padding: 0.45rem 0.7rem;
+  padding: 0.4rem 0.62rem;
   box-shadow: 0 10px 24px rgba(15, 42, 64, 0.04);
   min-width: 0;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 div[data-testid="stMetricLabel"] {
   color: var(--ui-ink-soft);
   overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 div[data-testid="stMetricValue"] {
   color: var(--ui-ink);
+  font-size: clamp(1rem, 1.15vw, 1.35rem) !important;
   line-height: 1.18;
   overflow-wrap: anywhere;
+  word-break: normal;
+  white-space: normal;
 }
 
 div[data-testid="stVerticalBlockBorderWrapper"] {
@@ -252,6 +339,8 @@ div[data-testid="stVerticalBlockBorderWrapper"] {
   border-radius: var(--ui-radius-lg);
   box-shadow: var(--ui-shadow);
   min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 div[data-testid="stVerticalBlockBorderWrapper"] > div {
@@ -324,6 +413,15 @@ div[data-testid="stHorizontalBlock"] {
 
 div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
   min-width: 0 !important;
+}
+
+[data-testid="stSidebarContent"] {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+[data-testid="stSidebar"] hr {
+  margin: 0.75rem 0;
 }
 
 .stCode pre,
@@ -405,13 +503,13 @@ div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
   overflow-wrap: anywhere;
 }
 
-@media (max-width: 1440px) {
+@media (max-width: 1600px) {
   div[data-testid="stHorizontalBlock"] {
     flex-wrap: wrap !important;
   }
 
   div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-    flex: 1 1 min(100%, 24rem) !important;
+    flex: 1 1 min(100%, 26rem) !important;
     width: auto !important;
   }
 }
@@ -429,6 +527,16 @@ div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
 
   .page-hero {
     padding: 1rem 1rem 0.95rem;
+  }
+
+  .ui-metric-grid,
+  .ui-metric-grid--compact {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+  }
+
+  .ui-metric-card--full {
+    max-width: 100%;
   }
 
   .figure-gallery-card__title,
