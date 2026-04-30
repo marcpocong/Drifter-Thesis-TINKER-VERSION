@@ -180,7 +180,7 @@ If you want the UI to reflect the latest packaged read-only outputs first, refre
 ## 9. Current Guardrails
 
 - `B1` is the only main-text primary Mindoro validation row.
-- March 13-14 keeps the shared-imagery caveat explicit and must not be described as independent day-to-day validation.
+- March 13-14 keeps the observation-independence note explicit: March 13 and March 14 are independent NOAA-published day-specific public-observation products.
 - `Track A` and every PyGNOME branch remain comparator-only support.
 - DWH remains a separate external transfer-validation story.
 - Mindoro oil-type and shoreline outputs remain support/context only.

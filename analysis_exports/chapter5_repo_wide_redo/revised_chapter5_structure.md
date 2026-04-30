@@ -77,7 +77,7 @@ Use:
 
 Interpretation:
 - Keep B1 as the only main-text primary Mindoro public-validation row.
-- Retain the March 13 to March 14 shared-imagery caveat explicitly.
+- Retain the March 13 to March 14 observation-independence note explicitly.
 - Keep Track A and PyGNOME in comparator-only support language.
 
 ## 5.6 Deepwater Horizon External Transfer-Validation Findings

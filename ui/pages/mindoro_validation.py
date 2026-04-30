@@ -132,8 +132,8 @@ def render(state: dict, ui_state: dict) -> None:
         )
 
     render_caveat_ribbon(
-        "Shared-imagery / reinitialization caveat",
-        "The March 13–14 pair shares March 12 WorldView-3 imagery provenance, so it is treated as a bounded reinitialization-based validation check rather than a fully independent day-to-day validation claim.",
+        "Observation independence / reinitialization note",
+        "March 13 and March 14 are independent NOAA-published day-specific public-observation products; March 13 is the public seed observation and March 14 is the public target observation.",
     )
 
     mindoro_final_registry = state["mindoro_final_registry"]
@@ -217,7 +217,7 @@ def render(state: dict, ui_state: dict) -> None:
         )
     render_caveat_ribbon(
         "B1 caveat",
-        "No exact 1 km overlap; this supports coastal-neighborhood usefulness, not exact-grid reproduction. No exact 1 km overlap is present; B1 supports coastal-neighborhood usefulness only. The March 13–14 pair shares March 12 WorldView-3 imagery provenance, so this is treated as a bounded reinitialization-based validation check rather than a fully independent day-to-day validation claim.",
+        "No exact 1 km overlap; this supports coastal-neighborhood usefulness, not exact-grid reproduction. No exact 1 km overlap is present; B1 supports coastal-neighborhood usefulness only. March 13 and March 14 are independent NOAA-published day-specific public-observation products.",
     )
 
     def _primary_package() -> None:

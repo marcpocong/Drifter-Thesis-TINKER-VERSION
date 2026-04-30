@@ -38,5 +38,5 @@ Mindoro Phase 1 provenance:
 - The broader `phase1_regional_2016_2022` lane remains preserved as a broader reference/governance lane and is not the active provenance for B1.
 - Phase 3B itself does not directly ingest drifters; it inherits a recipe selected by the separate focused Phase 1 rerun.
 
-Shared-imagery caveat:
-- Both NOAA/NESDIS public products cite WorldView-3 imagery acquired on 2023-03-12, so the promoted March 13 -> March 14 row is a reinitialization-based public-validation pair with shared-imagery provenance rather than a fully independent day-to-day validation.
+Observation independence note:
+- March 13 and March 14 are independent NOAA-published day-specific public-observation products. B1 uses the March 13 public seed observation and the March 14 public target observation, with interpretation limited to neighborhood-scale usefulness rather than exact 1 km overlap.

@@ -495,7 +495,6 @@ def documentation_findings() -> list[str]:
         "panel mode is the defense-safe default",
         "full launcher is the researcher",
         "only main philippine public-observation validation claim",
-        "shared-imagery caveat",
         "comparator-only",
         "external transfer validation",
         "not mindoro recalibration",

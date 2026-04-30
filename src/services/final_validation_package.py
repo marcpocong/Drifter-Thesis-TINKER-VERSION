@@ -1,8 +1,9 @@
-"""Read-only final validation package builder for completed Mindoro and DWH outputs."""
+﻿"""Read-only final validation package builder for completed Mindoro and DWH outputs."""
 
 from __future__ import annotations
 
 import json
+import os
 from shutil import copy2, rmtree
 from pathlib import Path
 from typing import Any
@@ -32,7 +33,7 @@ from src.services.mindoro_primary_validation_metadata import (
     MINDORO_PRIMARY_VALIDATION_THESIS_SUBTITLE,
     MINDORO_PRIMARY_VALIDATION_TRACK_ID,
     MINDORO_PRIMARY_VALIDATION_TRACK_LABEL,
-    MINDORO_SHARED_IMAGERY_CAVEAT,
+    MINDORO_OBSERVATION_INDEPENDENCE_NOTE,
 )
 from src.services.dwh_phase3c_metadata import (
     DWH_BASE_CASE_CONFIG_PATH,
@@ -75,6 +76,15 @@ MINDORO_B1_PUBLICATION_EXPORTS: dict[str, dict[str, Path | None]] = {
         "march13_seed_vs_march14_target.png": Path("output")
         / "figure_package_publication"
         / "case_mindoro_retro_2023__phase3b_reinit_primary__observation__single_seed_target_compare__2023_03_13_to_2023_03_14__single__paper__march13_seed_vs_march14_target.png",
+        "figure_4_4A_noaa_mar13_worldview3.png": Path("output")
+        / "figure_package_publication"
+        / "figure_4_4A_noaa_mar13_worldview3.png",
+        "figure_4_4B_noaa_mar14_worldview3.png": Path("output")
+        / "figure_package_publication"
+        / "figure_4_4B_noaa_mar14_worldview3.png",
+        "figure_4_4C_arcgis_mar13_mar14_observed_overlay.png": Path("output")
+        / "figure_package_publication"
+        / "figure_4_4C_arcgis_mar13_mar14_observed_overlay.png",
     },
     "opendrift_primary": {
         "march14_r1_previous_overlay.png": Path("output")
@@ -97,6 +107,12 @@ MINDORO_B1_PUBLICATION_EXPORTS: dict[str, dict[str, Path | None]] = {
         "mindoro_observed_masks_ensemble_pygnome_board.png": Path("output")
         / "figure_package_publication"
         / "case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift_vs_pygnome__comparison_board__2023_03_13_to_2023_03_14__board__slide__mindoro_observed_masks_ensemble_pygnome_board.png",
+        "Figure_4_5_Mindoro_TrackA_OpenDrift_PyGNOME_spatial_board.png": Path("output")
+        / "figure_package_publication"
+        / "Figure_4_5_Mindoro_TrackA_OpenDrift_PyGNOME_spatial_board.png",
+        "Figure_4_5_Mindoro_TrackA_OpenDrift_PyGNOME_spatial_board.json": Path("output")
+        / "figure_package_publication"
+        / "Figure_4_5_Mindoro_TrackA_OpenDrift_PyGNOME_spatial_board.json",
     },
 }
 MINDORO_B1_SCIENTIFIC_SOURCE_EXPORTS: dict[str, dict[str, Path]] = {
@@ -511,14 +527,28 @@ def _write_json(path: Path, payload: dict | list) -> None:
 
 def _write_text(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(text.rstrip() + "\n", encoding="utf-8")
+    with open(_path_for_io(path), "w", encoding="utf-8") as handle:
+        handle.write(text.rstrip() + "\n")
+
+
+def _path_for_io(path: str | Path) -> str:
+    path_obj = Path(path)
+    path_text = str(path_obj)
+    if os.name != "nt":
+        return path_text
+    absolute = str(path_obj.resolve())
+    if absolute.startswith("\\\\?\\"):
+        return absolute
+    if absolute.startswith("\\\\"):
+        return "\\\\?\\UNC\\" + absolute.lstrip("\\")
+    return "\\\\?\\" + absolute
 
 
 def _relative_to_repo(repo_root: Path, path: Path) -> str:
     try:
-        return str(path.resolve().relative_to(repo_root.resolve()))
+        return path.resolve().relative_to(repo_root.resolve()).as_posix()
     except Exception:
-        return str(path)
+        return Path(path).as_posix()
 
 
 def mean_fss(record: pd.Series | dict[str, Any]) -> float:
@@ -535,8 +565,8 @@ def mean_fss(record: pd.Series | dict[str, Any]) -> float:
 
 def decide_final_structure() -> str:
     return (
-        "Main text should emphasize Mindoro B1 as the March 13 -> March 14 NOAA reinit validation with an explicit "
-        "caveat that both NOAA products cite March 12 WorldView-3 imagery, while DWH Phase 3C remains the rich-data "
+        "Main text should emphasize Mindoro B1 as the March 13 -> March 14 NOAA reinit validation using separate "
+        "NOAA-published day-specific observation products, while DWH Phase 3C remains the rich-data "
         "transfer-validation success with deterministic as the clean baseline, p50 as the preferred probabilistic "
         "extension, p90 as support/comparison only, and PyGNOME as comparator-only; comparative discussion should "
         "emphasize the same-case Mindoro A comparator support track attached to B1 and the DWH "
@@ -937,15 +967,15 @@ class FinalValidationPackageService:
                 "- The broader `phase1_regional_2016_2022` lane remains preserved as a broader reference/governance lane and is not the active provenance for B1.",
                 "- Phase 3B itself does not directly ingest drifters; it inherits a recipe selected by the separate focused Phase 1 rerun.",
                 "",
-                "Shared-imagery caveat:",
-                f"- {MINDORO_SHARED_IMAGERY_CAVEAT}",
+                "Observation independence note:",
+                f"- {MINDORO_OBSERVATION_INDEPENDENCE_NOTE}",
             ]
         )
 
     def _build_mindoro_final_output_export(self, confirmation: dict[str, Any]) -> dict[str, Any]:
         export_dir = self.repo_root / MINDORO_B1_FINAL_OUTPUT_DIR
         if export_dir.exists():
-            rmtree(export_dir)
+            rmtree(_path_for_io(export_dir))
         publication_dir = export_dir / "publication"
         scientific_dir = export_dir / "scientific_source_pngs"
         summary_dir = export_dir / "summary"
@@ -1018,7 +1048,7 @@ class FinalValidationPackageService:
                 source = self.repo_root / relative_source
                 destination = base_dir / group_name / destination_name
                 destination.parent.mkdir(parents=True, exist_ok=True)
-                copy2(source, destination)
+                copy2(_path_for_io(source), _path_for_io(destination))
                 _record_export(
                     artifact_group=f"{base_dir.name}/{group_name}",
                     destination=destination,
@@ -1037,7 +1067,7 @@ class FinalValidationPackageService:
                 source = self.repo_root / MINDORO_MARCH14_TARGET_MASK_PATH
             else:
                 source = self.repo_root / relative_source
-                copy2(source, destination)
+                copy2(_path_for_io(source), _path_for_io(destination))
             _record_export(
                 artifact_group="publication/observations",
                 destination=destination,
@@ -1122,7 +1152,7 @@ class FinalValidationPackageService:
             "canonical_scientific_output_dir": _relative_to_repo(self.repo_root, self.repo_root / MINDORO_REINIT_DIR),
             "canonical_comparator_output_dir": _relative_to_repo(self.repo_root, self.repo_root / MINDORO_REINIT_CROSSMODEL_DIR),
             "read_only_export": True,
-            "shared_imagery_caveat": MINDORO_SHARED_IMAGERY_CAVEAT,
+            "observation_independence_note": MINDORO_OBSERVATION_INDEPENDENCE_NOTE,
             "dual_provenance_confirmation": confirmation,
             "exported_files": copied_files,
             "registry_path": _relative_to_repo(
@@ -1419,7 +1449,7 @@ class FinalValidationPackageService:
         if main_table is None:
             main_table = pd.DataFrame(columns=["case_id"])
         if export_dir.exists():
-            rmtree(export_dir)
+            rmtree(_path_for_io(export_dir))
         publication_dir = export_dir / "publication"
         scientific_dir = export_dir / "scientific_source_pngs"
         summary_dir = export_dir / "summary"
@@ -1492,12 +1522,12 @@ class FinalValidationPackageService:
         ) -> None:
             for destination_name, relative_source in exports.items():
                 source = self.repo_root / relative_source
-                if optional_missing_ok and not source.exists():
+                if optional_missing_ok and not Path(_path_for_io(source)).exists():
                     missing_optional.append(_relative_to_repo(self.repo_root, source))
                     continue
                 destination = base_dir / group_name / destination_name
                 destination.parent.mkdir(parents=True, exist_ok=True)
-                copy2(source, destination)
+                copy2(_path_for_io(source), _path_for_io(destination))
                 _record_export(
                     artifact_group=f"{base_dir.name}/{group_name}",
                     destination=destination,
@@ -1789,7 +1819,7 @@ class FinalValidationPackageService:
             "case_freeze_amendment_path": str(DWH_PHASE3C_FINAL_NOTE_PATH),
             "base_case_definition_preserved": False,
             "row_role": "scientific_result" if track_id != DWH_PHASE3C_TRACK_ID_COMPARATOR else "comparator_only",
-            "shared_imagery_caveat": "",
+            "observation_independence_note": "",
             "thesis_phase_title": DWH_PHASE3C_THESIS_PHASE_TITLE,
             "thesis_phase_subtitle": DWH_PHASE3C_THESIS_SUBTITLE,
             "notes": notes,
@@ -1840,7 +1870,7 @@ class FinalValidationPackageService:
                 "case_freeze_amendment_path": str(MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH),
                 "base_case_definition_preserved": True,
                 "row_role": "primary_public_validation",
-                "shared_imagery_caveat": MINDORO_SHARED_IMAGERY_CAVEAT,
+                "observation_independence_note": MINDORO_OBSERVATION_INDEPENDENCE_NOTE,
                 "thesis_phase_title": MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE,
                 "thesis_phase_subtitle": MINDORO_PRIMARY_VALIDATION_THESIS_SUBTITLE,
                 **confirmation,
@@ -1884,7 +1914,7 @@ class FinalValidationPackageService:
                 "case_freeze_amendment_path": str(MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH),
                 "base_case_definition_preserved": True,
                 "row_role": "legacy_honesty_only",
-                "shared_imagery_caveat": "",
+                "observation_independence_note": "",
                 "notes": (
                     "Legacy honesty-only row preserved for methodology honesty. The accepted WWF March 6 "
                     "validation mask rasterized to only two observed ocean cells, so this remains valuable context "
@@ -1922,7 +1952,7 @@ class FinalValidationPackageService:
                 "case_freeze_amendment_path": str(MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH),
                 "base_case_definition_preserved": True,
                 "row_role": "legacy_support_only",
-                "shared_imagery_caveat": "",
+                "observation_independence_note": "",
                 "notes": (
                     "Legacy broader-support reference preserved for narrative context. This March 3-6 public "
                     "observation union remains informative, but it should not be confused with the promoted "
@@ -1960,7 +1990,7 @@ class FinalValidationPackageService:
                     "case_freeze_amendment_path": str(MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH),
                     "base_case_definition_preserved": True,
                     "row_role": "comparator_only",
-                    "shared_imagery_caveat": MINDORO_SHARED_IMAGERY_CAVEAT,
+                    "observation_independence_note": MINDORO_OBSERVATION_INDEPENDENCE_NOTE,
                     "notes": (
                         "Same-case comparator-support track attached to B1 only; the accepted March 14 NOAA "
                         "observation mask remains truth. "
@@ -2058,7 +2088,7 @@ class FinalValidationPackageService:
                 "notes": (
                     "Same-case comparator-support track attached to B1 only. PyGNOME is not truth, the A row is "
                     "not a co-primary validation claim, and the March 13/14 comparator must be reported with the "
-                    "explicit caveat that both NOAA products cite March 12 WorldView-3 imagery."
+                    "explicit note that March 13 and March 14 are independent NOAA-published day-specific observation products."
                 ),
             },
             {
@@ -2323,8 +2353,8 @@ class FinalValidationPackageService:
                     "service_url": str(row["service_url"]),
                     "notes": (
                         str(row.get("notes", "") or "")
-                        + " | Primary package caveat: "
-                        + MINDORO_SHARED_IMAGERY_CAVEAT
+                        + " | Primary package note: "
+                        + MINDORO_OBSERVATION_INDEPENDENCE_NOTE
                     ).strip(" |"),
                 }
             )
@@ -2430,11 +2460,11 @@ class FinalValidationPackageService:
                 "limitation_id": "M1",
                 "case_id": MINDORO_CASE_ID,
                 "track_id": "B1",
-                "category": "shared_imagery_caveat",
+                "category": "observation_independence_note",
                 "statement": str(self.mindoro_reinit_manifest["limitations"]["noaa_source_limitation_note"]),
                 "implication": (
                     "Present March 13 -> March 14 as the canonical Mindoro validation track, but state clearly that "
-                    "it is a reinitialization-based public-validation pair with shared March 12 imagery provenance rather than independent day-to-day validation."
+                    "March 13 is the public seed observation and March 14 is the public target observation."
                 ),
                 "source_artifact": str(MINDORO_REINIT_DIR / "march13_14_reinit_run_manifest.json"),
             },
@@ -2583,7 +2613,7 @@ class FinalValidationPackageService:
         lines = [
             "# Final Validation Claims Guardrails",
             "",
-            f"- {MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE} is represented by Mindoro B1, the March 13 -> March 14 NOAA reinit validation, and it should be described with the explicit March 12 WorldView-3 caveat.",
+            f"- {MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE} is represented by Mindoro B1, the March 13 -> March 14 NOAA reinit validation, using independent NOAA-published day-specific observation products.",
             "- Mindoro A is the same-case March 13 -> March 14 comparator-support track attached to B1. It is never truth and never a co-primary validation row.",
             f"- {self._mindoro_phase1_provenance_statement(include_raw_provenance_clause=True)}",
             "- The broader 2016-2022 regional rerun is preserved as a reference/governance lane and is not the active provenance for B1.",
@@ -2626,7 +2656,7 @@ class FinalValidationPackageService:
             "- Keep DWH as the separate Phase 3C external rich-data transfer-validation branch, with no new drifter ingestion in the thesis-facing lane.",
             "- Present Phase 3A as same-case comparator-only support attached to B1, not as a co-primary claim or truth-source replacement.",
             "- Preserve `config/case_mindoro_retro_2023.yaml` as the frozen March 3 -> March 6 case definition and carry the Phase 3B promotion through the amendment file instead.",
-            "- Present March 13 -> March 14 as the canonical Mindoro validation with the shared-imagery caveat stated explicitly.",
+            "- Present March 13 -> March 14 as the canonical Mindoro validation with March 13 as the public seed observation and March 14 as the public target observation.",
             f"- State that {self._mindoro_phase1_provenance_statement(include_raw_provenance_clause=True).lower()}",
             "- State that the broader 2016-2022 regional rerun is preserved as reference/governance context rather than as the active B1 provenance lane.",
             "- Keep March 6 and March 3-6 visible as legacy/reference material rather than deleting or hiding them.",
@@ -2650,7 +2680,7 @@ class FinalValidationPackageService:
             "",
             "Interpretation notes:",
             "",
-            "- The promoted Mindoro row is a March 13 -> March 14 reinitialization test and must carry the caveat that both NOAA products cite March 12 WorldView-3 imagery.",
+            "- The promoted Mindoro row is a March 13 -> March 14 reinitialization test using independent NOAA-published day-specific public-observation products.",
             "- The legacy March 6 row should still be interpreted as an honesty-only difficult sparse-data edge case rather than erased from the methods story.",
             "- The legacy March 3-6 broader-support row remains helpful context, but it is not the same claim as the promoted B1 reinit validation.",
             "- The promoted Mindoro comparator lane shows OpenDrift R1 previous reinit p50 leading the March 13 -> March 14 cross-model comparison under the current case definition.",
@@ -2721,7 +2751,7 @@ class FinalValidationPackageService:
             "## Recommended Final Structure",
             "",
             f"- Base-case provenance: keep `{MINDORO_BASE_CASE_CONFIG_PATH}` frozen for March 3 -> March 6 and carry the B1 promotion through `{MINDORO_PRIMARY_VALIDATION_AMENDMENT_PATH}`.",
-            f"- Main text: {MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE} should foreground Mindoro B1 as the March 13 -> March 14 primary validation with the shared-imagery caveat and the later drifter-confirmation note, plus DWH Phase 3C as the separate external transfer-validation success with deterministic baseline and p50 extension wording kept explicit.",
+            f"- Main text: {MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE} should foreground Mindoro B1 as the March 13 -> March 14 primary validation using independent NOAA-published day-specific observation products and the later drifter-confirmation note, plus DWH Phase 3C as the separate external transfer-validation success with deterministic baseline and p50 extension wording kept explicit.",
             "- Comparative discussion: Mindoro A same-case comparator-support track attached to B1 and DWH deterministic-vs-ensemble-vs-PyGNOME comparison.",
             "- Legacy/reference and sensitivities: Mindoro B2/B3 legacy rows, recipe/init/source-history sensitivities, and optional future DWH extensions.",
             "",
@@ -2803,7 +2833,7 @@ class FinalValidationPackageService:
                 "thesis_phase_subtitle": MINDORO_PRIMARY_VALIDATION_THESIS_SUBTITLE,
                 "legacy_honesty_track_id": MINDORO_LEGACY_MARCH6_TRACK_ID,
                 "legacy_support_track_id": MINDORO_LEGACY_SUPPORT_TRACK_ID,
-                "shared_imagery_caveat": MINDORO_SHARED_IMAGERY_CAVEAT,
+                "observation_independence_note": MINDORO_OBSERVATION_INDEPENDENCE_NOTE,
                 "dual_provenance_confirmation": confirmation,
                 "final_output_export_dir": final_output_export["output_dir"],
             },
@@ -2854,3 +2884,4 @@ __all__ = [
     "mean_fss",
     "run_final_validation_package",
 ]
+

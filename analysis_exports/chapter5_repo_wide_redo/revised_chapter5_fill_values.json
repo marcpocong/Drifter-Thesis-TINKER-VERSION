@@ -1,4 +1,4 @@
-﻿{
+{
     "chapter5_redo_summary":  {
                                   "main_reason_for_redo":  "The previous Chapter 5 inventory overfocused on the publication/final-package layer and underused the broader repo evidence base.",
                                   "non_publication_figures_found":  "Yes. Strong non-publication boards were found in output/trajectory_gallery_panel, output/trajectory_gallery, and output/prototype_2016_pygnome_similarity.",
@@ -158,7 +158,7 @@
                        "observation_pair":  "March 13 public NOAA seed mask -\u003e March 14 public NOAA target mask",
                        "forecast_product":  "mask_p50_2023-03-14_localdate.tif from R1_previous",
                        "observation_mask":  "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public/accepted_obs_masks/10b37c42a9754363a5f7b14199b077e6.tif",
-                       "source_imagery_caveat":  "Both NOAA/NESDIS products cite WorldView-3 imagery acquired on 2023-03-12, so this is not a fully independent day-to-day validation.",
+                       "observation_independence_note":  "March 13 and March 14 are independent NOAA-published day-specific public-observation products.",
                        "fss_by_window":  [
                                              {
                                                  "window_km":  1,

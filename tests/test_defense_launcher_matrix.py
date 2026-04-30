@@ -41,8 +41,8 @@ def test_primary_claim_boundaries_keep_required_language():
     dwh_boundary = entries["dwh_reportable_bundle"]["claim_boundary"].lower()
 
     assert "only main philippine public-observation validation claim" in b1_boundary
-    assert "shared-imagery" in b1_boundary
-    assert "independent day-to-day pair" in b1_boundary
+    assert "independent noaa-published day-specific observation products" in b1_boundary
+    assert "neighborhood-scale" in b1_boundary
 
     assert "transport-provenance" in phase1_boundary
     assert "not direct spill-footprint validation" in phase1_boundary

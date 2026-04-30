@@ -707,11 +707,11 @@
                            "caveat":  "Public observed mask on the same projected scoring grid."
                        },
                        {
-                           "value_name":  "shared_imagery_caveat",
-                           "exact_value":  "Both NOAA/NESDIS public products cite WorldView-3 imagery acquired on 2023-03-12, so the promoted March 13 -\u003e March 14 row is a reinitialization-based public-validation pair with shared-imagery provenance rather than a fully independent day-to-day validation.",
+                           "value_name":  "observation_independence_note",
+                           "exact_value":  "March 13 and March 14 are independent NOAA-published day-specific public-observation products. B1 uses the March 13 public seed observation and the March 14 public target observation, with interpretation limited to neighborhood-scale usefulness rather than exact 1 km overlap.",
                            "units_if_any":  "",
                            "source_file":  "output/final_validation_package/final_validation_main_table.csv",
-                           "row_column_or_key":  "track_id=B1, column=shared_imagery_caveat",
+                           "row_column_or_key":  "track_id=B1, column=observation_independence_note",
                            "evidence_role":  "interpretation_guardrail",
                            "caveat":  "Must remain explicit in the March 13 -\u003e March 14 main-text row."
                        },
@@ -817,8 +817,8 @@
                                 "caveat":  "Stored cross-model FSS windows."
                             },
                             {
-                                "value_name":  "shared_imagery_caveat",
-                                "exact_value":  "Both NOAA/NESDIS public products cite WorldView-3 imagery acquired on 2023-03-12, so the promoted March 13 -\u003e March 14 row is a reinitialization-based public-validation pair with shared-imagery provenance rather than a fully independent day-to-day validation.",
+                                "value_name":  "observation_independence_note",
+                                "exact_value":  "March 13 and March 14 are independent NOAA-published day-specific public-observation products. B1 uses the March 13 public seed observation and the March 14 public target observation, with interpretation limited to neighborhood-scale usefulness rather than exact 1 km overlap.",
                                 "units_if_any":  "",
                                 "source_file":  "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_run_manifest.json",
                                 "row_column_or_key":  "limitations.noaa_source_limitation_note",

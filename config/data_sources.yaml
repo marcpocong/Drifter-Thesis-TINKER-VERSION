@@ -247,7 +247,7 @@ mindoro_noaa_public_observation_masks:
   product_or_layer_id: "MindoroOilSpill_NOAA_230313 item 8f8e3944748c4772910efc9829497e20; MindoroOilSpill_NOAA_230314 item 10b37c42a9754363a5f7b14199b077e6"
   official_url: "https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/MindoroOilSpill_NOAA_230313/FeatureServer; https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/Possible_Oil_Spills_March_14/FeatureServer"
   access_endpoint_or_item_url: "https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/MindoroOilSpill_NOAA_230313/FeatureServer; https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/Possible_Oil_Spills_March_14/FeatureServer"
-  citation_or_attribution: "NOAA/NESDIS public product attribution as preserved in repo source taxonomy; March 13 and March 14 rows cite WorldView-3 imagery acquired on 2023-03-12."
+  citation_or_attribution: "NOAA/NESDIS public product attribution as preserved in repo source taxonomy; March 13 and March 14 are treated as independent day-specific WorldView-3 public observation products."
   used_in_workflows:
     - "mindoro_phase3b_primary_public_validation"
     - "mindoro Track A comparator support"
@@ -270,7 +270,7 @@ mindoro_noaa_public_observation_masks:
     - "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_run_manifest.json"
   refresh_or_credentials_note: "Public ArcGIS layers; exact layer URLs above were found in repo manifests/inventories."
   caveats:
-    - "March 13-14 B1 has shared March 12 WorldView-3 imagery provenance and is not fully independent day-to-day validation."
+    - "March 13-14 B1 uses independent NOAA-published day-specific public-observation products."
     - "Public spill extents support B1 spatial scoring only after common-grid processing."
     - "These masks are observation truth for B1 scoring, not model comparator outputs."
   status: confirmed_from_manifest

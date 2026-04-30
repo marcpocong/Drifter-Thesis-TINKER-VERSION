@@ -1,4 +1,4 @@
-"""Read-only static trajectory gallery build from existing artifacts."""
+﻿"""Read-only static trajectory gallery build from existing artifacts."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ from rasterio.plot import show
 from shapely.geometry import MultiPoint
 
 from src.core.artifact_status import artifact_status_columns
-from src.services.mindoro_primary_validation_metadata import MINDORO_SHARED_IMAGERY_CAVEAT
+from src.services.mindoro_primary_validation_metadata import MINDORO_OBSERVATION_INDEPENDENCE_NOTE
 
 matplotlib.use("Agg")
 
@@ -822,7 +822,7 @@ class TrajectoryGalleryBuildService:
                 "run_type": "forecast_vs_observation_overlay",
                 "date_token": "2023-03-13_to_2023-03-14",
                 "figure_slug": "seed_vs_target",
-                "notes": f"Promoted March 13 seed-versus-March 14 target figure reused as a panel-ready gallery figure. {MINDORO_SHARED_IMAGERY_CAVEAT}",
+                "notes": f"Promoted March 13 seed-versus-March 14 target figure reused as a panel-ready gallery figure. {MINDORO_OBSERVATION_INDEPENDENCE_NOTE}",
             },
             {
                 "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/qa_march14_reinit_R1_previous_overlay.png",
@@ -833,7 +833,7 @@ class TrajectoryGalleryBuildService:
                 "run_type": "forecast_vs_observation_overlay",
                 "date_token": "2023-03-14",
                 "figure_slug": "r1_previous_overlay",
-                "notes": f"Promoted March 14 R1 previous reinit overlay reused from the completed reinit QA bundle. {MINDORO_SHARED_IMAGERY_CAVEAT}",
+                "notes": f"Promoted March 14 R1 previous reinit overlay reused from the completed reinit QA bundle. {MINDORO_OBSERVATION_INDEPENDENCE_NOTE}",
             },
             {
                 "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/qa/qa_march14_crossmodel_R1_previous_reinit_p50_overlay.png",
@@ -844,7 +844,7 @@ class TrajectoryGalleryBuildService:
                 "run_type": "comparison_overlay",
                 "date_token": "2023-03-14",
                 "figure_slug": "r1_previous_crossmodel_overlay",
-                "notes": f"Promoted March 14 R1 previous reinit cross-model overlay reused from the stored comparator outputs. PyGNOME remains comparator-only where shown, and {MINDORO_SHARED_IMAGERY_CAVEAT}",
+                "notes": f"Promoted March 14 R1 previous reinit cross-model overlay reused from the stored comparator outputs. PyGNOME remains comparator-only where shown, and {MINDORO_OBSERVATION_INDEPENDENCE_NOTE}",
             },
             {
                 "source_relative_path": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/qa/qa_march14_crossmodel_pygnome_reinit_deterministic_overlay.png",
@@ -855,7 +855,7 @@ class TrajectoryGalleryBuildService:
                 "run_type": "comparison_overlay",
                 "date_token": "2023-03-14",
                 "figure_slug": "pygnome_crossmodel_overlay",
-                "notes": f"Promoted March 14 PyGNOME comparator overlay reused from the stored comparator bundle. PyGNOME remains comparator-only, and {MINDORO_SHARED_IMAGERY_CAVEAT}",
+                "notes": f"Promoted March 14 PyGNOME comparator overlay reused from the stored comparator bundle. PyGNOME remains comparator-only, and {MINDORO_OBSERVATION_INDEPENDENCE_NOTE}",
             },
             {
                 "source_relative_path": "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_ensemble_comparison/qa_phase3c_ensemble_overlays.png",
@@ -1059,3 +1059,4 @@ class TrajectoryGalleryBuildService:
 
 def run_trajectory_gallery_build(repo_root: str | Path = ".", output_dir: str | Path | None = None) -> dict[str, Any]:
     return TrajectoryGalleryBuildService(repo_root=repo_root, output_dir=output_dir).run()
+

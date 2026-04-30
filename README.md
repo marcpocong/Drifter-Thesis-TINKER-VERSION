@@ -77,7 +77,7 @@ Panel reviewers can inspect the external observation, drifter, forcing, shorelin
 - `R1_previous` reached the target date; forecast cells `5`; observed cells `22`; nearest distance `1414.21 m`; centroid distance `7358.16 m`
 - `R1_previous` is promoted because it is scoreable and survives to the target date, not because it is an exact-grid match
 - `IoU = 0.0` and `Dice = 0.0`, so the row must not be described as exact overlap or exact 1 km success
-- Caveat: March 13-14 is a reinitialization-based public-observation validation check. Both public products cite the same March 12 WorldView-3 imagery provenance, so it is not an independent day-to-day validation pair.
+- Observation independence note: March 13 and March 14 are independent NOAA-published day-specific public-observation products. B1 uses March 13 as the public seed observation and March 14 as the public target observation, with interpretation limited to neighborhood-scale usefulness rather than exact 1 km overlap.
 
 ### Mindoro `Track A` Comparator Support Only
 
@@ -178,7 +178,7 @@ Launcher controls:
 
 - `B1` is the only main Philippine public-observation validation claim.
 - `B1` supports coastal-neighborhood usefulness, not exact 1 km overlap or universal operational accuracy.
-- Keep the March 13-14 shared-imagery caveat explicit.
+- Keep the March 13-14 observation-independence note explicit.
 - `Track A` and PyGNOME branches are comparator-only support, never the observational scoring reference.
 - DWH is external transfer validation, not Mindoro recalibration, the main Philippine case, or a second local Phase 1.
 - Do not treat Mindoro oil-type / shoreline outputs as primary validation.

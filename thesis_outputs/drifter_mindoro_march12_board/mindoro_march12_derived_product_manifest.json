@@ -1,0 +1,76 @@
+{
+  "generated_at_utc": "2026-04-30T07:16:17.409370+00:00",
+  "experiment_id": "mindoro_march12_derived_product_board",
+  "output_image": "C:\\tmp\\drifter_mindoro_march12_board\\mindoro_march12_derived_product_board.png",
+  "source_product_image": "C:\\tmp\\drifter_mindoro_march12_board\\mindoro_march12_source_product.png",
+  "plot_bounds_wgs84": [
+    121.414328578,
+    13.174587024000001,
+    121.557057499448,
+    13.3449923139213
+  ],
+  "source_product_bounds_wgs84": [
+    121.419188725898,
+    13.1129797116049,
+    121.559263772,
+    13.353827699
+  ],
+  "force_refresh": false,
+  "note": "This board packages public NOAA/NESDIS delineation products whose preserved metadata cite WorldView-3 acquired on 2023-03-12. It is not the raw March 12 satellite raster.",
+  "selected_layers": [
+    {
+      "label": "March 13 NOAA seed product",
+      "panel_title": "March 13 NOAA seed",
+      "source_name": "MindoroOilSpill_NOAA_230313",
+      "provider": "NOAA/NESDIS",
+      "observation_date": "2023-03-13",
+      "service_url": "https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/MindoroOilSpill_NOAA_230313/FeatureServer",
+      "item_id": "8f8e3944748c4772910efc9829497e20",
+      "resolved_layer_id": 0,
+      "source_crs": "EPSG:4326",
+      "raw_feature_count": 39,
+      "processed_feature_count": 39,
+      "item_title": "MindoroOilSpill_NOAA_230313",
+      "item_snippet": "Marine Pollution Surveilance Report by The National Oceanic and Atmospheric Administration, Satellite and Information Service (NOAA/NESDIS) https://disasterscharter.org/web/guest/activations/-/article/oil-spill-in-philippines-activation-807-",
+      "item_description_html": "<div style='box-sizing:border-box; margin:0px; padding:0px; color:rgb(33, 37, 41); font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size:16px;'>Oil Spill in the Philippines</div><br /><div style='box-sizing:border-box; margin:0px; padding:0px; color:rgb(33, 37, 41); font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size:16px;'><span style='box-sizing:border-box; font-weight:bolder;'>Source:</span>\u00a0WorldView-3</div><div style='box-sizing:border-box; margin:0px; padding:0px; color:rgb(33, 37, 41); font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size:16px;'><span style='box-sizing:border-box; font-weight:bolder;'>Acquired:</span>\u00a012/03/2023</div><br /><div style='box-sizing:border-box; margin:0px; padding:0px; color:rgb(33, 37, 41); font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size:16px;'><span style='box-sizing:border-box; font-weight:bolder;'>Category:</span>\u00a0Delineation Map</div><br /><div style='box-sizing:border-box; margin:0px; padding:0px 0px 27px; color:rgb(33, 37, 41); font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size:16px;'><span style='box-sizing:border-box; font-weight:bolder;'>Copyright:</span>\u00a0\u00a9 (2023) DigitalGlobe, Inc., Longmont CO USA 80503. DigitalGlobe and the DigitalGlobe logos are trademarks of DigitalGlobe, Inc. The use and/or dissemination of this data and/or of any product in any way derived there from are restricted. Unauthorized use and/or dissemination is prohibited<br />Map produced by NOAA / NESDIS</div>",
+      "cache": {
+        "cache_dir": "C:\\tmp\\drifter_mindoro_march12_board\\cache\\march13_noaa_seed_product",
+        "raw_geojson": "C:\\tmp\\drifter_mindoro_march12_board\\cache\\march13_noaa_seed_product\\march13_noaa_seed_product_raw.geojson",
+        "layer_metadata": "C:\\tmp\\drifter_mindoro_march12_board\\cache\\march13_noaa_seed_product\\march13_noaa_seed_product_layer_metadata.json",
+        "item_metadata": "C:\\tmp\\drifter_mindoro_march12_board\\cache\\march13_noaa_seed_product\\march13_noaa_seed_product_item_metadata.json",
+        "processed_vector": "C:\\tmp\\drifter_mindoro_march12_board\\cache\\march13_noaa_seed_product\\march13_noaa_seed_product_processed.gpkg"
+      },
+      "notes": [
+        "raw metadata suggested Web Mercator, but coordinates were degree-like; treated as EPSG:4326",
+        "qa null_dropped=0 invalid_repaired=0 multipart_parts_exploded=0 non_matching_parts_dropped=0 empty_dropped=0"
+      ]
+    },
+    {
+      "label": "March 14 NOAA target product",
+      "panel_title": "March 14 NOAA target",
+      "source_name": "MindoroOilSpill_NOAA_230314",
+      "provider": "NOAA/NESDIS",
+      "observation_date": "2023-03-14",
+      "service_url": "https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/Possible_Oil_Spills_March_14/FeatureServer",
+      "item_id": "10b37c42a9754363a5f7b14199b077e6",
+      "resolved_layer_id": 0,
+      "source_crs": "EPSG:4326",
+      "raw_feature_count": 2,
+      "processed_feature_count": 739,
+      "item_title": "MindoroOilSpill_NOAA_230314",
+      "item_snippet": "Marine Pollution Surveilance Report by The National Oceanic and Atmospheric Administration, Satellite and Information Service (NOAA/NESDIS) https://disasterscharter.org/web/guest/activations/-/article/oil-spill-in-philippines-activation-807-",
+      "item_description_html": "<div style='box-sizing:border-box; margin:0px; padding:0px; color:rgb(33, 37, 41); font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size:16px;'>Philippines Oil Spill</div><br /><div style='box-sizing:border-box; margin:0px; padding:0px; color:rgb(33, 37, 41); font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size:16px;'><span style='box-sizing:border-box; font-weight:bolder;'>Source:</span>\u00a0WorldView-3</div><div style='box-sizing:border-box; margin:0px; padding:0px; color:rgb(33, 37, 41); font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size:16px;'><span style='box-sizing:border-box; font-weight:bolder;'>Acquired:</span>\u00a012/03/2023</div><br /><div style='box-sizing:border-box; margin:0px; padding:0px; color:rgb(33, 37, 41); font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size:16px;'><span style='box-sizing:border-box; font-weight:bolder;'>Category:</span>\u00a0Delineation Map</div><br /><div style='box-sizing:border-box; margin:0px; padding:0px 0px 27px; color:rgb(33, 37, 41); font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size:16px;'><span style='box-sizing:border-box; font-weight:bolder;'>Copyright:</span>\u00a0\u00a9 (year of acquistion) DigitalGlobe, Inc., Longmont CO USA 80503. DigitalGlobe and the DigitalGlobe logos are trademarks of DigitalGlobe, Inc. The use and/or dissemination of this data and/or of any product in any way derived there from are restricted. Unauthorized use and/or dissemination is prohibited<br />Map produced by NOAA / NESDIS</div>",
+      "cache": {
+        "cache_dir": "C:\\tmp\\drifter_mindoro_march12_board\\cache\\march14_noaa_target_product",
+        "raw_geojson": "C:\\tmp\\drifter_mindoro_march12_board\\cache\\march14_noaa_target_product\\march14_noaa_target_product_raw.geojson",
+        "layer_metadata": "C:\\tmp\\drifter_mindoro_march12_board\\cache\\march14_noaa_target_product\\march14_noaa_target_product_layer_metadata.json",
+        "item_metadata": "C:\\tmp\\drifter_mindoro_march12_board\\cache\\march14_noaa_target_product\\march14_noaa_target_product_item_metadata.json",
+        "processed_vector": "C:\\tmp\\drifter_mindoro_march12_board\\cache\\march14_noaa_target_product\\march14_noaa_target_product_processed.gpkg"
+      },
+      "notes": [
+        "raw metadata suggested Web Mercator, but coordinates were degree-like; treated as EPSG:4326",
+        "qa null_dropped=0 invalid_repaired=2 multipart_parts_exploded=737 non_matching_parts_dropped=0 empty_dropped=0"
+      ]
+    }
+  ]
+}

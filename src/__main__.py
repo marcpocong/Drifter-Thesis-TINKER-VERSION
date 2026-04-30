@@ -13,7 +13,7 @@ Container routing via the PIPELINE_PHASE environment variable:
   PIPELINE_PHASE=phase3b_extended_public -> Official extended-horizon public-observation validation guardrail
   PIPELINE_PHASE=phase3b_extended_public_scored -> Appendix-only short extended public-observation scoring
   PIPELINE_PHASE=phase3b_extended_public_scored_march23 -> Appendix-only March 23 extended public branch stress test
-  PIPELINE_PHASE=phase3b_extended_public_scored_march13_14_reinit -> Mindoro Phase 3B primary public-validation row (March 13 -> March 14 NOAA reinit with explicit shared-imagery caveat)
+  PIPELINE_PHASE=phase3b_extended_public_scored_march13_14_reinit -> Mindoro Phase 3B primary public-validation row (March 13 public seed observation -> March 14 public target observation)
   PIPELINE_PHASE=phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison -> Mindoro Phase 3A same-case comparator-only March 13 -> March 14 support lane
   PIPELINE_PHASE=horizon_survival_audit -> Read-only short-extended horizon survival diagnosis
   PIPELINE_PHASE=transport_retention_fix -> Official transport-retention sensitivity diagnostics
@@ -37,6 +37,12 @@ Container routing via the PIPELINE_PHASE environment variable:
   PIPELINE_PHASE=phase1_production_rerun -> Dedicated full 2016-2022 historical/regional Phase 1 production rerun
   PIPELINE_PHASE=mindoro_march13_14_phase1_focus_trial -> Experimental March 13 -> March 14 replay using the staged Mindoro-focused pre-spill Phase 1 candidate
   PIPELINE_PHASE=mindoro_b1_5000_element_experiment -> Experimental March 13 -> March 14 5,000-element B1 rerun into a separate non-thesis-facing output lane
+  PIPELINE_PHASE=mindoro_march3_4_philsa_5000_experiment -> Experimental PhilSA-only March 3 -> March 4 5,000-element archive/provenance run
+  PIPELINE_PHASE=mindoro_mar09_12_multisource_experiment_dry_run -> Dry-run gate for the experimental Mindoro March 9-12 archive lane
+  PIPELINE_PHASE=mindoro_mar09_12_multisource_experiment_resolve_forcing_only -> Local/bounded forcing resolution only for the March 9-12 archive lane
+  PIPELINE_PHASE=mindoro_mar09_12_multisource_experiment_ingest_masks_only -> Observation-mask ingestion only for the March 9-12 archive lane
+  PIPELINE_PHASE=mindoro_mar09_12_multisource_experiment -> Experimental/archive-only Mindoro March 9-12 multi-source OpenDrift lane
+  PIPELINE_PHASE=mindoro_mar09_12_multisource_experiment_pygnome -> Comparator-only PyGNOME finalization for the March 9-12 multi-source archive lane
   PIPELINE_PHASE=mindoro_b1_element_count_sensitivity_board -> Build the separate experimental 100k-vs-5k Mindoro B1 sensitivity board and metrics package
   PIPELINE_PHASE=mindoro_local_recipe_experiment -> Stage a Mindoro-local recipe candidate and replay the Mindoro event comparison with GFS
   PIPELINE_PHASE=phase4_oiltype_and_shoreline -> Mindoro support-layer oil-type fate and shoreline-impact workflow
@@ -2186,6 +2192,149 @@ def run_mindoro_b1_5000_element_experiment_phase():
     print(f"Protected outputs unchanged: {results['protected_outputs_unchanged']}")
 
 
+def run_mindoro_march3_4_philsa_5000_experiment_phase():
+    from src.core.case_context import get_case_context
+    from src.services.mindoro_march3_4_philsa_5000_experiment import (
+        run_mindoro_march3_4_philsa_5000_experiment,
+    )
+
+    case = get_case_context()
+    if case.workflow_mode != "mindoro_retro_2023" or not case.is_official:
+        print("mindoro_march3_4_philsa_5000_experiment requires WORKFLOW_MODE=mindoro_retro_2023.")
+        sys.exit(1)
+
+    print("Starting experimental Mindoro PhilSA March 3 -> March 4 5,000-element rerun...")
+    print(
+        "This lane uses PhilSA layers for both dates, writes only to an experimental archive/provenance "
+        "directory, and does not replace or relabel canonical B1."
+    )
+
+    results = run_mindoro_march3_4_philsa_5000_experiment()
+
+    print("\nExperimental Mindoro PhilSA March 3 -> March 4 5,000-element rerun complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print(f"Summary: {results['summary_csv']}")
+    print(f"FSS: {results['fss_csv']}")
+    print(f"Diagnostics: {results['diagnostics_csv']}")
+    print(f"Decision note: {results['decision_note_md']}")
+    print(f"Run manifest: {results['run_manifest_json']}")
+    print(f"Actual element count detected: {results['element_count_detected_from_manifest']}")
+    print(f"Actual ensemble member count detected: {results['actual_member_count_detected']}")
+    print(f"Protected outputs unchanged: {results['protected_outputs_unchanged']}")
+
+
+def run_mindoro_mar09_12_multisource_experiment_phase():
+    from src.core.case_context import get_case_context
+    from src.services.mindoro_mar09_12_multisource_experiment import (
+        run_mindoro_mar09_12_multisource_experiment,
+    )
+
+    case = get_case_context()
+    if case.workflow_mode != "mindoro_retro_2023" or not case.is_official:
+        print("mindoro_mar09_12_multisource_experiment requires WORKFLOW_MODE=mindoro_retro_2023.")
+        sys.exit(1)
+
+    print("Starting experimental/archive-only Mindoro March 9-12 multi-source OpenDrift lane...")
+    print(
+        "This writes only under output/CASE_MINDORO_RETRO_2023/experiments/mar09_11_12_multisource "
+        "and does not replace or relabel canonical B1, Track A, DWH, final-validation, or publication outputs."
+    )
+
+    results = run_mindoro_mar09_12_multisource_experiment()
+
+    print("\nExperimental Mindoro March 9-12 multi-source OpenDrift stage complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print(f"Status: {results.get('status')}")
+    if results.get("model_run_executed") is False:
+        print("Model run was not executed because the explicit real-run gate is not enabled.")
+        print(f"Set {results.get('run_gate_env')}=1 only after dry-run approval.")
+    if results.get("scorecard_csv"):
+        print(f"Scorecard: {results['scorecard_csv']}")
+    if results.get("diagnostics_csv"):
+        print(f"Diagnostics: {results['diagnostics_csv']}")
+    print(f"Manifest: {results['manifest_json']}")
+
+
+def run_mindoro_mar09_12_multisource_experiment_dry_run_phase():
+    import json
+
+    from src.core.case_context import get_case_context
+    from src.services.mindoro_mar09_12_multisource_experiment import (
+        run_mindoro_mar09_12_multisource_experiment_dry_run,
+    )
+
+    case = get_case_context()
+    if case.workflow_mode != "mindoro_retro_2023" or not case.is_official:
+        print("mindoro_mar09_12_multisource_experiment_dry_run requires WORKFLOW_MODE=mindoro_retro_2023.")
+        sys.exit(1)
+
+    result = run_mindoro_mar09_12_multisource_experiment_dry_run()
+    print(json.dumps(result, indent=2, default=str))
+    if result.get("status") == "blocked_missing_forcing":
+        print("\nDry-run gate stopped before any model run because required local forcing is missing.")
+        print("missing_forcing_manifest.json was written under the experiment output root.")
+
+
+def run_mindoro_mar09_12_multisource_experiment_resolve_forcing_only_phase():
+    import json
+
+    from src.core.case_context import get_case_context
+    from src.services.mindoro_mar09_12_multisource_experiment import (
+        run_mindoro_mar09_12_multisource_experiment_resolve_forcing_only,
+    )
+
+    case = get_case_context()
+    if case.workflow_mode != "mindoro_retro_2023" or not case.is_official:
+        print("mindoro_mar09_12_multisource_experiment_resolve_forcing_only requires WORKFLOW_MODE=mindoro_retro_2023.")
+        sys.exit(1)
+
+    result = run_mindoro_mar09_12_multisource_experiment_resolve_forcing_only()
+    print(json.dumps(result, indent=2, default=str))
+    print("\nForcing-resolution-only phase stopped before OpenDrift or PyGNOME.")
+
+
+def run_mindoro_mar09_12_multisource_experiment_ingest_masks_only_phase():
+    import json
+
+    from src.core.case_context import get_case_context
+    from src.services.mindoro_mar09_12_multisource_experiment import (
+        run_mindoro_mar09_12_multisource_experiment_ingest_masks_only,
+    )
+
+    case = get_case_context()
+    if case.workflow_mode != "mindoro_retro_2023" or not case.is_official:
+        print("mindoro_mar09_12_multisource_experiment_ingest_masks_only requires WORKFLOW_MODE=mindoro_retro_2023.")
+        sys.exit(1)
+
+    result = run_mindoro_mar09_12_multisource_experiment_ingest_masks_only()
+    print(json.dumps(result, indent=2, default=str))
+    print("\nMask-ingestion-only phase stopped before forcing resolution, OpenDrift, or PyGNOME.")
+
+
+def run_mindoro_mar09_12_multisource_experiment_pygnome_phase():
+    from src.core.case_context import get_case_context
+    from src.services.mindoro_mar09_12_multisource_experiment import (
+        run_mindoro_mar09_12_multisource_experiment_pygnome,
+    )
+
+    case = get_case_context()
+    if case.workflow_mode != "mindoro_retro_2023" or not case.is_official:
+        print("mindoro_mar09_12_multisource_experiment_pygnome requires WORKFLOW_MODE=mindoro_retro_2023.")
+        sys.exit(1)
+
+    print("Starting comparator-only PyGNOME finalization for the Mindoro March 9-12 archive lane...")
+    print("PyGNOME output is labeled comparator-only and is never treated as validation truth.")
+
+    results = run_mindoro_mar09_12_multisource_experiment_pygnome()
+
+    print("\nExperimental Mindoro March 9-12 multi-source finalization complete.")
+    print(f"Outputs saved to: {results['output_dir']}")
+    print(f"Scorecard: {results['scorecard_csv']}")
+    print(f"Diagnostics: {results['diagnostics_csv']}")
+    print(f"README: {results['readme_md']}")
+    print(f"Manifest: {results['manifest_json']}")
+
+
 def run_mindoro_b1_element_count_sensitivity_board_phase():
     from src.core.case_context import get_case_context
     from src.services.mindoro_b1_element_count_sensitivity_board import (
@@ -2532,6 +2681,24 @@ def main():
     if phase == "mindoro_b1_5000_element_experiment":
         run_mindoro_b1_5000_element_experiment_phase()
         return
+    if phase == "mindoro_march3_4_philsa_5000_experiment":
+        run_mindoro_march3_4_philsa_5000_experiment_phase()
+        return
+    if phase == "mindoro_mar09_12_multisource_experiment_dry_run":
+        run_mindoro_mar09_12_multisource_experiment_dry_run_phase()
+        return
+    if phase == "mindoro_mar09_12_multisource_experiment_resolve_forcing_only":
+        run_mindoro_mar09_12_multisource_experiment_resolve_forcing_only_phase()
+        return
+    if phase == "mindoro_mar09_12_multisource_experiment_ingest_masks_only":
+        run_mindoro_mar09_12_multisource_experiment_ingest_masks_only_phase()
+        return
+    if phase == "mindoro_mar09_12_multisource_experiment":
+        run_mindoro_mar09_12_multisource_experiment_phase()
+        return
+    if phase == "mindoro_mar09_12_multisource_experiment_pygnome":
+        run_mindoro_mar09_12_multisource_experiment_pygnome_phase()
+        return
     if phase == "mindoro_b1_element_count_sensitivity_board":
         run_mindoro_b1_element_count_sensitivity_board_phase()
         return
@@ -2675,6 +2842,18 @@ def main():
         run_mindoro_march13_14_phase1_focus_trial_phase()
     elif phase == "mindoro_b1_5000_element_experiment":
         run_mindoro_b1_5000_element_experiment_phase()
+    elif phase == "mindoro_march3_4_philsa_5000_experiment":
+        run_mindoro_march3_4_philsa_5000_experiment_phase()
+    elif phase == "mindoro_mar09_12_multisource_experiment_dry_run":
+        run_mindoro_mar09_12_multisource_experiment_dry_run_phase()
+    elif phase == "mindoro_mar09_12_multisource_experiment_resolve_forcing_only":
+        run_mindoro_mar09_12_multisource_experiment_resolve_forcing_only_phase()
+    elif phase == "mindoro_mar09_12_multisource_experiment_ingest_masks_only":
+        run_mindoro_mar09_12_multisource_experiment_ingest_masks_only_phase()
+    elif phase == "mindoro_mar09_12_multisource_experiment":
+        run_mindoro_mar09_12_multisource_experiment_phase()
+    elif phase == "mindoro_mar09_12_multisource_experiment_pygnome":
+        run_mindoro_mar09_12_multisource_experiment_pygnome_phase()
     elif phase == "mindoro_b1_element_count_sensitivity_board":
         run_mindoro_b1_element_count_sensitivity_board_phase()
     elif phase == "mindoro_local_recipe_experiment":

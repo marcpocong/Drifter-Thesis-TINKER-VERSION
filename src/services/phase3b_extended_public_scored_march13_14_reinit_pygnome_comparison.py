@@ -1,4 +1,4 @@
-"""Mindoro Phase 3A comparator-only March 13 -> March 14 cross-model bundle."""
+﻿"""Mindoro Phase 3A comparator-only March 13 -> March 14 cross-model bundle."""
 
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ from src.services.mindoro_primary_validation_metadata import (
     MINDORO_PRIMARY_VALIDATION_PHASE_OR_TRACK,
     MINDORO_PRIMARY_VALIDATION_TRACK_ID,
     MINDORO_PRIMARY_VALIDATION_TRACK_LABEL,
-    MINDORO_SHARED_IMAGERY_CAVEAT,
+    MINDORO_OBSERVATION_INDEPENDENCE_NOTE,
 )
 from src.services.phase3b_extended_public_scored_march13_14_reinit import (
     LOCAL_TIMEZONE,
@@ -584,7 +584,7 @@ class Phase3BExtendedPublicScoredMarch1314ReinitPyGnomeComparisonService(
             f"- The canonical Phase 3B row remains {MINDORO_PRIMARY_VALIDATION_TRACK_ID}: {MINDORO_PRIMARY_VALIDATION_TRACK_LABEL}.",
             "- The completed March 13 -> March 14 OpenDrift reinit outputs are reused and hash-checked rather than modified.",
             "- The frozen strict March 6 outputs and final validation package remain unchanged.",
-            f"- Limitation note: {MINDORO_SHARED_IMAGERY_CAVEAT}",
+            f"- Limitation note: {MINDORO_OBSERVATION_INDEPENDENCE_NOTE}",
             "- PyGNOME still does not reproduce the exact OpenDrift gridded current/wave/Stokes stack.",
             "",
             "## Recommendation",
@@ -688,7 +688,7 @@ class Phase3BExtendedPublicScoredMarch1314ReinitPyGnomeComparisonService(
                 "appendix_only": False,
                 "comparator_only": True,
                 "noaa_source_limitation_note": NOAA_SOURCE_LIMITATION_NOTE,
-                "shared_imagery_caveat_prevents_independent_day_to_day_validation": True,
+                "independent_day_specific_public_observations": True,
                 "pygnome_structural_mismatch": "PyGNOME deterministic comparator does not reproduce the exact OpenDrift gridded current/wave/Stokes stack.",
             },
             "upstream_reinit": {
@@ -718,3 +718,4 @@ def run_phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison() ->
 if __name__ == "__main__":  # pragma: no cover
     result = run_phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison()
     print(json.dumps(result, indent=2, default=_json_default))
+

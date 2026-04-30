@@ -23,16 +23,16 @@ This gallery is built from existing outputs, manifests, rasters, and NetCDFs onl
 ## D. Mindoro March 13 -> March 14 primary-validation overlays
 
 - `case_mindoro_retro_2023__phase3b_reinit_primary__observation__forecast_vs_observation_overlay__2023_03_13_to_2023_03_14__seed_vs_target.png`: case=`CASE_MINDORO_RETRO_2023`, model=`observation`, run_type=`forecast_vs_observation_overlay`, date=`2023-03-13_to_2023-03-14`, scenario=`n/a`, panel_ready=`true`.
-  Note: Promoted March 13 seed-versus-March 14 target figure reused as a panel-ready gallery figure.
+  Note: Promoted March 13 seed-versus-March 14 target figure reused as a panel-ready gallery figure. March 13 and March 14 are independent NOAA-published day-specific public-observation products. B1 uses the March 13 public seed observation and the March 14 public target observation, with interpretation limited to neighborhood-scale usefulness rather than exact 1 km overlap.
 - `case_mindoro_retro_2023__phase3b_reinit_primary__opendrift__forecast_vs_observation_overlay__2023_03_14__r1_previous_overlay.png`: case=`CASE_MINDORO_RETRO_2023`, model=`opendrift`, run_type=`forecast_vs_observation_overlay`, date=`2023-03-14`, scenario=`n/a`, panel_ready=`true`.
-  Note: Promoted March 14 R1 previous reinit overlay reused from the completed reinit QA bundle.
+  Note: Promoted March 14 R1 previous reinit overlay reused from the completed reinit QA bundle. March 13 and March 14 are independent NOAA-published day-specific public-observation products. B1 uses the March 13 public seed observation and the March 14 public target observation, with interpretation limited to neighborhood-scale usefulness rather than exact 1 km overlap.
 
 ## E. Mindoro March 13 -> March 14 cross-model comparison maps
 
 - `case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift_vs_pygnome__comparison_overlay__2023_03_14__pygnome_crossmodel_overlay.png`: case=`CASE_MINDORO_RETRO_2023`, model=`opendrift_vs_pygnome`, run_type=`comparison_overlay`, date=`2023-03-14`, scenario=`n/a`, panel_ready=`true`.
-  Note: Promoted March 14 PyGNOME comparator overlay reused from the stored comparator bundle.
+  Note: Promoted March 14 PyGNOME comparator overlay reused from the stored comparator bundle. PyGNOME remains comparator-only, and March 13 and March 14 are independent NOAA-published day-specific public-observation products. B1 uses the March 13 public seed observation and the March 14 public target observation, with interpretation limited to neighborhood-scale usefulness rather than exact 1 km overlap.
 - `case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift_vs_pygnome__comparison_overlay__2023_03_14__r1_previous_crossmodel_overlay.png`: case=`CASE_MINDORO_RETRO_2023`, model=`opendrift_vs_pygnome`, run_type=`comparison_overlay`, date=`2023-03-14`, scenario=`n/a`, panel_ready=`true`.
-  Note: Promoted March 14 R1 previous reinit cross-model overlay reused from the stored comparator outputs.
+  Note: Promoted March 14 R1 previous reinit cross-model overlay reused from the stored comparator outputs. PyGNOME remains comparator-only where shown, and March 13 and March 14 are independent NOAA-published day-specific public-observation products. B1 uses the March 13 public seed observation and the March 14 public target observation, with interpretation limited to neighborhood-scale usefulness rather than exact 1 km overlap.
 
 ## F. DWH deterministic track/path visuals
 

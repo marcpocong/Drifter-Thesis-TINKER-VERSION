@@ -7,15 +7,15 @@ These polished boards are read-only reinterpretations of existing outputs. No ex
 - File: `output/trajectory_gallery_panel/case_mindoro_retro_2023__phase3b_reinit_primary__opendrift__panel_board__2023_03_13_to_2023_03_14__panel__mindoro_primary_reinit_board.png`
 - Main-defense figure: `true`
 - Status: Mindoro March 13 -> March 14 R1 primary validation row
-- Provenance: March 13 seed, March 14 target, explicit shared March 12 imagery caveat, active Mindoro-specific recipe provenance from the separate focused 2016-2023 drifter rerun, and the preserved raw scientific note that the stored promoted B1 run remains tied to the existing R1_previous reinit lineage. This March 13 -> March 14 R1 label refers to the Phase 3B validation branch, not to the Phase 1 recipe-code family.
-- Interpretation: The promoted March 13 -> March 14 board is presentation-ready as the main Mindoro validation board, provided the shared-imagery caveat is stated honestly.
+- Provenance: March 13 public seed observation and March 14 public target observation, active Mindoro-specific recipe provenance from the separate focused 2016-2023 drifter rerun, and the preserved raw scientific note that the stored promoted B1 run remains tied to the existing R1_previous reinit lineage. This March 13 -> March 14 R1 label refers to the Phase 3B validation branch, not to the Phase 1 recipe-code family.
+- Interpretation: The promoted March 13 -> March 14 board is presentation-ready as the main Mindoro validation board with independent NOAA-published day-specific observation products.
 
 ## B. Mindoro March 13 -> March 14 cross-model comparator board
 
 - File: `output/trajectory_gallery_panel/case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift_vs_pygnome__panel_board__2023_03_14__panel__mindoro_crossmodel_reinit_board.png`
 - Main-defense figure: `true`
 - Status: Mindoro March 13 -> March 14 Track A comparator support
-- Provenance: Same March 14 target as the March 13 -> March 14 R1 primary validation row; same-case Track A comparator support remains separate from truth and PyGNOME remains comparator-only.
+- Provenance: March 13 is the independent public seed observation and March 14 is the independent public target observation for the same-case Track A comparator support; PyGNOME remains comparator-only and separate from truth.
 - Interpretation: The promoted March 14 cross-model board gives a clean side-by-side answer to the model-comparison question while keeping PyGNOME in a comparator-only role.
 
 ## C. Mindoro legacy March 6 honesty / limitations board

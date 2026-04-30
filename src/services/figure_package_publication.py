@@ -6,6 +6,7 @@ import json
 import shutil
 import textwrap
 import os
+import hashlib
 from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
@@ -40,7 +41,7 @@ from src.services.mindoro_primary_validation_metadata import (
     MINDORO_BASE_CASE_CONFIG_PATH,
     MINDORO_PHASE1_CONFIRMATION_CANDIDATE_BASELINE_PATH,
     MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE,
-    MINDORO_SHARED_IMAGERY_CAVEAT,
+    MINDORO_OBSERVATION_INDEPENDENCE_NOTE,
 )
 
 matplotlib.use("Agg")
@@ -288,9 +289,33 @@ def _write_csv(path: Path, rows: list[dict[str, Any]], columns: list[str]) -> No
 
 def _relative_to_repo(repo_root: Path, path: Path) -> str:
     try:
-        return str(path.resolve().relative_to(repo_root.resolve()))
+        return path.resolve().relative_to(repo_root.resolve()).as_posix()
     except Exception:
-        return str(path)
+        return Path(path).as_posix()
+
+
+def _path_for_io(path: str | Path) -> str:
+    path_obj = Path(path)
+    path_text = str(path_obj)
+    if os.name != "nt":
+        return path_text
+    absolute = str(path_obj.resolve())
+    if absolute.startswith("\\\\?\\"):
+        return absolute
+    if absolute.startswith("\\\\"):
+        return "\\\\?\\UNC\\" + absolute.lstrip("\\")
+    return "\\\\?\\" + absolute
+
+
+def _windows_safe_publication_filename(spec: dict[str, Any], original_filename: str) -> str:
+    digest = hashlib.sha1(original_filename.encode("utf-8")).hexdigest()[:10]
+    case_token = _safe_token(str(spec.get("case_id") or "case"))
+    model_token = _safe_token(str(spec.get("model_names") or "model"))
+    slug_token = _safe_token(str(spec.get("figure_slug") or Path(original_filename).stem)) or "figure"
+    shortened = f"{case_token}__{model_token}__{slug_token}__{digest}.png"
+    if len(shortened) <= 150:
+        return shortened
+    return f"{slug_token[:112].rstrip('_')}__{digest}.png"
 
 
 def _safe_token(value: str | None) -> str:
@@ -901,7 +926,7 @@ class FigurePackagePublicationService:
                 (
                     line
                     for line in note_lines
-                    if any(token in line.lower() for token in ("caveat", "shared-imagery", "truth", "comparator-only"))
+                    if any(token in line.lower() for token in ("caveat", "day-specific", "truth", "comparator-only"))
                 ),
                 "",
             )
@@ -2094,7 +2119,10 @@ class FigurePackagePublicationService:
         return [valid[idx] for idx in sorted(set(indices.tolist()))]
 
     def _figure_path(self, spec: dict[str, Any]) -> Path:
-        return self.output_dir / build_publication_figure_filename(
+        direct_filename = str(spec.get("direct_output_filename") or "").strip()
+        if direct_filename:
+            return self.output_dir / direct_filename
+        filename = build_publication_figure_filename(
             case_id=str(spec["case_id"]),
             phase_or_track=str(spec["phase_or_track"]),
             model_name=str(spec["model_names"]),
@@ -2105,6 +2133,10 @@ class FigurePackagePublicationService:
             variant=str(spec.get("variant") or ""),
             figure_slug=str(spec["figure_slug"]),
         )
+        path = self.output_dir / filename
+        if os.name == "nt" and len(str(path.resolve())) >= 240:
+            path = self.output_dir / _windows_safe_publication_filename(spec, filename)
+        return path
 
     def _register_figure(
         self,
@@ -2187,7 +2219,7 @@ class FigurePackagePublicationService:
         return record
 
     def _image_pixel_size(self, path: Path) -> tuple[int, int]:
-        image = plt.imread(path)
+        image = plt.imread(_path_for_io(path))
         return int(image.shape[1]), int(image.shape[0])
 
     def _save_external_image_figure(self, spec: dict[str, Any]) -> PublicationFigureRecord:
@@ -2196,7 +2228,7 @@ class FigurePackagePublicationService:
             raise FileNotFoundError(f"External image source missing for publication figure: {source_path}")
         output_path = self._figure_path(spec)
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(source_path, output_path)
+        shutil.copyfile(_path_for_io(source_path), _path_for_io(output_path))
         pixel_width, pixel_height = self._image_pixel_size(output_path)
         source_paths = [str(Path(str(spec["source_image_path"])).as_posix())]
         source_paths.extend(str(item) for item in spec.get("source_paths", []) if str(item))
@@ -2215,8 +2247,41 @@ class FigurePackagePublicationService:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         is_spatial = str(spec["renderer"]) in {"spatial", "track", "ensemble_track", "corridor", "shoreline_segment"}
         is_study_box = str(spec["renderer"]) == "study_boxes"
+        minimal_map_layout = bool(spec.get("minimal_map_layout")) and is_spatial
         fig = plt.figure(figsize=self._single_size(), dpi=self._dpi(), facecolor=(self.style.get("layout") or {}).get("figure_facecolor") or "#ffffff")
-        if is_spatial:
+        if minimal_map_layout:
+            grid = fig.add_gridspec(
+                2,
+                2,
+                width_ratios=[4.35, 1.05],
+                height_ratios=[1.0, 0.72],
+                left=0.045,
+                right=0.985,
+                top=0.90,
+                bottom=0.07,
+                wspace=0.14,
+                hspace=0.18,
+            )
+            main_ax = fig.add_subplot(grid[:, 0])
+            locator_ax = fig.add_subplot(grid[0, 1])
+            legend_ax = fig.add_subplot(grid[1, 1])
+            panel_title = spec.get("figure_title")
+            if "map_panel_title" in spec:
+                panel_title = spec.get("map_panel_title") or ""
+            render_info = self._render_panel(main_ax, dict(spec, panel_title=panel_title))
+            self._add_locator(
+                locator_ax,
+                str(spec["case_id"]),
+                render_info.get("crop_bounds"),
+                str(render_info.get("target_crs") or self._case_context(str(spec["case_id"]))["projected_crs"]),
+                compact=True,
+            )
+            self._add_legend(
+                legend_ax,
+                [str(item) for item in spec.get("legend_keys", [])],
+                label_overrides=self._legend_label_overrides(spec),
+            )
+        elif is_spatial:
             grid = fig.add_gridspec(3, 2, width_ratios=[3.8, 1.35], height_ratios=[1.15, 0.8, 1.25], left=0.05, right=0.98, top=0.90, bottom=0.07, wspace=0.16, hspace=0.22)
             main_ax = fig.add_subplot(grid[:, 0])
             locator_ax = fig.add_subplot(grid[0, 1])
@@ -2301,7 +2366,7 @@ class FigurePackagePublicationService:
         fig.suptitle(str(spec["figure_title"]), x=0.05, y=0.965, ha="left", fontsize=float((self.style.get("typography") or {}).get("title_size") or 19), fontweight="bold")
         fig.text(0.05, 0.932, subtitle_text, ha="left", va="top", fontsize=float((self.style.get("typography") or {}).get("subtitle_size") or 10), color="#475569")
         pixel_width, pixel_height = self._figure_pixel_size(fig)
-        fig.savefig(output_path, dpi=self._dpi())
+        fig.savefig(_path_for_io(output_path), dpi=self._dpi())
         plt.close(fig)
         return self._register_figure(
             spec,
@@ -2336,7 +2401,7 @@ class FigurePackagePublicationService:
             if source_record is None:
                 ax.text(0.5, 0.5, f"Missing figure\n{source_spec_id}", ha="center", va="center", fontsize=11)
                 return {"source_paths": [], "crop_bounds": None, "target_crs": None}, [], False
-            image = plt.imread(source_record.file_path)
+            image = plt.imread(_path_for_io(source_record.file_path))
             ax.imshow(image)
             ax.set_title(panel_title, loc="left", fontsize=float((self.style.get("typography") or {}).get("panel_title_size") or 11), fontweight="bold", pad=10)
             return {"source_paths": [source_record.relative_path], "crop_bounds": None, "target_crs": None}, [], False
@@ -2402,7 +2467,30 @@ class FigurePackagePublicationService:
         target_crs = ""
         layout = self._board_layout_settings(spec, panel_count)
         layout_mode = str(layout["layout_mode"])
-        if layout_mode == "bottom_strip":
+        compact_board_layout = bool(spec.get("compact_board_layout"))
+        if layout_mode == "bottom_strip" and compact_board_layout:
+            outer_grid = fig.add_gridspec(
+                2,
+                1,
+                height_ratios=[1.0, 0.22],
+                left=float(layout["outer_left"]),
+                right=float(layout["outer_right"]),
+                top=float(layout["outer_top"]),
+                bottom=float(layout["outer_bottom"]),
+                hspace=float(layout["outer_hspace"]),
+            )
+            panel_grid = outer_grid[0, 0].subgridspec(
+                rows,
+                cols,
+                wspace=float(layout["panel_grid_wspace"]),
+                hspace=float(layout["panel_grid_hspace"]),
+            )
+            info_grid = outer_grid[1, 0].subgridspec(1, 3, width_ratios=[0.82, 1.12, 2.06], wspace=float(layout["info_grid_wspace"]))
+            locator_ax = fig.add_subplot(info_grid[0, 0])
+            legend_ax = fig.add_subplot(info_grid[0, 1])
+            guide_ax = fig.add_subplot(info_grid[0, 2])
+            note_ax = None
+        elif layout_mode == "bottom_strip":
             outer_grid = fig.add_gridspec(
                 2,
                 1,
@@ -2425,6 +2513,28 @@ class FigurePackagePublicationService:
             legend_ax = fig.add_subplot(locator_stack[1, 0])
             guide_ax = fig.add_subplot(info_grid[0, 1])
             note_ax = fig.add_subplot(info_grid[0, 2])
+        elif compact_board_layout:
+            outer_grid = fig.add_gridspec(
+                1,
+                2,
+                width_ratios=[4.9, 1.55],
+                left=float(layout["outer_left"]),
+                right=float(layout["outer_right"]),
+                top=float(layout["outer_top"]),
+                bottom=float(layout["outer_bottom"]),
+                wspace=float(layout["outer_wspace"]),
+            )
+            panel_grid = outer_grid[0, 0].subgridspec(
+                rows,
+                cols,
+                wspace=float(layout["panel_grid_wspace"]),
+                hspace=float(layout["panel_grid_hspace"]),
+            )
+            side_grid = outer_grid[0, 1].subgridspec(3, 1, height_ratios=[0.94, 0.78, 1.18], hspace=float(layout["side_grid_hspace"]))
+            locator_ax = fig.add_subplot(side_grid[0, 0])
+            legend_ax = fig.add_subplot(side_grid[1, 0])
+            guide_ax = fig.add_subplot(side_grid[2, 0])
+            note_ax = None
         else:
             outer_grid = fig.add_gridspec(
                 1,
@@ -2491,7 +2601,7 @@ class FigurePackagePublicationService:
                 fontsize=float((self.style.get("typography") or {}).get("note_size") or 8),
                 max_chars=int(layout["guide_wrap_max_chars"]),
             ),
-            bullet_lines=True,
+            bullet_lines=bool(spec.get("guide_bullet_lines", True)),
             title_y=float(layout["guide_title_y"]),
             body_y=float(layout["guide_body_y"]),
             box_pad=float(layout["guide_box_pad"]),
@@ -2506,7 +2616,9 @@ class FigurePackagePublicationService:
             ]
             if line
         ]
-        if note_lines:
+        if note_ax is None:
+            note_body_artist = None
+        elif note_lines:
             _, note_body_artist = self._add_note_box(
                 note_ax,
                 "Caveat and Provenance",
@@ -2554,7 +2666,7 @@ class FigurePackagePublicationService:
         if note_body_artist is not None:
             guide_within_bounds = guide_within_bounds and self._artist_within_bbox(note_body_artist, note_ax.bbox)
         pixel_width, pixel_height = self._figure_pixel_size(fig)
-        fig.savefig(output_path, dpi=self._dpi())
+        fig.savefig(_path_for_io(output_path), dpi=self._dpi())
         plt.close(fig)
         self._append_board_layout_audit(
             spec,
@@ -2608,6 +2720,14 @@ class FigurePackagePublicationService:
         include_validation_in_crop: bool = False,
         status_key_override: str = "",
     ) -> dict[str, Any]:
+        is_current_mindoro_march13_14 = (
+            case_id == "CASE_MINDORO_RETRO_2023"
+            and phase_or_track in {"phase3b_reinit_primary", "phase3a_reinit_crossmodel"}
+        )
+        if is_current_mindoro_march13_14:
+            legend_keys = [key for key in legend_keys if key != "source_point"]
+            show_source = False
+            include_source_in_crop = False
         return {
             "spec_id": spec_id,
             "renderer": "spatial",
@@ -2639,6 +2759,7 @@ class FigurePackagePublicationService:
             "include_init_in_crop": include_init_in_crop,
             "include_validation_in_crop": include_validation_in_crop,
             "status_key_override": status_key_override,
+            "minimal_map_layout": is_current_mindoro_march13_14,
         }
 
     def _track_spec(
@@ -2924,6 +3045,8 @@ class FigurePackagePublicationService:
         provenance_line: str = "",
         board_issue_types: list[str] | None = None,
         board_layout_overrides: dict[str, Any] | None = None,
+        compact_board_layout: bool = False,
+        guide_bullet_lines: bool = True,
         scenario_id: str = "",
         recommended_for_main_defense: bool = True,
         recommended_for_paper: bool = False,
@@ -2950,6 +3073,8 @@ class FigurePackagePublicationService:
             "provenance_line": provenance_line,
             "board_issue_types": list(board_issue_types or []),
             "board_layout_overrides": dict(board_layout_overrides or {}),
+            "compact_board_layout": bool(compact_board_layout),
+            "guide_bullet_lines": bool(guide_bullet_lines),
             "note_box_title": "Board reading guide",
             "short_plain_language_interpretation": interpretation,
             "recommended_for_main_defense": recommended_for_main_defense,
@@ -3139,7 +3264,7 @@ class FigurePackagePublicationService:
         ).strip()
         lines = [
             f"{MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE} is now carried by the March 13 -> March 14 promoted Mindoro validation pair, seeded from the March 13 NOAA polygon and scored against the March 14 NOAA target.",
-            MINDORO_SHARED_IMAGERY_CAVEAT,
+            MINDORO_OBSERVATION_INDEPENDENCE_NOTE,
             (
                 f"The separate focused 2016-2023 Mindoro drifter rerun found {historical_winner} as the historical four-recipe winner, and official B1 now uses {official_recipe} from that focused lane."
                 if official_recipe
@@ -3178,7 +3303,7 @@ class FigurePackagePublicationService:
         lines = [
             "This cross-model lane reuses the completed March 13 -> March 14 reinit outputs and adds one deterministic PyGNOME surrogate seeded from the same March 13 NOAA polygon.",
             f"{top['model_name']} currently ranks first in the promoted local cross-model bundle under the current case definition.",
-            "PyGNOME remains comparator-only here, and the shared-imagery caveat still applies to the March 13 -> March 14 pair.",
+            "PyGNOME remains comparator-only here; March 13 and March 14 are independent NOAA-published day-specific observation products.",
         ]
         threshold_line = self._mindoro_reinit_threshold_equivalence_line()
         if threshold_line:
@@ -3189,7 +3314,7 @@ class FigurePackagePublicationService:
         lines = [
             "This comparison keeps the promoted OpenDrift reinit and PyGNOME comparator views side by side without treating PyGNOME as truth.",
             "In this lane, the score lines come from the March 14 NOAA target while the seed geometry comes from the March 13 NOAA polygon.",
-            MINDORO_SHARED_IMAGERY_CAVEAT,
+            MINDORO_OBSERVATION_INDEPENDENCE_NOTE,
         ]
         threshold_line = self._mindoro_reinit_threshold_equivalence_line()
         if threshold_line:
@@ -3320,72 +3445,91 @@ class FigurePackagePublicationService:
     def _mindoro_primary_board_layout_fields(self) -> dict[str, Any]:
         threshold_line = self._mindoro_reinit_threshold_equivalence_line()
         guide_bullets = [
-            "Read left to right: seed-versus-target context, promoted R1 previous reinit p50, then the March 13 seed mask; March 14 NOAA remains the scoring target while March 13 NOAA is the reinit seed.",
             self._format_fss_summary(self._mindoro_primary_branch_row("R1_previous"), "Promoted R1 previous reinit p50"),
         ]
         if threshold_line:
-            guide_bullets.insert(1, threshold_line)
+            guide_bullets.append(threshold_line)
         return {
+            "compact_board_layout": True,
+            "guide_heading": "Scorecard",
             "guide_bullets": guide_bullets,
-            "caveat_line": "Caveat: the March 13 and March 14 public masks share March 12 imagery.",
-            "provenance_line": self._mindoro_recipe_provenance_line(),
+            "guide_bullet_lines": False,
+            "caveat_line": "",
+            "provenance_line": "",
             "board_issue_types": [
                 "uneven panel spacing",
                 "overlapping text",
-                "awkward reading-guide placement",
+                "awkward note placement",
                 "weak title hierarchy",
             ],
             "board_layout_overrides": {
-                "outer_top": 0.855,
+                "outer_top": 0.89,
+                "outer_bottom": 0.05,
+                "outer_hspace": 0.08,
+                "guide_wrap_max_chars": 88,
+                "guide_body_y": 0.76,
             },
         }
 
     def _mindoro_crossmodel_board_layout_fields(self) -> dict[str, Any]:
         threshold_line = self._mindoro_reinit_threshold_equivalence_line()
         guide_bullets = [
-            "Read left to right: March 14 reference context, OpenDrift R1 previous reinit p50, then the PyGNOME comparator; March 14 NOAA stays truth throughout this board and PyGNOME remains comparator-only.",
             self._format_fss_summary(self._mindoro_crossmodel_row("r1"), "OpenDrift R1 previous reinit p50"),
             self._format_fss_summary(self._mindoro_crossmodel_row("pygnome"), "PyGNOME comparator"),
         ]
         if threshold_line:
-            guide_bullets.insert(1, threshold_line)
+            guide_bullets.append(threshold_line)
         return {
+            "compact_board_layout": True,
+            "guide_heading": "Scorecard",
             "guide_bullets": guide_bullets,
-            "caveat_line": "Caveat: the March 13 and March 14 public masks share March 12 imagery.",
-            "provenance_line": self._mindoro_recipe_provenance_line(),
+            "guide_bullet_lines": False,
+            "caveat_line": "",
+            "provenance_line": "",
             "board_issue_types": [
                 "uneven panel spacing",
                 "overlapping text",
-                "awkward reading-guide placement",
+                "awkward note placement",
                 "legend clutter",
             ],
             "board_layout_overrides": {
-                "outer_top": 0.855,
+                "outer_top": 0.89,
+                "outer_bottom": 0.05,
+                "outer_hspace": 0.08,
+                "guide_wrap_max_chars": 88,
+                "guide_body_y": 0.76,
             },
         }
 
     def _mindoro_observed_masks_crossmodel_board_layout_fields(self) -> dict[str, Any]:
         threshold_line = self._mindoro_reinit_threshold_equivalence_line()
         guide_bullets = [
-            "Read clockwise: March 13 seed mask, March 14 target mask, OpenDrift R1 previous reinit p50, then the PyGNOME comparator.",
-            "March 14 NOAA remains the scoring truth on this board; March 13 NOAA is the reinitialization seed context rather than a second independent validation day.",
             self._format_fss_summary(self._mindoro_crossmodel_row("r1"), "OpenDrift R1 previous reinit p50"),
             self._format_fss_summary(self._mindoro_crossmodel_row("pygnome"), "PyGNOME comparator"),
         ]
         if threshold_line:
-            guide_bullets.insert(2, threshold_line)
+            guide_bullets.append(threshold_line)
         return {
+            "compact_board_layout": True,
+            "guide_heading": "Scorecard",
             "guide_bullets": guide_bullets,
-            "caveat_line": "Caveat: the March 13 and March 14 public masks share March 12 imagery.",
-            "provenance_line": self._mindoro_recipe_provenance_line(),
+            "guide_bullet_lines": False,
+            "caveat_line": "",
+            "provenance_line": "",
             "board_issue_types": [
                 "uneven panel spacing",
                 "overlapping text",
-                "awkward reading-guide placement",
+                "awkward note placement",
                 "legend clutter",
             ],
             "board_layout_overrides": {
-                "outer_top": 0.855,
+                "outer_top": 0.82,
+                "outer_bottom": 0.05,
+                "outer_wspace": 0.045,
+                "panel_grid_hspace": 0.24,
+                "guide_wrap_max_chars": 56,
+                "guide_body_y": 0.76,
+                "subtitle_wrap_width": 108,
             },
         }
 
@@ -3451,10 +3595,7 @@ class FigurePackagePublicationService:
         )
 
     def _mindoro_primary_publication_specs(self) -> list[dict[str, Any]]:
-        subtitle = (
-            f"{MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE} | Mindoro | 13-14 March 2023 | "
-            "shared-imagery caveat explicit"
-        )
+        subtitle = "Mindoro | 13-14 March 2023 | primary validation with independent NOAA-published day-specific observations"
         seed_mask = self._mindoro_reinit_seed_mask_path()
         target_mask = self._mindoro_reinit_target_mask_path()
         r1_row = self._mindoro_primary_branch_row("R1_previous")
@@ -3479,12 +3620,12 @@ class FigurePackagePublicationService:
                 subtitle=subtitle,
                 interpretation=(
                     "This figure redraws the stored March 13 seed geometry on the scoring grid so "
-                    f"{MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE.lower()} starts from a "
+                    "the primary March 13 -> March 14 validation starts from a "
                     "publication-grade observation panel rather than a QA screenshot."
                 ),
                 notes=(
-                    "Built from the stored March 13 seed mask raster, shoreline context, and "
-                    "source-point geometry only; no scientific rerun was triggered, and the later "
+                    "Built from the stored March 13 seed mask raster and shoreline context only; "
+                    "no scientific rerun was triggered, and the later "
                     "2016-2023 Mindoro-focused drifter rerun now provides the active B1 recipe-provenance story."
                 ),
                 note_lines=self._mindoro_primary_note_lines(
@@ -3542,6 +3683,127 @@ class FigurePackagePublicationService:
                 show_source=False,
                 include_source_in_crop=False,
             ),
+            {
+                **self._spatial_spec(
+                    spec_id="mindoro_noaa_mar13_worldview3_support",
+                    figure_family_code="A",
+                    case_id="CASE_MINDORO_RETRO_2023",
+                    phase_or_track="phase3b_reinit_primary",
+                    date_token="2023-03-13",
+                    model_names="observation",
+                    run_type="support_noaa_analysis_map",
+                    view_type="single",
+                    variant="paper",
+                    figure_slug="noaa_mar13_worldview3",
+                    figure_title="Figure 4.4A. NOAA-published March 13 WorldView-3 analysis map",
+                    map_panel_title="",
+                    subtitle="Mindoro | 13 March 2023 | independent NOAA-published day-specific observation product",
+                    interpretation="Figure 4.4A. NOAA-published March 13 WorldView-3 analysis map.",
+                    notes="Support figure rendered from the stored March 13 NOAA/NESDIS public observation mask and shoreline context.",
+                    note_lines=[
+                        "March 13 is treated as a NOAA-published day-specific public seed observation.",
+                        "Blue shows the observed spill extent used to seed the March 13 -> March 14 B1 validation.",
+                    ],
+                    legend_keys=["deterministic_opendrift"],
+                    raster_layers=[
+                        {
+                            "path": seed_mask,
+                            "legend_key": "deterministic_opendrift",
+                            "alpha": 0.32,
+                            "linewidth": 1.5,
+                            "zorder": 5,
+                        }
+                    ],
+                    show_source=False,
+                    include_source_in_crop=False,
+                ),
+                "direct_output_filename": "figure_4_4A_noaa_mar13_worldview3.png",
+                "legend_label_overrides": {"deterministic_opendrift": "March 13 observed spill extent"},
+            },
+            {
+                **self._spatial_spec(
+                    spec_id="mindoro_noaa_mar14_worldview3_support",
+                    figure_family_code="A",
+                    case_id="CASE_MINDORO_RETRO_2023",
+                    phase_or_track="phase3b_reinit_primary",
+                    date_token="2023-03-14",
+                    model_names="observation",
+                    run_type="support_noaa_analysis_map",
+                    view_type="single",
+                    variant="paper",
+                    figure_slug="noaa_mar14_worldview3",
+                    figure_title="Figure 4.4B. NOAA-published March 14 WorldView-3 analysis map",
+                    map_panel_title="",
+                    subtitle="Mindoro | 14 March 2023 | independent NOAA-published day-specific observation product",
+                    interpretation="Figure 4.4B. NOAA-published March 14 WorldView-3 analysis map.",
+                    notes="Support figure rendered from the stored March 14 NOAA/NESDIS public observation mask and shoreline context.",
+                    note_lines=[
+                        "March 14 is treated as a NOAA-published day-specific public target observation.",
+                        "Dark gray shows the observed spill extent used as the B1 scoring target.",
+                    ],
+                    legend_keys=["observed_mask"],
+                    raster_layers=[
+                        {
+                            "path": target_mask,
+                            "legend_key": "observed_mask",
+                            "alpha": 0.36,
+                            "linewidth": 1.5,
+                            "zorder": 5,
+                        }
+                    ],
+                    show_source=False,
+                    include_source_in_crop=False,
+                ),
+                "direct_output_filename": "figure_4_4B_noaa_mar14_worldview3.png",
+                "legend_label_overrides": {"observed_mask": "March 14 observed spill extent"},
+            },
+            {
+                **self._spatial_spec(
+                    spec_id="mindoro_arcgis_mar13_mar14_observed_overlay",
+                    figure_family_code="A",
+                    case_id="CASE_MINDORO_RETRO_2023",
+                    phase_or_track="phase3b_reinit_primary",
+                    date_token="2023-03-13_to_2023-03-14",
+                    model_names="observation",
+                    run_type="support_arcgis_observed_overlay",
+                    view_type="single",
+                    variant="paper",
+                    figure_slug="arcgis_mar13_mar14_observed_overlay",
+                    figure_title="Figure 4.4C. ArcGIS overlay of March 13 and March 14 observed oil-spill extents",
+                    map_panel_title="",
+                    subtitle="Mindoro | 13-14 March 2023 | ArcGIS public-observation overlay",
+                    interpretation="Figure 4.4C. ArcGIS overlay of March 13 and March 14 observed oil-spill extents.",
+                    notes="Support figure rendered from the stored March 13 and March 14 NOAA/NESDIS public observation masks.",
+                    note_lines=[
+                        "March 13 is shown in blue and March 14 is shown in dark gray.",
+                        "The two layers are independent NOAA-published day-specific observation products.",
+                    ],
+                    legend_keys=["deterministic_opendrift", "observed_mask"],
+                    raster_layers=[
+                        {
+                            "path": seed_mask,
+                            "legend_key": "deterministic_opendrift",
+                            "alpha": 0.28,
+                            "linewidth": 1.5,
+                            "zorder": 5,
+                        },
+                        {
+                            "path": target_mask,
+                            "legend_key": "observed_mask",
+                            "alpha": 0.34,
+                            "linewidth": 1.5,
+                            "zorder": 6,
+                        },
+                    ],
+                    show_source=False,
+                    include_source_in_crop=False,
+                ),
+                "direct_output_filename": "figure_4_4C_arcgis_mar13_mar14_observed_overlay.png",
+                "legend_label_overrides": {
+                    "deterministic_opendrift": "March 13 observed spill extent",
+                    "observed_mask": "March 14 observed spill extent",
+                },
+            },
             self._spatial_spec(
                 spec_id="mindoro_primary_seed_vs_target",
                 figure_family_code="A",
@@ -3558,12 +3820,12 @@ class FigurePackagePublicationService:
                 subtitle=subtitle,
                 interpretation=(
                     "This figure makes the promoted March 13 seed and March 14 observation geometry "
-                    f"explicit before any model overlay is shown for {MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE.lower()}, "
+                    "explicit before any model overlay is shown for the primary validation, "
                     "using the stored on-grid rasters rather than the earlier QA composite."
                 ),
                 notes=(
                     "Built from the stored March 13 seed mask and March 14 observation mask only, "
-                    "with the shared-imagery caveat and the separate focused Phase 1 provenance note carried into the note box."
+                    "with the observation-independence note and the separate focused Phase 1 provenance note carried into the note box."
                 ),
                 note_lines=self._mindoro_primary_note_lines(
                     "Orange shows the March 13 seed geometry and dark slate shows the March 14 observation target."
@@ -3606,7 +3868,7 @@ class FigurePackagePublicationService:
                 subtitle=subtitle,
                 interpretation=(
                     "This is the promoted March 14 Mindoro validation overlay for "
-                    f"{MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE.lower()}, rebuilt from stored "
+                    "the primary March 13 -> March 14 validation, rebuilt from stored "
                     "rasters with the same publication grammar used by the DWH boards."
                 ),
                 notes=(
@@ -3713,7 +3975,7 @@ class FigurePackagePublicationService:
         ]
 
     def _mindoro_crossmodel_publication_specs(self) -> list[dict[str, Any]]:
-        subtitle = "Mindoro | 13-14 March 2023 | cross-model comparator on the March 14 NOAA target | shared March 12 imagery caveat"
+        subtitle = "Mindoro | 13-14 March 2023 | cross-model comparator on the March 14 NOAA target | March 13 public seed and March 14 public target observations"
         seed_mask = self._mindoro_reinit_seed_mask_path()
         target_mask = self._mindoro_reinit_target_mask_path()
         r1_row = self._mindoro_crossmodel_row("r1")
@@ -3999,14 +4261,12 @@ class FigurePackagePublicationService:
         ]
 
     def _mindoro_promoted_board_specs(self) -> list[dict[str, Any]]:
-        primary_subtitle = (
-            f"{MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE} | Mindoro | 13-14 March 2023 | shared-imagery caveat explicit"
-        )
+        primary_subtitle = "Mindoro | 13-14 March 2023 | primary validation with independent NOAA-published day-specific observations"
         crossmodel_subtitle = (
-            "Mindoro | 13-14 March 2023 | promoted cross-model comparator on the March 14 NOAA target | shared-imagery caveat explicit"
+            "Mindoro | 13-14 March 2023 | promoted cross-model comparator on the March 14 NOAA target | independent NOAA-published day-specific observations"
         )
         observed_masks_crossmodel_subtitle = (
-            "Mindoro | 13-14 March 2023 | observed seed/target masks plus OpenDrift ensemble and PyGNOME comparator | shared-imagery caveat explicit"
+            "Mindoro | 13-14 March 2023 | observed seed/target masks plus OpenDrift ensemble and PyGNOME comparator | independent NOAA-published day-specific observations"
         )
         legacy_subtitle = "Mindoro | 6 March 2023 | legacy sparse-reference honesty view"
         return [
@@ -4022,9 +4282,9 @@ class FigurePackagePublicationService:
                 figure_title="Mindoro March 13 -> March 14 primary validation board",
                 subtitle=primary_subtitle,
                 interpretation=(
-                    "This is now the main Mindoro presentation board for Phase 3B observation-based spatial validation "
+                    "This is now the main Mindoro presentation board for observation-based spatial validation "
                     "using public Mindoro spill extents because it centers the promoted March 13 -> March 14 validation "
-                    "pair, the thesis-facing R1 row, and the shared-imagery caveat without rewriting the stored run provenance."
+                    "pair, the thesis-facing R1 row, and the independent NOAA-published day-specific observation products without rewriting the stored run provenance."
                 ),
                 notes="Board assembled from publication-grade March 13 -> March 14 singles rebuilt from stored rasters and vectors only.",
                 note_lines=self._mindoro_primary_note_lines(
@@ -4049,7 +4309,7 @@ class FigurePackagePublicationService:
                 figure_slug="mindoro_crossmodel_board",
                 figure_title="Mindoro March 13 -> March 14 cross-model comparator board",
                 subtitle=crossmodel_subtitle,
-                interpretation="This board answers the cross-model question on the promoted March 14 target without treating PyGNOME as truth and without upgrading the shared-imagery pair into an independent day-to-day validation claim.",
+                interpretation="This board answers the cross-model question on the promoted March 14 target while keeping PyGNOME comparator-only and preserving March 13 as the public seed observation.",
                 notes="Board assembled from publication-grade March 13 -> March 14 singles rebuilt from stored rasters only; PyGNOME remains comparator-only.",
                 note_lines=self._mindoro_comparison_note_lines(
                     self._mindoro_crossmodel_score_line("r1", "OpenDrift R1 previous reinit p50"),
@@ -4072,7 +4332,7 @@ class FigurePackagePublicationService:
                 model_names="opendrift_vs_pygnome",
                 run_type="comparison_board",
                 figure_slug="mindoro_observed_masks_ensemble_pygnome_board",
-                figure_title="Mindoro March 13 -> March 14 observed masks, ensemble forecast, and PyGNOME board",
+                figure_title="Mindoro March 13 -> March 14 observed masks and comparator board",
                 subtitle=observed_masks_crossmodel_subtitle,
                 interpretation=(
                     "This board keeps the March 13 seed mask, the March 14 target mask, the promoted OpenDrift ensemble "
@@ -4964,12 +5224,12 @@ class FigurePackagePublicationService:
         featured_tags = set(THESIS_FACING_STUDY_BOX_NUMBERS)
         featured_study_boxes = [item for item in study_boxes if str(item.get("tag")) in featured_tags]
         source_paths = [
-            str(PHASE1_BASELINE_SELECTION_PATH),
-            str(MINDORO_BASE_CASE_CONFIG_PATH),
-            str(STUDY_BOX_LAND_CONTEXT_PATH),
-            str(MINDORO_FORECAST_MANIFEST),
-            str(PROTOTYPE_2016_PROVENANCE_METADATA_PATH),
-            str(DOMAIN_GLOSSARY_PATH),
+            PHASE1_BASELINE_SELECTION_PATH.as_posix(),
+            MINDORO_BASE_CASE_CONFIG_PATH.as_posix(),
+            STUDY_BOX_LAND_CONTEXT_PATH.as_posix(),
+            MINDORO_FORECAST_MANIFEST.as_posix(),
+            PROTOTYPE_2016_PROVENANCE_METADATA_PATH.as_posix(),
+            DOMAIN_GLOSSARY_PATH.as_posix(),
         ]
         subtitle_box_lines = [
             f"{item['tag']}. {item['label']}: {self._format_wgs84_bounds(item['bounds'])}"
@@ -7419,3 +7679,4 @@ class FigurePackagePublicationService:
 
 def run_figure_package_publication(repo_root: str | Path = ".", output_dir: str | Path | None = None) -> dict[str, Any]:
     return FigurePackagePublicationService(repo_root=repo_root, output_dir=output_dir).run()
+

@@ -148,7 +148,7 @@ If you want the freshest read-only packaging before opening the dashboard, refre
 - Use launcher entry IDs and role groups as the primary workflow vocabulary.
 - `B1` is the only main Philippine public-observation validation claim.
 - `B1` supports coastal-neighborhood usefulness, not exact 1 km overlap or universal operational accuracy.
-- March 13-14 keeps the shared-imagery caveat explicit.
+- March 13-14 keeps the observation-independence note explicit.
 - `Track A` and every PyGNOME branch remain comparator-only support.
 - PyGNOME is never observational truth.
 - DWH is external transfer validation, not Mindoro recalibration.

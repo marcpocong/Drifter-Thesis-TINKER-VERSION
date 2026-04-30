@@ -1,0 +1,183 @@
+{
+  "generated_at_utc": "2026-04-30T07:16:18.759776+00:00",
+  "experiment_id": "mindoro_march3_6_observation_overlay",
+  "case_id": "CASE_MINDORO_RETRO_2023",
+  "inventory_path": "C:\\Users\\marcp\\Downloads\\drifter-validated-oilspill-forecasting-rc-v1.0\\drifter-validated-oilspill-forecasting-rc-v1.0\\output\\final_validation_package\\final_validation_observation_table.csv",
+  "output_image": "C:\\tmp\\drifter_mindoro_march3_6_overlay\\mindoro_march3_6_observation_overlay.png",
+  "selection_rule": "Exact March 3-6 machine-readable observed spill layer set locked for the experiment.",
+  "plot_bounds_wgs84": [
+    121.348883801311,
+    11.70561856968817,
+    121.70236816481601,
+    13.560490184692929
+  ],
+  "force_refresh": false,
+  "selected_layers": [
+    {
+      "observation_date": "2023-03-03",
+      "provider": "PhilSA",
+      "source_name": "MindoroOilSpill_Philsa_230303",
+      "source_type": "feature service",
+      "truth_status": "legacy_support_reference",
+      "observation_usage": "legacy_support_reference",
+      "source_url": "https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/MindoroOilSpill_Philsa_230303/FeatureServer",
+      "service_url": "https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/MindoroOilSpill_Philsa_230303/FeatureServer",
+      "resolved_layer_id": 0,
+      "source_crs": "EPSG:4326",
+      "raw_feature_count": 7,
+      "processed_feature_count": 7,
+      "style": {
+        "label": "2023-03-03 PhilSA",
+        "mode": "filled",
+        "facecolor": "#4F86F7",
+        "edgecolor": "#1D4ED8",
+        "alpha": 0.26,
+        "linewidth": 2.2,
+        "linestyle": "solid"
+      },
+      "cache": {
+        "cache_dir": "C:\\tmp\\drifter_mindoro_march3_6_overlay\\cache\\2023_03_03__philsa__mindorooilspill_philsa_230303",
+        "raw_geojson": "C:\\tmp\\drifter_mindoro_march3_6_overlay\\cache\\2023_03_03__philsa__mindorooilspill_philsa_230303\\2023_03_03__philsa__mindorooilspill_philsa_230303_raw.geojson",
+        "layer_metadata": "C:\\tmp\\drifter_mindoro_march3_6_overlay\\cache\\2023_03_03__philsa__mindorooilspill_philsa_230303\\2023_03_03__philsa__mindorooilspill_philsa_230303_layer_metadata.json",
+        "processed_vector": "C:\\tmp\\drifter_mindoro_march3_6_overlay\\cache\\2023_03_03__philsa__mindorooilspill_philsa_230303\\2023_03_03__philsa__mindorooilspill_philsa_230303_processed.gpkg"
+      },
+      "notes": [
+        "raw metadata suggested Web Mercator, but coordinates were degree-like; treated as EPSG:4326",
+        "qa null_dropped=0 invalid_repaired=1 multipart_parts_exploded=0 non_matching_parts_dropped=0 empty_dropped=0"
+      ]
+    },
+    {
+      "observation_date": "2023-03-03",
+      "provider": "WWF Philippines",
+      "source_name": "Possible_oil_Spills_(March_3,_2023)",
+      "source_type": "feature layer",
+      "truth_status": "legacy_support_reference",
+      "observation_usage": "legacy_support_reference",
+      "source_url": "https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/Mindoro_Oil_Spills_Monitoring_Map_WFL1/FeatureServer/3",
+      "service_url": "https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/Mindoro_Oil_Spills_Monitoring_Map_WFL1/FeatureServer",
+      "resolved_layer_id": 3,
+      "source_crs": "EPSG:4326",
+      "raw_feature_count": 24,
+      "processed_feature_count": 9,
+      "style": {
+        "label": "2023-03-03 WWF",
+        "mode": "outline",
+        "facecolor": "none",
+        "edgecolor": "#60A5FA",
+        "alpha": 1.0,
+        "linewidth": 2.7,
+        "linestyle": "--"
+      },
+      "cache": {
+        "cache_dir": "C:\\tmp\\drifter_mindoro_march3_6_overlay\\cache\\2023_03_03__wwf_philippines__possible_oil_spills__march_3__2023",
+        "raw_geojson": "C:\\tmp\\drifter_mindoro_march3_6_overlay\\cache\\2023_03_03__wwf_philippines__possible_oil_spills__march_3__2023\\2023_03_03__wwf_philippines__possible_oil_spills__march_3__2023_raw.geojson",
+        "layer_metadata": "C:\\tmp\\drifter_mindoro_march3_6_overlay\\cache\\2023_03_03__wwf_philippines__possible_oil_spills__march_3__2023\\2023_03_03__wwf_philippines__possible_oil_spills__march_3__2023_layer_metadata.json",
+        "processed_vector": "C:\\tmp\\drifter_mindoro_march3_6_overlay\\cache\\2023_03_03__wwf_philippines__possible_oil_spills__march_3__2023\\2023_03_03__wwf_philippines__possible_oil_spills__march_3__2023_processed.gpkg"
+      },
+      "notes": [
+        "raw metadata suggested Web Mercator, but coordinates were degree-like; treated as EPSG:4326",
+        "rescued scaled-to-near-zero coordinates using Web Mercator scale normalization because raw bounds were implausible for the configured case region",
+        "qa null_dropped=19 invalid_repaired=2 multipart_parts_exploded=4 non_matching_parts_dropped=0 empty_dropped=0"
+      ]
+    },
+    {
+      "observation_date": "2023-03-04",
+      "provider": "PhilSA",
+      "source_name": "MindoroOilSpill_Philsa_230304",
+      "source_type": "feature service",
+      "truth_status": "legacy_support_reference",
+      "observation_usage": "legacy_support_reference",
+      "source_url": "https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/MindoroOilSpill_Philsa_230304/FeatureServer",
+      "service_url": "https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/MindoroOilSpill_Philsa_230304/FeatureServer",
+      "resolved_layer_id": 0,
+      "source_crs": "EPSG:4326",
+      "raw_feature_count": 3,
+      "processed_feature_count": 3,
+      "style": {
+        "label": "2023-03-04 PhilSA",
+        "mode": "filled",
+        "facecolor": "#22C55E",
+        "edgecolor": "#15803D",
+        "alpha": 0.24,
+        "linewidth": 2.2,
+        "linestyle": "solid"
+      },
+      "cache": {
+        "cache_dir": "C:\\tmp\\drifter_mindoro_march3_6_overlay\\cache\\2023_03_04__philsa__mindorooilspill_philsa_230304",
+        "raw_geojson": "C:\\tmp\\drifter_mindoro_march3_6_overlay\\cache\\2023_03_04__philsa__mindorooilspill_philsa_230304\\2023_03_04__philsa__mindorooilspill_philsa_230304_raw.geojson",
+        "layer_metadata": "C:\\tmp\\drifter_mindoro_march3_6_overlay\\cache\\2023_03_04__philsa__mindorooilspill_philsa_230304\\2023_03_04__philsa__mindorooilspill_philsa_230304_layer_metadata.json",
+        "processed_vector": "C:\\tmp\\drifter_mindoro_march3_6_overlay\\cache\\2023_03_04__philsa__mindorooilspill_philsa_230304\\2023_03_04__philsa__mindorooilspill_philsa_230304_processed.gpkg"
+      },
+      "notes": [
+        "raw metadata suggested Web Mercator, but coordinates were degree-like; treated as EPSG:4326",
+        "qa null_dropped=0 invalid_repaired=0 multipart_parts_exploded=0 non_matching_parts_dropped=0 empty_dropped=0"
+      ]
+    },
+    {
+      "observation_date": "2023-03-05",
+      "provider": "UP MSI",
+      "source_name": "MindoroOilSpill_MSI_230305",
+      "source_type": "feature service",
+      "truth_status": "legacy_support_reference",
+      "observation_usage": "legacy_support_reference",
+      "source_url": "https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/MindoroOilSpill_MSI_230305/FeatureServer",
+      "service_url": "https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/MindoroOilSpill_MSI_230305/FeatureServer",
+      "resolved_layer_id": 0,
+      "source_crs": "EPSG:4326",
+      "raw_feature_count": 171,
+      "processed_feature_count": 3554,
+      "style": {
+        "label": "2023-03-05 UP MSI",
+        "mode": "filled",
+        "facecolor": "#F59E0B",
+        "edgecolor": "#B45309",
+        "alpha": 0.08,
+        "linewidth": 1.6,
+        "linestyle": "solid"
+      },
+      "cache": {
+        "cache_dir": "C:\\tmp\\drifter_mindoro_march3_6_overlay\\cache\\2023_03_05__up_msi__mindorooilspill_msi_230305",
+        "raw_geojson": "C:\\tmp\\drifter_mindoro_march3_6_overlay\\cache\\2023_03_05__up_msi__mindorooilspill_msi_230305\\2023_03_05__up_msi__mindorooilspill_msi_230305_raw.geojson",
+        "layer_metadata": "C:\\tmp\\drifter_mindoro_march3_6_overlay\\cache\\2023_03_05__up_msi__mindorooilspill_msi_230305\\2023_03_05__up_msi__mindorooilspill_msi_230305_layer_metadata.json",
+        "processed_vector": "C:\\tmp\\drifter_mindoro_march3_6_overlay\\cache\\2023_03_05__up_msi__mindorooilspill_msi_230305\\2023_03_05__up_msi__mindorooilspill_msi_230305_processed.gpkg"
+      },
+      "notes": [
+        "raw metadata suggested Web Mercator, but coordinates were degree-like; treated as EPSG:4326",
+        "qa null_dropped=0 invalid_repaired=0 multipart_parts_exploded=3383 non_matching_parts_dropped=0 empty_dropped=0"
+      ]
+    },
+    {
+      "observation_date": "2023-03-06",
+      "provider": "WWF Philippines",
+      "source_name": "Possible_oil_slick_(March_6,_2023)",
+      "source_type": "feature layer",
+      "truth_status": "legacy_sparse_reference",
+      "observation_usage": "legacy_sparse_reference",
+      "source_url": "https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/Mindoro_Oil_Spills_Monitoring_Map_WFL1/FeatureServer/1",
+      "service_url": "https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/Mindoro_Oil_Spills_Monitoring_Map_WFL1/FeatureServer",
+      "resolved_layer_id": 1,
+      "source_crs": "EPSG:4326",
+      "raw_feature_count": 2000,
+      "processed_feature_count": 2000,
+      "style": {
+        "label": "2023-03-06 WWF",
+        "mode": "filled",
+        "facecolor": "#E11D48",
+        "edgecolor": "#9F1239",
+        "alpha": 0.22,
+        "linewidth": 2.3,
+        "linestyle": "solid"
+      },
+      "cache": {
+        "cache_dir": "C:\\tmp\\drifter_mindoro_march3_6_overlay\\cache\\2023_03_06__wwf_philippines__possible_oil_slick__march_6__2023",
+        "raw_geojson": "C:\\tmp\\drifter_mindoro_march3_6_overlay\\cache\\2023_03_06__wwf_philippines__possible_oil_slick__march_6__2023\\2023_03_06__wwf_philippines__possible_oil_slick__march_6__2023_raw.geojson",
+        "layer_metadata": "C:\\tmp\\drifter_mindoro_march3_6_overlay\\cache\\2023_03_06__wwf_philippines__possible_oil_slick__march_6__2023\\2023_03_06__wwf_philippines__possible_oil_slick__march_6__2023_layer_metadata.json",
+        "processed_vector": "C:\\tmp\\drifter_mindoro_march3_6_overlay\\cache\\2023_03_06__wwf_philippines__possible_oil_slick__march_6__2023\\2023_03_06__wwf_philippines__possible_oil_slick__march_6__2023_processed.gpkg"
+      },
+      "notes": [
+        "raw metadata suggested Web Mercator, but coordinates were degree-like; treated as EPSG:4326",
+        "qa null_dropped=0 invalid_repaired=0 multipart_parts_exploded=0 non_matching_parts_dropped=0 empty_dropped=0"
+      ]
+    }
+  ]
+}

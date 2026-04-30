@@ -345,7 +345,7 @@ Interpretation:
 - the broader `phase1_regional_2016_2022` rerun remains preserved as a regional reference/governance lane rather than the active provenance for B1
 - the focused rerun searched through early 2023 but its accepted registry does not include near-2023 accepted segments
 - the focused rerun now evaluates the full four-recipe family after a GFS completeness preflight; its raw historical winner is `cmems_gfs`, and official B1 now also uses `cmems_gfs`
-- the shared-imagery caveat remains explicit; do not describe March 13 -> March 14 as independent day-to-day validation
+- the observation-independence note remains explicit; March 13 and March 14 are independent NOAA-published day-specific public-observation products
 
 ## Curated DWH Phase 3C Final Output Export
 

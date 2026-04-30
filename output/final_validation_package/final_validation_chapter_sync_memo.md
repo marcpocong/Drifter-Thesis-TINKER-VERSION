@@ -20,7 +20,7 @@ Packaging guidance:
 - Keep DWH as the separate Phase 3C external rich-data transfer-validation branch, with no new drifter ingestion in the thesis-facing lane.
 - Present Phase 3A as same-case comparator-only support attached to B1, not as a co-primary claim or truth-source replacement.
 - Preserve `config/case_mindoro_retro_2023.yaml` as the frozen March 3 -> March 6 case definition and carry the Phase 3B promotion through the amendment file instead.
-- Present March 13 -> March 14 as the canonical Mindoro validation with the shared-imagery caveat stated explicitly.
+- Present March 13 -> March 14 as the canonical Mindoro validation with March 13 as the public seed observation and March 14 as the public target observation.
 - State that the separate focused 2016-2023 mindoro drifter rerun selected `cmems_gfs` as the active b1 recipe provenance. it does not replace the original b1 raw provenance.
 - State that the broader 2016-2022 regional rerun is preserved as reference/governance context rather than as the active B1 provenance lane.
 - Keep March 6 and March 3-6 visible as legacy/reference material rather than deleting or hiding them.

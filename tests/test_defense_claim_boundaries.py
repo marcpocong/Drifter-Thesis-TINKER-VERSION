@@ -15,8 +15,8 @@ def test_launcher_claim_boundaries_keep_main_thesis_separation():
     phase1_boundary = entries["phase1_mindoro_focus_provenance"]["claim_boundary"].lower()
 
     assert "only main philippine public-observation validation claim" in b1_boundary
-    assert "shared-imagery" in b1_boundary
-    assert "independent day-to-day pair" in b1_boundary
+    assert "independent noaa-published day-specific observation products" in b1_boundary
+    assert "neighborhood-scale" in b1_boundary
     assert "not the direct" in drifter_boundary
     assert "external transfer validation" in dwh_boundary
     assert "not mindoro recalibration" in dwh_boundary

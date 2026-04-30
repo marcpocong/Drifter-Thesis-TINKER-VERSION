@@ -309,7 +309,7 @@ class UiReadonlySemanticsTests(unittest.TestCase):
         self.assertIn("B1 Recipe Provenance — Not Truth Mask", b1_drifter_text)
         self.assertIn("Drifter segments support transport-provenance and recipe selection; they are not direct oil-footprint truth.", b1_drifter_text)
         self.assertIn("No exact 1 km overlap; this supports coastal-neighborhood usefulness, not exact-grid reproduction.", mindoro_text)
-        self.assertIn("The March 13–14 pair shares March 12 WorldView-3 imagery provenance", mindoro_text)
+        self.assertIn("March 13 and March 14 are independent NOAA-published day-specific public-observation products", mindoro_text)
         self.assertIn("0.1075", mindoro_text)
         self.assertNotIn("B2", mindoro_text)
         self.assertNotIn("B3", mindoro_text)

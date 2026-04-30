@@ -2,7 +2,7 @@
 
 ## 1. Amendment Summary
 
-This amendment will update the thesis-facing methodology language so it matches the current repository state without blurring provenance. The central reporting change will be that the March 13 -> March 14 R1 primary validation row will be the only thesis-facing Mindoro Phase 3B validation row used in the main paper. That decision will not delete or rewrite the original March 3 -> March 6 case definition. Instead, the frozen base-case YAML will remain the preserved historical case-definition artifact, while the promoted March 13 -> March 14 R1 row will be carried through the separate amendment path and reported as the main validation result with an explicit shared-imagery caveat.
+This amendment will update the thesis-facing methodology language so it matches the current repository state without blurring provenance. The central reporting change will be that the March 13 -> March 14 R1 primary validation row will be the only thesis-facing Mindoro Phase 3B validation row used in the main paper. That decision will not delete or rewrite the original March 3 -> March 6 case definition. Instead, the frozen base-case YAML will remain the preserved historical case-definition artifact, while the promoted March 13 -> March 14 R1 row will be carried through the separate amendment path and reported as the main validation result with an explicit observation-independence note.
 
 ## 2. What Will Change In Reporting And What Will Not Change In Frozen Artifacts
 
@@ -18,7 +18,7 @@ The same separation applies spatially. The regional transport-validation box is 
 
 ## 4. Limitations And Freeze-Status Honesty
 
-Two limitations should remain explicit in the thesis text. First, the promoted March 13 -> March 14 R1 primary validation row is not a fully independent day-to-day satellite validation because both NOAA/NESDIS public products cite March 12 WorldView-3 imagery. It should therefore be described as a promoted reinitialization-based public-validation pair with shared-imagery provenance. Second, the workflow remains upstream-provisional if the candidate Phase 1 historical/regional baseline has not yet been manually promoted into the official default baseline configuration. Under that condition, Phase 2 and downstream spill-case products remain scientifically usable and reportable, but the thesis should not claim that the baseline freeze story is already complete.
+Two limitations should remain explicit in the thesis text. First, the promoted March 13 -> March 14 R1 primary validation row uses independent NOAA-published day-specific public observations. It should therefore be described as a promoted reinitialization-based public-validation pair from the March 13 public seed observation to the March 14 public target observation. Second, the workflow remains upstream-provisional if the candidate Phase 1 historical/regional baseline has not yet been manually promoted into the official default baseline configuration. Under that condition, Phase 2 and downstream spill-case products remain scientifically usable and reportable, but the thesis should not claim that the baseline freeze story is already complete.
 
 ## 5. Archive-Only Mindoro Rule
 

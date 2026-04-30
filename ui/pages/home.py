@@ -190,7 +190,7 @@ def render(state: dict, ui_state: dict) -> None:
                 "title": "What does B1 prove and not prove?",
                 "badge": ROLE_THESIS,
                 "body": "B1 supports coastal-neighborhood usefulness and does not prove exact 1 km grid-cell reproduction.",
-                "note": "The March 13-14 pair shares March 12 WorldView-3 imagery provenance, so it remains a bounded reinitialization-based check.",
+                "note": "March 13 and March 14 are independent NOAA-published day-specific public-observation products; interpretation remains neighborhood-scale rather than exact 1 km overlap.",
             },
             {
                 "title": "What is Track A?",

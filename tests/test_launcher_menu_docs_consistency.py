@@ -139,7 +139,7 @@ def test_comparator_dwh_and_b1_guardrail_wording_is_present():
             assert "external transfer" in combined, entry["entry_id"]
         if entry["entry_id"] == "mindoro_phase3b_primary_public_validation":
             assert "only main philippine public-observation validation claim" in combined
-            assert "shared-imagery" in combined
+            assert "independent noaa-published day-specific observation products" in combined
         if entry["entry_id"] == "mindoro_march13_14_noaa_reinit_stress_test":
             assert entry.get("alias_of") == "mindoro_phase3b_primary_public_validation"
         if entry["entry_id"] == "b1_drifter_context_panel":

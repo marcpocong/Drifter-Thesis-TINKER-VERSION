@@ -405,7 +405,7 @@ class MindoroB15000ElementExperimentService:
                 "branches_compared_for_member_identity": perturbation_info["branches_compared"],
                 "seed_obs_date": "2023-03-13",
                 "target_obs_date": "2023-03-14",
-                "shared_imagery_caveat_preserved": True,
+                "independent_noaa_observation_products_confirmed": True,
                 "interpretation_boundary": (
                     "This experiment is not a thesis-facing validation row and does not replace canonical B1."
                 ),

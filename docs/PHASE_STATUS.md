@@ -51,7 +51,7 @@
 - `R1_previous` forecast cells `5`; observed cells `22`; nearest distance `1414.21 m`; centroid distance `7358.16 m`
 - `IoU = 0.0`; `Dice = 0.0`
 - Guardrail: `R1_previous` is promoted because it survives and is scoreable, not because it is an exact-grid match
-- Caveat: March 13-14 is a reinitialization-based public-observation validation pair; both products cite the same March 12 WorldView-3 imagery provenance
+- Observation independence note: March 13 and March 14 are independent NOAA-published day-specific public-observation products.
 
 ## Mindoro `Track A`
 
@@ -93,7 +93,7 @@ Guardrail: these are support/context values only, not a second primary validatio
 ## Final Guardrails
 
 - Keep `B1` as the only main-text primary Mindoro validation row.
-- Keep the March 13-14 shared-imagery caveat explicit.
+- Keep the March 13-14 observation-independence note explicit.
 - Keep `Track A` and PyGNOME comparator-only.
 - Keep DWH external only.
 - Keep Mindoro oil-type/shoreline support-only.

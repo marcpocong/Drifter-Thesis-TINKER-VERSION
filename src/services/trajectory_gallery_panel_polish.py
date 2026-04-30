@@ -1,4 +1,4 @@
-"""Panel-ready polish layer for the read-only trajectory gallery."""
+﻿"""Panel-ready polish layer for the read-only trajectory gallery."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Patch, Rectangle
 
 from src.core.artifact_status import artifact_status_columns
-from src.services.mindoro_primary_validation_metadata import MINDORO_SHARED_IMAGERY_CAVEAT
+from src.services.mindoro_primary_validation_metadata import MINDORO_OBSERVATION_INDEPENDENCE_NOTE
 
 matplotlib.use("Agg")
 
@@ -724,7 +724,7 @@ class TrajectoryGalleryPanelPolishService:
         if summary.empty:
             return [
                 "March 13 -> March 14 reinit summary CSV was not available.",
-                "Interpret this board visually and keep the shared-imagery caveat explicit.",
+                "Interpret this board visually using independent NOAA-published day-specific observations.",
             ]
         row = summary.iloc[0]
         return [
@@ -734,7 +734,7 @@ class TrajectoryGalleryPanelPolishService:
                 f"{float(row.get('fss_5km', 0.0)):.3f}/{float(row.get('fss_10km', 0.0)):.3f} with "
                 f"{int(row.get('forecast_nonzero_cells', 0))} forecast cells against {int(row.get('obs_nonzero_cells', 0))} observed cells."
             ),
-            MINDORO_SHARED_IMAGERY_CAVEAT,
+            MINDORO_OBSERVATION_INDEPENDENCE_NOTE,
         ]
 
     def _mindoro_strict_metrics(self) -> list[str]:
@@ -771,7 +771,7 @@ class TrajectoryGalleryPanelPolishService:
                 if not pygnome.empty
                 else ""
             ),
-            f"PyGNOME remains comparator-only. {MINDORO_SHARED_IMAGERY_CAVEAT}",
+            f"PyGNOME remains comparator-only. {MINDORO_OBSERVATION_INDEPENDENCE_NOTE}",
         ]
 
     def _dwh_event_metrics(self) -> dict[str, float]:
@@ -875,7 +875,7 @@ class TrajectoryGalleryPanelPolishService:
         return self._compose_board(
             board_family_code="A",
             board_title="Mindoro March 13 -> March 14 primary validation",
-            subtitle="Mindoro | 13-14 March 2023 | promoted NOAA reinit validation | shared-imagery caveat explicit",
+            subtitle="Mindoro | 13-14 March 2023 | promoted NOAA reinit validation | separate day-specific observations",
             case_id="CASE_MINDORO_RETRO_2023",
             phase_or_track="phase3b_reinit_primary",
             date_token="2023-03-13_to_2023-03-14",
@@ -886,13 +886,13 @@ class TrajectoryGalleryPanelPolishService:
                 self._image_slot("March 13 seed mask on grid", "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/qa_march13_seed_mask_on_grid.png"),
                 self._image_slot("March 13 seed vs March 14 target", "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/qa_march13_seed_vs_march14_target.png"),
                 self._image_slot("Promoted R1 previous reinit overlay", "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/qa_march14_reinit_R1_previous_overlay.png"),
-                self._text_slot("Why this board matters", "This is now the canonical Mindoro validation board. It keeps the seed polygon, next-day target, and best-performing OpenDrift reinit overlay together while staying transparent about the shared-imagery caveat."),
+                self._text_slot("Why this board matters", "This is now the canonical Mindoro validation board. It keeps the March 13 public seed observation, March 14 public target observation, and best-performing OpenDrift reinit overlay together."),
             ],
             legend_keys=["observed_mask", "ensemble_p50", "initialization_polygon", "validation_polygon"],
             metric_lines=self._mindoro_primary_metrics(),
-            interpretation="The promoted March 13 -> March 14 board is presentation-ready as the main Mindoro validation board, provided the shared-imagery caveat is stated honestly.",
-            caption="Use this board as the main Mindoro validation slide. It shows the March 13 NOAA seed geometry, the March 14 NOAA target, and the promoted OpenDrift R1 previous reinit result in one place while keeping the shared-imagery caveat explicit.",
-            notes="Built from stored March 13 -> March 14 reinit QA figures only, with the shared-imagery caveat preserved in the panel text.",
+            interpretation="The promoted March 13 -> March 14 board is presentation-ready as the main Mindoro validation board with independent NOAA-published day-specific observation products.",
+            caption="Use this board as the main Mindoro validation slide. It shows the March 13 NOAA seed geometry, the March 14 NOAA target, and the promoted OpenDrift R1 previous reinit result in one place.",
+            notes="Built from stored March 13 -> March 14 reinit QA figures only, with the observation-independence note preserved in the panel text.",
             recommended=True,
         )
 
@@ -917,7 +917,7 @@ class TrajectoryGalleryPanelPolishService:
             metric_lines=self._mindoro_crossmodel_metrics(),
             interpretation="The promoted March 14 cross-model board gives a clean side-by-side answer to the model-comparison question while keeping PyGNOME in a comparator-only role.",
             caption="Use this board when the panel asks which model performed better on the promoted March 14 target. It keeps both OpenDrift reinit branches and the deterministic PyGNOME comparator visible together without treating PyGNOME as truth.",
-            notes="Built from stored March 13 -> March 14 cross-model QA figures only; PyGNOME remains comparator-only and the shared-imagery caveat stays explicit.",
+            notes="Built from stored March 13 -> March 14 cross-model QA figures only; PyGNOME remains comparator-only and the NOAA observations remain day-specific.",
             recommended=True,
         )
 
@@ -1262,3 +1262,4 @@ def run_trajectory_gallery_panel_polish(
     output_dir: str | Path | None = None,
 ) -> dict[str, Any]:
     return TrajectoryGalleryPanelPolishService(repo_root=repo_root, output_dir=output_dir).run()
+

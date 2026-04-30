@@ -153,9 +153,10 @@ class LauncherMatrixMetadataTests(unittest.TestCase):
             self.assertTrue(entry["safe_default"], entry_id)
             self.assertIn(entry["run_kind"], {"read_only", "packaging_only"}, entry_id)
 
-    def test_b1_claim_boundary_mentions_shared_imagery_caveat(self):
+    def test_b1_claim_boundary_mentions_independent_noaa_products(self):
         boundary = self.entry_map["mindoro_phase3b_primary_public_validation"]["claim_boundary"].lower()
-        self.assertRegex(boundary, r"shared[- ]imagery")
+        self.assertIn("independent noaa-published day-specific observation products", boundary)
+        self.assertIn("neighborhood-scale", boundary)
         self.assertIn("only main philippine public-observation validation claim", boundary)
 
     def test_b1_drifter_context_entry_stays_read_only_and_not_direct(self):

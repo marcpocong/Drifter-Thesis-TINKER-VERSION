@@ -52,7 +52,7 @@
 - Do not describe `B1` as exact 1 km overlap.
 - `IoU = 0.0`
 - `Dice = 0.0`
-- Caveat: March 13-14 is a reinitialization-based public-observation validation check; both public products cite the same March 12 WorldView-3 imagery provenance; do not call it independent day-to-day validation
+- Observation independence note: March 13 and March 14 are independent NOAA-published day-specific public-observation products; B1 uses March 13 as the public seed observation and March 14 as the public target observation
 
 ### Mindoro `Track A`
 
@@ -113,7 +113,7 @@ pwsh ./start.ps1 -Explain mindoro_phase3b_primary_public_validation -ExportPlan 
 
 - Keep `B1` as the only main-text primary Philippine / Mindoro validation claim.
 - Keep `B1` framed as coastal-neighborhood usefulness, not exact 1 km overlap or universal operational accuracy.
-- Keep March 13-14 framed as reinitialization-based public-observation validation with the shared-imagery caveat visible.
+- Keep March 13-14 framed as reinitialization-based public-observation validation with the observation-independence note visible.
 - Keep `Track A` and every PyGNOME branch comparator-only.
 - Keep DWH external only; do not present it as Mindoro recalibration.
 - Keep Mindoro oil-type and shoreline outputs as support/context only.

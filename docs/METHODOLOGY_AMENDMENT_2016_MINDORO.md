@@ -31,7 +31,7 @@ March 13 -> March 14 R1 is the canonical B1 primary validation row through `conf
 
 The March 13 -> March 14 R0 archived baseline, March 6 B2, and March 3 -> March 6 B3 remain repo-preserved for archival provenance and reproducibility only. They remain inspectable in the repo and in the `Mindoro Validation Archive` page, but they will not be used in thesis-facing methodology, tables, figures, or headline validation claims.
 
-The shared-imagery caveat remains explicit: both public products cite March 12 WorldView-3 imagery, so March 13 -> March 14 R1 is a reinitialization-based public-validation pair, not an independent day-to-day validation.
+The observation-independence note remains explicit: March 13 and March 14 are independent NOAA-published day-specific public-observation products, so March 13 -> March 14 R1 is a reinitialization-based public-validation pair from the March 13 public seed to the March 14 public target.
 
 ## PyGNOME
 

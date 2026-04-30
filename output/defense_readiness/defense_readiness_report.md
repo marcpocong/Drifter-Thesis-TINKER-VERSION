@@ -208,7 +208,7 @@ Direct container commands:
 Guardrails:
   - Panel mode is the defense-safe default. The full launcher is for researcher/audit use.
   - Use launcher entry IDs and role groups as the user-facing startup vocabulary. Raw phase names are secondary implementation details.
-  - B1 is the only main-text primary Mindoro validation row, and the March 13 -> March 14 pair keeps the shared-imagery caveat explicit.
+  - B1 is the only main-text primary Mindoro validation row, and the March 13 -> March 14 pair keeps the observation-independence note explicit.
   - Track A and every PyGNOME branch remain comparator-only support, never observational truth.
   - DWH is a separate external transfer-validation story, not Mindoro recalibration.
   - Mindoro Phase 4 oil-type and shoreline outputs remain support/context only.
@@ -260,7 +260,7 @@ Use user-facing entry IDs and thesis-role groupings here. Raw phase names are no
      id=mindoro_phase3b_primary_public_validation
      thesis role=Primary evidence | draft=Evidence 3 / Mindoro B1 / Chapter 4.2
      tags=Scientific rerun | cost=expensive | explicit-confirm | for=researcher
-     boundary=Only main-text primary Mindoro validation row; shared-imagery caveat applies and it must not be presented as a fully independent day-to-day pair.
+     boundary=Only main-text primary Mindoro validation row; uses independent NOAA-published day-specific observations; interpretation remains neighborhood-scale rather than exact 1 km overlap.
 
   - DWH external transfer-validation bundle
      id=dwh_reportable_bundle
@@ -458,7 +458,7 @@ Filtered thesis role: Primary evidence
      id=mindoro_phase3b_primary_public_validation
      thesis role=Primary evidence | draft=Evidence 3 / Mindoro B1 / Chapter 4.2
      tags=Scientific rerun | cost=expensive | explicit-confirm | for=researcher
-     boundary=Only main-text primary Mindoro validation row; shared-imagery caveat applies and it must not be presented as a fully independent day-to-day pair.
+     boundary=Only main-text primary Mindoro validation row; uses independent NOAA-published day-specific observations; interpretation remains neighborhood-scale rather than exact 1 km overlap.
 
   - DWH external transfer-validation bundle
      id=dwh_reportable_bundle
@@ -576,7 +576,7 @@ Entry ID: mindoro_phase3b_primary_public_validation
 Label: Mindoro B1 primary public-validation rerun
 Thesis role: Primary evidence
 Draft section: Evidence 3 / Mindoro B1 / Chapter 4.2
-Claim boundary: Only main-text primary Mindoro validation row; shared-imagery caveat applies and it must not be presented as a fully independent day-to-day pair.
+Claim boundary: Only main-text primary Mindoro validation row; uses independent NOAA-published day-specific observations; interpretation remains neighborhood-scale rather than exact 1 km overlap.
 Run kind: Scientific rerun
 Rerun cost: expensive
 Safety: explicit confirmation required

@@ -287,8 +287,8 @@ def _draft_alignment_issues(entry: dict[str, Any]) -> list[str]:
     if entry_id == "mindoro_phase3b_primary_public_validation":
         for phrase in (
             "only main philippine public-observation validation claim",
-            "shared-imagery",
-            "independent day-to-day pair",
+            "independent noaa-published day-specific observation products",
+            "neighborhood-scale",
         ):
             if phrase not in boundary:
                 issues.append(f"B1 claim boundary is missing '{phrase}'")

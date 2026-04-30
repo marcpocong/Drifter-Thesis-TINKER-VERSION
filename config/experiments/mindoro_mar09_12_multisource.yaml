@@ -1,0 +1,116 @@
+experiment_id: mindoro_mar09_12_multisource_experiment
+status: experimental_archive_only
+workflow_mode: mindoro_retro_2023
+output_root: output/CASE_MINDORO_RETRO_2023/experiments/mar09_11_12_multisource
+safe_default: false
+experimental_only: true
+reportable: false
+thesis_facing: false
+claim_boundary: >
+  This March 9-12 multi-source lane is archive/provenance support only. It does
+  not replace the current B1 thesis-facing public-observation validation claim,
+  Track A/PyGNOME comparator support, DWH transfer validation, final validation
+  package, or publication figures.
+
+observation_policy:
+  source_preference: vector_featureserver_over_report_png
+  report_png_role: provenance_and_visual_qa
+  positive_classes:
+    - possible oil
+    - possible thicker oil
+  exclude_classes:
+    - suspected source
+  combine_rule: union_dissolve_after_reprojection
+  scoring_grid_policy: use_existing_mindoro_grid_if_covering_sources_else_experiment_local_epsg32651_1km
+  overwrite_canonical_grid: false
+  ocean_mask_required: true
+
+observation_sources:
+  - mask_id: OBS_MAR09_TERRAMODIS
+    date_label: "2023-03-09"
+    satellite: Terra MODIS
+    source_name: MindoroOilSpill_NOAA_230309
+    service_url: https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/MindoroOilSpill_NOAA_230309/FeatureServer
+    report_url: https://disasterscharter.org/cos-api/api/file/public/article-image/28555013
+    role: seed mask for E1 and E2
+  - mask_id: OBS_MAR11_ICEYE
+    date_label: "2023-03-11"
+    satellite: ICEYE
+    source_name: MindoroOilSpill_NOAA_230311
+    service_url: https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/MindoroOilSpill_NOAA_230311/FeatureServer
+    report_url: https://disasterscharter.org/cos-api/api/file/public/article-image/28555023
+    role: E1 validation target and E3 seed mask
+  - mask_id: OBS_MAR12_COMBINED
+    date_label: "2023-03-12"
+    satellite: combined
+    combine_rule: union_dissolve_after_reprojection
+    role: E2 and E3 validation target
+    source_mask_ids:
+      - OBS_MAR12_WORLDVIEW3_NOAA_230314
+      - OBS_MAR12_WORLDVIEW3_NOAA_230313
+      - OBS_MAR12_ICEYE
+  - mask_id: OBS_MAR12_WORLDVIEW3_NOAA_230314
+    date_label: "2023-03-12"
+    satellite: WorldView-3
+    source_name: MindoroOilSpill_NOAA_230314
+    resolved_service_url: https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/Possible_Oil_Spills_March_14/FeatureServer
+    role: individual March 12 source mask preserved before union
+  - mask_id: OBS_MAR12_WORLDVIEW3_NOAA_230313
+    date_label: "2023-03-12"
+    satellite: WorldView-3
+    source_name: MindoroOilSpill_NOAA_230313
+    service_url: https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/MindoroOilSpill_NOAA_230313/FeatureServer
+    role: individual March 12 source mask preserved before union
+  - mask_id: OBS_MAR12_ICEYE
+    date_label: "2023-03-12"
+    satellite: ICEYE
+    source_name: MindoroOilSpill_NOAA_230312
+    service_url: https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/MindoroOilSpill_NOAA_230312/FeatureServer
+    report_url: https://disasterscharter.org/cos-api/api/file/public/article-image/28555033
+    role: individual March 12 source mask preserved before union
+
+transport:
+  primary_model: OpenDrift
+  deterministic_control: true
+  ensemble_members: 50
+  max_elements_per_run_or_member: 5000
+  probability_surface: probability_of_presence
+  thresholds:
+    mask_p50: probability >= 0.50
+    mask_p90: probability >= 0.90
+  baseline_recipe: inherited_from_current_focused_phase1_mindoro_provenance
+  source_of_truth_order:
+    - config/phase1_baseline_selection.yaml
+    - config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml
+    - existing March 13-14 B1 resolved run manifests
+  rerun_phase1_recipe_selection: false
+  drifter_ingestion_enabled: false
+  gfs_historical_preflight_enabled: false
+  default_missing_forcing_policy: write_missing_forcing_manifest_and_stop
+  optional_minimal_case_forcing_fetch_env: ALLOW_MINIMAL_CASE_FORCING_FETCH
+  wave_and_stokes_policy: follow_existing_official_mindoro_settings
+  pygnome_role: comparator_only_never_truth
+
+forecast_pairs:
+  - pair_id: E1_MAR09_TO_MAR11_48H
+    seed_mask_id: OBS_MAR09_TERRAMODIS
+    target_mask_id: OBS_MAR11_ICEYE
+    nominal_lead_h: 48
+  - pair_id: E2_MAR09_TO_MAR12_72H
+    seed_mask_id: OBS_MAR09_TERRAMODIS
+    target_mask_id: OBS_MAR12_COMBINED
+    nominal_lead_h: 72
+  - pair_id: E3_MAR11_TO_MAR12_24H
+    seed_mask_id: OBS_MAR11_ICEYE
+    target_mask_id: OBS_MAR12_COMBINED
+    nominal_lead_h: 24
+
+scoring:
+  metric: FSS
+  windows_km: [1, 3, 5, 10]
+  surfaces:
+    - opendrift_deterministic
+    - opendrift_mask_p50
+    - opendrift_mask_p90
+    - pygnome_deterministic_comparator
+  expected_final_rows: 12

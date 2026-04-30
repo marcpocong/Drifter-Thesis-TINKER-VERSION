@@ -184,7 +184,7 @@ docker compose exec -T -e WORKFLOW_MODE=dwh_retro_2010 -e PIPELINE_PHASE=phase3c
 
 - `B1` is the only main Philippine public-observation validation claim.
 - `B1` supports coastal-neighborhood usefulness, not exact 1 km overlap or universal operational accuracy.
-- The March 13-14 `B1` pair keeps the shared-imagery caveat explicit.
+- The March 13-14 `B1` pair keeps the observation-independence note explicit.
 - `Track A` and every PyGNOME branch remain comparator-only support.
 - PyGNOME is never observational truth.
 - DWH is external transfer validation, not Mindoro recalibration.

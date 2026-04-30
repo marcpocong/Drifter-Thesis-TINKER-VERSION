@@ -334,7 +334,7 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
                     "mindoro_primary_validation_promotion": {
                         "thesis_phase_title": "Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents",
                         "thesis_phase_subtitle": "Mindoro March 13 -> March 14 public spill-extent reinitialization validation",
-                        "shared_imagery_caveat": "Both NOAA products cite 2023-03-12 imagery.",
+                        "observation_independence_note": "March 13 and March 14 are independent NOAA-published day-specific observation products.",
                         "dual_provenance_confirmation": {
                             "stored_run_selected_recipe": "cmems_era5",
                             "posthoc_phase1_confirmation_selected_recipe": "cmems_era5",
@@ -358,7 +358,7 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
                     [
                         "case_id,track_id,track_label,status,truth_source,primary_output_dir,reporting_role,main_text_priority,notes",
                         "CASE_MINDORO_RETRO_2023,A,Mindoro March 13 -> March 14 cross-model comparator,complete,March 14 NOAA mask,output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison,comparative discussion,secondary,Same-case comparator-support only",
-                        "CASE_MINDORO_RETRO_2023,B1,Mindoro March 13 -> March 14 NOAA reinit primary validation,complete,March 14 NOAA mask with March 13 seed polygon,output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit,main-text primary validation,primary,Promoted primary row with March 12 imagery caveat",
+                        "CASE_MINDORO_RETRO_2023,B1,Mindoro March 13 -> March 14 R1 primary validation row,complete,March 14 NOAA mask with March 13 seed polygon,output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit,main-text primary validation,primary,Promoted primary row with independent NOAA day-specific observations",
                         "CASE_MINDORO_RETRO_2023,B2,Mindoro legacy March 6 sparse strict reference,complete,WWF March 6 mask,output/CASE_MINDORO_RETRO_2023/phase3b,legacy reference,secondary,Legacy sparse reference",
                         "CASE_MINDORO_RETRO_2023,B3,Mindoro legacy March 3-6 broader-support reference,complete,public union,output/CASE_MINDORO_RETRO_2023/public_obs_appendix,legacy reference,secondary,Legacy broader-support reference",
                         "CASE_DWH_RETRO_2010_72H,C1,DWH deterministic,complete,DWH public masks,output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run,main-text scientific result,primary,Transfer validation",
@@ -517,7 +517,7 @@ class Phase5LauncherAndDocsSyncTests(unittest.TestCase):
             phase_status_by_track = phase_status_df.set_index("track_id")
             self.assertEqual(
                 phase_status_by_track.loc["B1", "track_label"],
-                "Mindoro March 13 -> March 14 NOAA reinit primary validation",
+                "Mindoro March 13 -> March 14 R1 primary validation row",
             )
             self.assertEqual(
                 phase_status_by_track.loc["C1", "track_label"],

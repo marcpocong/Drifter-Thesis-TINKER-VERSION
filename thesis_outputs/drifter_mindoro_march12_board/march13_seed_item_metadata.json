@@ -1,0 +1,68 @@
+{
+  "id": "8f8e3944748c4772910efc9829497e20",
+  "owner": "jrsales@wwf.org.ph_panda",
+  "orgId": "RTK5Unh1Z71JKIiR",
+  "created": 1678940019000,
+  "modified": 1723225293000,
+  "guid": null,
+  "name": null,
+  "title": "MindoroOilSpill_NOAA_230313",
+  "type": "Feature Service",
+  "typeKeywords": [
+    "ArcGIS Server",
+    "Data",
+    "Feature Access",
+    "Feature Service",
+    "Metadata",
+    "Service",
+    "Singlelayer",
+    "Hosted Service"
+  ],
+  "description": "<div style='box-sizing:border-box; margin:0px; padding:0px; color:rgb(33, 37, 41); font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size:16px;'>Oil Spill in the Philippines</div><br /><div style='box-sizing:border-box; margin:0px; padding:0px; color:rgb(33, 37, 41); font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size:16px;'><span style='box-sizing:border-box; font-weight:bolder;'>Source:</span>\u00a0WorldView-3</div><div style='box-sizing:border-box; margin:0px; padding:0px; color:rgb(33, 37, 41); font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size:16px;'><span style='box-sizing:border-box; font-weight:bolder;'>Acquired:</span>\u00a012/03/2023</div><br /><div style='box-sizing:border-box; margin:0px; padding:0px; color:rgb(33, 37, 41); font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size:16px;'><span style='box-sizing:border-box; font-weight:bolder;'>Category:</span>\u00a0Delineation Map</div><br /><div style='box-sizing:border-box; margin:0px; padding:0px 0px 27px; color:rgb(33, 37, 41); font-family:-apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Helvetica Neue&quot;, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;; font-size:16px;'><span style='box-sizing:border-box; font-weight:bolder;'>Copyright:</span>\u00a0\u00a9 (2023) DigitalGlobe, Inc., Longmont CO USA 80503. DigitalGlobe and the DigitalGlobe logos are trademarks of DigitalGlobe, Inc. The use and/or dissemination of this data and/or of any product in any way derived there from are restricted. Unauthorized use and/or dissemination is prohibited<br />Map produced by NOAA / NESDIS</div>",
+  "tags": [
+    "Mindoro Oil Spill"
+  ],
+  "snippet": "Marine Pollution Surveilance Report by The National Oceanic and Atmospheric Administration, Satellite and Information Service (NOAA/NESDIS) https://disasterscharter.org/web/guest/activations/-/article/oil-spill-in-philippines-activation-807-",
+  "thumbnail": "thumbnail/ago_downloaded.png",
+  "documentation": null,
+  "extent": [
+    [
+      121.44432857800008,
+      13.204587024000034
+    ],
+    [
+      121.46556950700001,
+      13.26761836700003
+    ]
+  ],
+  "categories": [],
+  "spatialReference": "102100",
+  "accessInformation": null,
+  "classification": null,
+  "licenseInfo": null,
+  "culture": "en-us",
+  "properties": null,
+  "advancedSettings": null,
+  "url": "https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/MindoroOilSpill_NOAA_230313/FeatureServer",
+  "proxyFilter": null,
+  "access": "public",
+  "size": 139264,
+  "subInfo": 0,
+  "appCategories": [],
+  "industries": [],
+  "languages": [],
+  "largeThumbnail": null,
+  "banner": null,
+  "screenshots": [],
+  "listed": false,
+  "commentsEnabled": true,
+  "numComments": 0,
+  "numRatings": 0,
+  "avgRating": 0,
+  "numViews": 1360,
+  "scoreCompleteness": 66,
+  "groupDesignations": null,
+  "apiToken1ExpirationDate": -1,
+  "apiToken2ExpirationDate": -1,
+  "lastViewed": 1777525200000
+}

@@ -1,4 +1,4 @@
-"""Mindoro Phase 3B March 13 -> March 14 primary public-validation source bundle."""
+﻿"""Mindoro Phase 3B March 13 -> March 14 primary public-validation source bundle."""
 
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ from src.services.mindoro_primary_validation_metadata import (
     MINDORO_PRIMARY_VALIDATION_PHASE_OR_TRACK,
     MINDORO_PRIMARY_VALIDATION_TRACK_ID,
     MINDORO_PRIMARY_VALIDATION_TRACK_LABEL,
-    MINDORO_SHARED_IMAGERY_CAVEAT,
+    MINDORO_OBSERVATION_INDEPENDENCE_NOTE,
 )
 from src.services.phase3b_extended_public import EXTENDED_DIR_NAME
 from src.services.phase3b_multidate_public import _as_bool, _hash_file
@@ -73,7 +73,7 @@ TRACK_LABEL = "mindoro_phase3b_primary_public_validation_reinit"
 PHASE_OR_TRACK = MINDORO_PRIMARY_VALIDATION_PHASE_OR_TRACK
 REPORTING_ROLE = "canonical_phase3b_public_validation_source"
 START_SOURCE_GEOMETRY_LABEL = "accepted_march13_noaa_processed_polygon"
-NOAA_SOURCE_LIMITATION_NOTE = MINDORO_SHARED_IMAGERY_CAVEAT
+NOAA_SOURCE_LIMITATION_NOTE = MINDORO_OBSERVATION_INDEPENDENCE_NOTE
 PHASE3B_REINIT_OUTPUT_DIR_NAME_ENV = "PHASE3B_REINIT_OUTPUT_DIR_NAME"
 PHASE3B_REINIT_TRACK_OVERRIDE_ENV = "PHASE3B_REINIT_TRACK_OVERRIDE"
 PHASE3B_REINIT_TRACK_ID_OVERRIDE_ENV = "PHASE3B_REINIT_TRACK_ID_OVERRIDE"
@@ -1475,7 +1475,7 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
         elif self.is_canonical_bundle:
             lines.append(
                 "- Decision: At least one branch produced a scoreable March 14 p50 mask, so this bundle is usable as the canonical "
-                "Phase 3B public-validation source row when the shared-imagery caveat is kept explicit."
+                "Phase 3B public-validation source row with independent NOAA-published day-specific observation products."
             )
         else:
             lines.append(
@@ -1642,7 +1642,7 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
             "element_count_detected_from_manifest": _consensus_int(branch_actual_counts),
             "element_count_detected_from_manifest_by_branch": branch_actual_counts,
             "requested_element_count_by_branch": branch_requested_counts,
-            "shared_imagery_caveat_preserved": True,
+            "independent_noaa_observation_products_confirmed": True,
             "workflow_mode": self.case.workflow_mode,
             "run_name": self.case.run_name,
             "launcher_entry_ids": self._launcher_entry_ids(),
@@ -1674,7 +1674,7 @@ class Phase3BExtendedPublicScoredMarch1314ReinitService:
             "limitations": {
                 "appendix_only": self.appendix_only,
                 "noaa_source_limitation_note": NOAA_SOURCE_LIMITATION_NOTE,
-                "shared_imagery_caveat_prevents_independent_day_to_day_validation": True,
+                "independent_day_specific_public_observations": True,
                 "legacy_march6_outputs_preserved": True,
             },
             "recipe": {
@@ -1719,3 +1719,4 @@ def run_phase3b_extended_public_scored_march13_14_reinit() -> dict:
 if __name__ == "__main__":  # pragma: no cover
     result = run_phase3b_extended_public_scored_march13_14_reinit()
     print(json.dumps(result, indent=2, default=_json_default))
+

@@ -20,7 +20,7 @@ B1_BOUNDARY = "Only main Philippine public-observation validation claim"
                 "LAUNCHER HELP",
                 B1_ENTRY_ID,
                 "B1 is the only main Philippine public-observation validation claim",
-                "shared-imagery caveat",
+                "independent March 13 and March 14 NOAA public-observation products",
             ],
         ),
         (
@@ -29,7 +29,7 @@ B1_BOUNDARY = "Only main Philippine public-observation validation claim"
                 "CURRENT LAUNCHER CATALOG",
                 "Mindoro B1 primary public-validation rerun",
                 B1_BOUNDARY,
-                "shared-imagery caveat applies",
+                "independent NOAA-published day-specific observation products",
             ],
         ),
         (
@@ -38,7 +38,7 @@ B1_BOUNDARY = "Only main Philippine public-observation validation claim"
                 "Filtered thesis role: Primary evidence",
                 "Mindoro B1 primary public-validation rerun",
                 B1_BOUNDARY,
-                "shared-imagery caveat applies",
+                "independent NOAA-published day-specific observation products",
             ],
         ),
         (
@@ -47,7 +47,7 @@ B1_BOUNDARY = "Only main Philippine public-observation validation claim"
                 "ENTRY PREVIEW",
                 f"Entry ID: {B1_ENTRY_ID}",
                 f"Claim boundary: {B1_BOUNDARY}",
-                "shared-imagery caveat applies",
+                "independent NOAA-published day-specific observation products",
             ],
         ),
     ],

@@ -2,6 +2,9 @@ import unittest
 import tempfile
 from pathlib import Path
 import json
+import os
+from contextlib import contextmanager
+from shutil import rmtree
 
 import pandas as pd
 
@@ -21,6 +24,33 @@ from src.services.final_validation_package import (
     mean_fss,
 )
 from src.services.dwh_phase3c_metadata import DWH_BASE_CASE_CONFIG_PATH, DWH_PHASE3C_FINAL_NOTE_PATH
+
+
+def _path_for_io(path: Path) -> str:
+    path_text = str(path)
+    if os.name != "nt":
+        return path_text
+    absolute = str(path.resolve())
+    if absolute.startswith("\\\\?\\"):
+        return absolute
+    if absolute.startswith("\\\\"):
+        return "\\\\?\\UNC\\" + absolute.lstrip("\\")
+    return "\\\\?\\" + absolute
+
+
+def _write_fixture_text(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(_path_for_io(path), "w", encoding="utf-8") as handle:
+        handle.write(text)
+
+
+@contextmanager
+def _temporary_directory():
+    path = Path(tempfile.mkdtemp())
+    try:
+        yield str(path)
+    finally:
+        rmtree(_path_for_io(path), ignore_errors=True)
 
 
 class FinalValidationPackageTests(unittest.TestCase):
@@ -140,7 +170,7 @@ class FinalValidationPackageTests(unittest.TestCase):
                     "transport_model": "oceandrift",
                     "provisional_transport_model": True,
                     "track_tie_break_order": 1,
-                    "structural_limitations": "Shared-imagery caveat applies.",
+                    "structural_limitations": "Observation-independence note applies.",
                 },
                 {
                     "track_id": "pygnome_reinit_deterministic",
@@ -256,28 +286,24 @@ class FinalValidationPackageTests(unittest.TestCase):
         self.assertIn("comparator-only", str(c3_registry["track_label"]).lower())
 
     def test_build_mindoro_final_output_export_writes_nested_tree_and_registry(self):
-        with tempfile.TemporaryDirectory() as tmpdir:
+        with _temporary_directory() as tmpdir:
             root = Path(tmpdir)
             for exports in MINDORO_B1_PUBLICATION_EXPORTS.values():
                 for source in exports.values():
                     if source is None:
                         continue
                     path = root / source
-                    path.parent.mkdir(parents=True, exist_ok=True)
-                    path.write_text("png\n", encoding="utf-8")
+                    _write_fixture_text(path, "png\n")
             for exports in MINDORO_B1_SCIENTIFIC_SOURCE_EXPORTS.values():
                 for source in exports.values():
                     path = root / source
-                    path.parent.mkdir(parents=True, exist_ok=True)
-                    path.write_text("png\n", encoding="utf-8")
+                    _write_fixture_text(path, "png\n")
             for exports in MINDORO_B1_SUMMARY_EXPORTS.values():
                 for source in exports.values():
                     path = root / source
-                    path.parent.mkdir(parents=True, exist_ok=True)
-                    path.write_text("summary\n", encoding="utf-8")
+                    _write_fixture_text(path, "summary\n")
             target_mask = root / MINDORO_MARCH14_TARGET_MASK_PATH
-            target_mask.parent.mkdir(parents=True, exist_ok=True)
-            target_mask.write_text("tif\n", encoding="utf-8")
+            _write_fixture_text(target_mask, "tif\n")
 
             service = object.__new__(FinalValidationPackageService)
             service.repo_root = root
@@ -325,27 +351,23 @@ class FinalValidationPackageTests(unittest.TestCase):
             self.assertFalse((registry_df["surface_key"].astype(str) == "archive_only").any())
 
     def test_build_dwh_final_output_export_writes_curated_tree_and_registry(self):
-        with tempfile.TemporaryDirectory() as tmpdir:
+        with _temporary_directory() as tmpdir:
             root = Path(tmpdir)
             for exports in DWH_PUBLICATION_EXPORTS.values():
                 for source in exports.values():
                     path = root / source
-                    path.parent.mkdir(parents=True, exist_ok=True)
-                    path.write_text("png\n", encoding="utf-8")
+                    _write_fixture_text(path, "png\n")
             for exports in DWH_SCIENTIFIC_SOURCE_EXPORTS.values():
                 for source in exports.values():
                     path = root / source
-                    path.parent.mkdir(parents=True, exist_ok=True)
-                    path.write_text("png\n", encoding="utf-8")
+                    _write_fixture_text(path, "png\n")
             for exports in DWH_SUMMARY_EXPORTS.values():
                 for source in exports.values():
                     path = root / source
-                    path.parent.mkdir(parents=True, exist_ok=True)
-                    path.write_text("summary\n", encoding="utf-8")
+                    _write_fixture_text(path, "summary\n")
             for source in DWH_OBSERVATION_SOURCE_MASKS.values():
                 path = root / source
-                path.parent.mkdir(parents=True, exist_ok=True)
-                path.write_text("tif\n", encoding="utf-8")
+                _write_fixture_text(path, "tif\n")
 
             service = object.__new__(FinalValidationPackageService)
             service.repo_root = root

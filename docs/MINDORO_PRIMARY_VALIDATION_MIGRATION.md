@@ -37,7 +37,7 @@ The final validation package now carries these promotion/provenance fields for M
 - `case_freeze_amendment_path`
 - `base_case_definition_preserved`
 - `row_role`
-- `shared_imagery_caveat`
+- `observation_independence_note`
 
 The synced Phase 5 case registry now also carries:
 
@@ -55,5 +55,5 @@ The synced Phase 5 case registry now also carries:
 
 ## Claim Guardrail
 
-Both NOAA/NESDIS public products for the promoted March 13 -> March 14 pair cite WorldView-3 imagery acquired on `2023-03-12`.
-That means the promoted B1 row is a reinitialization-based public-validation pair with shared-imagery provenance, not an independent day-to-day validation pair.
+March 13 and March 14 are independent NOAA-published day-specific public-observation products.
+That means the promoted B1 row should be described as a reinitialization-based public-validation pair from the March 13 public seed observation to the March 14 public target observation.

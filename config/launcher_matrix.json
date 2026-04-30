@@ -135,13 +135,13 @@
       "category_id": "scientific_reportable_tracks",
       "workflow_mode": "mindoro_retro_2023",
       "label": "Mindoro B1 primary public-validation rerun",
-      "description": "Promoted March 13 -> March 14 R1 public-validation row with explicit shared-imagery caveat while preserving the frozen March 3 -> March 6 case definition and the repo-preserved archive-only March-family outputs.",
+      "description": "Promoted March 13 -> March 14 R1 public-validation row using independent March 13 and March 14 NOAA public-observation products while preserving the frozen March 3 -> March 6 case definition and the repo-preserved archive-only March-family outputs.",
       "service_profile": "pipeline_only",
       "rerun_cost": "expensive",
       "safe_default": false,
       "thesis_role": "primary_evidence",
       "draft_section": "Evidence 3 / Mindoro B1 / Chapter 4.2",
-      "claim_boundary": "Only main Philippine public-observation validation claim for Mindoro B1; shared-imagery caveat applies, so it is not an independent day-to-day pair.",
+      "claim_boundary": "Only main Philippine public-observation validation claim for Mindoro B1; March 13 and March 14 are independent NOAA-published day-specific observation products, and interpretation remains neighborhood-scale rather than exact 1 km overlap.",
       "run_kind": "scientific_rerun",
       "recommended_for": "researcher",
       "confirms_before_run": true,
@@ -519,6 +519,79 @@
       ]
     },
     {
+      "entry_id": "phase3b_mindoro_march3_4_philsa_5000_experiment",
+      "menu_order": 66.5,
+      "category_id": "sensitivity_appendix_tracks",
+      "workflow_mode": "mindoro_retro_2023",
+      "label": "Experimental Mindoro PhilSA March 3 -> March 4 5,000-element rerun",
+      "description": "Experimental PhilSA-only March 3 -> March 4 next-day public-observation validation test at 5,000 elements; archive/provenance only and not thesis-facing.",
+      "service_profile": "pipeline_only",
+      "rerun_cost": "expensive",
+      "safe_default": false,
+      "thesis_role": "archive_provenance",
+      "draft_section": "Experimental only / PhilSA March 3 -> March 4 candidate",
+      "claim_boundary": "Experimental PhilSA-only March 3 -> March 4 next-day test; does not replace canonical B1 and is not thesis-facing unless manually reviewed later.",
+      "run_kind": "archive_rerun",
+      "recommended_for": "developer",
+      "confirms_before_run": true,
+      "menu_hidden": true,
+      "reportable": false,
+      "thesis_facing": false,
+      "experimental_only": true,
+      "notes": "Experimental-only launcher entry. Uses PhilSA layers for both dates, writes only to output/CASE_MINDORO_RETRO_2023/phase3b_philsa_march3_4_5000_experiment, snapshots protected outputs before and after, hard-fails if detected element count is not 5,000, and does not overwrite canonical B1, final validation, publication, or reproducibility packages.",
+      "steps": [
+        {
+          "phase": "mindoro_march3_4_philsa_5000_experiment",
+          "service": "pipeline",
+          "description": "Run the separate PhilSA March 3 -> March 4 5,000-element experimental archive/provenance validation test"
+        }
+      ]
+    },
+    {
+      "entry_id": "mindoro_mar09_12_multisource_experiment",
+      "menu_order": 66.75,
+      "category_id": "sensitivity_appendix_tracks",
+      "workflow_mode": "mindoro_retro_2023",
+      "label": "Experimental Mindoro March 9-12 multi-source archive lane",
+      "description": "Archive-only March 9 -> March 11/12 and March 11 -> March 12 public-observation experiment using vector-first Terra MODIS, ICEYE, and WorldView-3 masks, with PyGNOME comparator-only finalization.",
+      "service_profile": "mixed_pipeline_and_gnome",
+      "rerun_cost": "expensive",
+      "safe_default": false,
+      "thesis_role": "archive_provenance",
+      "draft_section": "Experimental only / Mindoro March 9-12 multi-source archive provenance",
+      "claim_boundary": "Experimental multi-source March 9-12 lane only; does not replace B1, Track A, DWH, final validation, publication figures, or any thesis-facing validation claim.",
+      "run_kind": "archive_rerun",
+      "recommended_for": "researcher",
+      "confirms_before_run": true,
+      "menu_hidden": true,
+      "reportable": false,
+      "thesis_facing": false,
+      "experimental_only": true,
+      "notes": "Hidden experimental-only launcher entry. Writes only to output/CASE_MINDORO_RETRO_2023/experiments/mar09_11_12_multisource, resolves the adopted B1 forcing recipe from existing config/manifests without Phase 1 or drifter ingestion, stops with missing_forcing_manifest.json if March 9-12 local forcing is unavailable, downloads nothing unless ALLOW_MINIMAL_CASE_FORCING_FETCH=1 is explicitly set for the bounded March 8 evening to March 13 case window, and runs no model unless RUN_MINDORO_MAR09_12_MULTISOURCE_EXPERIMENT=1 is explicitly set. Caps OpenDrift/PyGNOME runs at 5,000 elements/particles, preserves individual March 12 source masks before union/dissolve, labels PyGNOME as comparator-only, snapshots protected outputs, and explicitly does not replace the current B1 thesis-facing validation claim.",
+      "steps": [
+        {
+          "phase": "mindoro_mar09_12_multisource_experiment_resolve_forcing_only",
+          "service": "pipeline",
+          "description": "Search local forcing stores, optionally stage valid aliases/subsets in the experiment forcing directory, and stop before any model run"
+        },
+        {
+          "phase": "mindoro_mar09_12_multisource_experiment_ingest_masks_only",
+          "service": "pipeline",
+          "description": "Ingest vector-first March 9/11/12 observation masks, preserve individual March 12 sources, build the March 12 union, and stop without forcing or model execution"
+        },
+        {
+          "phase": "mindoro_mar09_12_multisource_experiment",
+          "service": "pipeline",
+          "description": "Dry-run gate first; run OpenDrift deterministic and 50-member ensemble products only when RUN_MINDORO_MAR09_12_MULTISOURCE_EXPERIMENT=1 is set"
+        },
+        {
+          "phase": "mindoro_mar09_12_multisource_experiment_pygnome",
+          "service": "gnome",
+          "description": "Run comparator-only PyGNOME products and finalize the 12-row FSS scorecards, figures, manifests, and README"
+        }
+      ]
+    },
+    {
       "entry_id": "phase3b_mindoro_march13_14_reinit_5000_experiment",
       "menu_order": 67,
       "category_id": "sensitivity_appendix_tracks",
@@ -564,7 +637,7 @@
       "safe_default": false,
       "thesis_role": "primary_evidence",
       "draft_section": "Evidence 3 / Mindoro B1 / Chapter 4.2",
-      "claim_boundary": "Only main Philippine public-observation validation claim for Mindoro B1; shared-imagery caveat applies, so it is not an independent day-to-day pair.",
+      "claim_boundary": "Only main Philippine public-observation validation claim for Mindoro B1; March 13 and March 14 are independent NOAA-published day-specific observation products, and interpretation remains neighborhood-scale rather than exact 1 km overlap.",
       "run_kind": "scientific_rerun",
       "recommended_for": "developer",
       "confirms_before_run": true,

@@ -40,10 +40,10 @@ MINDORO_PHASE1_REGIONAL_REFERENCE_CANDIDATE_BASELINE_PATH = (
     Path("output") / "phase1_production_rerun" / "phase1_baseline_selection_candidate.yaml"
 )
 
-MINDORO_SHARED_IMAGERY_CAVEAT = (
-    "Both NOAA/NESDIS public products cite WorldView-3 imagery acquired on 2023-03-12, so the promoted "
-    "March 13 -> March 14 row is a reinitialization-based public-validation pair with shared-imagery "
-    "provenance rather than a fully independent day-to-day validation."
+MINDORO_OBSERVATION_INDEPENDENCE_NOTE = (
+    "March 13 and March 14 are independent NOAA-published day-specific public-observation products. "
+    "B1 uses the March 13 public seed observation and the March 14 public target observation, "
+    "with interpretation limited to neighborhood-scale usefulness rather than exact 1 km overlap."
 )
 
 MINDORO_PHASE1_CONFIRMATION_INTERPRETATION_TEMPLATE = (

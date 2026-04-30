@@ -24,11 +24,11 @@ This note locks the current Mindoro track semantics to the stored-output review 
 - `IoU = 0.0`; `Dice = 0.0`
 - Promote `R1_previous` because it survives and is scoreable, not because it is an exact-grid match
 
-## Shared-Imagery Rule
+## Observation Independence Rule
 
 - March 13-14 is a reinitialization-based public-observation validation check.
-- Both public products cite the same March 12 WorldView-3 imagery provenance.
-- Do not describe March 13-14 as independent day-to-day validation.
+- March 13 and March 14 are independent NOAA-published day-specific public-observation products.
+- Describe the row as a March 13 public seed observation to March 14 public target observation validation pair.
 
 ## Phase 1 Provenance Rule
 

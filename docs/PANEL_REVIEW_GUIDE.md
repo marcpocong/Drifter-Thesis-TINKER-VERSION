@@ -49,7 +49,7 @@ Panel mode is built to respect that order instead of flattening the repo into on
 
 - `B1` is the only main Philippine public-observation validation claim.
 - `B1` supports coastal-neighborhood usefulness, not exact 1 km overlap or universal operational accuracy.
-- March 13-14 keeps the shared-imagery caveat explicit.
+- March 13-14 keeps the observation-independence note explicit.
 - `Track A` is comparator-only support.
 - PyGNOME is comparator-only and never the observational scoring reference.
 - DWH is external transfer validation, not Mindoro recalibration.
@@ -187,11 +187,11 @@ That registry is read-only. It never downloads inputs, reruns workflows, rewrite
 - The March 13-14 `R0` branch is preserved for archive/provenance.
 - The other March-family rows remain useful context, but they are not replacements for `B1`.
 
-## 11. Why The Shared-Imagery Caveat Matters
+## 11. Why The Observation Independence Note Matters
 
-The March 13 and March 14 public products both cite March 12 WorldView-3 imagery.
+The March 13 and March 14 public products are independent NOAA-published day-specific public observations.
 
-That means the row is still useful, but it must be described honestly as a reinitialization-based public-observation validation pair rather than as independent day-to-day validation.
+That means the row can be described as an independent day-to-day observation pair, while still being clear that the model evaluation is a reinitialization-based public-observation validation from the March 13 seed to the March 14 target.
 
 ## 12. Which Commands Are Researcher / Audit Reruns
 

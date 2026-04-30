@@ -769,6 +769,14 @@ function Get-LauncherEntryExpectedOutputDirs {
             )
             break
         }
+        "phase3b_mindoro_march3_4_philsa_5000_experiment" {
+            @("output/CASE_MINDORO_RETRO_2023/phase3b_philsa_march3_4_5000_experiment")
+            break
+        }
+        "mindoro_mar09_12_multisource_experiment" {
+            @("output/CASE_MINDORO_RETRO_2023/experiments/mar09_11_12_multisource")
+            break
+        }
         "phase3b_mindoro_march13_14_reinit_5000_experiment" {
             @(
                 "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_5000_experiment",
@@ -2898,7 +2906,7 @@ function Show-Help {
     Write-Host "  - Panel mode is the defense-safe default. The full launcher is for researcher/audit use." -ForegroundColor White
     Write-Host "  - Panel mode and read-only entries do not rerun science." -ForegroundColor White
     Write-Host "  - Use launcher entry IDs and role groups as the user-facing startup vocabulary. Raw phase names are secondary implementation details." -ForegroundColor White
-    Write-Host "  - B1 is the only main Philippine public-observation validation claim, and the March 13 -> March 14 pair keeps the shared-imagery caveat explicit." -ForegroundColor White
+    Write-Host "  - B1 is the only main Philippine public-observation validation claim, using independent March 13 and March 14 NOAA public-observation products." -ForegroundColor White
     Write-Host "  - Track A and every PyGNOME branch remain comparator-only support, never observational truth." -ForegroundColor White
     Write-Host "  - DWH is a separate external transfer-validation story, not Mindoro recalibration." -ForegroundColor White
     Write-Host "  - Mindoro Phase 4 oil-type and shoreline outputs remain support/context only." -ForegroundColor White

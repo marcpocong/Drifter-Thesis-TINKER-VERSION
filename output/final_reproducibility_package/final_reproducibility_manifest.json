@@ -36,7 +36,7 @@
     "legacy_row_retained": "B2",
     "thesis_phase_title": "Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents",
     "thesis_phase_subtitle": "Mindoro March 13 -> March 14 public spill-extent reinitialization validation",
-    "shared_imagery_caveat": "Both NOAA/NESDIS public products cite WorldView-3 imagery acquired on 2023-03-12, so the promoted March 13 -> March 14 row is a reinitialization-based public-validation pair with shared-imagery provenance rather than a fully independent day-to-day validation.",
+    "observation_independence_note": "March 13 and March 14 are independent NOAA-published day-specific public-observation products. B1 uses the March 13 public seed observation and the March 14 public target observation, with interpretation limited to neighborhood-scale usefulness rather than exact 1 km overlap.",
     "dual_provenance_confirmation": {
       "stored_run_recipe_source_path": "config/phase1_baseline_selection.yaml",
       "stored_run_selected_recipe": "cmems_gfs",
@@ -141,7 +141,7 @@
       "scientifically_reportable": true,
       "scientifically_frozen": false,
       "inherited_provisional": true,
-      "main_blocker": "Comparator-only track with a shared-imagery caveat; upstream Mindoro transport baseline is still not frozen.",
+      "main_blocker": "Comparator-only track with an observation-independence note; upstream Mindoro transport baseline is still not frozen.",
       "reportable_now": true,
       "reportability_scope": "comparative_benchmark_discussion",
       "summary": "Same-case Track A comparator-only support attached to the March 13 -> March 14 R1 primary validation row. fss_1km=0.0000, fss_3km=0.0441, fss_5km=0.1371, fss_10km=0.2490",

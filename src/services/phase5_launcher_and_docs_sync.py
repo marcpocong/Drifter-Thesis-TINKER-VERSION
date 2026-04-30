@@ -1,4 +1,4 @@
-"""Phase 5 reproducibility, launcher, documentation, and packaging sync."""
+﻿"""Phase 5 reproducibility, launcher, documentation, and packaging sync."""
 
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ from src.services.mindoro_primary_validation_metadata import (
     MINDORO_PRIMARY_VALIDATION_LAUNCHER_ALIAS_ENTRY_ID,
     MINDORO_PRIMARY_VALIDATION_LAUNCHER_ENTRY_ID,
     MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE,
-    MINDORO_SHARED_IMAGERY_CAVEAT,
+    MINDORO_OBSERVATION_INDEPENDENCE_NOTE,
 )
 from src.services.dwh_phase3c_metadata import (
     DWH_BASE_CASE_CONFIG_PATH,
@@ -139,9 +139,9 @@ def _write_csv(path: Path, rows: list[dict[str, Any]], columns: list[str] | None
 
 def _relative_to_repo(repo_root: Path, path: Path) -> str:
     try:
-        return str(path.resolve().relative_to(repo_root.resolve()))
+        return path.resolve().relative_to(repo_root.resolve()).as_posix()
     except Exception:
-        return str(path)
+        return Path(path).as_posix()
 
 
 def _resolve_repo_path(repo_root: Path, value: str | Path) -> Path:
@@ -648,7 +648,7 @@ class Phase5LauncherAndDocsSyncService:
                 "scientifically_reportable": True,
                 "scientifically_frozen": False,
                 "inherited_provisional": True,
-                "main_blocker": "Comparator-only track with a shared-imagery caveat; upstream Mindoro transport baseline is still not frozen.",
+                "main_blocker": "Comparator-only track using independent NOAA-published day-specific observations; upstream Mindoro transport baseline is still not frozen.",
                 "reportable_now": True,
                 "reportability_scope": "comparative_benchmark_discussion",
                 "summary": _headline_note(
@@ -665,7 +665,7 @@ class Phase5LauncherAndDocsSyncService:
                 "scientifically_reportable": True,
                 "scientifically_frozen": False,
                 "inherited_provisional": True,
-                "main_blocker": mindoro_upstream_blocker or "Primary validation remains inherited-provisional from upstream transport state and carries a shared-imagery caveat.",
+                "main_blocker": mindoro_upstream_blocker or "Primary validation remains inherited-provisional from upstream transport state while using independent NOAA-published day-specific observations.",
                 "reportable_now": True,
                 "reportability_scope": "main_text_primary_validation",
                 "summary": _headline_note(
@@ -1076,7 +1076,7 @@ class Phase5LauncherAndDocsSyncService:
             "- No scientific score tables were recomputed here.",
             "- No finished Mindoro or DWH scientific outputs were overwritten.",
             "- The March 3 -> March 6 Mindoro base case YAML remains frozen; the promoted March 13 -> March 14 row is recorded as an amendment rather than a silent rewrite.",
-            f"- `{MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE}` remains tied to B1, and {MINDORO_SHARED_IMAGERY_CAVEAT.lower()}",
+            f"- `{MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE}` remains tied to B1, and {MINDORO_OBSERVATION_INDEPENDENCE_NOTE.lower()}",
             f"- DWH Phase 3C remains a separate external transfer-validation lane under `{DWH_BASE_CASE_CONFIG_PATH.as_posix()}` with forcing fixed to `{DWH_PHASE3C_FORCING_STACK}` and no thesis-facing drifter baseline.",
             "- The separate focused 2016-2023 Mindoro drifter rerun now supplies the active B1 recipe-provenance story, not the raw generation history of the stored March 13 -> March 14 science bundle.",
             f"- The legacy `prototype_2016` lane is framed as Phase 1 / 2 / 3A / 4 / 5 support, with its dedicated curated package rooted at `{PROTOTYPE_2016_FINAL_OUTPUT_DIR.as_posix()}`; it has no thesis-facing Phase 3B or Phase 3C.",
@@ -1313,7 +1313,7 @@ class Phase5LauncherAndDocsSyncService:
                 "legacy_row_retained": "B2",
                 "thesis_phase_title": _coerce_text(promotion.get("thesis_phase_title")) or MINDORO_PRIMARY_VALIDATION_THESIS_PHASE_TITLE,
                 "thesis_phase_subtitle": _coerce_text(promotion.get("thesis_phase_subtitle")),
-                "shared_imagery_caveat": _coerce_text(promotion.get("shared_imagery_caveat")) or MINDORO_SHARED_IMAGERY_CAVEAT,
+                "observation_independence_note": _coerce_text(promotion.get("observation_independence_note")) or MINDORO_OBSERVATION_INDEPENDENCE_NOTE,
                 "dual_provenance_confirmation": promotion.get("dual_provenance_confirmation") or {},
                 "final_output_export_dir": _coerce_text(promotion.get("final_output_export_dir"))
                 or _coerce_text(self.final_validation_manifest.get("phase3b_march13_14_final_output", {}).get("output_dir")),
@@ -1529,3 +1529,4 @@ def run_phase5_launcher_and_docs_sync(
     output_dir: str | Path | None = None,
 ) -> dict[str, Any]:
     return Phase5LauncherAndDocsSyncService(repo_root=repo_root, output_dir=output_dir).run()
+

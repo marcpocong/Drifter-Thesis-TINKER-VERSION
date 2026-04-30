@@ -122,20 +122,19 @@ STATUS_REGISTRY: dict[str, ArtifactStatus] = {
         official_status="promoted_primary_validation",
         frozen_status="not_frozen",
         provenance_label=(
-            "March 13 seed, March 14 target, explicit shared March 12 imagery caveat, active "
+            "March 13 public seed observation and March 14 public target observation, active "
             "Mindoro-specific recipe provenance from the separate focused 2016-2023 drifter rerun, "
             "and the preserved raw scientific note that the stored promoted B1 run remains tied to "
-            "the existing R1_previous reinit lineage. This March 13 -> March 14 R1 label refers to "
-            "the Phase 3B validation branch, not to the Phase 1 recipe-code family."
+            "the existing R1_previous reinit lineage."
         ),
         panel_text=(
-            "Main Mindoro B1 Phase 3B observation-based spatial validation view. This page will use the "
-            "March 13 -> March 14 R1 primary validation row only. Phase 3B itself does not directly ingest "
+            "Main Mindoro B1 observation-based spatial validation view. This page will use the "
+            "March 13 -> March 14 R1 primary validation row only. This validation layer does not directly ingest "
             "drifters; it inherits the official cmems_gfs B1 recipe from the separate focused 2016-2023 "
             "Mindoro drifter rerun after that four-recipe rerun found cmems_gfs as the historical winner "
             "and promoted it directly into official B1, while the broader 2016-2022 regional rerun stays "
             "reference-only. The stored promoted B1 run remains tied to the existing R1_previous reinit "
-            "lineage. Keep the shared March 12 imagery caveat explicit."
+            "lineage. Treat March 13 and March 14 as independent NOAA-published day-specific observation products."
         ),
         dashboard_summary=(
             "March 13 -> March 14 R1 primary validation row only; the focused 2016-2023 Mindoro drifter "
@@ -152,18 +151,20 @@ STATUS_REGISTRY: dict[str, ArtifactStatus] = {
         official_status="comparator_only_not_truth",
         frozen_status="not_frozen",
         provenance_label=(
-            "Same March 14 target as the March 13 -> March 14 R1 primary validation row; same-case Track A "
-            "comparator support remains separate from truth and PyGNOME remains comparator-only."
+            "March 13 is the independent public seed observation and March 14 is the independent public "
+            "target observation for the same-case Track A comparator support; PyGNOME remains comparator-only "
+            "and separate from truth."
         ),
         panel_text=(
             "Same-case Track A comparator support attached to the March 13 -> March 14 R1 primary validation "
-            "row on the March 14 target. PyGNOME is a comparator, not truth, and Track A is not a co-primary "
-            "validation row. Archived March 13 -> March 14 R0 comparator outputs are not part of this thesis-"
-            "facing view."
+            "row, using March 13 as the independent public seed observation and March 14 as the independent "
+            "public target observation. PyGNOME is a comparator, not truth, and Track A is not a co-primary "
+            "validation row. Archived March 13 -> March 14 R0 comparator outputs are not part of this "
+            "thesis-facing view."
         ),
         dashboard_summary=(
             "Same-case Track A comparator-only support attached to the March 13 -> March 14 R1 primary "
-            "validation row."
+            "validation row with independent March 13 seed and March 14 target observations."
         ),
     ),
     "mindoro_b1_r0_archive": ArtifactStatus(

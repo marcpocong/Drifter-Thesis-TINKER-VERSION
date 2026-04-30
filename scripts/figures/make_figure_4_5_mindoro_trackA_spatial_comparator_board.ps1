@@ -193,7 +193,7 @@ function Draw-LegendItem {
         [Parameter(Mandatory = $true)]
         [int]$Y,
         [Parameter(Mandatory = $true)]
-        [ValidateSet("obs", "opendrift", "pygnome", "seed", "source")]
+        [ValidateSet("obs", "opendrift", "pygnome", "seed")]
         [string]$Kind,
         [Parameter(Mandatory = $true)]
         [string]$Label,
@@ -231,11 +231,6 @@ function Draw-LegendItem {
             $pen.DashStyle = [System.Drawing.Drawing2D.DashStyle]::Dash
             $Graphics.DrawRectangle($pen, $X, $Y, 36, 22)
             $pen.Dispose()
-        }
-        "source" {
-            $fill = [System.Drawing.SolidBrush]::new([System.Drawing.Color]::FromArgb(187, 37, 25))
-            $Graphics.FillEllipse($fill, $X + 7, $Y + 1, 22, 22)
-            $fill.Dispose()
         }
     }
 
@@ -326,7 +321,7 @@ $secondaryManifestPath = Join-Path $secondaryOutputDir "$outputStem.json"
 $sourceBoard = [System.Drawing.Bitmap]::FromFile($sourceBoardPath)
 $topCropHeight = 1380
 $axisBandHeight = 86
-$bottomBandHeight = 450
+$bottomBandHeight = 360
 $canvasWidth = $sourceBoard.Width
 $canvasHeight = $topCropHeight + $axisBandHeight + $bottomBandHeight
 
@@ -345,7 +340,6 @@ $graphics.DrawImage(
 )
 
 $figureLabelFont = [System.Drawing.Font]::new("Times New Roman", 30, [System.Drawing.FontStyle]::Bold)
-$badgeFont = [System.Drawing.Font]::new("Times New Roman", 22, [System.Drawing.FontStyle]::Bold)
 $headerFont = [System.Drawing.Font]::new("Times New Roman", 28, [System.Drawing.FontStyle]::Bold)
 $bodyFont = [System.Drawing.Font]::new("Times New Roman", 19)
 $axisFont = [System.Drawing.Font]::new("Times New Roman", 22)
@@ -353,25 +347,10 @@ $axisFont = [System.Drawing.Font]::new("Times New Roman", 22)
 $darkBrush = [System.Drawing.SolidBrush]::new([System.Drawing.Color]::FromArgb(28, 37, 58))
 $mutedBrush = [System.Drawing.SolidBrush]::new([System.Drawing.Color]::FromArgb(61, 76, 99))
 $panelFillBrush = [System.Drawing.SolidBrush]::new([System.Drawing.Color]::FromArgb(252, 253, 255))
-$badgeFillBrush = [System.Drawing.SolidBrush]::new([System.Drawing.Color]::FromArgb(246, 249, 253))
 $dividerPen = [System.Drawing.Pen]::new([System.Drawing.Color]::FromArgb(210, 218, 229), 2)
 $boxPen = [System.Drawing.Pen]::new([System.Drawing.Color]::FromArgb(173, 186, 204), 2)
 
 $graphics.DrawString("Figure 4.5", $figureLabelFont, $mutedBrush, [single]144, [single]14)
-
-$badgeX = 2140
-$badgeY = 88
-$badgeWidth = 1225
-$badgeHeight = 94
-$graphics.FillRectangle($badgeFillBrush, $badgeX, $badgeY, $badgeWidth, $badgeHeight)
-$graphics.DrawRectangle($boxPen, $badgeX, $badgeY, $badgeWidth, $badgeHeight)
-$badgeTextRect = [System.Drawing.RectangleF]::new([single]($badgeX + 18), [single]($badgeY + 14), [single]($badgeWidth - 36), [single]($badgeHeight - 28))
-$graphics.DrawString(
-    "Comparator support only; PyGNOME is not the observational scoring reference.",
-    $badgeFont,
-    $darkBrush,
-    $badgeTextRect
-)
 
 $dividerY = $topCropHeight + 16
 $graphics.DrawLine($dividerPen, 120, $dividerY, $canvasWidth - 120, $dividerY)
@@ -385,29 +364,23 @@ Draw-TextCentered `
 
 $bottomY = $topCropHeight + $axisBandHeight
 $legendX = 110
-$legendWidth = 900
-$scoreX = 1075
-$scoreWidth = 1325
-$noteX = 2485
-$noteWidth = 925
-$boxHeight = 398
+$legendWidth = 1160
+$scoreX = 1350
+$scoreWidth = 2025
+$boxHeight = 304
 
 $graphics.FillRectangle($panelFillBrush, $legendX, $bottomY + 18, $legendWidth, $boxHeight)
 $graphics.DrawRectangle($boxPen, $legendX, $bottomY + 18, $legendWidth, $boxHeight)
 $graphics.FillRectangle($panelFillBrush, $scoreX, $bottomY + 18, $scoreWidth, $boxHeight)
 $graphics.DrawRectangle($boxPen, $scoreX, $bottomY + 18, $scoreWidth, $boxHeight)
-$graphics.FillRectangle($panelFillBrush, $noteX, $bottomY + 18, $noteWidth, $boxHeight)
-$graphics.DrawRectangle($boxPen, $noteX, $bottomY + 18, $noteWidth, $boxHeight)
 
 $graphics.DrawString("Legend", $headerFont, $darkBrush, [single]($legendX + 18), [single]($bottomY + 28))
 $graphics.DrawString("Table 4.9 values shown", $headerFont, $darkBrush, [single]($scoreX + 18), [single]($bottomY + 28))
-$graphics.DrawString("Interpretation", $headerFont, $darkBrush, [single]($noteX + 18), [single]($bottomY + 28))
 
-Draw-LegendItem -Graphics $graphics -X ($legendX + 24) -Y ($bottomY + 88) -Kind "obs" -Label "March 14 public mask/reference" -Font $bodyFont
-Draw-LegendItem -Graphics $graphics -X ($legendX + 24) -Y ($bottomY + 152) -Kind "opendrift" -Label "OpenDrift R1_previous footprint (mask_p50)" -Font $bodyFont
-Draw-LegendItem -Graphics $graphics -X ($legendX + 24) -Y ($bottomY + 216) -Kind "pygnome" -Label "PyGNOME deterministic footprint" -Font $bodyFont
-Draw-LegendItem -Graphics $graphics -X ($legendX + 24) -Y ($bottomY + 280) -Kind "seed" -Label "March 13 seed polygon context" -Font $bodyFont
-Draw-LegendItem -Graphics $graphics -X ($legendX + 24) -Y ($bottomY + 344) -Kind "source" -Label "Source point" -Font $bodyFont
+Draw-LegendItem -Graphics $graphics -X ($legendX + 24) -Y ($bottomY + 88) -Kind "obs" -Label "March 14 independent public target observation" -Font $bodyFont
+Draw-LegendItem -Graphics $graphics -X ($legendX + 24) -Y ($bottomY + 154) -Kind "opendrift" -Label "OpenDrift R1_previous footprint (mask_p50)" -Font $bodyFont
+Draw-LegendItem -Graphics $graphics -X ($legendX + 24) -Y ($bottomY + 220) -Kind "pygnome" -Label "PyGNOME deterministic footprint" -Font $bodyFont
+Draw-LegendItem -Graphics $graphics -X ($legendX + 24) -Y ($bottomY + 286) -Kind "seed" -Label "March 13 independent public seed observation" -Font $bodyFont
 
 $openDriftScoreText = Format-MetricBlock -Label "OpenDrift R1_previous" -Metrics $openDriftMetrics
 $pygnomeScoreText = Format-MetricBlock -Label "PyGNOME deterministic" -Metrics $pygnomeMetrics
@@ -422,21 +395,11 @@ $scoreFormat.LineAlignment = [System.Drawing.StringAlignment]::Near
 $graphics.DrawString($openDriftScoreText, $bodyFont, [System.Drawing.Brushes]::Black, $scoreLeftRect, $scoreFormat)
 $graphics.DrawString($pygnomeScoreText, $bodyFont, [System.Drawing.Brushes]::Black, $scoreRightRect, $scoreFormat)
 
-$noteText = @(
-    "March 14 public observation mask remains the only external spatial reference."
-    ""
-    "OpenDrift R1_previous lies much closer to the March 14 mask than deterministic PyGNOME, consistent with the stored nearest-distance and FSS diagnostics."
-    ""
-    "FSS 1 km remains 0.0000 for both footprints, so exact 1 km overlap is absent."
-) -join [Environment]::NewLine
-$noteTextRect = [System.Drawing.RectangleF]::new([single]($noteX + 20), [single]($bottomY + 76), [single]($noteWidth - 40), [single]($boxHeight - 90))
-$graphics.DrawString($noteText, $bodyFont, [System.Drawing.Brushes]::Black, $noteTextRect, $scoreFormat)
-
 $canvas.SetResolution(300.0, 300.0)
 $canvas.Save($primaryPngPath, [System.Drawing.Imaging.ImageFormat]::Png)
 Copy-Item -LiteralPath $primaryPngPath -Destination $secondaryPngPath -Force
 
-$noteTextManifest = "Comparator support only; PyGNOME is not the observational scoring reference."
+$noteTextManifest = "Comparator support only; March 13 is the public seed observation, March 14 is the public target observation, and PyGNOME is not the observational scoring reference."
 $manifest = [ordered]@{
     figure_label = "Figure 4.5"
     title = "Mindoro Track A same-case OpenDrift-PyGNOME spatial comparator board"
@@ -489,14 +452,12 @@ Copy-Item -LiteralPath $primaryManifestPath -Destination $secondaryManifestPath 
 
 $scoreFormat.Dispose()
 $figureLabelFont.Dispose()
-$badgeFont.Dispose()
 $headerFont.Dispose()
 $bodyFont.Dispose()
 $axisFont.Dispose()
 $darkBrush.Dispose()
 $mutedBrush.Dispose()
 $panelFillBrush.Dispose()
-$badgeFillBrush.Dispose()
 $dividerPen.Dispose()
 $boxPen.Dispose()
 $graphics.Dispose()

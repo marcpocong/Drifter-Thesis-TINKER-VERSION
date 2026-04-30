@@ -80,7 +80,7 @@ Use launcher entry IDs and panel options as the user-facing startup vocabulary; 
 
 - `B1` is promoted because `R1_previous` survives to the target date and is scoreable, not because it is an exact-grid match.
 - March 13-14 is a reinitialization-based public-observation validation check.
-- Both public products cite the same March 12 WorldView-3 imagery provenance, so do not call the pair independent day-to-day validation.
+- March 13 and March 14 are independent NOAA-published day-specific public-observation products.
 - `Track A` and every PyGNOME branch remain comparator-only support.
 - DWH is external transfer validation, not Mindoro recalibration.
 - Mindoro oil-type and shoreline outputs are support/context only.

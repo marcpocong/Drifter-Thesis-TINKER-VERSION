@@ -1,6 +1,6 @@
 # Final Validation Claims Guardrails
 
-- Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents is represented by Mindoro B1, the March 13 -> March 14 NOAA reinit validation, and it should be described with the explicit March 12 WorldView-3 caveat.
+- Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents is represented by Mindoro B1, the March 13 -> March 14 NOAA reinit validation, using independent NOAA-published day-specific observation products.
 - Mindoro A is the same-case March 13 -> March 14 comparator-support track attached to B1. It is never truth and never a co-primary validation row.
 - The separate focused 2016-2023 Mindoro drifter rerun selected `cmems_gfs` as the active B1 recipe provenance. It does not replace the original B1 raw provenance.
 - The broader 2016-2022 regional rerun is preserved as a reference/governance lane and is not the active provenance for B1.

@@ -419,11 +419,15 @@ class FigurePackagePublicationTests(unittest.TestCase):
             )
             self.assertIn("March 13 -> March 14", specs["mindoro_primary_board"]["figure_title"])
             self.assertIn(
-                "Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents",
+                "primary validation with independent NOAA-published day-specific observations",
                 specs["mindoro_primary_seed_mask"]["subtitle"],
             )
+            self.assertNotIn("source_point", specs["mindoro_primary_seed_mask"]["legend_keys"])
+            self.assertFalse(bool(specs["mindoro_primary_r1_overlay"]["show_source"]))
+            self.assertNotIn("source_point", specs["mindoro_primary_r1_overlay"]["legend_keys"])
+            self.assertNotIn("source_point", specs["mindoro_crossmodel_r1_overlay"]["legend_keys"])
             self.assertIn("sparse-reference", specs["mindoro_legacy_board"]["short_plain_language_interpretation"])
-            self.assertIn("observed masks, ensemble forecast, and PyGNOME", specs["mindoro_observed_masks_ensemble_pygnome_board"]["figure_title"])
+            self.assertIn("observed masks and comparator board", specs["mindoro_observed_masks_ensemble_pygnome_board"]["figure_title"])
             self.assertIn(
                 "Mindoro March 13-14 observed masks, ensemble forecast, and PyGNOME overlay",
                 specs["mindoro_observed_masks_ensemble_pygnome_overlay"]["figure_title"],
@@ -472,7 +476,7 @@ class FigurePackagePublicationTests(unittest.TestCase):
             try:
                 legend = service._add_legend(
                     ax,
-                    ["observed_mask", "ensemble_p50", "initialization_polygon", "source_point"],
+                    ["observed_mask", "ensemble_p50", "initialization_polygon"],
                     compact=True,
                     label_overrides=service._board_legend_label_overrides(specs["mindoro_primary_board"]),
                 )
@@ -753,9 +757,12 @@ class FigurePackagePublicationTests(unittest.TestCase):
             crossmodel_board = _find_spec(boards, "mindoro_crossmodel_board")
             observed_masks_board = _find_spec(boards, "mindoro_observed_masks_ensemble_pygnome_board")
 
-            self.assertEqual(primary_board["board_layout_overrides"]["outer_top"], 0.855)
-            self.assertEqual(crossmodel_board["board_layout_overrides"]["outer_top"], 0.855)
-            self.assertEqual(observed_masks_board["board_layout_overrides"]["outer_top"], 0.855)
+            self.assertEqual(primary_board["board_layout_overrides"]["outer_top"], 0.89)
+            self.assertEqual(crossmodel_board["board_layout_overrides"]["outer_top"], 0.89)
+            self.assertEqual(observed_masks_board["board_layout_overrides"]["outer_top"], 0.82)
+            self.assertEqual(observed_masks_board["board_layout_overrides"]["panel_grid_hspace"], 0.24)
+            self.assertTrue(primary_board["compact_board_layout"])
+            self.assertEqual(primary_board["guide_heading"], "Scorecard")
 
     def test_service_writes_registry_manifest_and_records_missing_optional_inputs(self):
         with tempfile.TemporaryDirectory() as tmpdir:

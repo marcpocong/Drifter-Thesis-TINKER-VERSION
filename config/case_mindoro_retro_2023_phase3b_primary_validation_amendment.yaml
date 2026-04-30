@@ -25,11 +25,11 @@ promotion:
   validation_branch_disambiguation_note: >
     March 13 -> March 14 R1 here refers to the Phase 3B validation branch, not
     to the separate Phase 1 recipe-code family.
-  shared_imagery_caveat: >
-    Both NOAA/NESDIS public products cite WorldView-3 imagery acquired on
-    2023-03-12, so the promoted March 13 -> March 14 row is a reinitialization-based
-    public-validation pair with shared-imagery provenance rather than a fully
-    independent day-to-day validation.
+  observation_independence_note: >
+    March 13 and March 14 are independent NOAA-published day-specific
+    public-observation products. The promoted March 13 -> March 14 row uses
+    March 13 as the public seed observation and March 14 as the public target
+    observation.
 
 legacy_retention:
   legacy_honesty_track_id: B2
@@ -56,7 +56,7 @@ legacy_retention:
 guardrails:
   mutate_base_case_definition: false
   pygnome_role: comparator_only
-  independent_day_to_day_validation_claim_allowed: false
+  independent_day_to_day_observation_claim_allowed: true
   preserve_march6_outputs: true
   preserve_march3_6_support_outputs: true
 

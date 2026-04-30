@@ -57,9 +57,9 @@
   "limitations": {
     "appendix_only": false,
     "comparator_only": true,
-    "noaa_source_limitation_note": "Both NOAA/NESDIS public products cite WorldView-3 imagery acquired on 2023-03-12, so the promoted March 13 -> March 14 row is a reinitialization-based public-validation pair with shared-imagery provenance rather than a fully independent day-to-day validation.",
-    "shared_imagery_caveat_prevents_independent_day_to_day_validation": true,
-    "pygnome_structural_mismatch": "PyGNOME deterministic comparator does not reproduce the exact OpenDrift gridded current/wave/Stokes stack."
+    "noaa_source_limitation_note": "March 13 and March 14 are independent NOAA-published day-specific public-observation products. B1 uses the March 13 public seed observation and the March 14 public target observation, with interpretation limited to neighborhood-scale usefulness rather than exact 1 km overlap.",
+    "pygnome_structural_mismatch": "PyGNOME deterministic comparator does not reproduce the exact OpenDrift gridded current/wave/Stokes stack.",
+    "independent_day_specific_public_observations": true
   },
   "upstream_reinit": {
     "reinit_summary_csv": "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_summary.csv",

@@ -24,7 +24,7 @@ paper_output_registry:
     packaging_role: "read_only_packaging"
     notes:
       - "This output is read-only packaging over stored branch diagnostics."
-      - "The March 13 -> March 14 pair carries the shared-imagery caveat."
+      - "March 13 and March 14 are independent NOAA-published day-specific observation products."
 
   - manuscript_item: "Table 4.7"
     item_type: "table"
@@ -51,6 +51,42 @@ paper_output_registry:
     notes:
       - "This figure is rebuilt from stored outputs only."
       - "This is the thesis-facing B1 board."
+
+  - manuscript_item: "Figure 4.4A"
+    item_type: "figure"
+    thesis_facing: true
+    interpretation_role: "NOAA March 13 public-observation support map"
+    plain_language_statement: "NOAA-published March 13 WorldView-3 analysis map."
+    stored_source_paths:
+      - "output/figure_package_publication/figure_4_4A_noaa_mar13_worldview3.png"
+      - "output/figure_package_publication/publication_figure_registry.csv"
+    packaging_role: "read_only_support_reference"
+    notes:
+      - "March 13 is the public seed observation for B1."
+
+  - manuscript_item: "Figure 4.4B"
+    item_type: "figure"
+    thesis_facing: true
+    interpretation_role: "NOAA March 14 public-observation support map"
+    plain_language_statement: "NOAA-published March 14 WorldView-3 analysis map."
+    stored_source_paths:
+      - "output/figure_package_publication/figure_4_4B_noaa_mar14_worldview3.png"
+      - "output/figure_package_publication/publication_figure_registry.csv"
+    packaging_role: "read_only_support_reference"
+    notes:
+      - "March 14 is the public target observation for B1."
+
+  - manuscript_item: "Figure 4.4C"
+    item_type: "figure"
+    thesis_facing: true
+    interpretation_role: "ArcGIS March 13 and March 14 observed-extent overlay"
+    plain_language_statement: "ArcGIS overlay of March 13 and March 14 observed oil-spill extents."
+    stored_source_paths:
+      - "output/figure_package_publication/figure_4_4C_arcgis_mar13_mar14_observed_overlay.png"
+      - "output/figure_package_publication/publication_figure_registry.csv"
+    packaging_role: "read_only_support_reference"
+    notes:
+      - "March 13 is shown in blue and March 14 is shown in gray/black."
 
   - manuscript_item: "Table 4.9"
     item_type: "table"

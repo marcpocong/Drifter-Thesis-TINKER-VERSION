@@ -89,7 +89,7 @@ Keep these claims stable across page text, labels, captions, and export views:
 - Focused Mindoro Phase 1 is transport provenance / recipe selection, not oil-footprint truth.
 - Mindoro B1 is the only main Philippine public-observation validation claim.
 - B1 supports coastal-neighborhood usefulness, not exact 1 km overlap.
-- The March 13–14 B1 case keeps the shared-imagery / reinitialization caveat visible.
+- The March 13-14 B1 case keeps the observation-independence / reinitialization note visible.
 - Mindoro Track A and PyGNOME are comparator-only support.
 - DWH is external transfer validation; it does not recalibrate Mindoro.
 - Mindoro oil-type and shoreline outputs are support/context only.

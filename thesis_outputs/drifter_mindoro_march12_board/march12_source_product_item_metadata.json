@@ -1,0 +1,68 @@
+{
+  "id": "8ed68b6d973746ae86f40721a761f114",
+  "owner": "jrsales@wwf.org.ph_panda",
+  "orgId": "RTK5Unh1Z71JKIiR",
+  "created": 1678753129000,
+  "modified": 1723225288000,
+  "guid": null,
+  "name": null,
+  "title": "MindoroOilSpill_NOAA_230312",
+  "type": "Feature Service",
+  "typeKeywords": [
+    "ArcGIS Server",
+    "Data",
+    "Feature Access",
+    "Feature Service",
+    "Metadata",
+    "Service",
+    "Singlelayer",
+    "Hosted Service"
+  ],
+  "description": null,
+  "tags": [
+    "Mindoro Oil Spill"
+  ],
+  "snippet": "Marine Pollution Surveilance Report by The National Oceanic and Atmospheric Administration, Satellite and Information Service (NOAA/NESDIS) https://disasterscharter.org/web/guest/activations/-/article/oil-spill-in-philippines-activation-807-",
+  "thumbnail": "thumbnail/ago_downloaded.png",
+  "documentation": null,
+  "extent": [
+    [
+      121.44918872400001,
+      13.142979256000043
+    ],
+    [
+      121.52926377200002,
+      13.323827699000073
+    ]
+  ],
+  "categories": [],
+  "spatialReference": "102100",
+  "accessInformation": null,
+  "classification": null,
+  "licenseInfo": null,
+  "culture": "en-us",
+  "properties": null,
+  "advancedSettings": null,
+  "url": "https://services1.arcgis.com/RTK5Unh1Z71JKIiR/arcgis/rest/services/MindoroOilSpill_NOAA_230312/FeatureServer",
+  "proxyFilter": null,
+  "access": "public",
+  "size": 90112,
+  "subInfo": 0,
+  "appCategories": [],
+  "industries": [],
+  "languages": [],
+  "largeThumbnail": null,
+  "banner": null,
+  "screenshots": [],
+  "listed": false,
+  "commentsEnabled": true,
+  "numComments": 0,
+  "numRatings": 0,
+  "avgRating": 0,
+  "numViews": 1464,
+  "scoreCompleteness": 50,
+  "groupDesignations": null,
+  "apiToken1ExpirationDate": -1,
+  "apiToken2ExpirationDate": -1,
+  "lastViewed": 1777525200000
+}
