@@ -1,0 +1,1432 @@
+{
+  "manifest_type": "secondary_2016_drifter_track_benchmark",
+  "generated_at_utc": "2026-04-30T21:26:28Z",
+  "benchmark_role": "secondary_support_only",
+  "reference": "observed NOAA drifter track",
+  "pygnome_role": "deterministic_comparator_only",
+  "case_ids": [
+    "CASE_2016-09-01",
+    "CASE_2016-09-06",
+    "CASE_2016-09-17"
+  ],
+  "skipped_cases": [],
+  "metric_definitions": {
+    "endpoint_distance": "Great-circle distance between observed drifter position and model representative position at 24 h, 48 h, and 72 h.",
+    "time_averaged_separation": "Mean great-circle distance over observed timestamps from 0 h through 72 h.",
+    "normalized_cumulative_separation": "Sum of aligned separation distances divided by observed cumulative 0-72 h track length.",
+    "nearest_member_distance": "Minimum distance from the observed drifter to any OpenDrift ensemble member median track at the same observed timestamp.",
+    "opendrift_minus_pygnome": "OpenDrift deterministic separation minus PyGNOME deterministic comparator separation; negative values mean OpenDrift is nearer.",
+    "percent_improvement_vs_pygnome": "(PyGNOME comparator separation minus OpenDrift separation) divided by PyGNOME comparator separation."
+  },
+  "interpretation": {
+    "metric": "case-mean time-averaged separation",
+    "opendrift_mean_km": 12.068796229926937,
+    "pygnome_mean_km": 13.537905538914345,
+    "difference_km": -1.4691093089874077,
+    "direction": "nearer",
+    "sentence": "Across the 2016 drifter-track benchmark, the OpenDrift promoted configuration was 1.47 km nearer than the PyGNOME deterministic comparator under case-mean time-averaged separation. This is a secondary drifter-track benchmark and does not replace the primary Mindoro public-observation validation."
+  },
+  "outputs": {
+    "scorecard_csv": "output/2016_drifter_benchmark/scorecard.csv",
+    "scorecard_json": "output/2016_drifter_benchmark/scorecard.json",
+    "case_boards_dir": "output/2016_drifter_benchmark/case_boards",
+    "readme": "output/2016_drifter_benchmark/README.md"
+  },
+  "cases": [
+    {
+      "case_id": "CASE_2016-09-01",
+      "inputs": {
+        "observed_csv": "data/drifters/CASE_2016-09-01/drifters_noaa.csv",
+        "opendrift_nc": "output/CASE_2016-09-01/forecast/deterministic_control_cmems_era5.nc",
+        "pygnome_nc": "output/CASE_2016-09-01/benchmark/pygnome/pygnome_deterministic_control.nc",
+        "ensemble_members": [
+          "output/CASE_2016-09-01/ensemble/member_01.nc",
+          "output/CASE_2016-09-01/ensemble/member_02.nc",
+          "output/CASE_2016-09-01/ensemble/member_03.nc",
+          "output/CASE_2016-09-01/ensemble/member_04.nc",
+          "output/CASE_2016-09-01/ensemble/member_05.nc",
+          "output/CASE_2016-09-01/ensemble/member_06.nc",
+          "output/CASE_2016-09-01/ensemble/member_07.nc",
+          "output/CASE_2016-09-01/ensemble/member_08.nc",
+          "output/CASE_2016-09-01/ensemble/member_09.nc",
+          "output/CASE_2016-09-01/ensemble/member_10.nc",
+          "output/CASE_2016-09-01/ensemble/member_11.nc",
+          "output/CASE_2016-09-01/ensemble/member_12.nc",
+          "output/CASE_2016-09-01/ensemble/member_13.nc",
+          "output/CASE_2016-09-01/ensemble/member_14.nc",
+          "output/CASE_2016-09-01/ensemble/member_15.nc",
+          "output/CASE_2016-09-01/ensemble/member_16.nc",
+          "output/CASE_2016-09-01/ensemble/member_17.nc",
+          "output/CASE_2016-09-01/ensemble/member_18.nc",
+          "output/CASE_2016-09-01/ensemble/member_19.nc",
+          "output/CASE_2016-09-01/ensemble/member_20.nc",
+          "output/CASE_2016-09-01/ensemble/member_21.nc",
+          "output/CASE_2016-09-01/ensemble/member_22.nc",
+          "output/CASE_2016-09-01/ensemble/member_23.nc",
+          "output/CASE_2016-09-01/ensemble/member_24.nc",
+          "output/CASE_2016-09-01/ensemble/member_25.nc",
+          "output/CASE_2016-09-01/ensemble/member_26.nc",
+          "output/CASE_2016-09-01/ensemble/member_27.nc",
+          "output/CASE_2016-09-01/ensemble/member_28.nc",
+          "output/CASE_2016-09-01/ensemble/member_29.nc",
+          "output/CASE_2016-09-01/ensemble/member_30.nc",
+          "output/CASE_2016-09-01/ensemble/member_31.nc",
+          "output/CASE_2016-09-01/ensemble/member_32.nc",
+          "output/CASE_2016-09-01/ensemble/member_33.nc",
+          "output/CASE_2016-09-01/ensemble/member_34.nc",
+          "output/CASE_2016-09-01/ensemble/member_35.nc",
+          "output/CASE_2016-09-01/ensemble/member_36.nc",
+          "output/CASE_2016-09-01/ensemble/member_37.nc",
+          "output/CASE_2016-09-01/ensemble/member_38.nc",
+          "output/CASE_2016-09-01/ensemble/member_39.nc",
+          "output/CASE_2016-09-01/ensemble/member_40.nc",
+          "output/CASE_2016-09-01/ensemble/member_41.nc",
+          "output/CASE_2016-09-01/ensemble/member_42.nc",
+          "output/CASE_2016-09-01/ensemble/member_43.nc",
+          "output/CASE_2016-09-01/ensemble/member_44.nc",
+          "output/CASE_2016-09-01/ensemble/member_45.nc",
+          "output/CASE_2016-09-01/ensemble/member_46.nc",
+          "output/CASE_2016-09-01/ensemble/member_47.nc",
+          "output/CASE_2016-09-01/ensemble/member_48.nc",
+          "output/CASE_2016-09-01/ensemble/member_49.nc",
+          "output/CASE_2016-09-01/ensemble/member_50.nc"
+        ],
+        "probability_ncs": {
+          "24": "output/CASE_2016-09-01/ensemble/probability_24h.nc",
+          "48": "output/CASE_2016-09-01/ensemble/probability_48h.nc",
+          "72": "output/CASE_2016-09-01/ensemble/probability_72h.nc"
+        },
+        "benchmark_dir": "output/CASE_2016-09-01/benchmark",
+        "config_snapshot": "output/CASE_2016-09-01/benchmark/config_snapshot.yaml"
+      },
+      "observed": {
+        "selected_drifter_id": "300234062416640",
+        "selected_point_count": 16,
+        "start_time_utc": "2016-09-01T00:00:00Z",
+        "start_lat": 10.415,
+        "start_lon": 117.18
+      },
+      "metrics": {
+        "opendrift": {
+          "time_averaged_separation_km": 10.207434835626788,
+          "normalized_cumulative_separation": 4.318626005471186,
+          "valid_aligned_count": 13,
+          "endpoint_24h_km": 7.725825155110914,
+          "endpoint_48h_km": 11.886951851596466,
+          "endpoint_72h_km": 24.81952127510513
+        },
+        "pygnome": {
+          "time_averaged_separation_km": 13.123740775801565,
+          "normalized_cumulative_separation": 5.5524751434731066,
+          "valid_aligned_count": 13,
+          "endpoint_24h_km": 9.36196173624931,
+          "endpoint_48h_km": 15.816127487734466,
+          "endpoint_72h_km": 31.428199934675213
+        },
+        "nearest_member": {
+          "time_averaged_separation_km": 9.715617195907274,
+          "normalized_cumulative_separation": 4.110544691894843,
+          "valid_aligned_count": 13,
+          "endpoint_24h_km": 7.188871074178705,
+          "endpoint_48h_km": 11.228064803797809,
+          "endpoint_72h_km": 24.371425684944708
+        },
+        "opendrift_minus_pygnome": {
+          "opendrift_minus_pygnome_time_averaged_km": -2.9163059401747766,
+          "opendrift_percent_improvement_vs_pygnome_time_averaged": 22.221605790568933,
+          "opendrift_minus_pygnome_endpoint_24h_km": -1.6361365811383957,
+          "opendrift_percent_improvement_vs_pygnome_endpoint_24h": 17.47642884293482,
+          "opendrift_minus_pygnome_endpoint_48h_km": -3.929175636138,
+          "opendrift_percent_improvement_vs_pygnome_endpoint_48h": 24.842842466875076,
+          "opendrift_minus_pygnome_endpoint_72h_km": -6.6086786595700815,
+          "opendrift_percent_improvement_vs_pygnome_endpoint_72h": 21.02786247162258
+        },
+        "probability_footprint": [
+          {
+            "case_id": "CASE_2016-09-01",
+            "hour": 24,
+            "timestamp_utc": "2016-09-02T00:00:00Z",
+            "observed_lon": 117.208,
+            "observed_lat": 10.402,
+            "probability_nc": "output/CASE_2016-09-01/ensemble/probability_24h.nc",
+            "probability_at_observed_cell": 0.0,
+            "ensemble_contains_any": false,
+            "ensemble_contains_p50": false,
+            "ensemble_contains_p90": false,
+            "distance_to_any_footprint_km": 6.736211216994445,
+            "distance_to_p50_footprint_km": 7.4929101015408515,
+            "distance_to_p90_footprint_km": 7.4929101015408515
+          },
+          {
+            "case_id": "CASE_2016-09-01",
+            "hour": 48,
+            "timestamp_utc": "2016-09-03T00:00:00Z",
+            "observed_lon": 117.291,
+            "observed_lat": 10.417,
+            "probability_nc": "output/CASE_2016-09-01/ensemble/probability_48h.nc",
+            "probability_at_observed_cell": 0.0,
+            "ensemble_contains_any": false,
+            "ensemble_contains_p50": false,
+            "ensemble_contains_p90": false,
+            "distance_to_any_footprint_km": 8.17357023603462,
+            "distance_to_p50_footprint_km": 9.894993032666946,
+            "distance_to_p90_footprint_km": 9.894993032666946
+          },
+          {
+            "case_id": "CASE_2016-09-01",
+            "hour": 72,
+            "timestamp_utc": "2016-09-04T00:00:00Z",
+            "observed_lon": 117.336,
+            "observed_lat": 10.32,
+            "probability_nc": "output/CASE_2016-09-01/ensemble/probability_72h.nc",
+            "probability_at_observed_cell": 0.0,
+            "ensemble_contains_any": false,
+            "ensemble_contains_p50": false,
+            "ensemble_contains_p90": false,
+            "distance_to_any_footprint_km": 6.798250464121955,
+            "distance_to_p50_footprint_km": 10.483250197038753,
+            "distance_to_p90_footprint_km": 11.886352711833023
+          }
+        ]
+      },
+      "aligned_separations": {
+        "opendrift": [
+          {
+            "time": "2016-09-01T00:00:00Z",
+            "observed_lon": 117.18,
+            "observed_lat": 10.415,
+            "opendrift_lon": 117.18000030517578,
+            "opendrift_lat": 10.414999961853027,
+            "opendrift_separation_km": 3.3643424344812445e-05
+          },
+          {
+            "time": "2016-09-01T06:00:00Z",
+            "observed_lon": 117.196,
+            "observed_lat": 10.411,
+            "opendrift_lon": 117.19110107421875,
+            "opendrift_lat": 10.424050331115723,
+            "opendrift_separation_km": 1.5468747725276024
+          },
+          {
+            "time": "2016-09-01T12:00:00Z",
+            "observed_lon": 117.2,
+            "observed_lat": 10.402,
+            "opendrift_lon": 117.2100830078125,
+            "opendrift_lat": 10.428420066833496,
+            "opendrift_separation_km": 3.1379171750573462
+          },
+          {
+            "time": "2016-09-01T18:00:00Z",
+            "observed_lon": 117.199,
+            "observed_lat": 10.395,
+            "opendrift_lon": 117.22740936279297,
+            "opendrift_lat": 10.4398775100708,
+            "opendrift_separation_km": 5.878313612610611
+          },
+          {
+            "time": "2016-09-02T00:00:00Z",
+            "observed_lon": 117.208,
+            "observed_lat": 10.402,
+            "opendrift_lon": 117.24535369873047,
+            "opendrift_lat": 10.460973739624023,
+            "opendrift_separation_km": 7.725825155110914
+          },
+          {
+            "time": "2016-09-02T06:00:00Z",
+            "observed_lon": 117.231,
+            "observed_lat": 10.414,
+            "opendrift_lon": 117.2674331665039,
+            "opendrift_lat": 10.481854438781738,
+            "opendrift_separation_km": 8.532329532966093
+          },
+          {
+            "time": "2016-09-02T12:00:00Z",
+            "observed_lon": 117.24,
+            "observed_lat": 10.416,
+            "opendrift_lon": 117.30126190185547,
+            "opendrift_lat": 10.490742683410645,
+            "opendrift_separation_km": 10.67469526487634
+          },
+          {
+            "time": "2016-09-02T18:00:00Z",
+            "observed_lon": 117.259,
+            "observed_lat": 10.415,
+            "opendrift_lon": 117.33588409423828,
+            "opendrift_lat": 10.488527297973633,
+            "opendrift_separation_km": 11.727205685283398
+          },
+          {
+            "time": "2016-09-03T00:00:00Z",
+            "observed_lon": 117.291,
+            "observed_lat": 10.417,
+            "opendrift_lon": 117.374267578125,
+            "opendrift_lat": 10.485721588134766,
+            "opendrift_separation_km": 11.886951851596466
+          },
+          {
+            "time": "2016-09-03T06:00:00Z",
+            "observed_lon": 117.328,
+            "observed_lat": 10.413,
+            "opendrift_lon": 117.41122436523438,
+            "opendrift_lat": 10.478189468383789,
+            "opendrift_separation_km": 11.63479521478588
+          },
+          {
+            "time": "2016-09-03T12:00:00Z",
+            "observed_lon": 117.354,
+            "observed_lat": 10.378,
+            "opendrift_lon": 117.4472885131836,
+            "opendrift_lat": 10.473233222961426,
+            "opendrift_separation_km": 14.704316539880882
+          },
+          {
+            "time": "2016-09-03T18:00:00Z",
+            "observed_lon": 117.353,
+            "observed_lat": 10.331,
+            "opendrift_lon": 117.47764587402344,
+            "opendrift_lat": 10.467820167541504,
+            "opendrift_separation_km": 20.42787313992325
+          },
+          {
+            "time": "2016-09-04T00:00:00Z",
+            "observed_lon": 117.336,
+            "observed_lat": 10.32,
+            "opendrift_lon": 117.5074462890625,
+            "opendrift_lat": 10.466233253479004,
+            "opendrift_separation_km": 24.81952127510513
+          }
+        ],
+        "pygnome": [
+          {
+            "time": "2016-09-01T00:00:00Z",
+            "observed_lon": 117.18,
+            "observed_lat": 10.415,
+            "pygnome_lon": 117.18,
+            "pygnome_lat": 10.415,
+            "pygnome_separation_km": 0.0
+          },
+          {
+            "time": "2016-09-01T06:00:00Z",
+            "observed_lon": 117.196,
+            "observed_lat": 10.411,
+            "pygnome_lon": 117.19292350729722,
+            "pygnome_lat": 10.426306221049462,
+            "pygnome_separation_km": 1.7349129633942462
+          },
+          {
+            "time": "2016-09-01T12:00:00Z",
+            "observed_lon": 117.2,
+            "observed_lat": 10.402,
+            "pygnome_lon": 117.21404994348802,
+            "pygnome_lat": 10.431083935573065,
+            "pygnome_separation_km": 3.5804526222652546
+          },
+          {
+            "time": "2016-09-01T18:00:00Z",
+            "observed_lon": 117.199,
+            "observed_lat": 10.395,
+            "pygnome_lon": 117.233032033604,
+            "pygnome_lat": 10.447060262584227,
+            "pygnome_separation_km": 6.882029871248601
+          },
+          {
+            "time": "2016-09-02T00:00:00Z",
+            "observed_lon": 117.208,
+            "observed_lat": 10.402,
+            "pygnome_lon": 117.25285497755934,
+            "pygnome_lat": 10.473712641275783,
+            "pygnome_separation_km": 9.36196173624931
+          },
+          {
+            "time": "2016-09-02T06:00:00Z",
+            "observed_lon": 117.231,
+            "observed_lat": 10.414,
+            "pygnome_lon": 117.27811575898531,
+            "pygnome_lat": 10.500143547732387,
+            "pygnome_separation_km": 10.87637826548472
+          },
+          {
+            "time": "2016-09-02T12:00:00Z",
+            "observed_lon": 117.24,
+            "observed_lat": 10.416,
+            "pygnome_lon": 117.31696208329669,
+            "pygnome_lat": 10.511282818638598,
+            "pygnome_separation_km": 13.530487728960617
+          },
+          {
+            "time": "2016-09-02T18:00:00Z",
+            "observed_lon": 117.259,
+            "observed_lat": 10.415,
+            "pygnome_lon": 117.35634731874852,
+            "pygnome_lat": 10.511011518540588,
+            "pygnome_separation_km": 15.07593142289099
+          },
+          {
+            "time": "2016-09-03T00:00:00Z",
+            "observed_lon": 117.291,
+            "observed_lat": 10.417,
+            "pygnome_lon": 117.399897776357,
+            "pygnome_lat": 10.51061609644485,
+            "pygnome_separation_km": 15.816127487734466
+          },
+          {
+            "time": "2016-09-03T06:00:00Z",
+            "observed_lon": 117.328,
+            "observed_lat": 10.413,
+            "pygnome_lon": 117.441701971427,
+            "pygnome_lat": 10.506153336167866,
+            "pygnome_separation_km": 16.182456980496887
+          },
+          {
+            "time": "2016-09-03T12:00:00Z",
+            "observed_lon": 117.354,
+            "observed_lat": 10.378,
+            "pygnome_lon": 117.48340694482926,
+            "pygnome_lat": 10.50379955239143,
+            "pygnome_separation_km": 19.897928427940148
+          },
+          {
+            "time": "2016-09-03T18:00:00Z",
+            "observed_lon": 117.353,
+            "observed_lat": 10.331,
+            "pygnome_lon": 117.51926282832005,
+            "pygnome_lat": 10.501161970314621,
+            "pygnome_separation_km": 26.24176264407989
+          },
+          {
+            "time": "2016-09-04T00:00:00Z",
+            "observed_lon": 117.336,
+            "observed_lat": 10.32,
+            "pygnome_lon": 117.55508943402907,
+            "pygnome_lat": 10.502901467727542,
+            "pygnome_separation_km": 31.428199934675213
+          }
+        ],
+        "nearest_member": [
+          {
+            "time": "2016-09-01T00:00:00Z",
+            "observed_lon": 117.18,
+            "observed_lat": 10.415,
+            "nearest_member_id": "20",
+            "nearest_member_distance_km": 0.018002574548452752
+          },
+          {
+            "time": "2016-09-01T06:00:00Z",
+            "observed_lon": 117.196,
+            "observed_lat": 10.411,
+            "nearest_member_id": "06",
+            "nearest_member_distance_km": 1.3685361992783611
+          },
+          {
+            "time": "2016-09-01T12:00:00Z",
+            "observed_lon": 117.2,
+            "observed_lat": 10.402,
+            "nearest_member_id": "06",
+            "nearest_member_distance_km": 2.4841787839103313
+          },
+          {
+            "time": "2016-09-01T18:00:00Z",
+            "observed_lon": 117.199,
+            "observed_lat": 10.395,
+            "nearest_member_id": "06",
+            "nearest_member_distance_km": 5.213367689423845
+          },
+          {
+            "time": "2016-09-02T00:00:00Z",
+            "observed_lon": 117.208,
+            "observed_lat": 10.402,
+            "nearest_member_id": "06",
+            "nearest_member_distance_km": 7.188871074178705
+          },
+          {
+            "time": "2016-09-02T06:00:00Z",
+            "observed_lon": 117.231,
+            "observed_lat": 10.414,
+            "nearest_member_id": "06",
+            "nearest_member_distance_km": 7.978034924320834
+          },
+          {
+            "time": "2016-09-02T12:00:00Z",
+            "observed_lon": 117.24,
+            "observed_lat": 10.416,
+            "nearest_member_id": "06",
+            "nearest_member_distance_km": 10.023756609501055
+          },
+          {
+            "time": "2016-09-02T18:00:00Z",
+            "observed_lon": 117.259,
+            "observed_lat": 10.415,
+            "nearest_member_id": "14",
+            "nearest_member_distance_km": 11.106386227205174
+          },
+          {
+            "time": "2016-09-03T00:00:00Z",
+            "observed_lon": 117.291,
+            "observed_lat": 10.417,
+            "nearest_member_id": "06",
+            "nearest_member_distance_km": 11.228064803797809
+          },
+          {
+            "time": "2016-09-03T06:00:00Z",
+            "observed_lon": 117.328,
+            "observed_lat": 10.413,
+            "nearest_member_id": "06",
+            "nearest_member_distance_km": 11.109081013376958
+          },
+          {
+            "time": "2016-09-03T12:00:00Z",
+            "observed_lon": 117.354,
+            "observed_lat": 10.378,
+            "nearest_member_id": "14",
+            "nearest_member_distance_km": 14.233852830972761
+          },
+          {
+            "time": "2016-09-03T18:00:00Z",
+            "observed_lon": 117.353,
+            "observed_lat": 10.331,
+            "nearest_member_id": "06",
+            "nearest_member_distance_km": 19.97946513133557
+          },
+          {
+            "time": "2016-09-04T00:00:00Z",
+            "observed_lon": 117.336,
+            "observed_lat": 10.32,
+            "nearest_member_id": "06",
+            "nearest_member_distance_km": 24.371425684944708
+          }
+        ]
+      },
+      "case_board_png": "output/2016_drifter_benchmark/case_boards/CASE_2016-09-01_drifter_track_benchmark.png"
+    },
+    {
+      "case_id": "CASE_2016-09-06",
+      "inputs": {
+        "observed_csv": "data/drifters/CASE_2016-09-06/drifters_noaa.csv",
+        "opendrift_nc": "output/CASE_2016-09-06/forecast/deterministic_control_cmems_ncep.nc",
+        "pygnome_nc": "output/CASE_2016-09-06/benchmark/pygnome/pygnome_deterministic_control.nc",
+        "ensemble_members": [
+          "output/CASE_2016-09-06/ensemble/member_01.nc",
+          "output/CASE_2016-09-06/ensemble/member_02.nc",
+          "output/CASE_2016-09-06/ensemble/member_03.nc",
+          "output/CASE_2016-09-06/ensemble/member_04.nc",
+          "output/CASE_2016-09-06/ensemble/member_05.nc",
+          "output/CASE_2016-09-06/ensemble/member_06.nc",
+          "output/CASE_2016-09-06/ensemble/member_07.nc",
+          "output/CASE_2016-09-06/ensemble/member_08.nc",
+          "output/CASE_2016-09-06/ensemble/member_09.nc",
+          "output/CASE_2016-09-06/ensemble/member_10.nc",
+          "output/CASE_2016-09-06/ensemble/member_11.nc",
+          "output/CASE_2016-09-06/ensemble/member_12.nc",
+          "output/CASE_2016-09-06/ensemble/member_13.nc",
+          "output/CASE_2016-09-06/ensemble/member_14.nc",
+          "output/CASE_2016-09-06/ensemble/member_15.nc",
+          "output/CASE_2016-09-06/ensemble/member_16.nc",
+          "output/CASE_2016-09-06/ensemble/member_17.nc",
+          "output/CASE_2016-09-06/ensemble/member_18.nc",
+          "output/CASE_2016-09-06/ensemble/member_19.nc",
+          "output/CASE_2016-09-06/ensemble/member_20.nc",
+          "output/CASE_2016-09-06/ensemble/member_21.nc",
+          "output/CASE_2016-09-06/ensemble/member_22.nc",
+          "output/CASE_2016-09-06/ensemble/member_23.nc",
+          "output/CASE_2016-09-06/ensemble/member_24.nc",
+          "output/CASE_2016-09-06/ensemble/member_25.nc",
+          "output/CASE_2016-09-06/ensemble/member_26.nc",
+          "output/CASE_2016-09-06/ensemble/member_27.nc",
+          "output/CASE_2016-09-06/ensemble/member_28.nc",
+          "output/CASE_2016-09-06/ensemble/member_29.nc",
+          "output/CASE_2016-09-06/ensemble/member_30.nc",
+          "output/CASE_2016-09-06/ensemble/member_31.nc",
+          "output/CASE_2016-09-06/ensemble/member_32.nc",
+          "output/CASE_2016-09-06/ensemble/member_33.nc",
+          "output/CASE_2016-09-06/ensemble/member_34.nc",
+          "output/CASE_2016-09-06/ensemble/member_35.nc",
+          "output/CASE_2016-09-06/ensemble/member_36.nc",
+          "output/CASE_2016-09-06/ensemble/member_37.nc",
+          "output/CASE_2016-09-06/ensemble/member_38.nc",
+          "output/CASE_2016-09-06/ensemble/member_39.nc",
+          "output/CASE_2016-09-06/ensemble/member_40.nc",
+          "output/CASE_2016-09-06/ensemble/member_41.nc",
+          "output/CASE_2016-09-06/ensemble/member_42.nc",
+          "output/CASE_2016-09-06/ensemble/member_43.nc",
+          "output/CASE_2016-09-06/ensemble/member_44.nc",
+          "output/CASE_2016-09-06/ensemble/member_45.nc",
+          "output/CASE_2016-09-06/ensemble/member_46.nc",
+          "output/CASE_2016-09-06/ensemble/member_47.nc",
+          "output/CASE_2016-09-06/ensemble/member_48.nc",
+          "output/CASE_2016-09-06/ensemble/member_49.nc",
+          "output/CASE_2016-09-06/ensemble/member_50.nc"
+        ],
+        "probability_ncs": {
+          "24": "output/CASE_2016-09-06/ensemble/probability_24h.nc",
+          "48": "output/CASE_2016-09-06/ensemble/probability_48h.nc",
+          "72": "output/CASE_2016-09-06/ensemble/probability_72h.nc"
+        },
+        "benchmark_dir": "output/CASE_2016-09-06/benchmark",
+        "config_snapshot": "output/CASE_2016-09-06/benchmark/config_snapshot.yaml"
+      },
+      "observed": {
+        "selected_drifter_id": "300234062416640",
+        "selected_point_count": 16,
+        "start_time_utc": "2016-09-06T00:00:00Z",
+        "start_lat": 10.272,
+        "start_lon": 117.424
+      },
+      "metrics": {
+        "opendrift": {
+          "time_averaged_separation_km": 7.486440576740321,
+          "normalized_cumulative_separation": 2.6261151969901477,
+          "valid_aligned_count": 13,
+          "endpoint_24h_km": 10.538463274918385,
+          "endpoint_48h_km": 7.5712387150199545,
+          "endpoint_72h_km": 12.057239742635195
+        },
+        "pygnome": {
+          "time_averaged_separation_km": 9.01065088444247,
+          "normalized_cumulative_separation": 3.1607820805959324,
+          "valid_aligned_count": 13,
+          "endpoint_24h_km": 12.557097038070248,
+          "endpoint_48h_km": 9.738766886036146,
+          "endpoint_72h_km": 14.260364356859721
+        },
+        "nearest_member": {
+          "time_averaged_separation_km": 7.434943004929049,
+          "normalized_cumulative_separation": 2.608050730364733,
+          "valid_aligned_count": 13,
+          "endpoint_24h_km": 10.6218429645376,
+          "endpoint_48h_km": 7.458257099511265,
+          "endpoint_72h_km": 11.97149832419888
+        },
+        "opendrift_minus_pygnome": {
+          "opendrift_minus_pygnome_time_averaged_km": -1.5242103077021483,
+          "opendrift_percent_improvement_vs_pygnome_time_averaged": 16.91565156889838,
+          "opendrift_minus_pygnome_endpoint_24h_km": -2.018633763151863,
+          "opendrift_percent_improvement_vs_pygnome_endpoint_24h": 16.07564038911085,
+          "opendrift_minus_pygnome_endpoint_48h_km": -2.1675281710161913,
+          "opendrift_percent_improvement_vs_pygnome_endpoint_48h": 22.25670042604762,
+          "opendrift_minus_pygnome_endpoint_72h_km": -2.203124614224526,
+          "opendrift_percent_improvement_vs_pygnome_endpoint_72h": 15.449286982381683
+        },
+        "probability_footprint": [
+          {
+            "case_id": "CASE_2016-09-06",
+            "hour": 24,
+            "timestamp_utc": "2016-09-07T00:00:00Z",
+            "observed_lon": 117.389,
+            "observed_lat": 10.191,
+            "probability_nc": "output/CASE_2016-09-06/ensemble/probability_24h.nc",
+            "probability_at_observed_cell": 0.0,
+            "ensemble_contains_any": false,
+            "ensemble_contains_p50": false,
+            "ensemble_contains_p90": false,
+            "distance_to_any_footprint_km": 3.2843604223485032,
+            "distance_to_p50_footprint_km": 3.2843604223485032,
+            "distance_to_p90_footprint_km": 3.2843604223485032
+          },
+          {
+            "case_id": "CASE_2016-09-06",
+            "hour": 48,
+            "timestamp_utc": "2016-09-08T00:00:00Z",
+            "observed_lon": 117.345,
+            "observed_lat": 10.187,
+            "probability_nc": "output/CASE_2016-09-06/ensemble/probability_48h.nc",
+            "probability_at_observed_cell": 1.0,
+            "ensemble_contains_any": true,
+            "ensemble_contains_p50": true,
+            "ensemble_contains_p90": true,
+            "distance_to_any_footprint_km": 0.0,
+            "distance_to_p50_footprint_km": 0.0,
+            "distance_to_p90_footprint_km": 0.0
+          },
+          {
+            "case_id": "CASE_2016-09-06",
+            "hour": 72,
+            "timestamp_utc": "2016-09-09T00:00:00Z",
+            "observed_lon": 117.29,
+            "observed_lat": 10.101,
+            "probability_nc": "output/CASE_2016-09-06/ensemble/probability_72h.nc",
+            "probability_at_observed_cell": 0.0,
+            "ensemble_contains_any": false,
+            "ensemble_contains_p50": false,
+            "ensemble_contains_p90": false,
+            "distance_to_any_footprint_km": 8.707071564568174,
+            "distance_to_p50_footprint_km": 8.707071564568174,
+            "distance_to_p90_footprint_km": 12.287178240327375
+          }
+        ]
+      },
+      "aligned_separations": {
+        "opendrift": [
+          {
+            "time": "2016-09-06T00:00:00Z",
+            "observed_lon": 117.424,
+            "observed_lat": 10.272,
+            "opendrift_lon": 117.42400360107422,
+            "opendrift_lat": 10.272000312805176,
+            "opendrift_separation_km": 0.0003955361997549134
+          },
+          {
+            "time": "2016-09-06T06:00:00Z",
+            "observed_lon": 117.426,
+            "observed_lat": 10.264,
+            "opendrift_lon": 117.42691802978516,
+            "opendrift_lat": 10.273280143737793,
+            "opendrift_separation_km": 1.0367834570607986
+          },
+          {
+            "time": "2016-09-06T12:00:00Z",
+            "observed_lon": 117.441,
+            "observed_lat": 10.244,
+            "opendrift_lon": 117.42501831054688,
+            "opendrift_lat": 10.27595329284668,
+            "opendrift_separation_km": 3.9600505678357587
+          },
+          {
+            "time": "2016-09-06T18:00:00Z",
+            "observed_lon": 117.431,
+            "observed_lat": 10.206,
+            "opendrift_lon": 117.4208984375,
+            "opendrift_lat": 10.276787757873535,
+            "opendrift_separation_km": 7.94848267664818
+          },
+          {
+            "time": "2016-09-07T00:00:00Z",
+            "observed_lon": 117.389,
+            "observed_lat": 10.191,
+            "opendrift_lon": 117.420654296875,
+            "opendrift_lat": 10.280508995056152,
+            "opendrift_separation_km": 10.538463274918385
+          },
+          {
+            "time": "2016-09-07T06:00:00Z",
+            "observed_lon": 117.35,
+            "observed_lat": 10.204,
+            "opendrift_lon": 117.42259979248047,
+            "opendrift_lat": 10.279131889343262,
+            "opendrift_separation_km": 11.528366555074673
+          },
+          {
+            "time": "2016-09-07T12:00:00Z",
+            "observed_lon": 117.354,
+            "observed_lat": 10.218,
+            "opendrift_lon": 117.42052459716797,
+            "opendrift_lat": 10.26795768737793,
+            "opendrift_separation_km": 9.156800280632362
+          },
+          {
+            "time": "2016-09-07T18:00:00Z",
+            "observed_lon": 117.36,
+            "observed_lat": 10.207,
+            "opendrift_lon": 117.41282653808594,
+            "opendrift_lat": 10.246212005615234,
+            "opendrift_separation_km": 7.24072132255552
+          },
+          {
+            "time": "2016-09-08T00:00:00Z",
+            "observed_lon": 117.345,
+            "observed_lat": 10.187,
+            "opendrift_lon": 117.40807342529297,
+            "opendrift_lat": 10.214977264404297,
+            "opendrift_separation_km": 7.5712387150199545
+          },
+          {
+            "time": "2016-09-08T06:00:00Z",
+            "observed_lon": 117.319,
+            "observed_lat": 10.188,
+            "opendrift_lon": 117.40122985839844,
+            "opendrift_lat": 10.176485061645508,
+            "opendrift_separation_km": 9.090176719908724
+          },
+          {
+            "time": "2016-09-08T12:00:00Z",
+            "observed_lon": 117.326,
+            "observed_lat": 10.175,
+            "opendrift_lon": 117.39573669433594,
+            "opendrift_lat": 10.143247604370117,
+            "opendrift_separation_km": 8.409849948960833
+          },
+          {
+            "time": "2016-09-08T18:00:00Z",
+            "observed_lon": 117.32,
+            "observed_lat": 10.141,
+            "opendrift_lon": 117.39521026611328,
+            "opendrift_lat": 10.113425254821777,
+            "opendrift_separation_km": 8.785158700174037
+          },
+          {
+            "time": "2016-09-09T00:00:00Z",
+            "observed_lon": 117.29,
+            "observed_lat": 10.101,
+            "opendrift_lon": 117.39923095703125,
+            "opendrift_lat": 10.087112426757812,
+            "opendrift_separation_km": 12.057239742635195
+          }
+        ],
+        "pygnome": [
+          {
+            "time": "2016-09-06T00:00:00Z",
+            "observed_lon": 117.424,
+            "observed_lat": 10.272,
+            "pygnome_lon": 117.424,
+            "pygnome_lat": 10.272,
+            "pygnome_separation_km": 0.0
+          },
+          {
+            "time": "2016-09-06T06:00:00Z",
+            "observed_lon": 117.426,
+            "observed_lat": 10.264,
+            "pygnome_lon": 117.42811096747201,
+            "pygnome_lat": 10.278615647637654,
+            "pygnome_separation_km": 1.6415183215219167
+          },
+          {
+            "time": "2016-09-06T12:00:00Z",
+            "observed_lon": 117.441,
+            "observed_lat": 10.244,
+            "pygnome_lon": 117.42613793471972,
+            "pygnome_lat": 10.284949848165425,
+            "pygnome_separation_km": 4.835078080124443
+          },
+          {
+            "time": "2016-09-06T18:00:00Z",
+            "observed_lon": 117.431,
+            "observed_lat": 10.206,
+            "pygnome_lon": 117.4231533716048,
+            "pygnome_lat": 10.290708951773384,
+            "pygnome_separation_km": 9.458268925246628
+          },
+          {
+            "time": "2016-09-07T00:00:00Z",
+            "observed_lon": 117.389,
+            "observed_lat": 10.191,
+            "pygnome_lon": 117.42473995398876,
+            "pygnome_lat": 10.298312222712124,
+            "pygnome_separation_km": 12.557097038070248
+          },
+          {
+            "time": "2016-09-07T06:00:00Z",
+            "observed_lon": 117.35,
+            "observed_lat": 10.204,
+            "pygnome_lon": 117.42968002065848,
+            "pygnome_lat": 10.299979573274502,
+            "pygnome_separation_km": 13.780957769527221
+          },
+          {
+            "time": "2016-09-07T12:00:00Z",
+            "observed_lon": 117.354,
+            "observed_lat": 10.218,
+            "pygnome_lon": 117.42806254923283,
+            "pygnome_lat": 10.28978980069406,
+            "pygnome_separation_km": 11.375218933459195
+          },
+          {
+            "time": "2016-09-07T18:00:00Z",
+            "observed_lon": 117.36,
+            "observed_lat": 10.207,
+            "pygnome_lon": 117.42223932268001,
+            "pygnome_lat": 10.269137209841734,
+            "pygnome_separation_km": 9.701661173853504
+          },
+          {
+            "time": "2016-09-08T00:00:00Z",
+            "observed_lon": 117.345,
+            "observed_lat": 10.187,
+            "pygnome_lon": 117.4187540408511,
+            "pygnome_lat": 10.236010578680325,
+            "pygnome_separation_km": 9.738766886036146
+          },
+          {
+            "time": "2016-09-08T06:00:00Z",
+            "observed_lon": 117.319,
+            "observed_lat": 10.188,
+            "pygnome_lon": 117.41334618746288,
+            "pygnome_lat": 10.197105151006527,
+            "pygnome_separation_km": 10.37479122359221
+          },
+          {
+            "time": "2016-09-08T12:00:00Z",
+            "observed_lon": 117.326,
+            "observed_lat": 10.175,
+            "pygnome_lon": 117.40929326538904,
+            "pygnome_lat": 10.163236709713253,
+            "pygnome_separation_km": 9.209667013136102
+          },
+          {
+            "time": "2016-09-08T18:00:00Z",
+            "observed_lon": 117.32,
+            "observed_lat": 10.141,
+            "pygnome_lon": 117.41297135626186,
+            "pygnome_lat": 10.134144496104625,
+            "pygnome_separation_km": 10.205071776324768
+          },
+          {
+            "time": "2016-09-09T00:00:00Z",
+            "observed_lon": 117.29,
+            "observed_lat": 10.101,
+            "pygnome_lon": 117.42009967116704,
+            "pygnome_lat": 10.10749379128624,
+            "pygnome_separation_km": 14.260364356859721
+          }
+        ],
+        "nearest_member": [
+          {
+            "time": "2016-09-06T00:00:00Z",
+            "observed_lon": 117.424,
+            "observed_lat": 10.272,
+            "nearest_member_id": "41",
+            "nearest_member_distance_km": 0.0004974410200883909
+          },
+          {
+            "time": "2016-09-06T06:00:00Z",
+            "observed_lon": 117.426,
+            "observed_lat": 10.264,
+            "nearest_member_id": "48",
+            "nearest_member_distance_km": 0.9847129658365626
+          },
+          {
+            "time": "2016-09-06T12:00:00Z",
+            "observed_lon": 117.441,
+            "observed_lat": 10.244,
+            "nearest_member_id": "04",
+            "nearest_member_distance_km": 3.8681821771821583
+          },
+          {
+            "time": "2016-09-06T18:00:00Z",
+            "observed_lon": 117.431,
+            "observed_lat": 10.206,
+            "nearest_member_id": "37",
+            "nearest_member_distance_km": 8.017881380784178
+          },
+          {
+            "time": "2016-09-07T00:00:00Z",
+            "observed_lon": 117.389,
+            "observed_lat": 10.191,
+            "nearest_member_id": "10",
+            "nearest_member_distance_km": 10.6218429645376
+          },
+          {
+            "time": "2016-09-07T06:00:00Z",
+            "observed_lon": 117.35,
+            "observed_lat": 10.204,
+            "nearest_member_id": "23",
+            "nearest_member_distance_km": 11.534687402886908
+          },
+          {
+            "time": "2016-09-07T12:00:00Z",
+            "observed_lon": 117.354,
+            "observed_lat": 10.218,
+            "nearest_member_id": "42",
+            "nearest_member_distance_km": 9.05630266794064
+          },
+          {
+            "time": "2016-09-07T18:00:00Z",
+            "observed_lon": 117.36,
+            "observed_lat": 10.207,
+            "nearest_member_id": "44",
+            "nearest_member_distance_km": 7.209001581501985
+          },
+          {
+            "time": "2016-09-08T00:00:00Z",
+            "observed_lon": 117.345,
+            "observed_lat": 10.187,
+            "nearest_member_id": "23",
+            "nearest_member_distance_km": 7.458257099511265
+          },
+          {
+            "time": "2016-09-08T06:00:00Z",
+            "observed_lon": 117.319,
+            "observed_lat": 10.188,
+            "nearest_member_id": "22",
+            "nearest_member_distance_km": 9.006419002878358
+          },
+          {
+            "time": "2016-09-08T12:00:00Z",
+            "observed_lon": 117.326,
+            "observed_lat": 10.175,
+            "nearest_member_id": "44",
+            "nearest_member_distance_km": 8.255279974107697
+          },
+          {
+            "time": "2016-09-08T18:00:00Z",
+            "observed_lon": 117.32,
+            "observed_lat": 10.141,
+            "nearest_member_id": "23",
+            "nearest_member_distance_km": 8.669696081691333
+          },
+          {
+            "time": "2016-09-09T00:00:00Z",
+            "observed_lon": 117.29,
+            "observed_lat": 10.101,
+            "nearest_member_id": "44",
+            "nearest_member_distance_km": 11.97149832419888
+          }
+        ]
+      },
+      "case_board_png": "output/2016_drifter_benchmark/case_boards/CASE_2016-09-06_drifter_track_benchmark.png"
+    },
+    {
+      "case_id": "CASE_2016-09-17",
+      "inputs": {
+        "observed_csv": "data/drifters/CASE_2016-09-17/drifters_noaa.csv",
+        "opendrift_nc": "output/CASE_2016-09-17/forecast/deterministic_control_cmems_era5.nc",
+        "pygnome_nc": "output/CASE_2016-09-17/benchmark/pygnome/pygnome_deterministic_control.nc",
+        "ensemble_members": [
+          "output/CASE_2016-09-17/ensemble/member_01.nc",
+          "output/CASE_2016-09-17/ensemble/member_02.nc",
+          "output/CASE_2016-09-17/ensemble/member_03.nc",
+          "output/CASE_2016-09-17/ensemble/member_04.nc",
+          "output/CASE_2016-09-17/ensemble/member_05.nc",
+          "output/CASE_2016-09-17/ensemble/member_06.nc",
+          "output/CASE_2016-09-17/ensemble/member_07.nc",
+          "output/CASE_2016-09-17/ensemble/member_08.nc",
+          "output/CASE_2016-09-17/ensemble/member_09.nc",
+          "output/CASE_2016-09-17/ensemble/member_10.nc",
+          "output/CASE_2016-09-17/ensemble/member_11.nc",
+          "output/CASE_2016-09-17/ensemble/member_12.nc",
+          "output/CASE_2016-09-17/ensemble/member_13.nc",
+          "output/CASE_2016-09-17/ensemble/member_14.nc",
+          "output/CASE_2016-09-17/ensemble/member_15.nc",
+          "output/CASE_2016-09-17/ensemble/member_16.nc",
+          "output/CASE_2016-09-17/ensemble/member_17.nc",
+          "output/CASE_2016-09-17/ensemble/member_18.nc",
+          "output/CASE_2016-09-17/ensemble/member_19.nc",
+          "output/CASE_2016-09-17/ensemble/member_20.nc",
+          "output/CASE_2016-09-17/ensemble/member_21.nc",
+          "output/CASE_2016-09-17/ensemble/member_22.nc",
+          "output/CASE_2016-09-17/ensemble/member_23.nc",
+          "output/CASE_2016-09-17/ensemble/member_24.nc",
+          "output/CASE_2016-09-17/ensemble/member_25.nc",
+          "output/CASE_2016-09-17/ensemble/member_26.nc",
+          "output/CASE_2016-09-17/ensemble/member_27.nc",
+          "output/CASE_2016-09-17/ensemble/member_28.nc",
+          "output/CASE_2016-09-17/ensemble/member_29.nc",
+          "output/CASE_2016-09-17/ensemble/member_30.nc",
+          "output/CASE_2016-09-17/ensemble/member_31.nc",
+          "output/CASE_2016-09-17/ensemble/member_32.nc",
+          "output/CASE_2016-09-17/ensemble/member_33.nc",
+          "output/CASE_2016-09-17/ensemble/member_34.nc",
+          "output/CASE_2016-09-17/ensemble/member_35.nc",
+          "output/CASE_2016-09-17/ensemble/member_36.nc",
+          "output/CASE_2016-09-17/ensemble/member_37.nc",
+          "output/CASE_2016-09-17/ensemble/member_38.nc",
+          "output/CASE_2016-09-17/ensemble/member_39.nc",
+          "output/CASE_2016-09-17/ensemble/member_40.nc",
+          "output/CASE_2016-09-17/ensemble/member_41.nc",
+          "output/CASE_2016-09-17/ensemble/member_42.nc",
+          "output/CASE_2016-09-17/ensemble/member_43.nc",
+          "output/CASE_2016-09-17/ensemble/member_44.nc",
+          "output/CASE_2016-09-17/ensemble/member_45.nc",
+          "output/CASE_2016-09-17/ensemble/member_46.nc",
+          "output/CASE_2016-09-17/ensemble/member_47.nc",
+          "output/CASE_2016-09-17/ensemble/member_48.nc",
+          "output/CASE_2016-09-17/ensemble/member_49.nc",
+          "output/CASE_2016-09-17/ensemble/member_50.nc"
+        ],
+        "probability_ncs": {
+          "24": "output/CASE_2016-09-17/ensemble/probability_24h.nc",
+          "48": "output/CASE_2016-09-17/ensemble/probability_48h.nc",
+          "72": "output/CASE_2016-09-17/ensemble/probability_72h.nc"
+        },
+        "benchmark_dir": "output/CASE_2016-09-17/benchmark",
+        "config_snapshot": "output/CASE_2016-09-17/benchmark/config_snapshot.yaml"
+      },
+      "observed": {
+        "selected_drifter_id": "300234064013000",
+        "selected_point_count": 16,
+        "start_time_utc": "2016-09-17T00:00:00Z",
+        "start_lat": 16.298,
+        "start_lon": 112.663
+      },
+      "metrics": {
+        "opendrift": {
+          "time_averaged_separation_km": 18.512513277413703,
+          "normalized_cumulative_separation": 3.2222552316323023,
+          "valid_aligned_count": 13,
+          "endpoint_24h_km": 10.758288136750346,
+          "endpoint_48h_km": 24.272770213805387,
+          "endpoint_72h_km": 42.414824590519366
+        },
+        "pygnome": {
+          "time_averaged_separation_km": 18.479324956499003,
+          "normalized_cumulative_separation": 3.21647853134888,
+          "valid_aligned_count": 13,
+          "endpoint_24h_km": 11.296168670188242,
+          "endpoint_48h_km": 24.061081534668144,
+          "endpoint_72h_km": 42.14072024791316
+        },
+        "nearest_member": {
+          "time_averaged_separation_km": 17.716873685473665,
+          "normalized_cumulative_separation": 3.083767615218246,
+          "valid_aligned_count": 13,
+          "endpoint_24h_km": 9.797371879877387,
+          "endpoint_48h_km": 23.191757238083643,
+          "endpoint_72h_km": 41.38183674428646
+        },
+        "opendrift_minus_pygnome": {
+          "opendrift_minus_pygnome_time_averaged_km": 0.03318832091470014,
+          "opendrift_percent_improvement_vs_pygnome_time_averaged": -0.17959704151978845,
+          "opendrift_minus_pygnome_endpoint_24h_km": -0.537880533437896,
+          "opendrift_percent_improvement_vs_pygnome_endpoint_24h": 4.761619174981146,
+          "opendrift_minus_pygnome_endpoint_48h_km": 0.21168867913724299,
+          "opendrift_percent_improvement_vs_pygnome_endpoint_48h": -0.8797970233891343,
+          "opendrift_minus_pygnome_endpoint_72h_km": 0.27410434260620775,
+          "opendrift_percent_improvement_vs_pygnome_endpoint_72h": -0.6504500658594738
+        },
+        "probability_footprint": [
+          {
+            "case_id": "CASE_2016-09-17",
+            "hour": 24,
+            "timestamp_utc": "2016-09-18T00:00:00Z",
+            "observed_lon": 112.588,
+            "observed_lat": 16.312,
+            "probability_nc": "output/CASE_2016-09-17/ensemble/probability_24h.nc",
+            "probability_at_observed_cell": 0.0,
+            "ensemble_contains_any": false,
+            "ensemble_contains_p50": false,
+            "ensemble_contains_p90": false,
+            "distance_to_any_footprint_km": 12.852956597983512,
+            "distance_to_p50_footprint_km": 12.852956597983512,
+            "distance_to_p90_footprint_km": 12.852956597983512
+          },
+          {
+            "case_id": "CASE_2016-09-17",
+            "hour": 48,
+            "timestamp_utc": "2016-09-19T00:00:00Z",
+            "observed_lon": 112.642,
+            "observed_lat": 16.367,
+            "probability_nc": "output/CASE_2016-09-17/ensemble/probability_48h.nc",
+            "probability_at_observed_cell": 0.0,
+            "ensemble_contains_any": false,
+            "ensemble_contains_p50": false,
+            "ensemble_contains_p90": false,
+            "distance_to_any_footprint_km": 10.016473705007918,
+            "distance_to_p50_footprint_km": 12.370627557803815,
+            "distance_to_p90_footprint_km": 12.370627557803815
+          },
+          {
+            "case_id": "CASE_2016-09-17",
+            "hour": 72,
+            "timestamp_utc": "2016-09-20T00:00:00Z",
+            "observed_lon": 112.602,
+            "observed_lat": 16.479,
+            "probability_nc": "output/CASE_2016-09-17/ensemble/probability_72h.nc",
+            "probability_at_observed_cell": 0.0,
+            "ensemble_contains_any": false,
+            "ensemble_contains_p50": false,
+            "ensemble_contains_p90": false,
+            "distance_to_any_footprint_km": 10.07749089712099,
+            "distance_to_p50_footprint_km": 10.07749089712099,
+            "distance_to_p90_footprint_km": 10.07749089712099
+          }
+        ]
+      },
+      "aligned_separations": {
+        "opendrift": [
+          {
+            "time": "2016-09-17T00:00:00Z",
+            "observed_lon": 112.663,
+            "observed_lat": 16.298,
+            "opendrift_lon": 112.66300201416016,
+            "opendrift_lat": 16.29800033569336,
+            "opendrift_separation_km": 0.00021818148550952222
+          },
+          {
+            "time": "2016-09-17T06:00:00Z",
+            "observed_lon": 112.709,
+            "observed_lat": 16.261,
+            "opendrift_lon": 112.65357208251953,
+            "opendrift_lat": 16.272151947021484,
+            "opendrift_separation_km": 6.045139246155473
+          },
+          {
+            "time": "2016-09-17T12:00:00Z",
+            "observed_lon": 112.682,
+            "observed_lat": 16.224,
+            "opendrift_lon": 112.64073181152344,
+            "opendrift_lat": 16.249149322509766,
+            "opendrift_separation_km": 5.2183662226402285
+          },
+          {
+            "time": "2016-09-17T18:00:00Z",
+            "observed_lon": 112.602,
+            "observed_lat": 16.243,
+            "opendrift_lon": 112.62520599365234,
+            "opendrift_lat": 16.230989456176758,
+            "opendrift_separation_km": 2.8145069130693368
+          },
+          {
+            "time": "2016-09-18T00:00:00Z",
+            "observed_lon": 112.588,
+            "observed_lat": 16.312,
+            "opendrift_lon": 112.61861419677734,
+            "opendrift_lat": 16.219820022583008,
+            "opendrift_separation_km": 10.758288136750346
+          },
+          {
+            "time": "2016-09-18T06:00:00Z",
+            "observed_lon": 112.625,
+            "observed_lat": 16.394,
+            "opendrift_lon": 112.6093521118164,
+            "opendrift_lat": 16.20391845703125,
+            "opendrift_separation_km": 21.20200751296826
+          },
+          {
+            "time": "2016-09-18T12:00:00Z",
+            "observed_lon": 112.669,
+            "observed_lat": 16.419,
+            "opendrift_lon": 112.59323120117188,
+            "opendrift_lat": 16.190183639526367,
+            "opendrift_separation_km": 26.697322232033937
+          },
+          {
+            "time": "2016-09-18T18:00:00Z",
+            "observed_lon": 112.643,
+            "observed_lat": 16.378,
+            "opendrift_lon": 112.56742095947266,
+            "opendrift_lat": 16.17906379699707,
+            "opendrift_separation_km": 23.54579886492646
+          },
+          {
+            "time": "2016-09-19T00:00:00Z",
+            "observed_lon": 112.642,
+            "observed_lat": 16.367,
+            "opendrift_lon": 112.53506469726562,
+            "opendrift_lat": 16.174352645874023,
+            "opendrift_separation_km": 24.272770213805387
+          },
+          {
+            "time": "2016-09-19T06:00:00Z",
+            "observed_lon": 112.619,
+            "observed_lat": 16.321,
+            "opendrift_lon": 112.5029296875,
+            "opendrift_lat": 16.16570281982422,
+            "opendrift_separation_km": 21.254095786301832
+          },
+          {
+            "time": "2016-09-19T12:00:00Z",
+            "observed_lon": 112.591,
+            "observed_lat": 16.349,
+            "opendrift_lon": 112.46637725830078,
+            "opendrift_lat": 16.15285873413086,
+            "opendrift_separation_km": 25.547282113090915
+          },
+          {
+            "time": "2016-09-19T18:00:00Z",
+            "observed_lon": 112.584,
+            "observed_lat": 16.382,
+            "opendrift_lon": 112.42546844482422,
+            "opendrift_lat": 16.149572372436523,
+            "opendrift_separation_km": 30.892052592631064
+          },
+          {
+            "time": "2016-09-20T00:00:00Z",
+            "observed_lon": 112.602,
+            "observed_lat": 16.479,
+            "opendrift_lon": 112.39892578125,
+            "opendrift_lat": 16.151103973388672,
+            "opendrift_separation_km": 42.414824590519366
+          }
+        ],
+        "pygnome": [
+          {
+            "time": "2016-09-17T00:00:00Z",
+            "observed_lon": 112.663,
+            "observed_lat": 16.298,
+            "pygnome_lon": 112.663,
+            "pygnome_lat": 16.298,
+            "pygnome_separation_km": 0.0
+          },
+          {
+            "time": "2016-09-17T06:00:00Z",
+            "observed_lon": 112.709,
+            "observed_lat": 16.261,
+            "pygnome_lon": 112.65654880889822,
+            "pygnome_lat": 16.27089173795493,
+            "pygnome_separation_km": 5.705875935043594
+          },
+          {
+            "time": "2016-09-17T12:00:00Z",
+            "observed_lon": 112.682,
+            "observed_lat": 16.224,
+            "pygnome_lon": 112.64511198956134,
+            "pygnome_lat": 16.246662628377244,
+            "pygnome_separation_km": 4.67542786523246
+          },
+          {
+            "time": "2016-09-17T18:00:00Z",
+            "observed_lon": 112.602,
+            "observed_lat": 16.243,
+            "pygnome_lon": 112.63077678557502,
+            "pygnome_lat": 16.229305967012124,
+            "pygnome_separation_km": 3.4288736593750477
+          },
+          {
+            "time": "2016-09-18T00:00:00Z",
+            "observed_lon": 112.588,
+            "observed_lat": 16.312,
+            "pygnome_lon": 112.62748416161838,
+            "pygnome_lat": 16.217747316394522,
+            "pygnome_separation_km": 11.296168670188242
+          },
+          {
+            "time": "2016-09-18T06:00:00Z",
+            "observed_lon": 112.625,
+            "observed_lat": 16.394,
+            "pygnome_lon": 112.62030645891815,
+            "pygnome_lat": 16.201071185015525,
+            "pygnome_separation_km": 21.458582655799137
+          },
+          {
+            "time": "2016-09-18T12:00:00Z",
+            "observed_lon": 112.669,
+            "observed_lat": 16.419,
+            "pygnome_lon": 112.60544077701636,
+            "pygnome_lat": 16.186140638313688,
+            "pygnome_separation_km": 26.7666039922195
+          },
+          {
+            "time": "2016-09-18T18:00:00Z",
+            "observed_lon": 112.643,
+            "observed_lat": 16.378,
+            "pygnome_lon": 112.58020166034865,
+            "pygnome_lat": 16.1740077204428,
+            "pygnome_separation_km": 23.652610558132146
+          },
+          {
+            "time": "2016-09-19T00:00:00Z",
+            "observed_lon": 112.642,
+            "observed_lat": 16.367,
+            "pygnome_lon": 112.5496697757662,
+            "pygnome_lat": 16.169599069956632,
+            "pygnome_separation_km": 24.061081534668144
+          },
+          {
+            "time": "2016-09-19T06:00:00Z",
+            "observed_lon": 112.619,
+            "observed_lat": 16.321,
+            "pygnome_lon": 112.52083242450068,
+            "pygnome_lat": 16.158831123605157,
+            "pygnome_separation_km": 20.85668559601178
+          },
+          {
+            "time": "2016-09-19T12:00:00Z",
+            "observed_lon": 112.591,
+            "observed_lat": 16.349,
+            "pygnome_lon": 112.48505741152982,
+            "pygnome_lat": 16.143714231861875,
+            "pygnome_separation_km": 25.474978254402707
+          },
+          {
+            "time": "2016-09-19T18:00:00Z",
+            "observed_lon": 112.584,
+            "observed_lat": 16.382,
+            "pygnome_lon": 112.44382358548523,
+            "pygnome_lat": 16.1407834926299,
+            "pygnome_separation_km": 30.713615465501118
+          },
+          {
+            "time": "2016-09-20T00:00:00Z",
+            "observed_lon": 112.602,
+            "observed_lat": 16.479,
+            "pygnome_lon": 112.42007141289338,
+            "pygnome_lat": 16.142639143527518,
+            "pygnome_separation_km": 42.14072024791316
+          }
+        ],
+        "nearest_member": [
+          {
+            "time": "2016-09-17T00:00:00Z",
+            "observed_lon": 112.663,
+            "observed_lat": 16.298,
+            "nearest_member_id": "48",
+            "nearest_member_distance_km": 0.041931023667426154
+          },
+          {
+            "time": "2016-09-17T06:00:00Z",
+            "observed_lon": 112.709,
+            "observed_lat": 16.261,
+            "nearest_member_id": "46",
+            "nearest_member_distance_km": 5.980448363140452
+          },
+          {
+            "time": "2016-09-17T12:00:00Z",
+            "observed_lon": 112.682,
+            "observed_lat": 16.224,
+            "nearest_member_id": "22",
+            "nearest_member_distance_km": 5.123515389850027
+          },
+          {
+            "time": "2016-09-17T18:00:00Z",
+            "observed_lon": 112.602,
+            "observed_lat": 16.243,
+            "nearest_member_id": "48",
+            "nearest_member_distance_km": 2.7584007471852643
+          },
+          {
+            "time": "2016-09-18T00:00:00Z",
+            "observed_lon": 112.588,
+            "observed_lat": 16.312,
+            "nearest_member_id": "36",
+            "nearest_member_distance_km": 9.797371879877387
+          },
+          {
+            "time": "2016-09-18T06:00:00Z",
+            "observed_lon": 112.625,
+            "observed_lat": 16.394,
+            "nearest_member_id": "36",
+            "nearest_member_distance_km": 19.99077298356633
+          },
+          {
+            "time": "2016-09-18T12:00:00Z",
+            "observed_lon": 112.669,
+            "observed_lat": 16.419,
+            "nearest_member_id": "29",
+            "nearest_member_distance_km": 25.524323829492797
+          },
+          {
+            "time": "2016-09-18T18:00:00Z",
+            "observed_lon": 112.643,
+            "observed_lat": 16.378,
+            "nearest_member_id": "36",
+            "nearest_member_distance_km": 22.456242100735146
+          },
+          {
+            "time": "2016-09-19T00:00:00Z",
+            "observed_lon": 112.642,
+            "observed_lat": 16.367,
+            "nearest_member_id": "36",
+            "nearest_member_distance_km": 23.191757238083643
+          },
+          {
+            "time": "2016-09-19T06:00:00Z",
+            "observed_lon": 112.619,
+            "observed_lat": 16.321,
+            "nearest_member_id": "36",
+            "nearest_member_distance_km": 20.0409800255896
+          },
+          {
+            "time": "2016-09-19T12:00:00Z",
+            "observed_lon": 112.591,
+            "observed_lat": 16.349,
+            "nearest_member_id": "36",
+            "nearest_member_distance_km": 24.308897580893323
+          },
+          {
+            "time": "2016-09-19T18:00:00Z",
+            "observed_lon": 112.584,
+            "observed_lat": 16.382,
+            "nearest_member_id": "36",
+            "nearest_member_distance_km": 29.72288000478978
+          },
+          {
+            "time": "2016-09-20T00:00:00Z",
+            "observed_lon": 112.602,
+            "observed_lat": 16.479,
+            "nearest_member_id": "36",
+            "nearest_member_distance_km": 41.38183674428646
+          }
+        ]
+      },
+      "case_board_png": "output/2016_drifter_benchmark/case_boards/CASE_2016-09-17_drifter_track_benchmark.png"
+    }
+  ]
+}
