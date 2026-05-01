@@ -3,12 +3,12 @@
 Thesis-facing title: Phase 3B Observation-Based Spatial Validation Using Public Mindoro Spill Extents
 
 This is a read-only curated export of the promoted Mindoro B1 family.
-It does not replace the canonical scientific directory under `output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/`.
+The raw `output/CASE_MINDORO_RETRO_2023/...` generation tree is rerun/staging provenance and is not tracked as the reviewer first-open folder in the submitted package.
 
 What is primary here:
 - B1 = Mindoro March 13 -> March 14 NOAA reinit primary validation.
 - OpenDrift-versus-observation is the main claim in this folder.
-- The primary success statement is that the promoted OpenDrift row achieves non-zero FSS against the March 14 observed spill mask.
+- B1 provides bounded evidence of neighborhood-scale agreement at 3-10 km, with no exact 1 km overlap.
 - PyGNOME remains comparator-only; OpenDrift-versus-PyGNOME figures here are supporting context only and never truth replacement.
 - Side-by-side publication boards in this folder keep the thesis-facing March 13 -> March 14 comparison visible without surfacing archived R0 panels.
 

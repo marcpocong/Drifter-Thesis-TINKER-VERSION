@@ -17,8 +17,8 @@ Missing or placeholder figure files must be inserted or regenerated from stored 
 | `figure_4_1` | Figure 4.1 - Study-box context | `output/figure_package_publication/*thesis_study_boxes_reference.png`; `publication_figure_registry.csv` | Geographic context only. |
 | `figure_4_2` | Figure 4.2 - Focused/Mindoro geography | `output/figure_package_publication/*focused_phase1_box_geography_reference.png`; `*mindoro_case_domain_geography_reference.png` | Geographic provenance context only. |
 | `output_phase1_mindoro_focus_root` | Focused Phase 1 output root | `output/phase1_mindoro_focus_pre_spill_2016_2023` | Required stored provenance root. |
-| `table_3_11` | Table 3.11 - Mindoro deterministic product setup | `output/CASE_MINDORO_RETRO_2023/forecast/forecast_manifest.json` | Standardized product, not validation by itself. |
-| `table_3_12` | Table 3.12 - Mindoro ensemble/probability products | `output/CASE_MINDORO_RETRO_2023/ensemble/ensemble_manifest.json`; `prob_presence`; `mask_p50`; `mask_p90` | Preserve p50/p90 semantics. |
+| `table_3_11` | Table 3.11 - Mindoro deterministic product setup | `output/final_reproducibility_package/final_manifest_index.csv`; `output/final_validation_package/final_validation_manifest.json`; raw `output/CASE_MINDORO_RETRO_2023/forecast/...` paths are optional rerun/staging provenance in the registry | Standardized product, not validation by itself. |
+| `table_3_12` | Table 3.12 - Mindoro ensemble/probability products | `output/final_reproducibility_package/final_manifest_index.csv`; `output/final_validation_package/final_validation_manifest.json`; raw `output/CASE_MINDORO_RETRO_2023/ensemble/...` paths are optional rerun/staging provenance in the registry | Preserve p50/p90 semantics. |
 | `table_4_5` | Table 4.5 - Mindoro B1 scorecard | `march13_14_reinit_summary.csv`; `march13_14_reinit_fss_by_window.csv` | Only main Philippine public-observation validation claim. |
 | `table_4_6` | Table 4.6 - B1 branch diagnostics | `march13_14_reinit_branch_survival_summary.csv`; `march13_14_reinit_diagnostics.csv` | Scoreable branch, not exact-grid success. |
 | `table_4_7` | Table 4.7 - B1 FSS/overlap interpretation | `march13_14_reinit_fss_by_window.csv`; `march13_14_reinit_summary.csv` | Supports coastal-neighborhood usefulness, not exact 1 km overlap. |
@@ -26,7 +26,7 @@ Missing or placeholder figure files must be inserted or regenerated from stored 
 | `figure_4_4a` | Figure 4.4A - March 13 public observation | `output/Phase 3B March13-14 Final Output/publication/observations/figure_4_4A_noaa_mar13_worldview3.png` | Seed observation support. |
 | `figure_4_4b` | Figure 4.4B - March 14 public observation | `output/Phase 3B March13-14 Final Output/publication/observations/figure_4_4B_noaa_mar14_worldview3.png` | Target observation support. |
 | `figure_4_4c` | Figure 4.4C - March 13/14 observed overlay | `output/Phase 3B March13-14 Final Output/publication/observations/figure_4_4C_arcgis_mar13_mar14_observed_overlay.png` | Observation-pair context only. |
-| `output_mindoro_case_root` | Mindoro canonical case root | `output/CASE_MINDORO_RETRO_2023` | Contains primary, support, and archive branches. |
+| `output_mindoro_case_root` | Mindoro curated B1 package root | `output/Phase 3B March13-14 Final Output`; raw `output/CASE_MINDORO_RETRO_2023` paths are optional rerun/staging provenance in the registry | Submitted reviewer package for B1; non-B1 branches remain governed by archive/support routing. |
 | `output_phase3b_final_export` | Curated B1 export root | `output/Phase 3B March13-14 Final Output` | Read-only B1 export layer. |
 
 ## Comparator Support
@@ -36,20 +36,20 @@ Missing or placeholder figure files must be inserted or regenerated from stored 
 | `table_4_8` | Table 4.8 - Mindoro Track A comparator | `march13_14_reinit_crossmodel_summary.csv`; `march13_14_reinit_crossmodel_model_ranking.csv` | Comparator-only. |
 | `figure_4_5` | Figure 4.5 - Track A spatial board | `Figure_4_5_Mindoro_TrackA_OpenDrift_PyGNOME_spatial_board.png`; `mindoro_crossmodel_board.png` | PyGNOME is never observation truth. |
 | `figure_4_6` | Figure 4.6 - Track A overlays/ranking | `march14_crossmodel_r1_overlay.png`; `march14_crossmodel_pygnome_overlay.png`; ranking CSV | Stored overlays plus numeric ranking; no new claim if a dedicated bar-chart file is absent. |
-| `output_track_a_comparator_root` | Track A comparator roots | `output/CASE_MINDORO_RETRO_2023/..._pygnome_comparison`; `output/Phase 3B March13-14 Final Output/summary/comparator_pygnome` | Comparator support only. |
+| `output_track_a_comparator_root` | Track A comparator roots | `output/Phase 3B March13-14 Final Output/summary/comparator_pygnome`; raw `output/CASE_MINDORO_RETRO_2023/..._pygnome_comparison` paths are optional rerun/staging provenance in the registry | Comparator support only. |
 
 ## External Transfer
 
 | Paper item | Paper label | Trace target | Claim boundary |
 | --- | --- | --- | --- |
-| `table_3_13` | Table 3.13 - DWH setup/forcing | `phase3c_external_case_setup_manifest.json`; `dwh_scientific_prepared_forcing_manifest.json` | External transfer validation only. |
+| `table_3_13` | Table 3.13 - DWH setup/forcing | `output/Phase 3C DWH Final Output/manifests/phase3c_final_output_manifest.json`; curated DWH run manifests; raw setup/forcing paths are optional rerun/staging provenance in the registry | External transfer validation only. |
 | `table_3_14` | Table 3.14 - DWH product definitions | DWH deterministic, ensemble, and comparator memos under `output/Phase 3C DWH Final Output/summary` | Not Mindoro recalibration. |
-| `table_4_9` | Table 4.9 - DWH event-corridor mean FSS | `phase3c_main_scorecard.csv`; DWH FSS-by-window CSVs | DWH observed masks are scoring reference. |
-| `table_4_10` | Table 4.10 - DWH geometry diagnostics | `phase3c_eventcorridor_summary.csv`; `phase3c_ensemble_eventcorridor_summary.csv`; PyGNOME comparator summary | PyGNOME remains comparator-only. |
+| `table_4_9` | Table 4.9 - DWH event-corridor mean FSS | `output/Phase 3C DWH Final Output/summary/comparison/phase3c_main_scorecard.csv`; raw DWH FSS-by-window CSVs are optional rerun/staging provenance in the registry | DWH observed masks are scoring reference. |
+| `table_4_10` | Table 4.10 - DWH geometry diagnostics | `output/Phase 3C DWH Final Output/summary/deterministic/phase3c_eventcorridor_summary.csv`; `summary/ensemble/phase3c_ensemble_eventcorridor_summary.csv`; `summary/comparator_pygnome/phase3c_dwh_pygnome_eventcorridor_summary.csv` | PyGNOME remains comparator-only. |
 | `figure_4_7` | Figure 4.7 - DWH deterministic board | `dwh_24h_48h_72h_deterministic_footprint_overview_board.png` | DWH deterministic transfer-validation visual. |
 | `figure_4_8` | Figure 4.8 - DWH deterministic/p50/p90 board | `dwh_2010-05-21_to_2010-05-23_eventcorridor_observed_deterministic_mask_p50_mask_p90_board.png` | p90 is conservative support/comparison only. |
 | `figure_4_9` | Figure 4.9 - DWH PyGNOME board | `dwh_2010-05-21_to_2010-05-23_eventcorridor_observed_deterministic_mask_p50_pygnome_board.png` | Comparator-only. |
-| `output_dwh_case_root` | DWH canonical case root | `output/CASE_DWH_RETRO_2010_72H` | Canonical scientific root. |
+| `output_dwh_case_root` | DWH curated package root | `output/Phase 3C DWH Final Output`; raw `output/CASE_DWH_RETRO_2010_72H` paths are optional rerun/staging provenance in the registry | Submitted reviewer package for external transfer validation. |
 | `output_phase3c_final_export` | Curated DWH export root | `output/Phase 3C DWH Final Output` | Read-only transfer-validation export layer. |
 
 ## Support Context
@@ -100,4 +100,4 @@ The validator writes:
 - `output/paper_to_output_registry_validation/paper_to_output_registry_validation.json`
 - `output/paper_to_output_registry_validation/paper_to_output_registry_validation.md`
 
-It fails only for missing required primary-evidence paths. Optional appendix, support, and figure placeholder paths are warnings.
+It validates tracked repository paths, fails for missing required primary/external evidence paths, and accepts missing raw/provenance paths only when they are explicitly marked optional/missing with a reason.

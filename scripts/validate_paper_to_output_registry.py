@@ -6,8 +6,8 @@ science package, or run any scientific workflow.
 
 from __future__ import annotations
 
+import fnmatch
 import json
-import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -42,43 +42,66 @@ ALLOWED_ROLES = {
     "governance",
 }
 
+MISSING_MARKERS = (
+    "optional_missing:",
+    "missing_optional:",
+    "placeholder_missing:",
+    "not_stored:",
+    "not_present:",
+    "not stored:",
+    "not present:",
+)
 
-def _long_path(path: Path) -> str:
-    """Return a Windows long-path-safe absolute path string."""
-    absolute = str(path.resolve())
-    if os.name != "nt":
-        return absolute
-    if absolute.startswith("\\\\?\\"):
-        return absolute
-    return "\\\\?\\" + absolute
+MISSING_STATUSES = {
+    "optional_missing",
+    "missing_optional",
+    "placeholder_missing",
+    "not_stored",
+    "not_present",
+    "not stored",
+    "not present",
+}
 
-
-def _direct_exists(path: Path) -> bool:
-    return path.exists() or os.path.exists(_long_path(path))
+_TRACKED_PATHS_CACHE: set[str] | None = None
 
 
 def _has_glob_magic(pattern: str) -> bool:
     return any(char in pattern for char in "*?[")
 
 
+def _tracked_repo_paths() -> set[str]:
+    """Return paths tracked by git so validation mirrors a clean CI checkout."""
+
+    global _TRACKED_PATHS_CACHE
+    if _TRACKED_PATHS_CACHE is not None:
+        return _TRACKED_PATHS_CACHE
+
+    import subprocess
+
+    output = subprocess.check_output(
+        ["git", "ls-files", "-z"],
+        cwd=ROOT,
+        encoding="utf-8",
+        errors="replace",
+    )
+    _TRACKED_PATHS_CACHE = {item.replace("\\", "/") for item in output.split("\0") if item}
+    return _TRACKED_PATHS_CACHE
+
+
 def _match_repo_pattern(pattern: str) -> list[str]:
-    normalized = pattern.replace("\\", "/")
-    if not _has_glob_magic(normalized):
-        candidate = ROOT / normalized
-        return [normalized] if _direct_exists(candidate) else []
+    normalized = pattern.replace("\\", "/").strip().rstrip("/")
+    if not normalized:
+        return []
 
-    try:
-        matches = list(ROOT.glob(normalized))
-    except (OSError, ValueError):
-        matches = []
+    tracked_paths = _tracked_repo_paths()
+    if _has_glob_magic(normalized):
+        return sorted(path for path in tracked_paths if fnmatch.fnmatch(path, normalized))
 
-    rel_matches: list[str] = []
-    for match in matches:
-        try:
-            rel_matches.append(match.relative_to(ROOT).as_posix())
-        except ValueError:
-            rel_matches.append(match.as_posix())
-    return sorted(set(rel_matches))
+    if normalized in tracked_paths:
+        return [normalized]
+
+    prefix = normalized + "/"
+    return sorted(path for path in tracked_paths if path.startswith(prefix))
 
 
 def _load_registry(path: Path) -> dict[str, Any]:
@@ -103,6 +126,63 @@ def _load_registry(path: Path) -> dict[str, Any]:
 
 def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else []
+
+
+def _marker_from_text(value: str) -> str:
+    lowered = value.strip().lower()
+    for marker in MISSING_MARKERS:
+        if lowered.startswith(marker):
+            return marker
+    return ""
+
+
+def _parse_path_spec(value: Any) -> dict[str, Any]:
+    if isinstance(value, dict):
+        path = str(value.get("path") or "").strip()
+        status = str(value.get("status") or "").strip().lower()
+        reason = str(value.get("reason") or "").strip()
+        required = value.get("required")
+        return {
+            "pattern": path,
+            "status": status,
+            "reason": reason,
+            "required": required if isinstance(required, bool) else None,
+            "raw": value,
+        }
+
+    text = str(value).strip()
+    marker = _marker_from_text(text)
+    if marker:
+        remainder = text.split(":", 1)[1].strip()
+        pattern, separator, reason = remainder.partition(" - ")
+        return {
+            "pattern": pattern.strip(),
+            "status": marker[:-1],
+            "reason": reason.strip() if separator else "",
+            "required": False,
+            "raw": value,
+        }
+
+    return {
+        "pattern": text,
+        "status": "",
+        "reason": "",
+        "required": None,
+        "raw": value,
+    }
+
+
+def _is_missing_optional(spec: dict[str, Any]) -> bool:
+    return str(spec.get("status") or "").strip().lower() in MISSING_STATUSES
+
+
+def _is_url(path_text: str) -> bool:
+    return "://" in path_text
+
+
+def _path_escapes_repo(path_text: str) -> bool:
+    candidate = Path(path_text.replace("\\", "/"))
+    return candidate.is_absolute() or ".." in candidate.parts
 
 
 def _validate_entry(entry: dict[str, Any]) -> dict[str, Any]:
@@ -131,22 +211,42 @@ def _validate_entry(entry: dict[str, Any]) -> dict[str, Any]:
     missing_required_repo_paths: list[str] = []
 
     for raw_path in repo_paths:
-        pattern = str(raw_path)
+        spec = _parse_path_spec(raw_path)
+        pattern = str(spec.get("pattern") or "")
+        optional_missing = _is_missing_optional(spec)
+        is_required = spec.get("required") is True or pattern in required_repo_paths
+
+        if not pattern:
+            errors.append("repo_paths contains an empty path")
+            continue
+        if _is_url(pattern):
+            errors.append(f"repo_paths must contain local repo paths, not URLs: {pattern}")
+            continue
+        if _path_escapes_repo(pattern):
+            errors.append(f"repo_path escapes the repository: {pattern}")
+            continue
+
         matches = _match_repo_pattern(pattern)
         exists = bool(matches)
         matched_any = matched_any or exists
         if not exists:
-            missing_repo_paths.append(pattern)
-            if pattern in required_repo_paths:
-                if role == "primary_evidence":
-                    missing_required_repo_paths.append(pattern)
-                else:
-                    warnings.append(
-                        f"required_repo_path missing outside primary_evidence: {pattern}"
-                    )
+            if optional_missing:
+                if not spec.get("reason"):
+                    warnings.append(f"optional/missing repo path lacks reason: {pattern}")
+            else:
+                missing_repo_paths.append(pattern)
+                if is_required:
+                    if role in {"primary_evidence", "external_transfer"}:
+                        missing_required_repo_paths.append(pattern)
+                    else:
+                        warnings.append(
+                            f"required_repo_path missing outside primary/external evidence: {pattern}"
+                        )
         path_results.append(
             {
                 "pattern": pattern,
+                "status": spec.get("status") or ("required" if is_required else "declared"),
+                "reason": spec.get("reason") or "",
                 "exists": exists,
                 "match_count": len(matches),
                 "matches": matches[:25],
@@ -156,7 +256,7 @@ def _validate_entry(entry: dict[str, Any]) -> dict[str, Any]:
 
     if missing_required_repo_paths:
         errors.append(
-            "missing required primary evidence repo path(s): "
+            "missing required primary/external evidence repo path(s): "
             + ", ".join(missing_required_repo_paths)
         )
 
@@ -165,9 +265,12 @@ def _validate_entry(entry: dict[str, Any]) -> dict[str, Any]:
             warnings.append(f"optional or placeholder repo path missing: {missing}")
 
     if entry.get("output_exists") is True and not matched_any:
-        warnings.append("declared output_exists=true but no repo_paths matched")
+        errors.append("declared output_exists=true but no tracked repo_paths matched")
     if entry.get("output_exists") is False and matched_any:
-        warnings.append("declared output_exists=false but one or more repo_paths matched")
+        notes = str(entry.get("notes") or "").lower()
+        honest_terms = ("placeholder", "optional", "not stored", "not present", "missing", "archive")
+        if not any(term in notes for term in honest_terms):
+            errors.append("declared output_exists=false but one or more tracked repo_paths matched")
 
     source_config_results: list[dict[str, Any]] = []
     for raw_path in source_config_paths:
@@ -204,7 +307,7 @@ def _write_markdown(report: dict[str, Any]) -> None:
         f"- Errors: `{report['summary']['error_count']}`",
         f"- Warnings: `{report['summary']['warning_count']}`",
         "",
-        "This validation checks stored paths only. It does not run scientific workflows.",
+        "This validation checks tracked repository paths only. It does not run scientific workflows.",
         "",
         "## Entry Results",
         "",

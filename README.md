@@ -84,10 +84,9 @@ In the dashboard, the default navigation begins with `Overview / Final Manuscrip
 ## Read-Only Output Surfaces
 
 - [output/phase1_mindoro_focus_pre_spill_2016_2023](output/phase1_mindoro_focus_pre_spill_2016_2023): focused Mindoro Phase 1 provenance artifacts.
-- [output/CASE_MINDORO_RETRO_2023](output/CASE_MINDORO_RETRO_2023): canonical Mindoro deterministic, ensemble, scoring, and support outputs.
-- [output/Phase 3B March13-14 Final Output](output/Phase%203B%20March13-14%20Final%20Output): curated B1 and Track A export layer.
-- [output/CASE_DWH_RETRO_2010_72H](output/CASE_DWH_RETRO_2010_72H): canonical DWH scientific outputs.
+- [output/Phase 3B March13-14 Final Output](output/Phase%203B%20March13-14%20Final%20Output): curated B1 and Track A export layer for panel review. Raw `output/CASE_MINDORO_RETRO_2023` paths are rerun/staging provenance and are not the reviewer first-open folder in the submitted package.
 - [output/Phase 3C DWH Final Output](output/Phase%203C%20DWH%20Final%20Output): curated DWH transfer-validation export layer.
+- Raw `output/CASE_DWH_RETRO_2010_72H` paths are rerun/staging provenance and are not the reviewer first-open folder in the submitted package.
 - [output/phase4/CASE_MINDORO_RETRO_2023](output/phase4/CASE_MINDORO_RETRO_2023): Mindoro oil-type and shoreline support/context outputs.
 - [output/2016 Legacy Runs FINAL Figures](output/2016%20Legacy%20Runs%20FINAL%20Figures): curated secondary 2016 legacy-support package.
 - [output/final_validation_package](output/final_validation_package): frozen review package for stored results and claim boundaries.

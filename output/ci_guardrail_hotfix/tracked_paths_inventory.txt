@@ -1,0 +1,872 @@
+﻿PANEL_QUICK_START.md
+README.md
+config/archive_registry.yaml
+config/case_dwh_retro_2010_72h.yaml
+config/case_mindoro_retro_2023.yaml
+config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml
+config/data_sources.yaml
+config/ensemble.yaml
+config/experiments/mindoro_mar09_12_multisource.yaml
+config/launcher_matrix.json
+config/launcher_matrix.schema.json
+config/oil.yaml
+config/panel_figure_style.yaml
+config/panel_map_labels_dwh.csv
+config/panel_map_labels_mindoro.csv
+config/panel_paper_expected_values.yaml
+config/paper_output_registry.yaml
+config/paper_to_output_registry.yaml
+config/phase1_baseline_selection.yaml
+config/phase1_mindoro_focus_pre_spill_2016_2023.yaml
+config/phase1_regional_2016_2022.yaml
+config/phase4_oil_scenarios.csv
+config/prototype_2021_cases.yaml
+config/publication_figure_style.yaml
+config/publication_map_labels_dwh.csv
+config/publication_map_labels_mindoro.csv
+config/recipes.yaml
+config/settings.yaml
+docs/ARCHITECTURE.md
+docs/ARCHIVE_GOVERNANCE.md
+docs/A_BASELINE_GOVERNANCE_DECISION_MEMO.md
+docs/COMMAND_MATRIX.md
+docs/DATA_SOURCES.md
+docs/DEFENSE_DEMO_RUNBOOK.md
+docs/DOMAIN_GLOSSARY.md
+docs/DWH_CONSISTENCY_CHECKLIST.md
+docs/DWH_METHODS_NOTE.md
+docs/DWH_PHASE3C_FINAL.md
+docs/DWH_PHASE3C_FREEZE_SYNC_NOTE.md
+docs/EXPERIMENT_MINDORO_MAR09_12_MULTISOURCE.md
+docs/FIGURE_GALLERY.md
+docs/FINAL_PAPER_ALIGNMENT.md
+docs/LAUNCHER_USER_GUIDE.md
+docs/METHODOLOGY_AMENDMENT_2016_MINDORO.md
+docs/MINDORO_PHASE1_PROVENANCE_FINAL.md
+docs/MINDORO_PRIMARY_VALIDATION_MIGRATION.md
+docs/MINDORO_TRACK_SEMANTICS_FINAL.md
+docs/MINDORO_VALIDATION_ARCHIVE_DECISION.md
+docs/OUTPUT_CATALOG.md
+docs/PANEL_REVIEW_GUIDE.md
+docs/PAPER_OUTPUT_REGISTRY.md
+docs/PAPER_TO_REPO_CROSSWALK.md
+docs/PHASE1_REGIONAL_2016_2022_REFERENCE_NOTE.md
+docs/PHASE4_COMPARATOR_DECISION.md
+docs/PHASE_STATUS.md
+docs/QUICKSTART.md
+docs/README_FINALIZATION_CHECKLIST.md
+docs/REPO_FINAL_ALIGNMENT_AUDIT.md
+docs/REPRODUCIBILITY_BUNDLE_GUIDE.md
+docs/THESIS_SURFACE_GOVERNANCE.md
+docs/UI_BRANDING.md
+docs/UI_GUIDE.md
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-01/drifter_track_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-01/drifter_vs_ensemble_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-01/ensemble_consolidated_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-01/ensemble_probability_24h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-01/ensemble_probability_48h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-01/ensemble_probability_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-01/pygnome_24h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-01/pygnome_48h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-01/pygnome_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-01/pygnome_consolidated_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-01/pygnome_vs_ensemble_24h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-01/pygnome_vs_ensemble_48h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-01/pygnome_vs_ensemble_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-01/pygnome_vs_ensemble_consolidated_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-06/drifter_track_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-06/drifter_vs_ensemble_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-06/ensemble_consolidated_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-06/ensemble_probability_24h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-06/ensemble_probability_48h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-06/ensemble_probability_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-06/pygnome_24h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-06/pygnome_48h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-06/pygnome_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-06/pygnome_consolidated_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-06/pygnome_vs_ensemble_24h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-06/pygnome_vs_ensemble_48h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-06/pygnome_vs_ensemble_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-06/pygnome_vs_ensemble_consolidated_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-17/drifter_track_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-17/drifter_vs_ensemble_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-17/ensemble_consolidated_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-17/ensemble_probability_24h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-17/ensemble_probability_48h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-17/ensemble_probability_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-17/pygnome_24h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-17/pygnome_48h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-17/pygnome_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-17/pygnome_consolidated_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-17/pygnome_vs_ensemble_24h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-17/pygnome_vs_ensemble_48h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-17/pygnome_vs_ensemble_72h.png
+output/2016 Legacy Runs FINAL Figures/CASE_2016-09-17/pygnome_vs_ensemble_consolidated_72h.png
+output/2016 Legacy Runs FINAL Figures/README.md
+output/2016 Legacy Runs FINAL Figures/final_figure_manifest.json
+output/2016 Legacy Runs FINAL Figures/manifests/legacy_final_output_manifest.json
+output/2016 Legacy Runs FINAL Figures/manifests/prototype_2016_final_output_registry.csv
+output/2016 Legacy Runs FINAL Figures/manifests/prototype_2016_final_output_registry.json
+output/2016 Legacy Runs FINAL Figures/manifests/prototype_2016_provenance_metadata.json
+output/2016 Legacy Runs FINAL Figures/missing_figures.csv
+output/2016 Legacy Runs FINAL Figures/phase5/prototype_2016_packaging_summary.md
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_02__single__paper__case_2016_09_01_prototype_2016_24h_opendrift_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_03__single__paper__case_2016_09_01_prototype_2016_48h_opendrift_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_04__single__paper__case_2016_09_01_prototype_2016_72h_opendrift_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_02__single__paper__case_2016_09_01_prototype_2016_24h_opendrift_p50_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_03__single__paper__case_2016_09_01_prototype_2016_48h_opendrift_p50_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_04__single__paper__case_2016_09_01_prototype_2016_72h_opendrift_p50_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_02__single__paper__case_2016_09_01_prototype_2016_24h_opendrift_p90_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_03__single__paper__case_2016_09_01_prototype_2016_48h_opendrift_p90_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_04__single__paper__case_2016_09_01_prototype_2016_72h_opendrift_p90_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_pygnome_similarity_summary__opendrift_vs_pygnome__comparison_board__2016_09_02_to_2016_09_04__board__slide__case_2016_09_01_prototype_2016_24_48_72h_opendrift_vs_pygnome_board.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_02__single__paper__case_2016_09_01_prototype_2016_24h_pygnome_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_03__single__paper__case_2016_09_01_prototype_2016_48h_pygnome_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_04__single__paper__case_2016_09_01_prototype_2016_72h_pygnome_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_07__single__paper__case_2016_09_06_prototype_2016_24h_opendrift_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_08__single__paper__case_2016_09_06_prototype_2016_48h_opendrift_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_09__single__paper__case_2016_09_06_prototype_2016_72h_opendrift_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_07__single__paper__case_2016_09_06_prototype_2016_24h_opendrift_p50_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_08__single__paper__case_2016_09_06_prototype_2016_48h_opendrift_p50_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_09__single__paper__case_2016_09_06_prototype_2016_72h_opendrift_p50_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_07__single__paper__case_2016_09_06_prototype_2016_24h_opendrift_p90_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_08__single__paper__case_2016_09_06_prototype_2016_48h_opendrift_p90_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_09__single__paper__case_2016_09_06_prototype_2016_72h_opendrift_p90_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_pygnome_similarity_summary__opendrift_vs_pygnome__comparison_board__2016_09_07_to_2016_09_09__board__slide__case_2016_09_06_prototype_2016_24_48_72h_opendrift_vs_pygnome_board.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_07__single__paper__case_2016_09_06_prototype_2016_24h_pygnome_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_08__single__paper__case_2016_09_06_prototype_2016_48h_pygnome_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_09__single__paper__case_2016_09_06_prototype_2016_72h_pygnome_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_18__single__paper__case_2016_09_17_prototype_2016_24h_opendrift_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_19__single__paper__case_2016_09_17_prototype_2016_48h_opendrift_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_20__single__paper__case_2016_09_17_prototype_2016_72h_opendrift_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_18__single__paper__case_2016_09_17_prototype_2016_24h_opendrift_p50_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_19__single__paper__case_2016_09_17_prototype_2016_48h_opendrift_p50_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_20__single__paper__case_2016_09_17_prototype_2016_72h_opendrift_p50_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_18__single__paper__case_2016_09_17_prototype_2016_24h_opendrift_p90_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_19__single__paper__case_2016_09_17_prototype_2016_48h_opendrift_p90_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_20__single__paper__case_2016_09_17_prototype_2016_72h_opendrift_p90_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_pygnome_similarity_summary__opendrift_vs_pygnome__comparison_board__2016_09_18_to_2016_09_20__board__slide__case_2016_09_17_prototype_2016_24_48_72h_opendrift_vs_pygnome_board.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_18__single__paper__case_2016_09_17_prototype_2016_24h_pygnome_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_19__single__paper__case_2016_09_17_prototype_2016_48h_pygnome_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_20__single__paper__case_2016_09_17_prototype_2016_72h_pygnome_single.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4/CASE_2016-09-01/mass_budget_comparison.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4/CASE_2016-09-01/mass_budget_heavy.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4/CASE_2016-09-01/mass_budget_light.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4/CASE_2016-09-01/shoreline_summary_heavy.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4/CASE_2016-09-01/shoreline_summary_light.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4/CASE_2016-09-06/mass_budget_comparison.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4/CASE_2016-09-06/mass_budget_heavy.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4/CASE_2016-09-06/mass_budget_light.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4/CASE_2016-09-06/shoreline_summary_heavy.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4/CASE_2016-09-06/shoreline_summary_light.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4/CASE_2016-09-17/mass_budget_comparison.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4/CASE_2016-09-17/mass_budget_heavy.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4/CASE_2016-09-17/mass_budget_light.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4/CASE_2016-09-17/shoreline_summary_heavy.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4/CASE_2016-09-17/shoreline_summary_light.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4_comparator/CASE_2016-09-01/budget_comparison_board.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4_comparator/CASE_2016-09-01/budget_time_series_heavy.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4_comparator/CASE_2016-09-01/budget_time_series_light.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4_comparator/CASE_2016-09-06/budget_comparison_board.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4_comparator/CASE_2016-09-06/budget_time_series_heavy.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4_comparator/CASE_2016-09-06/budget_time_series_light.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4_comparator/CASE_2016-09-17/budget_comparison_board.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4_comparator/CASE_2016-09-17/budget_time_series_heavy.png
+output/2016 Legacy Runs FINAL Figures/publication/phase4_comparator/CASE_2016-09-17/budget_time_series_light.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_2016__24_48_72h__opendrift_vs_pygnome__board.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_2016__24h__opendrift__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_2016__24h__opendrift_p50__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_2016__24h__opendrift_p90__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_2016__24h__pygnome__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_2016__48h__opendrift__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_2016__48h__opendrift_p50__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_2016__48h__opendrift_p90__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_2016__48h__pygnome__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_2016__72h__opendrift__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_2016__72h__opendrift_p50__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_2016__72h__opendrift_p90__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-01/case_2016_09_01__prototype_2016__72h__pygnome__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_2016__24_48_72h__opendrift_vs_pygnome__board.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_2016__24h__opendrift__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_2016__24h__opendrift_p50__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_2016__24h__opendrift_p90__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_2016__24h__pygnome__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_2016__48h__opendrift__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_2016__48h__opendrift_p50__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_2016__48h__opendrift_p90__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_2016__48h__pygnome__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_2016__72h__opendrift__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_2016__72h__opendrift_p50__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_2016__72h__opendrift_p90__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-06/case_2016_09_06__prototype_2016__72h__pygnome__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_2016__24_48_72h__opendrift_vs_pygnome__board.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_2016__24h__opendrift__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_2016__24h__opendrift_p50__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_2016__24h__opendrift_p90__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_2016__24h__pygnome__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_2016__48h__opendrift__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_2016__48h__opendrift_p50__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_2016__48h__opendrift_p90__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_2016__48h__pygnome__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_2016__72h__opendrift__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_2016__72h__opendrift_p50__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_2016__72h__opendrift_p90__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase3a/CASE_2016-09-17/case_2016_09_17__prototype_2016__72h__pygnome__single.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase4/CASE_2016-09-01/mass_budget_comparison.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase4/CASE_2016-09-01/mass_budget_heavy.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase4/CASE_2016-09-01/mass_budget_light.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase4/CASE_2016-09-06/mass_budget_comparison.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase4/CASE_2016-09-06/mass_budget_heavy.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase4/CASE_2016-09-06/mass_budget_light.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase4/CASE_2016-09-17/mass_budget_comparison.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase4/CASE_2016-09-17/mass_budget_heavy.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase4/CASE_2016-09-17/mass_budget_light.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase4_comparator/CASE_2016-09-01/budget_comparison_board.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase4_comparator/CASE_2016-09-01/budget_time_series_heavy.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase4_comparator/CASE_2016-09-01/budget_time_series_light.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase4_comparator/CASE_2016-09-06/budget_comparison_board.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase4_comparator/CASE_2016-09-06/budget_time_series_heavy.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase4_comparator/CASE_2016-09-06/budget_time_series_light.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase4_comparator/CASE_2016-09-17/budget_comparison_board.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase4_comparator/CASE_2016-09-17/budget_time_series_heavy.png
+output/2016 Legacy Runs FINAL Figures/scientific_source_pngs/phase4_comparator/CASE_2016-09-17/budget_time_series_light.png
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/CASE_2016-09-01/grid.json
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/CASE_2016-09-01/phase3a_fss_by_time_window.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/CASE_2016-09-01/phase3a_kl_by_time.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/CASE_2016-09-01/phase3a_pairing_manifest.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/CASE_2016-09-01/phase3a_summary.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/CASE_2016-09-01/pygnome_benchmark_metadata.json
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/CASE_2016-09-06/grid.json
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/CASE_2016-09-06/phase3a_fss_by_time_window.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/CASE_2016-09-06/phase3a_kl_by_time.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/CASE_2016-09-06/phase3a_pairing_manifest.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/CASE_2016-09-06/phase3a_summary.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/CASE_2016-09-06/pygnome_benchmark_metadata.json
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/CASE_2016-09-17/grid.json
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/CASE_2016-09-17/phase3a_fss_by_time_window.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/CASE_2016-09-17/phase3a_kl_by_time.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/CASE_2016-09-17/phase3a_pairing_manifest.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/CASE_2016-09-17/phase3a_summary.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/CASE_2016-09-17/pygnome_benchmark_metadata.json
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/prototype_pygnome_case_registry.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/prototype_pygnome_figure_captions.md
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/prototype_pygnome_figure_registry.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/prototype_pygnome_fss_by_case_window.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/prototype_pygnome_kl_by_case_hour.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/prototype_pygnome_similarity_by_case.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/prototype_pygnome_similarity_manifest.json
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/prototype_pygnome_similarity_summary.md
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/prototype_pygnome_skipped_cases.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase3a/source_path_notes.md
+output/2016 Legacy Runs FINAL Figures/summary/phase4/CASE_2016-09-01/budget_heavy.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4/CASE_2016-09-01/budget_light.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4/CASE_2016-09-01/shoreline_heavy.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4/CASE_2016-09-01/shoreline_light.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4/CASE_2016-09-06/budget_heavy.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4/CASE_2016-09-06/budget_light.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4/CASE_2016-09-06/shoreline_heavy.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4/CASE_2016-09-06/shoreline_light.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4/CASE_2016-09-17/budget_heavy.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4/CASE_2016-09-17/budget_light.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4/CASE_2016-09-17/shoreline_heavy.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4/CASE_2016-09-17/shoreline_light.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4/prototype_2016_phase4_registry.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4_comparator/CASE_2016-09-01/phase4_budget_comparison.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4_comparator/CASE_2016-09-01/phase4_budget_time_series_metrics.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4_comparator/CASE_2016-09-01/pygnome_budget_heavy.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4_comparator/CASE_2016-09-01/pygnome_budget_light.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4_comparator/CASE_2016-09-01/pygnome_phase4_run_manifest.json
+output/2016 Legacy Runs FINAL Figures/summary/phase4_comparator/CASE_2016-09-06/phase4_budget_comparison.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4_comparator/CASE_2016-09-06/phase4_budget_time_series_metrics.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4_comparator/CASE_2016-09-06/pygnome_budget_heavy.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4_comparator/CASE_2016-09-06/pygnome_budget_light.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4_comparator/CASE_2016-09-06/pygnome_phase4_run_manifest.json
+output/2016 Legacy Runs FINAL Figures/summary/phase4_comparator/CASE_2016-09-17/phase4_budget_comparison.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4_comparator/CASE_2016-09-17/phase4_budget_time_series_metrics.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4_comparator/CASE_2016-09-17/pygnome_budget_heavy.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4_comparator/CASE_2016-09-17/pygnome_budget_light.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4_comparator/CASE_2016-09-17/pygnome_phase4_run_manifest.json
+output/2016 Legacy Runs FINAL Figures/summary/phase4_comparator/prototype_2016_phase4_pygnome_comparator_registry.csv
+output/2016 Legacy Runs FINAL Figures/summary/phase4_comparator/prototype_2016_phase4_pygnome_decision_note.md
+output/2016_drifter_benchmark/README.md
+output/2016_drifter_benchmark/case_boards/CASE_2016-09-01_drifter_track_benchmark.png
+output/2016_drifter_benchmark/case_boards/CASE_2016-09-06_drifter_track_benchmark.png
+output/2016_drifter_benchmark/case_boards/CASE_2016-09-17_drifter_track_benchmark.png
+output/2016_drifter_benchmark/manifest.json
+output/2016_drifter_benchmark/scorecard.csv
+output/2016_drifter_benchmark/scorecard.json
+output/Phase 3B March13-14 Final Output/README.md
+output/Phase 3B March13-14 Final Output/final_output_manifest.json
+output/Phase 3B March13-14 Final Output/manifests/final_output_manifest.json
+output/Phase 3B March13-14 Final Output/manifests/phase3b_final_output_registry.csv
+output/Phase 3B March13-14 Final Output/manifests/phase3b_final_output_registry.json
+output/Phase 3B March13-14 Final Output/publication/comparator_pygnome/Figure_4_5_Mindoro_TrackA_OpenDrift_PyGNOME_spatial_board.json
+output/Phase 3B March13-14 Final Output/publication/comparator_pygnome/Figure_4_5_Mindoro_TrackA_OpenDrift_PyGNOME_spatial_board.png
+output/Phase 3B March13-14 Final Output/publication/comparator_pygnome/march14_crossmodel_pygnome_overlay.png
+output/Phase 3B March13-14 Final Output/publication/comparator_pygnome/march14_crossmodel_r1_overlay.png
+output/Phase 3B March13-14 Final Output/publication/comparator_pygnome/mindoro_crossmodel_board.png
+output/Phase 3B March13-14 Final Output/publication/comparator_pygnome/mindoro_observed_masks_ensemble_pygnome_board.png
+output/Phase 3B March13-14 Final Output/publication/observations/figure_4_4A_noaa_mar13_worldview3.png
+output/Phase 3B March13-14 Final Output/publication/observations/figure_4_4B_noaa_mar14_worldview3.png
+output/Phase 3B March13-14 Final Output/publication/observations/figure_4_4C_arcgis_mar13_mar14_observed_overlay.png
+output/Phase 3B March13-14 Final Output/publication/observations/march13_seed_mask_on_grid.png
+output/Phase 3B March13-14 Final Output/publication/observations/march13_seed_vs_march14_target.png
+output/Phase 3B March13-14 Final Output/publication/observations/march14_target_mask_on_grid.png
+output/Phase 3B March13-14 Final Output/publication/opendrift_primary/march14_r1_previous_overlay.png
+output/Phase 3B March13-14 Final Output/publication/opendrift_primary/mindoro_primary_validation_board.png
+output/Phase 3B March13-14 Final Output/scientific_source_pngs/comparator_pygnome/qa_march14_crossmodel_R1_previous_reinit_p50_overlay.png
+output/Phase 3B March13-14 Final Output/scientific_source_pngs/comparator_pygnome/qa_march14_crossmodel_pygnome_reinit_deterministic_overlay.png
+output/Phase 3B March13-14 Final Output/scientific_source_pngs/opendrift_primary/qa_march13_seed_mask_on_grid.png
+output/Phase 3B March13-14 Final Output/scientific_source_pngs/opendrift_primary/qa_march13_seed_vs_march14_target.png
+output/Phase 3B March13-14 Final Output/scientific_source_pngs/opendrift_primary/qa_march14_reinit_R1_previous_overlay.png
+output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_diagnostics.csv
+output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_fss_by_window.csv
+output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_model_ranking.csv
+output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_pairing_manifest.csv
+output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_run_manifest.json
+output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_summary.csv
+output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_tracks_registry.csv
+output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_branch_pairing_manifest.csv
+output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_branch_survival_summary.csv
+output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_decision_note.md
+output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_diagnostics.csv
+output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_fss_by_window.csv
+output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_run_manifest.json
+output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_summary.csv
+output/Phase 3C DWH Final Output/README.md
+output/Phase 3C DWH Final Output/manifests/phase3c_final_output_manifest.json
+output/Phase 3C DWH Final Output/manifests/phase3c_final_output_registry.csv
+output/Phase 3C DWH Final Output/manifests/phase3c_final_output_registry.json
+output/Phase 3C DWH Final Output/publication/comparator_pygnome/dwh_2010-05-21_24h_observed_deterministic_mask_p50_pygnome_board.png
+output/Phase 3C DWH Final Output/publication/comparator_pygnome/dwh_2010-05-21_24h_pygnome_footprint_overlay.png
+output/Phase 3C DWH Final Output/publication/comparator_pygnome/dwh_2010-05-21_to_2010-05-23_eventcorridor_deterministic_vs_pygnome_board.png
+output/Phase 3C DWH Final Output/publication/comparator_pygnome/dwh_2010-05-21_to_2010-05-23_eventcorridor_mask_p50_vs_pygnome_board.png
+output/Phase 3C DWH Final Output/publication/comparator_pygnome/dwh_2010-05-21_to_2010-05-23_eventcorridor_observed_deterministic_mask_p50_pygnome_board.png
+output/Phase 3C DWH Final Output/publication/comparator_pygnome/dwh_2010-05-21_to_2010-05-23_eventcorridor_pygnome_footprint_overlay.png
+output/Phase 3C DWH Final Output/publication/comparator_pygnome/dwh_2010-05-22_48h_observed_deterministic_mask_p50_pygnome_board.png
+output/Phase 3C DWH Final Output/publication/comparator_pygnome/dwh_2010-05-22_48h_pygnome_footprint_overlay.png
+output/Phase 3C DWH Final Output/publication/comparator_pygnome/dwh_2010-05-23_72h_observed_deterministic_mask_p50_pygnome_board.png
+output/Phase 3C DWH Final Output/publication/comparator_pygnome/dwh_2010-05-23_72h_pygnome_footprint_overlay.png
+output/Phase 3C DWH Final Output/publication/comparator_pygnome/dwh_24h_48h_72h_mask_p50_mask_p90_dual_threshold_vs_pygnome_overview_board.png
+output/Phase 3C DWH Final Output/publication/comparator_pygnome/dwh_24h_48h_72h_mask_p50_mask_p90_vs_pygnome_three_row_overview_board.png
+output/Phase 3C DWH Final Output/publication/comparator_pygnome/dwh_24h_48h_72h_mask_p50_vs_pygnome_overview_board.png
+output/Phase 3C DWH Final Output/publication/comparator_pygnome/dwh_24h_48h_72h_mask_p90_vs_pygnome_overview_board.png
+output/Phase 3C DWH Final Output/publication/context_optional/dwh_ensemble_sampled_trajectory_context.png
+output/Phase 3C DWH Final Output/publication/observations/dwh_2010-05-21_24h_observation_truth_context.png
+output/Phase 3C DWH Final Output/publication/observations/dwh_2010-05-21_to_2010-05-23_eventcorridor_observation_truth_context.png
+output/Phase 3C DWH Final Output/publication/observations/dwh_2010-05-22_48h_observation_truth_context.png
+output/Phase 3C DWH Final Output/publication/observations/dwh_2010-05-23_72h_observation_truth_context.png
+output/Phase 3C DWH Final Output/publication/opendrift_deterministic/dwh_2010-05-21_24h_deterministic_footprint_overlay.png
+output/Phase 3C DWH Final Output/publication/opendrift_deterministic/dwh_2010-05-21_to_2010-05-23_eventcorridor_deterministic_footprint_overlay.png
+output/Phase 3C DWH Final Output/publication/opendrift_deterministic/dwh_2010-05-22_48h_deterministic_footprint_overlay.png
+output/Phase 3C DWH Final Output/publication/opendrift_deterministic/dwh_2010-05-23_72h_deterministic_footprint_overlay.png
+output/Phase 3C DWH Final Output/publication/opendrift_deterministic/dwh_24h_48h_72h_deterministic_footprint_overview_board.png
+output/Phase 3C DWH Final Output/publication/opendrift_ensemble/dwh_2010-05-21_24h_mask_p50_overlay.png
+output/Phase 3C DWH Final Output/publication/opendrift_ensemble/dwh_2010-05-21_24h_mask_p90_overlay.png
+output/Phase 3C DWH Final Output/publication/opendrift_ensemble/dwh_2010-05-21_24h_observed_deterministic_mask_p50_mask_p90_board.png
+output/Phase 3C DWH Final Output/publication/opendrift_ensemble/dwh_2010-05-21_to_2010-05-23_eventcorridor_mask_p50_overlay.png
+output/Phase 3C DWH Final Output/publication/opendrift_ensemble/dwh_2010-05-21_to_2010-05-23_eventcorridor_mask_p90_overlay.png
+output/Phase 3C DWH Final Output/publication/opendrift_ensemble/dwh_2010-05-21_to_2010-05-23_eventcorridor_observed_deterministic_mask_p50_mask_p90_board.png
+output/Phase 3C DWH Final Output/publication/opendrift_ensemble/dwh_2010-05-22_48h_mask_p50_overlay.png
+output/Phase 3C DWH Final Output/publication/opendrift_ensemble/dwh_2010-05-22_48h_mask_p90_overlay.png
+output/Phase 3C DWH Final Output/publication/opendrift_ensemble/dwh_2010-05-22_48h_observed_deterministic_mask_p50_mask_p90_board.png
+output/Phase 3C DWH Final Output/publication/opendrift_ensemble/dwh_2010-05-23_72h_mask_p50_overlay.png
+output/Phase 3C DWH Final Output/publication/opendrift_ensemble/dwh_2010-05-23_72h_mask_p90_overlay.png
+output/Phase 3C DWH Final Output/publication/opendrift_ensemble/dwh_2010-05-23_72h_observed_deterministic_mask_p50_mask_p90_board.png
+output/Phase 3C DWH Final Output/publication/opendrift_ensemble/dwh_24h_48h_72h_mask_p50_footprint_overview_board.png
+output/Phase 3C DWH Final Output/publication/opendrift_ensemble/dwh_24h_48h_72h_mask_p50_mask_p90_dual_threshold_overview_board.png
+output/Phase 3C DWH Final Output/publication/opendrift_ensemble/dwh_24h_48h_72h_mask_p90_footprint_overview_board.png
+output/Phase 3C DWH Final Output/scientific_source_pngs/comparator_pygnome/qa_phase3c_dwh_pygnome_eventcorridor_overlay.png
+output/Phase 3C DWH Final Output/scientific_source_pngs/comparator_pygnome/qa_phase3c_dwh_pygnome_overlays.png
+output/Phase 3C DWH Final Output/scientific_source_pngs/deterministic/qa_phase3c_eventcorridor_overlay.png
+output/Phase 3C DWH Final Output/scientific_source_pngs/deterministic/qa_phase3c_overlays.png
+output/Phase 3C DWH Final Output/scientific_source_pngs/ensemble/qa_phase3c_ensemble_eventcorridor_overlay.png
+output/Phase 3C DWH Final Output/scientific_source_pngs/ensemble/qa_phase3c_ensemble_overlays.png
+output/Phase 3C DWH Final Output/summary/comparator_pygnome/chapter3_phase3c_dwh_pygnome_comparison_memo.md
+output/Phase 3C DWH Final Output/summary/comparator_pygnome/phase3c_dwh_all_results_table.csv
+output/Phase 3C DWH Final Output/summary/comparator_pygnome/phase3c_dwh_pygnome_eventcorridor_summary.csv
+output/Phase 3C DWH Final Output/summary/comparator_pygnome/phase3c_dwh_pygnome_pairing_manifest.csv
+output/Phase 3C DWH Final Output/summary/comparator_pygnome/phase3c_dwh_pygnome_product_registry.csv
+output/Phase 3C DWH Final Output/summary/comparator_pygnome/phase3c_dwh_pygnome_product_registry.json
+output/Phase 3C DWH Final Output/summary/comparator_pygnome/phase3c_dwh_pygnome_run_manifest.json
+output/Phase 3C DWH Final Output/summary/comparator_pygnome/phase3c_dwh_pygnome_summary.csv
+output/Phase 3C DWH Final Output/summary/comparison/phase3c_interpretation_note.md
+output/Phase 3C DWH Final Output/summary/comparison/phase3c_main_scorecard.csv
+output/Phase 3C DWH Final Output/summary/comparison/phase3c_output_matrix_decision_note.md
+output/Phase 3C DWH Final Output/summary/deterministic/chapter3_phase3c_external_case_run_memo.md
+output/Phase 3C DWH Final Output/summary/deterministic/phase3c_eventcorridor_summary.csv
+output/Phase 3C DWH Final Output/summary/deterministic/phase3c_pairing_manifest.csv
+output/Phase 3C DWH Final Output/summary/deterministic/phase3c_product_registry.csv
+output/Phase 3C DWH Final Output/summary/deterministic/phase3c_product_registry.json
+output/Phase 3C DWH Final Output/summary/deterministic/phase3c_run_manifest.json
+output/Phase 3C DWH Final Output/summary/deterministic/phase3c_summary.csv
+output/Phase 3C DWH Final Output/summary/ensemble/chapter3_phase3c_ensemble_extension_memo.md
+output/Phase 3C DWH Final Output/summary/ensemble/phase3c_ensemble_eventcorridor_summary.csv
+output/Phase 3C DWH Final Output/summary/ensemble/phase3c_ensemble_pairing_manifest.csv
+output/Phase 3C DWH Final Output/summary/ensemble/phase3c_ensemble_product_registry.csv
+output/Phase 3C DWH Final Output/summary/ensemble/phase3c_ensemble_run_manifest.json
+output/Phase 3C DWH Final Output/summary/ensemble/phase3c_ensemble_summary.csv
+output/ci_guardrail_hotfix/ci_guardrail_hotfix_report.json
+output/ci_guardrail_hotfix/ci_guardrail_hotfix_report.md
+output/ci_guardrail_hotfix/registry_path_reconciliation_report.json
+output/ci_guardrail_hotfix/registry_path_reconciliation_report.md
+output/ci_guardrail_hotfix/tracked_paths_inventory.txt
+output/defense_readiness/defense_readiness_report.json
+output/defense_readiness/defense_readiness_report.md
+output/figure_package_publication/Figure_4_5_Mindoro_TrackA_OpenDrift_PyGNOME_spatial_board.json
+output/figure_package_publication/Figure_4_5_Mindoro_TrackA_OpenDrift_PyGNOME_spatial_board.png
+output/figure_package_publication/board_layout_audit.csv
+output/figure_package_publication/case_2016_09_01__prototype_2016_home_overview__observation__single_support_context__2016_09_01__single__paper__drifter_track_case_2016_09_01.png
+output/figure_package_publication/case_2016_09_01__prototype_2016_home_overview__observation_vs_opendrift__single_support_context__2016_09_01__single__paper__drifter_vs_ensemble_case_2016_09_01.png
+output/figure_package_publication/case_2016_09_01__prototype_2016_home_overview__opendrift_vs_pygnome__single_support_context__2016_09_01__single__paper__pygnome_vs_ensemble_case_2016_09_01.png
+output/figure_package_publication/case_2016_09_01__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_02__single__paper__case_2016_09_01_prototype_2016_24h_opendrift_single.png
+output/figure_package_publication/case_2016_09_01__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_03__single__paper__case_2016_09_01_prototype_2016_48h_opendrift_single.png
+output/figure_package_publication/case_2016_09_01__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_04__single__paper__case_2016_09_01_prototype_2016_72h_opendrift_single.png
+output/figure_package_publication/case_2016_09_01__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_02__single__paper__case_2016_09_01_prototype_2016_24h_opendrift_p50_single.png
+output/figure_package_publication/case_2016_09_01__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_03__single__paper__case_2016_09_01_prototype_2016_48h_opendrift_p50_single.png
+output/figure_package_publication/case_2016_09_01__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_04__single__paper__case_2016_09_01_prototype_2016_72h_opendrift_p50_single.png
+output/figure_package_publication/case_2016_09_01__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_02__single__paper__case_2016_09_01_prototype_2016_24h_opendrift_p90_single.png
+output/figure_package_publication/case_2016_09_01__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_03__single__paper__case_2016_09_01_prototype_2016_48h_opendrift_p90_single.png
+output/figure_package_publication/case_2016_09_01__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_04__single__paper__case_2016_09_01_prototype_2016_72h_opendrift_p90_single.png
+output/figure_package_publication/case_2016_09_01__prototype_pygnome_similarity_summary__opendrift_vs_pygnome__comparison_board__2016_09_02_to_2016_09_04__board__slide__case_2016_09_01_prototype_2016_24_48_72h_opendrift_vs_pygnome_board.png
+output/figure_package_publication/case_2016_09_01__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_02__single__paper__case_2016_09_01_prototype_2016_24h_pygnome_single.png
+output/figure_package_publication/case_2016_09_01__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_03__single__paper__case_2016_09_01_prototype_2016_48h_pygnome_single.png
+output/figure_package_publication/case_2016_09_01__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_04__single__paper__case_2016_09_01_prototype_2016_72h_pygnome_single.png
+output/figure_package_publication/case_2016_09_06__prototype_2016_home_overview__observation__single_support_context__2016_09_06__single__paper__drifter_track_case_2016_09_06.png
+output/figure_package_publication/case_2016_09_06__prototype_2016_home_overview__observation_vs_opendrift__single_support_context__2016_09_06__single__paper__drifter_vs_ensemble_case_2016_09_06.png
+output/figure_package_publication/case_2016_09_06__prototype_2016_home_overview__opendrift_vs_pygnome__single_support_context__2016_09_06__single__paper__pygnome_vs_ensemble_case_2016_09_06.png
+output/figure_package_publication/case_2016_09_06__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_07__single__paper__case_2016_09_06_prototype_2016_24h_opendrift_single.png
+output/figure_package_publication/case_2016_09_06__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_08__single__paper__case_2016_09_06_prototype_2016_48h_opendrift_single.png
+output/figure_package_publication/case_2016_09_06__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_09__single__paper__case_2016_09_06_prototype_2016_72h_opendrift_single.png
+output/figure_package_publication/case_2016_09_06__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_07__single__paper__case_2016_09_06_prototype_2016_24h_opendrift_p50_single.png
+output/figure_package_publication/case_2016_09_06__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_08__single__paper__case_2016_09_06_prototype_2016_48h_opendrift_p50_single.png
+output/figure_package_publication/case_2016_09_06__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_09__single__paper__case_2016_09_06_prototype_2016_72h_opendrift_p50_single.png
+output/figure_package_publication/case_2016_09_06__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_07__single__paper__case_2016_09_06_prototype_2016_24h_opendrift_p90_single.png
+output/figure_package_publication/case_2016_09_06__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_08__single__paper__case_2016_09_06_prototype_2016_48h_opendrift_p90_single.png
+output/figure_package_publication/case_2016_09_06__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_09__single__paper__case_2016_09_06_prototype_2016_72h_opendrift_p90_single.png
+output/figure_package_publication/case_2016_09_06__prototype_pygnome_similarity_summary__opendrift_vs_pygnome__comparison_board__2016_09_07_to_2016_09_09__board__slide__case_2016_09_06_prototype_2016_24_48_72h_opendrift_vs_pygnome_board.png
+output/figure_package_publication/case_2016_09_06__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_07__single__paper__case_2016_09_06_prototype_2016_24h_pygnome_single.png
+output/figure_package_publication/case_2016_09_06__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_08__single__paper__case_2016_09_06_prototype_2016_48h_pygnome_single.png
+output/figure_package_publication/case_2016_09_06__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_09__single__paper__case_2016_09_06_prototype_2016_72h_pygnome_single.png
+output/figure_package_publication/case_2016_09_17__prototype_2016_home_overview__observation__single_support_context__2016_09_17__single__paper__drifter_track_case_2016_09_17.png
+output/figure_package_publication/case_2016_09_17__prototype_2016_home_overview__observation_vs_opendrift__single_support_context__2016_09_17__single__paper__drifter_vs_ensemble_case_2016_09_17.png
+output/figure_package_publication/case_2016_09_17__prototype_2016_home_overview__opendrift_vs_pygnome__single_support_context__2016_09_17__single__paper__pygnome_vs_ensemble_case_2016_09_17.png
+output/figure_package_publication/case_2016_09_17__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_18__single__paper__case_2016_09_17_prototype_2016_24h_opendrift_single.png
+output/figure_package_publication/case_2016_09_17__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_19__single__paper__case_2016_09_17_prototype_2016_48h_opendrift_single.png
+output/figure_package_publication/case_2016_09_17__prototype_pygnome_similarity_summary__opendrift__single_forecast__2016_09_20__single__paper__case_2016_09_17_prototype_2016_72h_opendrift_single.png
+output/figure_package_publication/case_2016_09_17__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_18__single__paper__case_2016_09_17_prototype_2016_24h_opendrift_p50_single.png
+output/figure_package_publication/case_2016_09_17__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_19__single__paper__case_2016_09_17_prototype_2016_48h_opendrift_p50_single.png
+output/figure_package_publication/case_2016_09_17__prototype_pygnome_similarity_summary__opendrift_p50__single_forecast__2016_09_20__single__paper__case_2016_09_17_prototype_2016_72h_opendrift_p50_single.png
+output/figure_package_publication/case_2016_09_17__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_18__single__paper__case_2016_09_17_prototype_2016_24h_opendrift_p90_single.png
+output/figure_package_publication/case_2016_09_17__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_19__single__paper__case_2016_09_17_prototype_2016_48h_opendrift_p90_single.png
+output/figure_package_publication/case_2016_09_17__prototype_pygnome_similarity_summary__opendrift_p90__single_forecast__2016_09_20__single__paper__case_2016_09_17_prototype_2016_72h_opendrift_p90_single.png
+output/figure_package_publication/case_2016_09_17__prototype_pygnome_similarity_summary__opendrift_vs_pygnome__comparison_board__2016_09_18_to_2016_09_20__board__slide__case_2016_09_17_prototype_2016_24_48_72h_opendrift_vs_pygnome_board.png
+output/figure_package_publication/case_2016_09_17__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_18__single__paper__case_2016_09_17_prototype_2016_24h_pygnome_single.png
+output/figure_package_publication/case_2016_09_17__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_19__single__paper__case_2016_09_17_prototype_2016_48h_pygnome_single.png
+output/figure_package_publication/case_2016_09_17__prototype_pygnome_similarity_summary__pygnome__single_forecast__2016_09_20__single__paper__case_2016_09_17_prototype_2016_72h_pygnome_single.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__opendrift_vs_pygnome__comparison_board__2010_05_21__board__slide__observed_deterministic_mask_p50_pygnome_board.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__opendrift_vs_pygnome__comparison_board__2010_05_21_to_2010_05_23__board__slide__24h_48h_72h_mask_p50_mask_p90_dual_threshold_vs_pygnome_overview_board.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__opendrift_vs_pygnome__comparison_board__2010_05_21_to_2010_05_23__board__slide__24h_48h_72h_mask_p50_mask_p90_vs_pygnome_three_row_overview_board.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__opendrift_vs_pygnome__comparison_board__2010_05_21_to_2010_05_23__board__slide__24h_48h_72h_mask_p50_vs_pygnome_overview_board.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__opendrift_vs_pygnome__comparison_board__2010_05_21_to_2010_05_23__board__slide__24h_48h_72h_mask_p90_vs_pygnome_overview_board.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__opendrift_vs_pygnome__comparison_board__2010_05_21_to_2010_05_23__board__slide__eventcorridor_deterministic_vs_pygnome_board.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__opendrift_vs_pygnome__comparison_board__2010_05_21_to_2010_05_23__board__slide__eventcorridor_mask_p50_vs_pygnome_board.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__opendrift_vs_pygnome__comparison_board__2010_05_21_to_2010_05_23__board__slide__observed_deterministic_mask_p50_pygnome_board.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__opendrift_vs_pygnome__comparison_board__2010_05_21_to_2010_05_23__board__slide__opendrift_vs_pygnome_board.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__opendrift_vs_pygnome__comparison_board__2010_05_22__board__slide__observed_deterministic_mask_p50_pygnome_board.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__opendrift_vs_pygnome__comparison_board__2010_05_23__board__slide__observed_deterministic_mask_p50_pygnome_board.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__pygnome__single_model__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_pygnome.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__pygnome__single_pygnome_overlay__2010_05_21__zoom__paper__pygnome_footprint_overlay.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__pygnome__single_pygnome_overlay__2010_05_21_to_2010_05_23__zoom__paper__pygnome_footprint_overlay.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__pygnome__single_pygnome_overlay__2010_05_22__zoom__paper__pygnome_footprint_overlay.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__pygnome__single_pygnome_overlay__2010_05_23__zoom__paper__pygnome_footprint_overlay.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__pygnome__single_trajectory__2010_05_20_to_2010_05_23__zoom__paper__pygnome_trajectory.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__comparison_board__2010_05_21__board__slide__observed_deterministic_mask_p50_mask_p90_board.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__24h_48h_72h_mask_p50_footprint_overview_board.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__24h_48h_72h_mask_p50_mask_p90_dual_threshold_overview_board.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__24h_48h_72h_mask_p90_footprint_overview_board.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__deterministic_vs_ensemble_board.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__observed_deterministic_mask_p50_mask_p90_board.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__comparison_board__2010_05_22__board__slide__observed_deterministic_mask_p50_mask_p90_board.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__comparison_board__2010_05_23__board__slide__observed_deterministic_mask_p50_mask_p90_board.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__single_model__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_p50.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__single_model__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_p90.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__single_trajectory__2010_05_20_to_2010_05_23__zoom__paper__ensemble_sampled_trajectory.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift_mask_p50__single_mask_p50_overlay__2010_05_21__zoom__paper__mask_p50_overlay.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift_mask_p50__single_mask_p50_overlay__2010_05_21_to_2010_05_23__zoom__paper__mask_p50_overlay.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift_mask_p50__single_mask_p50_overlay__2010_05_22__zoom__paper__mask_p50_overlay.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift_mask_p50__single_mask_p50_overlay__2010_05_23__zoom__paper__mask_p50_overlay.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift_mask_p50_mask_p90__single_dual_threshold_overlay__2010_05_21__zoom__paper__mask_p50_mask_p90_dual_threshold_overlay.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift_mask_p50_mask_p90__single_dual_threshold_overlay__2010_05_21_to_2010_05_23__zoom__paper__mask_p50_mask_p90_dual_threshold_overlay.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift_mask_p50_mask_p90__single_dual_threshold_overlay__2010_05_22__zoom__paper__mask_p50_mask_p90_dual_threshold_overlay.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift_mask_p50_mask_p90__single_dual_threshold_overlay__2010_05_23__zoom__paper__mask_p50_mask_p90_dual_threshold_overlay.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift_mask_p90__single_mask_p90_overlay__2010_05_21__zoom__paper__mask_p90_overlay.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift_mask_p90__single_mask_p90_overlay__2010_05_21_to_2010_05_23__zoom__paper__mask_p90_overlay.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift_mask_p90__single_mask_p90_overlay__2010_05_22__zoom__paper__mask_p90_overlay.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift_mask_p90__single_mask_p90_overlay__2010_05_23__zoom__paper__mask_p90_overlay.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_run__observation__single_observation__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_observation.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_run__observation__single_truth_context__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_observation_truth_context.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__daily_deterministic_board.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__daily_deterministic_footprint_overview_board.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__single_model__2010_05_21_to_2010_05_23__zoom__paper__eventcorridor_deterministic.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__single_overlay__2010_05_21__zoom__paper__forecast_vs_observation.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__single_overlay__2010_05_22__zoom__paper__forecast_vs_observation.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__single_overlay__2010_05_23__zoom__paper__forecast_vs_observation.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__single_trajectory__2010_05_20_to_2010_05_23__zoom__paper__deterministic_trajectory.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift_deterministic__single_deterministic_overlay__2010_05_21__zoom__paper__deterministic_footprint_overlay.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift_deterministic__single_deterministic_overlay__2010_05_21_to_2010_05_23__zoom__paper__deterministic_footprint_overlay.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift_deterministic__single_deterministic_overlay__2010_05_22__zoom__paper__deterministic_footprint_overlay.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift_deterministic__single_deterministic_overlay__2010_05_23__zoom__paper__deterministic_footprint_overlay.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift_vs_pygnome__trajectory_board__2010_05_20_to_2010_05_23__board__slide__trajectory_board.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_setup__observation__single_truth_context__2010_05_21__zoom__paper__observation_truth_context.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_setup__observation__single_truth_context__2010_05_22__zoom__paper__observation_truth_context.png
+output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_setup__observation__single_truth_context__2010_05_23__zoom__paper__observation_truth_context.png
+output/figure_package_publication/case_legacy_2016__prototype_2016_home_overview__observation__comparison_board__2016_09_01_to_2016_09_17__board__slide__legacy_2016_drifter_track_triptych_board.png
+output/figure_package_publication/case_legacy_2016__prototype_2016_home_overview__observation_vs_opendrift__comparison_board__2016_09_01_to_2016_09_17__board__slide__legacy_2016_drifter_vs_mask_p50_mask_p90_triptych_board.png
+output/figure_package_publication/case_legacy_2016__prototype_2016_home_overview__opendrift_vs_pygnome__comparison_board__2016_09_01_to_2016_09_17__board__slide__legacy_2016_mask_p50_mask_p90_vs_pygnome_triptych_board.png
+output/figure_package_publication/case_mindoro_retro_2023__phase2_official__opendrift__single_trajectory__2023_03_03_to_2023_03_06__zoom__paper__deterministic_trajectory.png
+output/figure_package_publication/case_mindoro_retro_2023__phase2_official__opendrift__single_trajectory__2023_03_03_to_2023_03_06__zoom__paper__ensemble_sampled_trajectory.png
+output/figure_package_publication/case_mindoro_retro_2023__phase2_official__opendrift_vs_pygnome__trajectory_board__2023_03_03_to_2023_03_06__board__slide__trajectory_board.png
+output/figure_package_publication/case_mindoro_retro_2023__phase2_phase3b__opendrift__single_trajectory__2023_03_06__close__paper__corridor_hull_trajectory.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3a_benchmark__opendrift__single_model__2023_03_04_to_2023_03_06__zoom__paper__comparison_opendrift_deterministic.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3a_benchmark__opendrift__single_model__2023_03_04_to_2023_03_06__zoom__paper__comparison_opendrift_ensemble_consolidated.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3a_benchmark__opendrift_vs_pygnome__comparison_board__2023_03_04_to_2023_03_06__board__slide__opendrift_vs_pygnome_board.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3a_benchmark__opendrift_vs_pygnome__comparison_overlay__2023_03_04_to_2023_03_06__close__paper__comparison_overlay.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3a_benchmark__pygnome__single_model__2023_03_04_to_2023_03_06__zoom__paper__comparison_pygnome.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3a_benchmark__pygnome__single_trajectory__2023_03_03_to_2023_03_06__zoom__paper__pygnome_trajectory.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift__single_model_overlay__2023_03_14__single__paper__march14_crossmodel_r0_overlay.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift__single_model_overlay__2023_03_14__single__paper__march14_crossmodel_r1_overlay.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift_vs_pygnome__comparison_board__2023_03_13_to_2023_03_14__board__slide__mindoro_observed_masks_ensemble_pygnome_board.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift_vs_pygnome__comparison_board__2023_03_14__board__slide__mindoro_crossmodel_board.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift_vs_pygnome__single_comparison_overlay__2023_03_13_to_2023_03_14__single__paper__mindoro_observed_masks_ensemble_pygnome_overlay.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3a_reinit_crossmodel__pygnome__single_model_overlay__2023_03_14__single__paper__march14_crossmodel_pygnome_overlay.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3b_legacy_strict__opendrift__comparison_board__2023_03_06__board__slide__mindoro_legacy_march6_board.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3b_legacy_strict__opendrift__single_legacy_context__2023_03_03_to_2023_03_06__single__paper__legacy_strict_context.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3b_legacy_strict__opendrift__single_legacy_overlay__2023_03_06__single__paper__legacy_strict_overlay.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3b_reinit_primary__observation__single_seed_observation__2023_03_13__single__paper__march13_seed_mask_on_grid.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3b_reinit_primary__observation__single_seed_target_compare__2023_03_13_to_2023_03_14__single__paper__march13_seed_vs_march14_target.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3b_reinit_primary__observation__single_target_observation__2023_03_14__single__paper__march14_target_mask_on_grid.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3b_reinit_primary__opendrift__comparison_board__2023_03_13_to_2023_03_14__board__slide__mindoro_primary_validation_board.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3b_reinit_primary__opendrift__single_primary_overlay__2023_03_14__single__paper__march14_r0_overlay.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3b_reinit_primary__opendrift__single_primary_overlay__2023_03_14__single__paper__march14_r1_previous_overlay.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3b_strict__observation__single_observation__2023_03_06__zoom__paper__strict_observation.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3b_strict__opendrift__comparison_board__2023_03_06__board__slide__strict_board.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3b_strict__opendrift__single_forecast__2023_03_06__zoom__paper__strict_official_p50.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3b_strict__opendrift__single_overlay__2023_03_06__close__paper__strict_obs_vs_p50.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3b_strict__opendrift__single_overlay__2023_03_06__locator__paper__strict_obs_vs_p50.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3b_strict__opendrift__single_overlay__2023_03_06__zoom__paper__strict_obs_vs_p50.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3b_support__observation__single_observation__2023_03_04_to_2023_03_06__zoom__paper__eventcorridor_observation.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3b_support__opendrift__comparison_board__2023_03_04_to_2023_03_06__board__slide__eventcorridor_board.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3b_support__opendrift__single_forecast__2023_03_04_to_2023_03_06__zoom__paper__eventcorridor_deterministic.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3b_support__opendrift__single_forecast__2023_03_04_to_2023_03_06__zoom__paper__eventcorridor_ensemble_consolidated.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3b_support__opendrift__single_overlay__2023_03_04_to_2023_03_06__close__paper__eventcorridor_obs_vs_ensemble_consolidated.png
+output/figure_package_publication/case_mindoro_retro_2023__phase3b_support__opendrift__single_overlay__2023_03_04_to_2023_03_06__locator__paper__eventcorridor_obs_vs_ensemble_consolidated.png
+output/figure_package_publication/case_mindoro_retro_2023__phase4__openoil__comparison_board__2023_03_03_to_2023_03_06__all_scenarios__board__slide__oil_budget_board.png
+output/figure_package_publication/case_mindoro_retro_2023__phase4__openoil__comparison_board__2023_03_03_to_2023_03_06__all_scenarios__board__slide__shoreline_impact_board.png
+output/figure_package_publication/case_mindoro_retro_2023__phase4__openoil__single_map__2023_03_03_to_2023_03_06__all_scenarios__close__paper__shoreline_segment_impacts.png
+output/figure_package_publication/case_mindoro_retro_2023__phase4__openoil__single_scenario__2023_03_03_to_2023_03_06__fixed_base_medium_heavy_proxy__single__paper__oil_budget_timeseries.png
+output/figure_package_publication/case_mindoro_retro_2023__phase4__openoil__single_scenario__2023_03_03_to_2023_03_06__heavier_oil__single__paper__oil_budget_timeseries.png
+output/figure_package_publication/case_mindoro_retro_2023__phase4__openoil__single_scenario__2023_03_03_to_2023_03_06__lighter_oil__single__paper__oil_budget_timeseries.png
+output/figure_package_publication/case_mindoro_retro_2023__phase4__openoil__single_summary__2023_03_03_to_2023_03_06__single__paper__oil_budget_summary.png
+output/figure_package_publication/case_mindoro_retro_2023__phase4__openoil__single_summary__2023_03_03_to_2023_03_06__single__paper__shoreline_arrival.png
+output/figure_package_publication/case_mindoro_retro_2023__phase4_crossmodel_comparability_audit__openoil_only__single_note__2023_03_03_to_2023_03_06__single__paper__crossmodel_comparison_deferred.png
+output/figure_package_publication/figure_4_4A_noaa_mar13_worldview3.png
+output/figure_package_publication/figure_4_4B_noaa_mar14_worldview3.png
+output/figure_package_publication/figure_4_4C_arcgis_mar13_mar14_observed_overlay.png
+output/figure_package_publication/font_audit.csv
+output/figure_package_publication/publication_figure_captions.md
+output/figure_package_publication/publication_figure_inventory.md
+output/figure_package_publication/publication_figure_manifest.json
+output/figure_package_publication/publication_figure_registry.csv
+output/figure_package_publication/publication_figure_talking_points.md
+output/figure_package_publication/thesis_study_context__phase1_study_context__study_box_geography__single_box_reference_map__shared_thesis_context__single__paper__focused_phase1_box_geography_reference.png
+output/figure_package_publication/thesis_study_context__phase1_study_context__study_box_geography__single_box_reference_map__shared_thesis_context__single__paper__mindoro_case_domain_geography_reference.png
+output/figure_package_publication/thesis_study_context__phase1_study_context__study_box_geography__single_box_reference_map__shared_thesis_context__single__paper__prototype_first_code_search_box_geography_reference.png
+output/figure_package_publication/thesis_study_context__phase1_study_context__study_box_geography__single_box_reference_map__shared_thesis_context__single__paper__scoring_grid_bounds_geography_reference.png
+output/figure_package_publication/thesis_study_context__phase1_study_context__study_boxes__single_reference_map__shared_thesis_context__single__paper__thesis_study_boxes_reference.png
+output/figure_package_publication/thesis_study_context__phase1_study_context__study_boxes_archive__archived_reference_map__shared_thesis_context__single__paper__thesis_study_boxes_reference_archive_full_context.png
+output/final_reproducibility_package/README.md
+output/final_reproducibility_package/final_case_registry.csv
+output/final_reproducibility_package/final_config_snapshot_index.csv
+output/final_reproducibility_package/final_log_index.csv
+output/final_reproducibility_package/final_manifest_index.csv
+output/final_reproducibility_package/final_output_catalog.csv
+output/final_reproducibility_package/final_phase_status_registry.csv
+output/final_reproducibility_package/final_reproducibility_manifest.json
+output/final_reproducibility_package/final_reproducibility_summary.md
+output/final_reproducibility_package/launcher_user_guide.md
+output/final_reproducibility_package/phase5_final_verdict.md
+output/final_reproducibility_package/phase5_packaging_sync_memo.md
+output/final_reproducibility_package/repo_submission_manifest.json
+output/final_reproducibility_package/software_versions.csv
+output/final_validation_package/final_validation_benchmark_table.csv
+output/final_validation_package/final_validation_case_registry.csv
+output/final_validation_package/final_validation_chapter_sync_memo.md
+output/final_validation_package/final_validation_claims_guardrails.md
+output/final_validation_package/final_validation_interpretation_memo.md
+output/final_validation_package/final_validation_limitations.csv
+output/final_validation_package/final_validation_main_table.csv
+output/final_validation_package/final_validation_manifest.json
+output/final_validation_package/final_validation_methodology_amendment_memo.md
+output/final_validation_package/final_validation_observation_table.csv
+output/final_validation_package/final_validation_oral_defense_script.md
+output/final_validation_package/final_validation_summary.md
+output/final_validation_package/mindoro_validation_archive_decision.md
+output/phase1_finalization_audit/phase1_final_verdict.md
+output/phase1_finalization_audit/phase1_finalization_memo.md
+output/phase1_finalization_audit/phase1_finalization_status.csv
+output/phase1_finalization_audit/phase1_finalization_status.json
+output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv
+output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_baseline_selection_candidate.yaml
+output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_drifter_registry.csv
+output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_gfs_month_preflight.csv
+output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_loading_audit.csv
+output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_local_input_inventory.csv
+output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_official_adoption_decision.json
+output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_official_adoption_decision.md
+output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_production_manifest.json
+output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_ranking_subset_registry.csv
+output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_ranking_subset_report.md
+output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv
+output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_summary.csv
+output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_rejected_segment_registry.csv
+output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_segment_metrics.csv
+output/phase1_production_rerun/phase1_accepted_segment_registry.csv
+output/phase1_production_rerun/phase1_baseline_selection_candidate.yaml
+output/phase1_production_rerun/phase1_drifter_registry.csv
+output/phase1_production_rerun/phase1_loading_audit.csv
+output/phase1_production_rerun/phase1_local_input_inventory.csv
+output/phase1_production_rerun/phase1_production_manifest.json
+output/phase1_production_rerun/phase1_recipe_ranking.csv
+output/phase1_production_rerun/phase1_recipe_summary.csv
+output/phase1_production_rerun/phase1_rejected_segment_registry.csv
+output/phase1_production_rerun/phase1_segment_metrics.csv
+output/phase2_finalization_audit/phase2_final_verdict.md
+output/phase2_finalization_audit/phase2_finalization_memo.md
+output/phase2_finalization_audit/phase2_finalization_status.csv
+output/phase2_finalization_audit/phase2_finalization_status.json
+output/phase2_finalization_audit/phase2_output_catalog.csv
+output/phase4/CASE_MINDORO_RETRO_2023/budget_fixed_base_medium_heavy_proxy.csv
+output/phase4/CASE_MINDORO_RETRO_2023/budget_heavier_oil.csv
+output/phase4/CASE_MINDORO_RETRO_2023/budget_lighter_oil.csv
+output/phase4/CASE_MINDORO_RETRO_2023/mass_budget_comparison.png
+output/phase4/CASE_MINDORO_RETRO_2023/mass_budget_fixed_base_medium_heavy_proxy.png
+output/phase4/CASE_MINDORO_RETRO_2023/mass_budget_heavier_oil.png
+output/phase4/CASE_MINDORO_RETRO_2023/mass_budget_lighter_oil.png
+output/phase4/CASE_MINDORO_RETRO_2023/phase4_final_verdict.md
+output/phase4/CASE_MINDORO_RETRO_2023/phase4_methodology_sync_memo.md
+output/phase4/CASE_MINDORO_RETRO_2023/phase4_oil_budget_summary.csv
+output/phase4/CASE_MINDORO_RETRO_2023/phase4_oil_budget_timeseries_fixed_base_medium_heavy_proxy.csv
+output/phase4/CASE_MINDORO_RETRO_2023/phase4_oil_budget_timeseries_heavier_oil.csv
+output/phase4/CASE_MINDORO_RETRO_2023/phase4_oil_budget_timeseries_lighter_oil.csv
+output/phase4/CASE_MINDORO_RETRO_2023/phase4_oiltype_comparison.csv
+output/phase4/CASE_MINDORO_RETRO_2023/phase4_run_manifest.json
+output/phase4/CASE_MINDORO_RETRO_2023/phase4_shoreline_arrival.csv
+output/phase4/CASE_MINDORO_RETRO_2023/phase4_shoreline_segments.csv
+output/phase4/CASE_MINDORO_RETRO_2023/qa_phase4_oiltype_comparison.png
+output/phase4/CASE_MINDORO_RETRO_2023/qa_phase4_shoreline_impacts.png
+output/prototype_2016_pygnome_similarity/board_layout_audit.csv
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_01__prototype_2016__24_48_72h__opendrift_vs_pygnome__board.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_01__prototype_2016__24h__opendrift__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_01__prototype_2016__24h__opendrift_p50__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_01__prototype_2016__24h__opendrift_p90__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_01__prototype_2016__24h__pygnome__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_01__prototype_2016__48h__opendrift__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_01__prototype_2016__48h__opendrift_p50__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_01__prototype_2016__48h__opendrift_p90__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_01__prototype_2016__48h__pygnome__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_01__prototype_2016__72h__opendrift__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_01__prototype_2016__72h__opendrift_p50__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_01__prototype_2016__72h__opendrift_p90__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_01__prototype_2016__72h__pygnome__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_06__prototype_2016__24_48_72h__opendrift_vs_pygnome__board.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_06__prototype_2016__24h__opendrift__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_06__prototype_2016__24h__opendrift_p50__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_06__prototype_2016__24h__opendrift_p90__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_06__prototype_2016__24h__pygnome__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_06__prototype_2016__48h__opendrift__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_06__prototype_2016__48h__opendrift_p50__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_06__prototype_2016__48h__opendrift_p90__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_06__prototype_2016__48h__pygnome__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_06__prototype_2016__72h__opendrift__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_06__prototype_2016__72h__opendrift_p50__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_06__prototype_2016__72h__opendrift_p90__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_06__prototype_2016__72h__pygnome__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_17__prototype_2016__24_48_72h__opendrift_vs_pygnome__board.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_17__prototype_2016__24h__opendrift__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_17__prototype_2016__24h__opendrift_p50__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_17__prototype_2016__24h__opendrift_p90__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_17__prototype_2016__24h__pygnome__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_17__prototype_2016__48h__opendrift__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_17__prototype_2016__48h__opendrift_p50__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_17__prototype_2016__48h__opendrift_p90__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_17__prototype_2016__48h__pygnome__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_17__prototype_2016__72h__opendrift__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_17__prototype_2016__72h__opendrift_p50__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_17__prototype_2016__72h__opendrift_p90__single.png
+output/prototype_2016_pygnome_similarity/figures/case_2016_09_17__prototype_2016__72h__pygnome__single.png
+output/prototype_2016_pygnome_similarity/font_audit.csv
+output/prototype_2016_pygnome_similarity/prototype_pygnome_case_registry.csv
+output/prototype_2016_pygnome_similarity/prototype_pygnome_figure_captions.md
+output/prototype_2016_pygnome_similarity/prototype_pygnome_figure_registry.csv
+output/prototype_2016_pygnome_similarity/prototype_pygnome_fss_by_case_window.csv
+output/prototype_2016_pygnome_similarity/prototype_pygnome_kl_by_case_hour.csv
+output/prototype_2016_pygnome_similarity/prototype_pygnome_similarity_by_case.csv
+output/prototype_2016_pygnome_similarity/prototype_pygnome_similarity_manifest.json
+output/prototype_2016_pygnome_similarity/prototype_pygnome_similarity_summary.md
+output/prototype_2016_pygnome_similarity/prototype_pygnome_skipped_cases.csv
+output/prototype_2016_pygnome_similarity/qa_prototype_pygnome_kl_by_case_hour.png
+output/prototype_2016_pygnome_similarity/qa_prototype_pygnome_scorecard.png
+output/repo_cleanup_audit/final_alignment_audit.json
+output/trajectory_gallery/case_dwh_retro_2010_72h__phase3c_ensemble__opendrift__ensemble_overlay__2010_05_21_to_2010_05_23__eventcorridor_overlay.png
+output/trajectory_gallery/case_dwh_retro_2010_72h__phase3c_ensemble__opendrift__ensemble_overlay__2010_05_21_to_2010_05_23__p50_p90_overlays.png
+output/trajectory_gallery/case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__deterministic_track_map__2010_05_20_to_2010_05_23__sampled_particle_paths.png
+output/trajectory_gallery/case_dwh_retro_2010_72h__phase3c_pygnome_comparator__opendrift_vs_pygnome__comparison_overlay__2010_05_21_to_2010_05_23__eventcorridor_overlay.png
+output/trajectory_gallery/case_dwh_retro_2010_72h__phase3c_pygnome_comparator__opendrift_vs_pygnome__comparison_overlay__2010_05_21_to_2010_05_23__per_date_overlays.png
+output/trajectory_gallery/case_mindoro_retro_2023__phase2_official__opendrift__deterministic_track_map__2023_03_03_to_2023_03_06__sampled_particle_paths.png
+output/trajectory_gallery/case_mindoro_retro_2023__phase2_official__opendrift__ensemble_sampled_member_centroids__2023_03_03_to_2023_03_06__member_centroid_paths.png
+output/trajectory_gallery/case_mindoro_retro_2023__phase2_phase3b__opendrift__corridor_hull_view__2023_03_06__p50_p90_hull_overlay.png
+output/trajectory_gallery/case_mindoro_retro_2023__phase3a_benchmark__opendrift_vs_pygnome__comparison_overlay__2023_03_04_to_2023_03_06__eventcorridor_overlay.png
+output/trajectory_gallery/case_mindoro_retro_2023__phase3a_benchmark__opendrift_vs_pygnome__comparison_overlay__2023_03_04_to_2023_03_06__public_obs_overlays.png
+output/trajectory_gallery/case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift_vs_pygnome__comparison_overlay__2023_03_14__pygnome_crossmodel_overlay.png
+output/trajectory_gallery/case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift_vs_pygnome__comparison_overlay__2023_03_14__r1_previous_crossmodel_overlay.png
+output/trajectory_gallery/case_mindoro_retro_2023__phase3b_reinit_primary__observation__forecast_vs_observation_overlay__2023_03_13_to_2023_03_14__seed_vs_target.png
+output/trajectory_gallery/case_mindoro_retro_2023__phase3b_reinit_primary__opendrift__forecast_vs_observation_overlay__2023_03_14__r1_previous_overlay.png
+output/trajectory_gallery/case_mindoro_retro_2023__phase3b_strict__opendrift__forecast_vs_observation_overlay__2023_03_03_to_2023_03_06__source_init_validation_overlay.png
+output/trajectory_gallery/case_mindoro_retro_2023__phase3b_strict__opendrift__forecast_vs_observation_overlay__2023_03_06__obsmask_vs_p50.png
+output/trajectory_gallery/case_mindoro_retro_2023__phase4__openoil__oil_budget_summary__2023_03_03_to_2023_03_06__all_scenarios__mass_budget_comparison.png
+output/trajectory_gallery/case_mindoro_retro_2023__phase4__openoil__oil_budget_timeseries__2023_03_03_to_2023_03_06__fixed_base_medium_heavy_proxy__mass_budget_timeseries.png
+output/trajectory_gallery/case_mindoro_retro_2023__phase4__openoil__oil_budget_timeseries__2023_03_03_to_2023_03_06__heavier_oil__mass_budget_timeseries.png
+output/trajectory_gallery/case_mindoro_retro_2023__phase4__openoil__oil_budget_timeseries__2023_03_03_to_2023_03_06__lighter_oil__mass_budget_timeseries.png
+output/trajectory_gallery/case_mindoro_retro_2023__phase4__openoil__oil_type_comparison__2023_03_03_to_2023_03_06__all_scenarios__oiltype_comparison.png
+output/trajectory_gallery/case_mindoro_retro_2023__phase4__openoil__shoreline_arrival_summary__2023_03_03_to_2023_03_06__all_scenarios__scenario_arrival_bars.png
+output/trajectory_gallery/case_mindoro_retro_2023__phase4__openoil__shoreline_impact_summary__2023_03_03_to_2023_03_06__all_scenarios__shoreline_impacts.png
+output/trajectory_gallery/case_mindoro_retro_2023__phase4__openoil__shoreline_segment_impact_map__2023_03_03_to_2023_03_06__all_scenarios__segment_midpoint_impacts.png
+output/trajectory_gallery/figures_index.md
+output/trajectory_gallery/trajectory_gallery_index.csv
+output/trajectory_gallery/trajectory_gallery_manifest.json
+output/trajectory_gallery_panel/_support/case_dwh_retro_2010_72h__phase3c_pygnome_comparator__pygnome__sampled_track_panel__2010_05_20_to_2010_05_23__support__dwh_pygnome_track.png
+output/trajectory_gallery_panel/case_dwh_retro_2010_72h__phase3c_ensemble__opendrift__panel_board__2010_05_21_to_2010_05_23__panel__dwh_deterministic_vs_ensemble_board.png
+output/trajectory_gallery_panel/case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__panel_board__2010_05_21_to_2010_05_23__panel__dwh_deterministic_board.png
+output/trajectory_gallery_panel/case_dwh_retro_2010_72h__phase3c_pygnome_comparator__opendrift_vs_pygnome__panel_board__2010_05_21_to_2010_05_23__panel__dwh_model_comparison_board.png
+output/trajectory_gallery_panel/case_dwh_retro_2010_72h__phase3c_trajectories__opendrift_vs_pygnome__panel_board__2010_05_20_to_2010_05_23__panel__dwh_trajectory_board.png
+output/trajectory_gallery_panel/case_mindoro_retro_2023__phase2_official__opendrift__panel_board__2023_03_03_to_2023_03_06__panel__mindoro_trajectory_board.png
+output/trajectory_gallery_panel/case_mindoro_retro_2023__phase3a_benchmark__opendrift_vs_pygnome__panel_board__2023_03_04_to_2023_03_06__panel__mindoro_model_comparison_board.png
+output/trajectory_gallery_panel/case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift_vs_pygnome__panel_board__2023_03_14__panel__mindoro_crossmodel_reinit_board.png
+output/trajectory_gallery_panel/case_mindoro_retro_2023__phase3b_legacy_strict__opendrift__panel_board__2023_03_06__panel__mindoro_legacy_march6_board.png
+output/trajectory_gallery_panel/case_mindoro_retro_2023__phase3b_reinit_primary__opendrift__panel_board__2023_03_13_to_2023_03_14__panel__mindoro_primary_reinit_board.png
+output/trajectory_gallery_panel/case_mindoro_retro_2023__phase3b_strict__opendrift__panel_board__2023_03_06__panel__mindoro_strict_march6_board.png
+output/trajectory_gallery_panel/case_mindoro_retro_2023__phase3b_support__opendrift_vs_pygnome__panel_board__2023_03_04_to_2023_03_06__panel__mindoro_eventcorridor_board.png
+output/trajectory_gallery_panel/case_mindoro_retro_2023__phase4__openoil__panel_board__2023_03_03_to_2023_03_06__all_scenarios__panel__mindoro_phase4_oil_budget_board.png
+output/trajectory_gallery_panel/case_mindoro_retro_2023__phase4__openoil__panel_board__2023_03_03_to_2023_03_06__all_scenarios__panel__mindoro_phase4_shoreline_board.png
+output/trajectory_gallery_panel/panel_figure_captions.md
+output/trajectory_gallery_panel/panel_figure_manifest.json
+output/trajectory_gallery_panel/panel_figure_registry.csv
+output/trajectory_gallery_panel/panel_figure_talking_points.md
+scripts/__init__.py
+scripts/build_2016_drifter_benchmark.py
+scripts/build_b1_drifter_context_panel.py
+scripts/build_mindoro_b1_element_count_sensitivity_board.py
+scripts/check_data_source_registry.py
+scripts/check_docs_against_manuscript_claims.py
+scripts/debug_mindoro_march3_4_philsa_5000_apples_to_apples.py
+scripts/debug_mindoro_march3_4_philsa_5000_experiment.py
+scripts/defense_readiness_check.py
+scripts/defense_readiness_common.py
+scripts/experiment_mindoro_march3_4_opendrift_focused_windage_timing_followup.py
+scripts/experiment_mindoro_march3_4_opendrift_settings_sensitivity.py
+scripts/figures/make_fig_5_3_focused_phase1_recipe_ranking.py
+scripts/figures/make_figure_4_5_mindoro_trackA_spatial_comparator_board.ps1
+scripts/generate_mindoro_march3_6_observation_overlay.py
+scripts/panel_verify_paper_results.py
+scripts/run_defense_demo_smoke.ps1
+scripts/run_mindoro_b1_5000_element_experiment.py
+scripts/run_mindoro_march3_4_philsa_5000_experiment.py
+scripts/run_mindoro_march3_4_philsa_5000_pygnome_comparator.py
+scripts/validate_archive_registry.py
+scripts/validate_data_sources_registry.py
+scripts/validate_final_paper_guardrails.py
+scripts/validate_paper_to_output_registry.py
+scripts/watch_march13_14_reinit_status.ps1
+tests/inspect_nc.py
+tests/launcher_ps_helpers.py
+tests/run_tests.ps1
+tests/test_artifact_status.py
+tests/test_benchmark_metrics.py
+tests/test_convergence_after_shoreline.py
+tests/test_defense_artifact_registry.py
+tests/test_defense_claim_boundaries.py
+tests/test_defense_dashboard_imports.py
+tests/test_defense_launcher_matrix.py
+tests/test_defense_panel_smoke.py
+tests/test_displacement_after_convergence.py
+tests/test_displacement_audit.py
+tests/test_dwh_phase3c_scientific_forcing.py
+tests/test_dwh_phase3c_smoke.py
+tests/test_ensemble_config_consistency.py
+tests/test_ensemble_threshold_sensitivity.py
+tests/test_figure_package_publication.py
+tests/test_final_paper_consistency_guardrails.py
+tests/test_final_validation_package.py
+tests/test_forcing_outage_policy.py
+tests/test_forecast_loading.py
+tests/test_generate_mindoro_march3_6_observation_overlay.py
+tests/test_gnome_comparison.py
+tests/test_horizon_survival_audit.py
+tests/test_init_mode_sensitivity_r1.py
+tests/test_io_recipe_provenance.py
+tests/test_launcher_matrix_metadata.py
+tests/test_launcher_menu_docs_consistency.py
+tests/test_march6_recovery_sensitivity.py
+tests/test_mindoro_local_recipe_experiment.py
+tests/test_mindoro_mar09_12_multisource_experiment.py
+tests/test_mindoro_march13_14_phase1_focus_trial.py
+tests/test_mindoro_march3_4_philsa_5000_experiment.py
+tests/test_no_draft_version_labels.py
+tests/test_official_rerun_r1.py
+tests/test_panel_b1_drifter_context.py
+tests/test_phase1_finalization_audit.py
+tests/test_phase1_production_rerun.py
+tests/test_phase2_finalization_audit.py
+tests/test_phase3b_extended_public.py
+tests/test_phase3b_extended_public_scored.py
+tests/test_phase3b_extended_public_scored_march13_14_reinit.py
+tests/test_phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison.py
+tests/test_phase3b_extended_public_scored_march23.py
+tests/test_phase3b_forensics.py
+tests/test_phase3b_multidate_public.py
+tests/test_phase3b_post_recipe_decision.py
+tests/test_phase3b_scoring.py
+tests/test_phase3c_dwh_pygnome_comparator.py
+tests/test_phase3c_external_case_ensemble_comparison.py
+tests/test_phase3c_external_case_run.py
+tests/test_phase3c_external_case_setup.py
+tests/test_phase4_crossmodel_comparability_audit.py
+tests/test_phase4_oiltype_and_shoreline.py
+tests/test_phase5_launcher_and_docs_sync.py
+tests/test_prep_outage_policy.py
+tests/test_prototype_2016_display_review.py
+tests/test_prototype_legacy_bundle_restore.py
+tests/test_prototype_legacy_final_figures.py
+tests/test_prototype_legacy_phase4_pygnome_comparator.py
+tests/test_prototype_pygnome_similarity_summary.py
+tests/test_public_obs_appendix.py
+tests/test_pygnome_public_comparison.py
+tests/test_recipe_sensitivity.py
+tests/test_recipe_sensitivity_r1_multibranch.py
+tests/test_scoring_grid.py
+tests/test_shoreline_mask.py
+tests/test_source_history_reconstruction_r1.py
+tests/test_start_ps1_interactive_navigation.py
+tests/test_start_ps1_validate_matrix.py
+tests/test_startup_prompt_policy.py
+tests/test_study_box_catalog.py
+tests/test_trajectory_gallery_build.py
+tests/test_trajectory_gallery_panel_polish.py
+tests/test_transport_retention_fix.py
+tests/test_ui_app_smoke.py
+tests/test_ui_data_access.py
+tests/test_ui_display_vocabulary.py
+tests/test_ui_metric_cards.py
+tests/test_ui_readonly_support.py
+tests/test_validate_launcher_matrix.py

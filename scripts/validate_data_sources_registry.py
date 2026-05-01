@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -79,9 +80,14 @@ SECRET_PATTERNS = (
 MISSING_MARKERS = (
     "optional_missing:",
     "missing_optional:",
+    "placeholder_missing:",
+    "not_stored:",
+    "not_present:",
     "not stored:",
     "not present:",
 )
+
+_TRACKED_PATHS_CACHE: set[str] | None = None
 
 
 def _flatten(value: Any) -> str:
@@ -190,6 +196,30 @@ def _manifest_path_from_value(value: str) -> str:
     return text.split(" - ", 1)[0].strip()
 
 
+def _tracked_repo_paths() -> set[str]:
+    global _TRACKED_PATHS_CACHE
+    if _TRACKED_PATHS_CACHE is not None:
+        return _TRACKED_PATHS_CACHE
+
+    output = subprocess.check_output(
+        ["git", "ls-files", "-z"],
+        cwd=REPO_ROOT,
+        encoding="utf-8",
+        errors="replace",
+    )
+    _TRACKED_PATHS_CACHE = {item.replace("\\", "/") for item in output.split("\0") if item}
+    return _TRACKED_PATHS_CACHE
+
+
+def _tracked_path_exists(path_text: str) -> bool:
+    normalized = path_text.replace("\\", "/").strip().rstrip("/")
+    tracked_paths = _tracked_repo_paths()
+    if normalized in tracked_paths:
+        return True
+    prefix = normalized + "/"
+    return any(path.startswith(prefix) for path in tracked_paths)
+
+
 def _validate_manifest_paths(entry_id: str, entry: dict[str, Any], problems: list[str]) -> None:
     manifests = _as_list(entry.get("repo_manifests"))
     if not manifests:
@@ -210,14 +240,12 @@ def _validate_manifest_paths(entry_id: str, entry: dict[str, Any], problems: lis
             problems.append(f"{entry_id}: repo_manifests should contain local repo paths, not URLs: {manifest_path}")
             continue
 
-        local_path = (REPO_ROOT / manifest_path).resolve()
-        try:
-            local_path.relative_to(REPO_ROOT)
-        except ValueError:
+        candidate = Path(manifest_path.replace("\\", "/"))
+        if candidate.is_absolute() or ".." in candidate.parts:
             problems.append(f"{entry_id}: repo_manifest path escapes the repository: {manifest_path}")
             continue
 
-        if local_path.exists():
+        if _tracked_path_exists(manifest_path):
             continue
         if optional_missing and any(word in value.lower() for word in ("missing", "optional", "not stored", "not present")):
             continue
@@ -359,7 +387,7 @@ def main() -> int:
     print("- Storage counts:")
     for storage in sorted(storage_counts):
         print(f"  - {storage}: {storage_counts[storage]}")
-    print("- Required fields, claim boundaries, secret scan, and local manifest paths are valid.")
+    print("- Required fields, claim boundaries, secret scan, and tracked manifest paths are valid.")
     return 0
 
 

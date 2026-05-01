@@ -1,0 +1,128 @@
+{
+  "git_head": "263ca5fb1089743f3987f79aa77c530227a6583c",
+  "timestamp_utc": "2026-05-01T15:03:00.193546+00:00",
+  "task": "registry path reconciliation for repo consistency CI",
+  "failing_commands_before_fix": [
+    {
+      "command": "python -m pytest tests/test_final_paper_consistency_guardrails.py -q",
+      "status": "FAILED_IN_GITHUB_ACTIONS",
+      "detail": "CI reported failures in test_paper_to_output_registry and test_data_sources_registry because registries referenced missing tracked paths as existing outputs."
+    },
+    {
+      "command": "python scripts/validate_paper_to_output_registry.py",
+      "status": "LOCAL_FALSE_PASS_BEFORE_FIX",
+      "detail": "Before the fix, local validation used filesystem existence and could pass when ignored/raw output folders were present outside git tracking."
+    },
+    {
+      "command": "python scripts/validate_data_sources_registry.py",
+      "status": "LOCAL_FALSE_PASS_BEFORE_FIX",
+      "detail": "Before the fix, local validation used filesystem existence and could pass when ignored/raw output folders were present outside git tracking."
+    },
+    {
+      "command": "python scripts/validate_final_paper_guardrails.py",
+      "status": "LOCAL_FALSE_PASS_BEFORE_FIX",
+      "detail": "Before the fix, this inherited the same filesystem-based registry checks."
+    }
+  ],
+  "root_cause": "Paper-to-output and data-source registries pointed some primary/external evidence and manifest entries at raw CASE_* paths that were available locally but not tracked in the submitted repository. The validators checked filesystem presence instead of git-tracked package presence, so local runs could mask clean-checkout CI failures.",
+  "inventory": "output/ci_guardrail_hotfix/tracked_paths_inventory.txt records tracked output/config/docs/scripts/tests paths used for the reconciliation.",
+  "registry_entries_updated_to_tracked_curated_paths": [
+    "table_3_11",
+    "table_3_12",
+    "table_4_5",
+    "table_4_6",
+    "table_4_7",
+    "output_mindoro_case_root",
+    "table_4_8",
+    "output_track_a_comparator_root",
+    "table_3_13",
+    "table_4_9",
+    "table_4_10",
+    "output_dwh_case_root",
+    "mindoro_noaa_nesdis_march13_14_public_arcgis",
+    "dwh_public_daily_observation_masks",
+    "copernicus_cmems_currents",
+    "noaa_ncep_gfs_winds",
+    "hycom_gofs_currents",
+    "ecmwf_era5_winds",
+    "copernicus_cmems_wave_stokes"
+  ],
+  "old_raw_paths_marked_optional_missing": [
+    "output/CASE_MINDORO_RETRO_2023/forecast/...",
+    "output/CASE_MINDORO_RETRO_2023/ensemble/...",
+    "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public...",
+    "output/CASE_MINDORO_RETRO_2023/..._pygnome_comparison...",
+    "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_setup/...",
+    "output/CASE_DWH_RETRO_2010_72H/dwh_phase3c_scientific_forcing_ready/...",
+    "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/...",
+    "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_ensemble_comparison/...",
+    "output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator/..."
+  ],
+  "docs_corrected": [
+    "README.md",
+    "docs/DATA_SOURCES.md",
+    "docs/PAPER_OUTPUT_REGISTRY.md",
+    "docs/PAPER_TO_REPO_CROSSWALK.md",
+    "output/Phase 3B March13-14 Final Output/README.md",
+    "output/Phase 3C DWH Final Output/README.md"
+  ],
+  "validators_changed": [
+    "scripts/validate_paper_to_output_registry.py now checks git-tracked paths, supports explicit optional/missing markers with reasons, rejects URL/escaping paths, and fails output_exists=true with no tracked match.",
+    "scripts/validate_data_sources_registry.py now checks git-tracked manifest paths and accepts optional/missing markers only when explicit."
+  ],
+  "validation_commands_rerun": [
+    {
+      "command": "python -m pytest tests/test_final_paper_consistency_guardrails.py -q",
+      "status": "PASS",
+      "detail": "9 passed in 0.79s after registry/path reconciliation."
+    },
+    {
+      "command": "python scripts/validate_paper_to_output_registry.py",
+      "status": "PASS",
+      "detail": "51 entries checked; 0 errors; 0 warnings. Validator now resolves local paths against git tracked files."
+    },
+    {
+      "command": "python scripts/validate_data_sources_registry.py",
+      "status": "PASS",
+      "detail": "13 source groups checked; required fields, claim boundaries, secret scan, and tracked manifest paths passed."
+    },
+    {
+      "command": "python scripts/validate_final_paper_guardrails.py",
+      "status": "PASS",
+      "detail": "Checked tracked labels, launcher routing, claim boundaries, alignment facts, registries, and p90 semantics."
+    },
+    {
+      "command": "python scripts/validate_archive_registry.py",
+      "status": "PASS",
+      "detail": "Archive registry validation passed against launcher matrix."
+    },
+    {
+      "command": "pwsh ./start.ps1 -ValidateMatrix -NoPause",
+      "status": "LOCAL_LIMITATION",
+      "detail": "Local shell does not provide pwsh; did not fail the hotfix for missing local PowerShell."
+    },
+    {
+      "command": "python -m src.utils.validate_launcher_matrix --no-write",
+      "status": "PASS",
+      "detail": "Fallback launcher matrix validation passed: 27 entries, 27 pass, 0 fail."
+    },
+    {
+      "command": "python -m pytest tests -q",
+      "status": "LOCAL_ENV_FAIL_EXPECTED",
+      "detail": "Collection failed because local Python lacks heavy/science dependencies including numpy, pandas, geopandas, xarray, and yaml. Cheap guardrail tests passed separately."
+    },
+    {
+      "command": "runtime-constructed forbidden-label scan over git ls-files",
+      "status": "PASS",
+      "detail": "No tracked text file contains the forbidden manuscript label."
+    }
+  ],
+  "claim_boundaries_preserved": [
+    "PyGNOME remains comparator-only and never observation truth.",
+    "DWH remains external transfer validation only and not Mindoro recalibration.",
+    "Mindoro B1 March 13-14 remains the only main Philippine public-observation validation claim.",
+    "p50 is P >= 0.50 and preferred; p90 is P >= 0.90 and conservative support/comparison only."
+  ],
+  "no_scientific_output_fabricated": true,
+  "no_expensive_science_rerun": true
+}

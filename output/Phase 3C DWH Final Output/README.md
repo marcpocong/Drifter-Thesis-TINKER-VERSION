@@ -45,4 +45,4 @@ Curated publication groups:
 
 Packaging rule:
 - This folder copies presentation artifacts from the stored publication package and writes summary derivatives from stored tables only.
-- It does not rename or replace the canonical scientific directories under `output/CASE_DWH_RETRO_2010_72H/`.
+- Raw `output/CASE_DWH_RETRO_2010_72H/...` paths are rerun/staging provenance and are not tracked as the reviewer first-open folder in the submitted package.

@@ -58,6 +58,7 @@ output/final_reproducibility_package/*
 output/ci_guardrail_hotfix/*
 !output/ci_guardrail_hotfix/*.json
 !output/ci_guardrail_hotfix/*.md
+!output/ci_guardrail_hotfix/*.txt
 !output/trajectory_gallery/
 output/trajectory_gallery/*
 !output/trajectory_gallery/*.csv
