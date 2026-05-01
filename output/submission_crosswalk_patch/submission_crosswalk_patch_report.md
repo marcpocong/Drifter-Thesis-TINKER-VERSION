@@ -20,33 +20,79 @@ For this recovery run, `scripts/figures/make_descriptive_label_manuscript_figure
 - Action: committed as safe preflight helper.
 - Preflight script commit: `b814a030001eeedaf4aa6b059821cf28274b95c7`
 
-Prompt 0 contract artifacts are being preserved before the crosswalk/registry patch. Preflight contract commit and push metadata will be filled in after those steps.
+Prompt 0 contract artifacts were also committed and pushed before patching:
 
-## Crosswalk / Registry Patch
-
-Not yet applied.
+- Preflight contract/report commit: `e1f1cad6ee9ab3f6c185503da2275b99c7d55435`
+- Preflight push: `origin/main`
 
 ## Files Changed By Crosswalk / Registry Patch
 
-Pending.
+- `docs/PAPER_TO_REPO_CROSSWALK.md`
+- `config/paper_to_output_registry.yaml`
+- `docs/PAPER_OUTPUT_REGISTRY.md`
+
+No scientific output files were changed.
 
 ## Stale Labels Corrected
 
-Pending.
+- Table 3.11 changed from stale Mindoro deterministic product setup to final Mindoro March 13-14 primary validation case definition.
+- Table 3.12 changed from stale Mindoro ensemble/probability products to final Mindoro manuscript labels.
+- Phase 2 deterministic and ensemble/probability product concepts were moved under Tables 3.9 and 3.10.
+- Table 4.8 now carries the Mindoro same-case OpenDrift-PyGNOME comparator detail.
+- DWH daily/event-corridor FSS is mapped to Table 4.9.
+- DWH event-corridor geometry diagnostics are mapped to Table 4.10.
+- Secondary 2016 direct drifter-track support starts at Table 4.11, with 4.11A and 4.11B assigned to scorecard summary and endpoint/ensemble-footprint diagnostics.
+- Legacy 2016 OpenDrift-versus-PyGNOME mean FSS is mapped to Table 4.12.
+- Table 4.13 is mapped to synthesis of principal findings and thesis use.
+- Figure 4.1 changed from generic study-box context to the focused Phase 1 accepted February-April segment map.
+- Figure 4.2 changed from generic geography/domain reference to the focused Phase 1 recipe ranking chart.
+- Figure 4.3 was added as the Mindoro product-family board trace.
+- Figures 4.7-4.9 were aligned to the final DWH board sequence.
+- Figures 4.10-4.12 were aligned to the three named 2016 secondary drifter-track cases.
+- Figure 4.13 was changed from legacy fate/shoreline support to the legacy 2016 OpenDrift-versus-PyGNOME overall mean FSS chart.
 
 ## Validators Run
 
-Pending.
+1. `python scripts/validate_paper_to_output_registry.py`
+2. `python scripts/panel_verify_paper_results.py`
 
 ## Validator Results
 
-Pending.
+`python scripts/validate_paper_to_output_registry.py` passed:
+
+```text
+Paper-to-output registry validation: PASS
+Entries checked: 57
+Errors: 0
+Warnings: 0
+```
+
+`python scripts/panel_verify_paper_results.py` did not start because the local environment lacks PyYAML:
+
+```text
+ModuleNotFoundError: No module named 'yaml'
+```
+
+No dependency install or download was attempted.
+
+## Git Diff Summary Before Final Commit
+
+```text
+config/paper_to_output_registry.yaml | 1067 +++++++++++++++++++---------------
+docs/PAPER_OUTPUT_REGISTRY.md        |   86 +--
+docs/PAPER_TO_REPO_CROSSWALK.md      |  157 +++--
+3 files changed, 733 insertions(+), 577 deletions(-)
+```
 
 ## Remaining Warnings
 
-- `output/submission_crosswalk_patch/submission_crosswalk_patch_report.md` is under `output/`, which is ignored by `.gitignore`; it is force-added only because this prompt explicitly requires it.
-- No scientific reruns or remote downloads were performed.
-- No scientific outputs were changed.
+- The optional final-layout placeholders for Figures 4.1, 4.2, 4.3, and 4.6 are explicitly marked `optional_missing` in the registry with reasons; their stored source CSVs/manifests remain the reviewer-facing evidence.
+- `python scripts/panel_verify_paper_results.py` requires the unavailable local `yaml` module.
+- Git reported CRLF conversion warnings for edited Markdown files on this Windows checkout.
+
+## Scientific Rerun / Download Statement
+
+No scientific reruns, launcher entries, model simulations, remote downloads, or data downloads were performed.
 
 ## Final Push Note
 

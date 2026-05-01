@@ -1,42 +1,60 @@
 # Paper-to-Output Registry
 
-This registry maps thesis-facing tables and figures to the stored outputs already present in this repository.
+This registry is the short reviewer-facing companion to [`config/paper_to_output_registry.yaml`](../config/paper_to_output_registry.yaml). It maps final manuscript labels to stored outputs already present in this repository.
 
-- This registry is read-only.
-- It is intended for panel review, defense inspection, and audit.
-- It does not promote experimental or sensitivity-only outputs into thesis-facing results.
-- The 5,000-element personal experiment is intentionally excluded from the default thesis-facing panel registry.
-
-## How to read this file
-
-- "This table is reproduced from..." means the manuscript value should be traceable to the listed stored CSV or package summary.
-- "This figure is rebuilt from..." means the current publication or defense figure is a packaging-layer rebuild from stored outputs only.
-- "Comparator support only" means the output helps explain behavior but is not observational truth and is not a co-primary validation claim.
-- "Support/context only" means the output is useful for interpretation, not for the main validation claim.
-- Data-source provenance for external observation, drifter, forcing, shoreline, oil-property, and model/tool sources is tracked separately in [DATA_SOURCES.md](DATA_SOURCES.md) and [config/data_sources.yaml](../config/data_sources.yaml).
+- It is read-only.
+- It does not promote experimental, archive-only, or sensitivity-only outputs.
+- It does not run scientific workflows or download data.
+- Raw `output/CASE_MINDORO_RETRO_2023` and `output/CASE_DWH_RETRO_2010_72H` paths are provenance/staging context only; curated package paths lead.
 
 ## Registry
 
 | Manuscript item | Plain-language mapping | Stored output path(s) | Notes |
 | --- | --- | --- | --- |
-| `Table 4.5` | This table is reproduced from the stored B1 scorecard for the promoted March 13 -> March 14 R1 row. | `output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_summary.csv` | Main Mindoro validation row only. Raw `output/CASE_MINDORO_RETRO_2023/...` paths are optional rerun/staging provenance in the machine registry. |
-| `Table 4.6` | This table is reproduced from the stored B1 branch-survival and displacement diagnostics. | `output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_branch_survival_summary.csv`; `output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_branch_pairing_manifest.csv`; `output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_diagnostics.csv` | Observation-independence note remains explicit. |
-| `Table 4.7` | This table is reproduced from the stored B1 overlap and neighborhood-skill outputs. | `output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_fss_by_window.csv`; `output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_summary.csv` | B1 supports neighborhood-scale usefulness, not exact 1 km reproduction. |
-| `Figure 4.4` | This figure is rebuilt from the stored B1 board package. | `output/figure_package_publication/case_mindoro_retro_2023__phase3b_reinit_primary__opendrift__comparison_board__2023_03_13_to_2023_03_14__board__slide__mindoro_primary_validation_board.png` | Read-only packaging from stored outputs only. |
-| `Table 4.9` | This table is reproduced from the stored Track A OpenDrift-vs-PyGNOME comparator scorecards. | `output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_summary.csv`; `output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_model_ranking.csv` | Comparator support only. PyGNOME is not the observational scoring reference. |
-| `Figure 4.5` | This figure is rebuilt from the stored Track A publication board. | `output/figure_package_publication/Figure_4_5_Mindoro_TrackA_OpenDrift_PyGNOME_spatial_board.png`; `output/figure_package_publication/case_mindoro_retro_2023__phase3a_reinit_crossmodel__opendrift_vs_pygnome__comparison_board__2023_03_14__board__slide__mindoro_crossmodel_board.png` | Comparator support only. |
-| `Figure 4.6` | This figure is backed by the stored Track A ranking CSV. | `output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_model_ranking.csv` | No dedicated canonical Track A bar-chart PNG was found in the current stored package; use the ranking CSV as the machine-readable source. |
-| `Table 4.10` | This table is reproduced from the stored DWH deterministic, ensemble, and comparator FSS summaries. | `output/Phase 3C DWH Final Output/summary/comparison/phase3c_main_scorecard.csv` | DWH is external transfer validation, not Mindoro recalibration. Raw DWH FSS-by-window paths are optional rerun/staging provenance in the machine registry. |
-| `Table 4.11` | This table is reproduced from the stored DWH corridor-overlap and geometry diagnostics. | `output/Phase 3C DWH Final Output/summary/deterministic/phase3c_eventcorridor_summary.csv`; `output/Phase 3C DWH Final Output/summary/ensemble/phase3c_ensemble_eventcorridor_summary.csv`; `output/Phase 3C DWH Final Output/summary/comparator_pygnome/phase3c_dwh_pygnome_eventcorridor_summary.csv` | PyGNOME remains comparator-only. |
-| `Figure 4.7` | This figure is rebuilt from the stored DWH deterministic board. | `output/Phase 3C DWH Final Output/publication/opendrift_deterministic/dwh_24h_48h_72h_deterministic_footprint_overview_board.png`; `output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__daily_deterministic_footprint_overview_board.png` | Read-only packaging from stored outputs only. |
-| `Figure 4.8` | This figure is rebuilt from the stored DWH deterministic / p50 / p90 comparison board. | `output/Phase 3C DWH Final Output/publication/opendrift_ensemble/dwh_2010-05-21_to_2010-05-23_eventcorridor_observed_deterministic_mask_p50_mask_p90_board.png`; `output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__observed_deterministic_mask_p50_mask_p90_board.png` | `p50` is the preferred probabilistic extension; `p90` is support/comparison only. |
-| `Figure 4.9` | This figure is rebuilt from the stored DWH deterministic / p50 / PyGNOME comparator board. | `output/Phase 3C DWH Final Output/publication/comparator_pygnome/dwh_2010-05-21_to_2010-05-23_eventcorridor_observed_deterministic_mask_p50_pygnome_board.png`; `output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__opendrift_vs_pygnome__comparison_board__2010_05_21_to_2010_05_23__board__slide__observed_deterministic_mask_p50_pygnome_board.png` | Comparator support only. PyGNOME is not the observational scoring reference. |
-| `Table F2` | This support table is reproduced from the stored Mindoro oil-budget summary. | `output/phase4/CASE_MINDORO_RETRO_2023/phase4_oil_budget_summary.csv`; `output/phase4/CASE_MINDORO_RETRO_2023/phase4_shoreline_arrival.csv` | Support/context only. Not observational truth. |
+| `Table 3.7` | Active Phase 1 provenance lane and adopted selection rules. | `output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv`; `phase1_ranking_subset_registry.csv`; `phase1_official_adoption_decision.md` | Provenance only. |
+| `Table 3.8` | Four-recipe family tested in the focused Mindoro provenance lane. | `output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv` | Recipe-selection support only. |
+| `Table 3.9` | Final deterministic and ensemble settings used for Mindoro transport-core products. | `output/final_reproducibility_package/final_manifest_index.csv`; `output/final_validation_package/final_validation_manifest.json` | Product settings, not validation by itself. |
+| `Table 3.10` | Standardized product families produced in Phase 2. | `output/final_reproducibility_package/final_output_catalog.csv`; `output/final_validation_package/final_validation_manifest.json` | `mask_p50` preferred; `mask_p90` conservative support only. |
+| `Table 3.11` | Final Mindoro March 13–14 primary validation case definition. | `output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_summary.csv`; `march13_14_reinit_run_manifest.json` | Only main Philippine public-observation validation claim. |
+| `Table 3.12` | Final Mindoro manuscript labels. | `docs/FINAL_SUBMISSION_ALIGNMENT_CONTRACT.md`; `docs/FINAL_PAPER_ALIGNMENT.md` | `B1` and `Track A` are internal aliases only. |
+| `Table 4.1` | Result groups, evidence roles, and interpretation boundaries. | `docs/FINAL_SUBMISSION_ALIGNMENT_CONTRACT.md`; `output/final_validation_package/final_validation_claims_guardrails.md` | Boundary table only. |
+| `Table 4.2` | Focused Mindoro Phase 1 accepted-pool summary. | `phase1_accepted_segment_registry.csv`; `phase1_ranking_subset_registry.csv` | Provenance corpus counts. |
+| `Table 4.3` | Focused Mindoro Phase 1 recipe ranking. | `phase1_recipe_ranking.csv` | NCS recipe provenance. |
+| `Table 4.4` | Standardized Forecast Products used in later scoring. | `output/final_reproducibility_package/final_output_catalog.csv`; `output/final_validation_package/final_validation_case_registry.csv` | Products used by scoring. |
+| `Table 4.5` | Mindoro primary validation FSS by neighborhood window. | `output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_fss_by_window.csv` | Coastal-neighborhood usefulness only. |
+| `Table 4.6` | Mindoro primary validation branch survival and displacement diagnostics. | `march13_14_reinit_branch_survival_summary.csv`; `march13_14_reinit_diagnostics.csv` | Scoreable branch, not exact-grid success. |
+| `Table 4.7` | Mindoro primary validation overlap and neighborhood FSS diagnostics. | `march13_14_reinit_summary.csv`; `march13_14_reinit_fss_by_window.csv` | IoU and Dice are zero. |
+| `Table 4.8` | Mindoro same-case OpenDrift–PyGNOME comparator detail. | `output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_summary.csv`; `march13_14_reinit_crossmodel_model_ranking.csv` | Comparator-only; PyGNOME is not truth. |
+| `Table 4.9` | Deepwater Horizon daily and event-corridor mean FSS summary. | `output/Phase 3C DWH Final Output/summary/comparison/phase3c_main_scorecard.csv` | DWH external transfer only. |
+| `Table 4.10` | Deepwater Horizon event-corridor geometry diagnostics. | `phase3c_eventcorridor_summary.csv`; `phase3c_ensemble_eventcorridor_summary.csv`; `phase3c_dwh_pygnome_eventcorridor_summary.csv` | PyGNOME comparator-only. |
+| `Table 4.11` | Secondary 2016 direct drifter-track benchmark summary. | `output/2016_drifter_benchmark/scorecard.csv`; `manifest.json` | Support only. |
+| `Table 4.11A` | Secondary 2016 scorecard summary values. | `output/2016_drifter_benchmark/scorecard.csv`; `scorecard.json` | Support only. |
+| `Table 4.11B` | Secondary 2016 endpoint and ensemble-footprint diagnostics from the scorecards. | `output/2016_drifter_benchmark/scorecard.csv`; `scorecard.json` | Support only. |
+| `Table 4.12` | Legacy 2016 OpenDrift-versus-PyGNOME mean FSS by case, support surface, and neighborhood window. | `output/prototype_2016_pygnome_similarity/prototype_pygnome_fss_by_case_window.csv`; `output/2016 Legacy Runs FINAL Figures/summary/phase3a/prototype_pygnome_fss_by_case_window.csv` | Legacy comparator support only. |
+| `Table 4.13` | Synthesis of principal findings and thesis use. | `docs/FINAL_SUBMISSION_ALIGNMENT_CONTRACT.md`; `output/final_validation_package/final_validation_summary.md` | Synthesis only. |
+| `Figure 4.1` | Focused Phase 1 accepted February–April segment map. | `phase1_accepted_segment_registry.csv`; `phase1_ranking_subset_registry.csv` | Stored segment registries are the trace source. |
+| `Figure 4.2` | Focused Phase 1 recipe ranking chart. | `phase1_recipe_ranking.csv` | Stored ranking CSV is the trace source. |
+| `Figure 4.3` | Mindoro product-family board with deterministic, probability, and threshold surfaces. | `output/final_reproducibility_package/final_output_catalog.csv`; Phase 2 publication products | Product-family support only. |
+| `Figure 4.4` | Mindoro primary validation board. | `output/Phase 3B March13-14 Final Output/publication/opendrift_primary/mindoro_primary_validation_board.png` | Primary Mindoro visualization. |
+| `Figure 4.4A` | NOAA-published March 13 WorldView-3 analysis map. | `output/Phase 3B March13-14 Final Output/publication/observations/figure_4_4A_noaa_mar13_worldview3.png` | Seed observation support. |
+| `Figure 4.4B` | NOAA-published March 14 WorldView-3 analysis map. | `output/Phase 3B March13-14 Final Output/publication/observations/figure_4_4B_noaa_mar14_worldview3.png` | Target observation support. |
+| `Figure 4.4C` | ArcGIS overlay of March 13 and March 14 observed oil-spill extents. | `output/Phase 3B March13-14 Final Output/publication/observations/figure_4_4C_arcgis_mar13_mar14_observed_overlay.png` | Observation-pair context. |
+| `Figure 4.5` | Mindoro same-case OpenDrift–PyGNOME spatial comparator board. | `output/Phase 3B March13-14 Final Output/publication/comparator_pygnome/Figure_4_5_Mindoro_TrackA_OpenDrift_PyGNOME_spatial_board.png` | Comparator-only. |
+| `Figure 4.6` | Mindoro same-case OpenDrift–PyGNOME comparator mean FSS summary. | `march13_14_reinit_crossmodel_model_ranking.csv` | Comparator-only. |
+| `Figure 4.7` | DWH observed, deterministic, mask_p50, and PyGNOME event-corridor board. | `output/Phase 3C DWH Final Output/publication/comparator_pygnome/dwh_2010-05-21_to_2010-05-23_eventcorridor_observed_deterministic_mask_p50_pygnome_board.png` | DWH external transfer. |
+| `Figure 4.8` | DWH 24 h, 48 h, and 72 h mask_p50, mask_p90, and PyGNOME overview board. | `output/Phase 3C DWH Final Output/publication/comparator_pygnome/dwh_24h_48h_72h_mask_p50_mask_p90_vs_pygnome_three_row_overview_board.png` | `mask_p90` conservative support only. |
+| `Figure 4.9` | DWH 48 h observed, deterministic, mask_p50, and PyGNOME board. | `output/Phase 3C DWH Final Output/publication/comparator_pygnome/dwh_2010-05-22_48h_observed_deterministic_mask_p50_pygnome_board.png` | Comparator-only for PyGNOME. |
+| `Figure 4.10` | CASE_2016-09-01 secondary drifter-track benchmark map panel. | `output/2016_drifter_benchmark/case_boards/CASE_2016-09-01_drifter_track_benchmark.png` | Support only. |
+| `Figure 4.11` | CASE_2016-09-06 secondary drifter-track benchmark map panel. | `output/2016_drifter_benchmark/case_boards/CASE_2016-09-06_drifter_track_benchmark.png` | Support only. |
+| `Figure 4.12` | CASE_2016-09-17 secondary drifter-track benchmark map panel. | `output/2016_drifter_benchmark/case_boards/CASE_2016-09-17_drifter_track_benchmark.png` | Support only. |
+| `Figure 4.13` | Legacy 2016 OpenDrift-versus-PyGNOME overall mean FSS chart. | `output/prototype_2016_pygnome_similarity/qa_prototype_pygnome_scorecard.png`; `prototype_pygnome_fss_by_case_window.csv` | Legacy comparator support only. |
 
-## Important interpretation boundaries
+## Important Interpretation Boundaries
 
-- `B1` is the only main Mindoro validation row for the thesis-facing panel story.
-- `Track A` is comparator support only. It compares OpenDrift and PyGNOME on the same case, but PyGNOME is not the scoring reference.
-- `DWH` is a separate external transfer-validation lane. It does not recalibrate Mindoro.
-- `Oil-type` and `shoreline-arrival` outputs are support/context only.
-- Experimental or sensitivity-only outputs, including the 5,000-element personal experiment, are excluded from the default panel-facing registry.
+- Primary Mindoro March 13–14 is the only main Philippine public-observation validation claim.
+- It supports coastal-neighborhood usefulness only, not exact 1 km spill-footprint reproduction.
+- PyGNOME is comparator-only.
+- DWH is external transfer only.
+- Oil-type and shoreline outputs are support/context only.
+- Secondary 2016 outputs are support only.
+- `mask_p50` is the preferred probabilistic footprint; `mask_p90` is conservative support only.
