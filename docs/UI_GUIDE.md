@@ -2,7 +2,9 @@
 
 ## Purpose
 
-The Streamlit dashboard is a read-only thesis review surface over already packaged artifacts. It presents stored outputs, figures, registries, and governance notes; it must not rerun science, mutate outputs, rewrite manifests, edit configs, or reinterpret stored result values.
+The Streamlit dashboard is a read-only final-paper review surface over already packaged artifacts. It presents stored outputs, figures, registries, and governance notes; it must not rerun science, mutate outputs, rewrite manifests, edit configs, or reinterpret stored result values.
+
+Use [FINAL_PAPER_ALIGNMENT.md](FINAL_PAPER_ALIGNMENT.md) as the source-of-truth bridge for current manuscript alignment. Use [DATA_SOURCES.md](DATA_SOURCES.md) and [ARCHIVE_GOVERNANCE.md](ARCHIVE_GOVERNANCE.md) for provenance and archive routing.
 
 ## Layout System
 
@@ -75,7 +77,7 @@ Panel-friendly mode is the default. It should show the main defense story first:
 
 Advanced mode exposes technical inspection layers:
 
-- B1 Recipe Provenance — Not Truth Mask
+- B1 Recipe Provenance - Not Truth Mask
 - Oil-Type/Shoreline Comparator Availability
 - Trajectory Explorer
 - Raw/panel galleries and registry previews where available
@@ -91,7 +93,7 @@ Keep these claims stable across page text, labels, captions, and export views:
 - B1 supports coastal-neighborhood usefulness, not exact 1 km overlap.
 - The March 13-14 B1 case keeps the observation-independence / reinitialization note visible.
 - Mindoro Track A and PyGNOME are comparator-only support.
-- DWH is external transfer validation; it does not recalibrate Mindoro.
+- DWH is external transfer validation only; it does not recalibrate Mindoro.
 - Mindoro oil-type and shoreline outputs are support/context only.
 - Legacy/archive outputs are preserved for provenance, audit, and reproducibility only.
 - UI/publication packages are presentation and governance surfaces over stored outputs only.

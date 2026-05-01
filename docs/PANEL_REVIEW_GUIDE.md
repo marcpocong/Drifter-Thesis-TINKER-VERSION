@@ -1,8 +1,9 @@
 # Panel Review Guide
 
-This guide is for panel members who want to inspect the stored thesis outputs, verify that the software matches the manuscript, and stay inside the final defended evidence boundaries.
+This guide is for panel members who want to inspect stored outputs, verify that the software matches the final manuscript alignment, and stay inside the final defended evidence boundaries.
 
 The practical rule is simple: panel mode and read-only entries do not rerun science.
+No uploaded manuscript file is required; use [FINAL_PAPER_ALIGNMENT.md](FINAL_PAPER_ALIGNMENT.md) as the concise paper-to-repo bridge.
 
 ## 1. Start Here
 
@@ -28,20 +29,22 @@ That opens the panel-safe launcher path instead of the full research launcher.
 
 None of those steps are meant to rerun expensive science or change thesis claims.
 
-## Data Sources and Provenance
+## Data Sources And Provenance
 
 Use [DATA_SOURCES.md](DATA_SOURCES.md) or the dashboard's `Data Sources & Provenance` reference page to answer what external data sources were used, where they came from, what each source was used for, and where the related manifests or stored outputs live. This is read-only governance documentation backed by [config/data_sources.yaml](../config/data_sources.yaml); it does not promote new claims or rerun science.
 
+Archive governance is documented in [ARCHIVE_GOVERNANCE.md](ARCHIVE_GOVERNANCE.md). Archived and legacy outputs stay inspectable without becoming main-paper evidence.
+
 ## 3. Final Manuscript Evidence Order
 
-1. Focused Mindoro Phase 1 provenance
-2. Phase 2 standardized forecast products
-3. Mindoro `B1` primary public-observation validation
-4. Mindoro `Track A` same-case OpenDrift versus PyGNOME comparator-only support
+1. Focused Mindoro Phase 1 transport provenance
+2. Phase 2 standardized deterministic and 50-member forecast products
+3. Mindoro `B1` March 13-14 primary public-observation validation
+4. Mindoro same-case OpenDrift-PyGNOME comparator support
 5. DWH external transfer validation
 6. Mindoro oil-type and shoreline support/context
-7. `prototype_2016` legacy/archive support
-8. Reproducibility / governance / read-only package layer
+7. Secondary 2016 drifter-track and legacy FSS support
+8. Reproducibility/governance/read-only package layer
 
 Panel mode is built to respect that order instead of flattening the repo into one undifferentiated list.
 
@@ -52,9 +55,9 @@ Panel mode is built to respect that order instead of flattening the repo into on
 - March 13-14 keeps the observation-independence note explicit.
 - `Track A` is comparator-only support.
 - PyGNOME is comparator-only and never the observational scoring reference.
-- DWH is external transfer validation, not Mindoro recalibration.
+- DWH is external transfer validation only, not Mindoro recalibration.
 - Mindoro oil-type and shoreline outputs are support/context only.
-- `prototype_2016` is legacy/archive support only.
+- Secondary 2016 outputs are drifter-track and legacy FSS support only.
 - The dashboard, publication package, validation packages, audits, and docs entries are read-only or packaging-only surfaces that do not recompute science.
 
 ## 5. Result Values Checklist
@@ -76,10 +79,12 @@ Panel mode is built to respect that order instead of flattening the repo into on
 
 - FSS `1 / 3 / 5 / 10 km`: `0.0000 / 0.0441 / 0.1371 / 0.2490`
 - Mean FSS: `0.1075`
-- `R0`: did not reach target date; forecast cells `0`; observed cells `22`
-- `R1_previous`: forecast cells `5`; observed cells `22`; nearest distance `1414.21 m`; centroid distance `7358.16 m`
+- Public-observation seed: March 13 NOAA/NESDIS observation extent
+- Public-observation target: March 14 NOAA/NESDIS observation extent
+- March 13 and March 14 are independent day-specific public-observation products
+- Forecast cells `5`; observed cells `22`; nearest distance `1414.21 m`; centroid distance `7358.16 m`
 - `IoU = 0.0`; `Dice = 0.0`
-- Interpretation: `R1_previous` is promoted because it survives and is scoreable, not because it is an exact-grid match or exact 1 km overlap
+- Interpretation: supports coastal-neighborhood usefulness, not exact 1 km overlap
 
 ### Mindoro `Track A`
 
@@ -95,7 +100,14 @@ Panel mode is built to respect that order instead of flattening the repo into on
 - `C2 p50` event-corridor mean FSS: `0.5389`
 - `C2 p90` event-corridor mean FSS: `0.4966`
 - `C3` PyGNOME comparator event-corridor mean FSS: `0.3612`
-- Interpretation: DWH remains an external transfer validation story and does not recalibrate Mindoro
+- Interpretation: DWH remains external transfer validation only and does not recalibrate Mindoro
+
+### Probability Semantics
+
+- `prob_presence`: cellwise ensemble probability of presence
+- `mask_p50`: `P >= 0.50`, preferred probabilistic footprint
+- `mask_p90`: `P >= 0.90`, conservative support/comparison product only
+- Never label `mask_p90` as a broad envelope
 
 ### Mindoro Oil-Type / Shoreline Support
 

@@ -1,6 +1,8 @@
-# Panel / Defense Quick Start
+# Panel Quick Start
 
-Start here:
+This is the short path for panel review. It uses stored outputs and packaging-safe launcher entries by default.
+
+## 1. Open Panel Mode
 
 ```powershell
 .\panel.ps1
@@ -12,129 +14,41 @@ or:
 .\start.ps1 -Panel
 ```
 
-macOS with Homebrew:
+On macOS or Linux with PowerShell 7:
 
 ```bash
-brew install powershell
-cd ~/Documents/GitHub/Drifter-Thesis-TINKER-VERSION
 pwsh ./panel.ps1
 pwsh ./start.ps1 -Panel
 ```
 
-Linux uses the same `pwsh ./panel.ps1` and `pwsh ./start.ps1 -Panel` commands after PowerShell 7 is installed through that distribution's package manager.
+## 2. Use The Panel Menu
 
-This opens the panel-safe review menu instead of the full research launcher. Panel mode and read-only entries do not rerun science.
-Use launcher entry IDs and panel options as the user-facing startup vocabulary; raw phase names are not the primary startup commands.
+Panel mode is read-only and packaging-safe. It can open the dashboard, verify stored paper numbers, rebuild publication figures from stored outputs, refresh review packages, and show provenance registries.
 
-## What Panel Mode Is For
+Suggested review path:
 
-1. Open read-only dashboard
-2. Verify paper numbers against stored scorecards
-3. Rebuild publication figures from stored outputs
-4. Refresh final validation package from stored outputs
-5. Refresh final reproducibility package / command documentation
-6. Show paper-to-output registry
-7. View B1 drifter provenance/context
-8. View data sources and provenance registry
+1. Open the read-only dashboard.
+2. Verify manuscript numbers against stored scorecards.
+3. Inspect [docs/FINAL_PAPER_ALIGNMENT.md](docs/FINAL_PAPER_ALIGNMENT.md).
+4. Inspect [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md).
+5. Inspect [docs/ARCHIVE_GOVERNANCE.md](docs/ARCHIVE_GOVERNANCE.md).
 
-## What Panel Mode Does Not Do By Default
+## 3. Keep The Evidence Boundaries
 
-- It does not rerun expensive scientific workflows.
-- It does not promote archive, appendix, or personal-experiment outputs into defended evidence.
-- It does not treat the full launcher as the default defense path.
-
-Archive governance is documented in [docs/ARCHIVE_GOVERNANCE.md](docs/ARCHIVE_GOVERNANCE.md). The archive registry keeps non-final-paper work inspectable without changing the final manuscript evidence boundaries.
-
-## Panel Menu Controls
-
-- `B`, `BACK`, `0` go back to launcher home when that path is available.
-- `C`, `CANCEL` cancel cleanly without throwing an error banner.
-- `Q`, `QUIT`, `EXIT` leave the launcher cleanly.
-- `A` opens the full research launcher when you intentionally need the advanced path.
-- `U`, `UI` open the read-only dashboard shortcut.
-- `R`, `RESTART` restart the read-only dashboard shortcut.
-- `L`, `LIST` show the launcher catalog.
-- `H`, `HELP` opens the panel interpretation guide.
-- `S`, `SEARCH` is available in the full launcher and read-only group for entry search.
-- `E`, `EXPORT` after an inspect/search preview exports a run plan without running science.
-
-## Final Manuscript Evidence Boundaries
-
-1. Focused Mindoro Phase 1 provenance = historical drifter-based transport validation and recipe selection.
-2. Phase 2 = standardized deterministic and 50-member machine-readable forecast products.
-3. Mindoro `B1` = March 13-14 `R1_previous` primary public-observation validation row and the only main-text primary Philippine / Mindoro validation claim; it supports coastal-neighborhood usefulness, not exact 1 km overlap or universal operational accuracy.
-4. Mindoro `Track A` = same-case OpenDrift versus PyGNOME comparator-only support; never the observational scoring reference.
-5. `DWH` = separate external transfer validation lane; not Mindoro recalibration.
-6. Mindoro oil-type / shoreline outputs = support/context only.
-7. `prototype_2016` = legacy/archive support only.
-8. Publication package, figure package, and UI = read-only presentation/governance surfaces built from stored outputs only.
-
-## Compact Result Values Checklist
-
-- Focused Phase 1 provenance: `cmems_gfs` winner; mean NCS `4.5886`; median NCS `4.6305`; full strict accepted segments `65`; ranked February-April subset `19`
-- Mindoro `B1`: mean FSS `0.1075`; FSS `0.0000 / 0.0441 / 0.1371 / 0.2490`; `R1_previous` forecast cells `5`; observed cells `22`; nearest distance `1414.21 m`; centroid distance `7358.16 m`; `IoU = 0.0`; `Dice = 0.0`
-- Mindoro `Track A` OpenDrift: forecast cells `5`; nearest distance `1414.21 m`; mean FSS `0.1075`
-- Mindoro `Track A` PyGNOME comparator-only support: forecast cells `6`; nearest distance `6082.76 m`; mean FSS `0.0061`
-- DWH event corridor: `C1 = 0.5568`; `C2 p50 = 0.5389`; `C2 p90 = 0.4966`; `C3 PyGNOME comparator = 0.3612`
-- Mindoro oil-type / shoreline support: light oil `0.02%`, `4 h`, `11`, QC pass; fixed-base medium-heavy proxy `0.61%`, `4 h`, `10`, QC flagged; heavier oil `0.63%`, `4 h`, `11`, QC pass
-
-## Important Caveats
-
-- `B1` is promoted because `R1_previous` survives to the target date and is scoreable, not because it is an exact-grid match.
-- March 13-14 is a reinitialization-based public-observation validation check.
-- March 13 and March 14 are independent NOAA-published day-specific public-observation products.
-- `Track A` and every PyGNOME branch remain comparator-only support.
-- DWH is external transfer validation, not Mindoro recalibration.
+- Mindoro B1 supports coastal-neighborhood usefulness, not exact 1 km overlap.
+- Mindoro Track A and PyGNOME are comparator-only.
+- DWH is external transfer validation only.
 - Mindoro oil-type and shoreline outputs are support/context only.
+- Secondary 2016 outputs are legacy support only.
 
-## Inspect Drifter Provenance Behind `B1`
+## 4. When A Rerun Is Needed
 
-Use either:
-
-```powershell
-.\start.ps1 -Entry b1_drifter_context_panel
-```
-
-or panel option `7`.
-
-That page stays stored-output-only. It explains the historical focused Phase 1 provenance behind the selected recipe without turning drifters into the March 13-14 public-observation truth mask.
-
-## Inspect Data Sources And Provenance
-
-Use panel option `8`, or open:
-
-```powershell
-docs\DATA_SOURCES.md
-```
-
-This is a read-only registry. It does not download inputs, rerun workflows, rewrite scientific outputs, or change thesis claims.
-
-## Inspect Archive Governance
-
-Open:
-
-```powershell
-docs\ARCHIVE_GOVERNANCE.md
-```
-
-To list archive routes through the launcher, run:
-
-```powershell
-.\start.ps1 -ListRole archive_provenance -NoPause
-```
-
-## If You Intentionally Need The Full Launcher
-
-Choose `Advanced` from the panel menu, or run:
+Expensive science does not run from the default panel path. Choose the full launcher only when an explicit research or audit rerun is intended:
 
 ```powershell
 .\start.ps1
+.\start.ps1 -List -NoPause
+.\start.ps1 -Entry mindoro_phase3b_primary_public_validation -DryRun -NoPause
 ```
 
-macOS / Linux with PowerShell 7:
-
-```bash
-pwsh ./start.ps1
-```
-
-Use the full launcher only when you intentionally want researcher or audit reruns.
+Use dry runs and exported plans before running any full scientific entry.
