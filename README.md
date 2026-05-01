@@ -63,6 +63,7 @@ External observation, drifter, forcing, shoreline, oil-property, and model/tool 
 - [PANEL_QUICK_START.md](PANEL_QUICK_START.md)
 - [docs/PANEL_REVIEW_GUIDE.md](docs/PANEL_REVIEW_GUIDE.md)
 - [docs/FINAL_PAPER_ALIGNMENT.md](docs/FINAL_PAPER_ALIGNMENT.md)
+- [docs/PAPER_TO_REPO_CROSSWALK.md](docs/PAPER_TO_REPO_CROSSWALK.md)
 - [docs/UI_GUIDE.md](docs/UI_GUIDE.md)
 - [docs/COMMAND_MATRIX.md](docs/COMMAND_MATRIX.md)
 - [docs/LAUNCHER_USER_GUIDE.md](docs/LAUNCHER_USER_GUIDE.md)

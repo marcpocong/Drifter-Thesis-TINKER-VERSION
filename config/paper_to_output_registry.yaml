@@ -1,0 +1,968 @@
+{
+  "registry_schema_version": 1,
+  "updated": "2026-05-01",
+  "purpose": "Paper-to-repo crosswalk for final-paper claims, tables, figures, appendices, and governance/data-source registries. This is a stored-output/config/doc registry only; it does not create new scientific claims.",
+  "validation_policy": {
+    "fail_on_missing_required_primary_evidence": true,
+    "warn_on_missing_optional_or_placeholder_paths": true,
+    "scientific_reruns_allowed": false
+  },
+  "entries": [
+    {
+      "paper_item_id": "table_3_7",
+      "paper_label": "Table 3.7 - Focused Mindoro Phase 1 validation design and window",
+      "evidence_role": "primary_evidence",
+      "claim_boundary": "Focused Mindoro Phase 1 is transport provenance and recipe selection only; it is not oil-footprint truth.",
+      "repo_paths": [
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_production_manifest.json",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_rejected_segment_registry.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_local_input_inventory.csv"
+      ],
+      "required_repo_paths": [
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_production_manifest.json",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv"
+      ],
+      "source_config_paths": [
+        "config/phase1_mindoro_focus_pre_spill_2016_2023.yaml",
+        "config/recipes.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "manifest and segment registries",
+      "notes": "Maps the 2016-01-01 to 2023-03-02 focused-box provenance setup and full strict accepted-segment inventory."
+    },
+    {
+      "paper_item_id": "table_3_8",
+      "paper_label": "Table 3.8 - Phase 1 recipe family and ranking policy",
+      "evidence_role": "primary_evidence",
+      "claim_boundary": "Recipe ranking supports Mindoro B1 recipe provenance only.",
+      "repo_paths": [
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_summary.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_gfs_month_preflight.csv"
+      ],
+      "required_repo_paths": [
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv"
+      ],
+      "source_config_paths": [
+        "config/phase1_mindoro_focus_pre_spill_2016_2023.yaml",
+        "config/recipes.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "stored ranking CSV and preflight audit",
+      "notes": "Four-recipe family: cmems_gfs, cmems_era5, hycom_gfs, hycom_era5."
+    },
+    {
+      "paper_item_id": "table_4_2",
+      "paper_label": "Table 4.2 - Focused Phase 1 accepted segments and February-April subset",
+      "evidence_role": "primary_evidence",
+      "claim_boundary": "Counts describe the provenance corpus, not spill validation.",
+      "repo_paths": [
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_ranking_subset_registry.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_ranking_subset_report.md"
+      ],
+      "required_repo_paths": [
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_accepted_segment_registry.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_ranking_subset_registry.csv"
+      ],
+      "source_config_paths": [
+        "config/phase1_mindoro_focus_pre_spill_2016_2023.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "stored segment and ranking-subset registries",
+      "notes": "Trace for 65 strict accepted segments and the 19-segment February-April ranked subset."
+    },
+    {
+      "paper_item_id": "table_4_3",
+      "paper_label": "Table 4.3 - Focused Phase 1 recipe ranking values",
+      "evidence_role": "primary_evidence",
+      "claim_boundary": "Recipe NCS ranking selects the final B1 recipe provenance; it is not a direct oil-spill validation score.",
+      "repo_paths": [
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_summary.csv",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_official_adoption_decision.md"
+      ],
+      "required_repo_paths": [
+        "output/phase1_mindoro_focus_pre_spill_2016_2023/phase1_recipe_ranking.csv"
+      ],
+      "source_config_paths": [
+        "config/phase1_mindoro_focus_pre_spill_2016_2023.yaml",
+        "config/phase1_baseline_selection.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "stored recipe-ranking CSV",
+      "notes": "Current final values are cmems_gfs 4.5886/4.6305, cmems_era5 4.6237/4.5916, hycom_gfs 4.7027/4.9263, hycom_era5 4.7561/5.0106."
+    },
+    {
+      "paper_item_id": "figure_4_1",
+      "paper_label": "Figure 4.1 - Study-box context for the final paper",
+      "evidence_role": "primary_evidence",
+      "claim_boundary": "Geographic context only; does not add a validation claim.",
+      "repo_paths": [
+        "output/figure_package_publication/thesis_study_context__phase1_study_context__study_boxes__single_reference_map__shared_thesis_context__single__paper__thesis_study_boxes_reference.png",
+        "output/figure_package_publication/publication_figure_registry.csv"
+      ],
+      "required_repo_paths": [
+        "output/figure_package_publication/publication_figure_registry.csv"
+      ],
+      "source_config_paths": [
+        "config/publication_figure_style.yaml",
+        "config/phase1_mindoro_focus_pre_spill_2016_2023.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "publication figure package and registry",
+      "notes": "The long PNG path exists on Windows but requires long-path-aware validation."
+    },
+    {
+      "paper_item_id": "figure_4_2",
+      "paper_label": "Figure 4.2 - Focused Phase 1 / Mindoro domain geography reference",
+      "evidence_role": "primary_evidence",
+      "claim_boundary": "Geographic provenance context only; not spill validation.",
+      "repo_paths": [
+        "output/figure_package_publication/thesis_study_context__phase1_study_context__study_box_geography__single_box_reference_map__shared_thesis_context__single__paper__focused_phase1_box_geography_reference.png",
+        "output/figure_package_publication/thesis_study_context__phase1_study_context__study_box_geography__single_box_reference_map__shared_thesis_context__single__paper__mindoro_case_domain_geography_reference.png",
+        "output/figure_package_publication/publication_figure_registry.csv"
+      ],
+      "required_repo_paths": [
+        "output/figure_package_publication/publication_figure_registry.csv"
+      ],
+      "source_config_paths": [
+        "config/phase1_mindoro_focus_pre_spill_2016_2023.yaml",
+        "config/case_mindoro_retro_2023.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "publication figure package and registry",
+      "notes": "Figure links the focused provenance box to the Mindoro case domain without promoting geography into a validation metric."
+    },
+    {
+      "paper_item_id": "output_phase1_mindoro_focus_root",
+      "paper_label": "Stored output root - Focused Phase 1 provenance",
+      "evidence_role": "primary_evidence",
+      "claim_boundary": "Repository output root for provenance inspection only.",
+      "repo_paths": [
+        "output/phase1_mindoro_focus_pre_spill_2016_2023"
+      ],
+      "required_repo_paths": [
+        "output/phase1_mindoro_focus_pre_spill_2016_2023"
+      ],
+      "source_config_paths": [
+        "config/phase1_mindoro_focus_pre_spill_2016_2023.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "directory presence",
+      "notes": "Required root named in the final-paper alignment facts."
+    },
+    {
+      "paper_item_id": "table_3_11",
+      "paper_label": "Table 3.11 - Mindoro Phase 2 deterministic forecast product setup",
+      "evidence_role": "primary_evidence",
+      "claim_boundary": "Phase 2 products are standardized forecast artifacts; they are not themselves public-observation validation.",
+      "repo_paths": [
+        "output/CASE_MINDORO_RETRO_2023/forecast/forecast_manifest.json",
+        "output/CASE_MINDORO_RETRO_2023/forecast/**"
+      ],
+      "required_repo_paths": [
+        "output/CASE_MINDORO_RETRO_2023/forecast/forecast_manifest.json"
+      ],
+      "source_config_paths": [
+        "config/case_mindoro_retro_2023.yaml",
+        "config/phase1_baseline_selection.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "forecast manifest",
+      "notes": "Maps the deterministic stored forecast layer used downstream by Mindoro validation/support products."
+    },
+    {
+      "paper_item_id": "table_3_12",
+      "paper_label": "Table 3.12 - Mindoro Phase 2 50-member ensemble and probability products",
+      "evidence_role": "primary_evidence",
+      "claim_boundary": "Probability products must preserve p50/p90 semantics; p90 is not a broad envelope.",
+      "repo_paths": [
+        "output/CASE_MINDORO_RETRO_2023/ensemble/ensemble_manifest.json",
+        "output/CASE_MINDORO_RETRO_2023/ensemble/prob_presence_*.tif",
+        "output/CASE_MINDORO_RETRO_2023/ensemble/mask_p50_*.tif",
+        "output/CASE_MINDORO_RETRO_2023/ensemble/mask_p90_*.tif"
+      ],
+      "required_repo_paths": [
+        "output/CASE_MINDORO_RETRO_2023/ensemble/ensemble_manifest.json"
+      ],
+      "source_config_paths": [
+        "config/case_mindoro_retro_2023.yaml",
+        "config/ensemble.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "ensemble manifest and grid artifacts",
+      "notes": "prob_presence is cellwise ensemble probability; mask_p50 is preferred footprint; mask_p90 is conservative support/comparison."
+    },
+    {
+      "paper_item_id": "table_4_5",
+      "paper_label": "Table 4.5 - Mindoro B1 public-observation scorecard",
+      "evidence_role": "primary_evidence",
+      "claim_boundary": "Mindoro B1 is the only main Philippine public-observation validation claim and supports coastal-neighborhood usefulness, not exact 1 km overlap.",
+      "repo_paths": [
+        "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_summary.csv",
+        "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_fss_by_window.csv",
+        "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_summary.csv"
+      ],
+      "required_repo_paths": [
+        "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_summary.csv"
+      ],
+      "source_config_paths": [
+        "config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml",
+        "config/panel_paper_expected_values.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "stored B1 summary scorecard",
+      "notes": "Trace for FSS 1/3/5/10 km, mean FSS, forecast cells, observed cells, nearest distance, centroid distance, IoU, and Dice."
+    },
+    {
+      "paper_item_id": "table_4_6",
+      "paper_label": "Table 4.6 - Mindoro B1 branch survival and displacement diagnostics",
+      "evidence_role": "primary_evidence",
+      "claim_boundary": "B1 is promoted because the R1_previous branch survives to the target date and is scoreable, not because it is exact-grid success.",
+      "repo_paths": [
+        "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_branch_survival_summary.csv",
+        "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_branch_pairing_manifest.csv",
+        "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_diagnostics.csv",
+        "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_branch_survival_summary.csv"
+      ],
+      "required_repo_paths": [
+        "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_branch_survival_summary.csv"
+      ],
+      "source_config_paths": [
+        "config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "branch survival summary and pairing manifest",
+      "notes": "Keeps R0 archived/provenance-only and B1 R1_previous as the scoreable row."
+    },
+    {
+      "paper_item_id": "table_4_7",
+      "paper_label": "Table 4.7 - Mindoro B1 overlap and neighborhood-skill interpretation",
+      "evidence_role": "primary_evidence",
+      "claim_boundary": "IoU and Dice are zero, so the row must not be framed as exact overlap.",
+      "repo_paths": [
+        "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_fss_by_window.csv",
+        "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_summary.csv",
+        "output/Phase 3B March13-14 Final Output/summary/opendrift_primary/march13_14_reinit_fss_by_window.csv"
+      ],
+      "required_repo_paths": [
+        "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit/march13_14_reinit_fss_by_window.csv"
+      ],
+      "source_config_paths": [
+        "config/panel_paper_expected_values.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "stored FSS-by-window and summary scorecard",
+      "notes": "Supports coastal-neighborhood usefulness only."
+    },
+    {
+      "paper_item_id": "figure_4_4",
+      "paper_label": "Figure 4.4 - Mindoro B1 primary validation board",
+      "evidence_role": "primary_evidence",
+      "claim_boundary": "B1 visualization supports coastal-neighborhood usefulness; not exact 1 km overlap.",
+      "repo_paths": [
+        "output/Phase 3B March13-14 Final Output/publication/opendrift_primary/mindoro_primary_validation_board.png",
+        "output/figure_package_publication/case_mindoro_retro_2023__phase3b_reinit_primary__opendrift__comparison_board__2023_03_13_to_2023_03_14__board__slide__mindoro_primary_validation_board.png",
+        "output/Phase 3B March13-14 Final Output/manifests/phase3b_final_output_registry.csv"
+      ],
+      "required_repo_paths": [
+        "output/Phase 3B March13-14 Final Output/publication/opendrift_primary/mindoro_primary_validation_board.png"
+      ],
+      "source_config_paths": [
+        "config/publication_figure_style.yaml",
+        "config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "stored publication board and output registry",
+      "notes": "Final export path is the shortest stable figure source; the publication-package path is also indexed."
+    },
+    {
+      "paper_item_id": "figure_4_4a",
+      "paper_label": "Figure 4.4A - March 13 public NOAA/NESDIS observation extent",
+      "evidence_role": "primary_evidence",
+      "claim_boundary": "March 13 is the public seed observation for B1; it is independent from the March 14 target product.",
+      "repo_paths": [
+        "output/Phase 3B March13-14 Final Output/publication/observations/figure_4_4A_noaa_mar13_worldview3.png",
+        "output/figure_package_publication/figure_4_4A_noaa_mar13_worldview3.png"
+      ],
+      "required_repo_paths": [
+        "output/Phase 3B March13-14 Final Output/publication/observations/figure_4_4A_noaa_mar13_worldview3.png"
+      ],
+      "source_config_paths": [
+        "config/data_sources.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "stored public-observation figure",
+      "notes": "Observation support figure only; it does not create a separate validation row."
+    },
+    {
+      "paper_item_id": "figure_4_4b",
+      "paper_label": "Figure 4.4B - March 14 public NOAA/NESDIS observation extent",
+      "evidence_role": "primary_evidence",
+      "claim_boundary": "March 14 is the public target observation for B1; it is independent from the March 13 seed product.",
+      "repo_paths": [
+        "output/Phase 3B March13-14 Final Output/publication/observations/figure_4_4B_noaa_mar14_worldview3.png",
+        "output/figure_package_publication/figure_4_4B_noaa_mar14_worldview3.png"
+      ],
+      "required_repo_paths": [
+        "output/Phase 3B March13-14 Final Output/publication/observations/figure_4_4B_noaa_mar14_worldview3.png"
+      ],
+      "source_config_paths": [
+        "config/data_sources.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "stored public-observation figure",
+      "notes": "Observation support figure only; it does not create a separate validation row."
+    },
+    {
+      "paper_item_id": "figure_4_4c",
+      "paper_label": "Figure 4.4C - March 13/14 observed-extent overlay",
+      "evidence_role": "primary_evidence",
+      "claim_boundary": "Overlay illustrates independent day-specific public-observation products; it does not imply exact forecast overlap.",
+      "repo_paths": [
+        "output/Phase 3B March13-14 Final Output/publication/observations/figure_4_4C_arcgis_mar13_mar14_observed_overlay.png",
+        "output/figure_package_publication/figure_4_4C_arcgis_mar13_mar14_observed_overlay.png"
+      ],
+      "required_repo_paths": [
+        "output/Phase 3B March13-14 Final Output/publication/observations/figure_4_4C_arcgis_mar13_mar14_observed_overlay.png"
+      ],
+      "source_config_paths": [
+        "config/data_sources.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "stored observed-overlay figure",
+      "notes": "Observation support figure only."
+    },
+    {
+      "paper_item_id": "output_mindoro_case_root",
+      "paper_label": "Stored output root - CASE_MINDORO_RETRO_2023",
+      "evidence_role": "primary_evidence",
+      "claim_boundary": "Canonical Mindoro case tree contains primary, support, archive, and experimental branches; only B1 is the main public-observation validation claim.",
+      "repo_paths": [
+        "output/CASE_MINDORO_RETRO_2023"
+      ],
+      "required_repo_paths": [
+        "output/CASE_MINDORO_RETRO_2023"
+      ],
+      "source_config_paths": [
+        "config/case_mindoro_retro_2023.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "directory presence",
+      "notes": "Use archive governance before citing non-B1 branches."
+    },
+    {
+      "paper_item_id": "output_phase3b_final_export",
+      "paper_label": "Stored output root - Phase 3B March13-14 Final Output",
+      "evidence_role": "primary_evidence",
+      "claim_boundary": "Curated B1 export layer only; comparator outputs remain comparator-only.",
+      "repo_paths": [
+        "output/Phase 3B March13-14 Final Output",
+        "output/Phase 3B March13-14 Final Output/final_output_manifest.json"
+      ],
+      "required_repo_paths": [
+        "output/Phase 3B March13-14 Final Output/final_output_manifest.json"
+      ],
+      "source_config_paths": [
+        "config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "curated export manifest",
+      "notes": "Read-only export layer used for panel/package inspection."
+    },
+    {
+      "paper_item_id": "table_4_8",
+      "paper_label": "Table 4.8 - Mindoro Track A OpenDrift/PyGNOME comparator",
+      "evidence_role": "comparator_support",
+      "claim_boundary": "Track A and PyGNOME are comparator-only; PyGNOME is never observation truth.",
+      "repo_paths": [
+        "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/march13_14_reinit_crossmodel_summary.csv",
+        "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison/march13_14_reinit_crossmodel_model_ranking.csv",
+        "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_summary.csv"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/case_mindoro_retro_2023_phase3b_primary_validation_amendment.yaml",
+        "config/archive_registry.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "stored cross-model scorecards",
+      "notes": "OpenDrift promoted p50 branch and PyGNOME deterministic comparator are support only."
+    },
+    {
+      "paper_item_id": "figure_4_5",
+      "paper_label": "Figure 4.5 - Mindoro Track A spatial comparator board",
+      "evidence_role": "comparator_support",
+      "claim_boundary": "Comparator-only visualization; not a second validation truth source.",
+      "repo_paths": [
+        "output/Phase 3B March13-14 Final Output/publication/comparator_pygnome/Figure_4_5_Mindoro_TrackA_OpenDrift_PyGNOME_spatial_board.png",
+        "output/Phase 3B March13-14 Final Output/publication/comparator_pygnome/mindoro_crossmodel_board.png",
+        "output/figure_package_publication/Figure_4_5_Mindoro_TrackA_OpenDrift_PyGNOME_spatial_board.png"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/publication_figure_style.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "stored comparator board",
+      "notes": "Same-case OpenDrift/PyGNOME support against the March 14 public mask."
+    },
+    {
+      "paper_item_id": "figure_4_6",
+      "paper_label": "Figure 4.6 - Mindoro Track A model-specific comparator overlays / ranking support",
+      "evidence_role": "comparator_support",
+      "claim_boundary": "Comparator-only support; use ranking CSV for numeric values.",
+      "repo_paths": [
+        "output/Phase 3B March13-14 Final Output/publication/comparator_pygnome/march14_crossmodel_r1_overlay.png",
+        "output/Phase 3B March13-14 Final Output/publication/comparator_pygnome/march14_crossmodel_pygnome_overlay.png",
+        "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome/march13_14_reinit_crossmodel_model_ranking.csv"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/panel_paper_expected_values.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "stored overlays plus ranking CSV",
+      "notes": "No new claim is made if a dedicated bar-chart figure is absent; the stored ranking CSV is the traceable numeric source."
+    },
+    {
+      "paper_item_id": "output_track_a_comparator_root",
+      "paper_label": "Stored output root - Mindoro Track A comparator",
+      "evidence_role": "comparator_support",
+      "claim_boundary": "Comparator-only, not observational truth.",
+      "repo_paths": [
+        "output/CASE_MINDORO_RETRO_2023/phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison",
+        "output/Phase 3B March13-14 Final Output/summary/comparator_pygnome"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/archive_registry.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "directory presence",
+      "notes": "Expose honestly as comparator support only."
+    },
+    {
+      "paper_item_id": "table_3_13",
+      "paper_label": "Table 3.13 - DWH external-case setup and forcing stack",
+      "evidence_role": "external_transfer",
+      "claim_boundary": "DWH is external transfer validation only, not Mindoro recalibration.",
+      "repo_paths": [
+        "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_setup/phase3c_external_case_setup_manifest.json",
+        "output/CASE_DWH_RETRO_2010_72H/dwh_phase3c_scientific_forcing_ready/dwh_scientific_prepared_forcing_manifest.json",
+        "output/CASE_DWH_RETRO_2010_72H/dwh_phase3c_scientific_forcing_ready/dwh_scientific_reader_check_manifest.json"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/case_dwh_retro_2010_72h.yaml",
+        "config/data_sources.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "setup and forcing manifests",
+      "notes": "Forcing stack: HYCOM GOFS 3.1 currents + ERA5 winds + CMEMS wave/Stokes."
+    },
+    {
+      "paper_item_id": "table_3_14",
+      "paper_label": "Table 3.14 - DWH deterministic, ensemble, and comparator product definitions",
+      "evidence_role": "external_transfer",
+      "claim_boundary": "DWH observed masks are the transfer-validation reference; PyGNOME remains comparator-only.",
+      "repo_paths": [
+        "output/Phase 3C DWH Final Output/summary/deterministic/chapter3_phase3c_external_case_run_memo.md",
+        "output/Phase 3C DWH Final Output/summary/ensemble/chapter3_phase3c_ensemble_extension_memo.md",
+        "output/Phase 3C DWH Final Output/summary/comparator_pygnome/chapter3_phase3c_dwh_pygnome_comparison_memo.md",
+        "output/Phase 3C DWH Final Output/manifests/phase3c_final_output_manifest.json"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/case_dwh_retro_2010_72h.yaml",
+        "config/ensemble.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "curated DWH memos and export manifest",
+      "notes": "Defines C1 deterministic, C2 ensemble p50/p90, and C3 PyGNOME comparator."
+    },
+    {
+      "paper_item_id": "table_4_9",
+      "paper_label": "Table 4.9 - DWH event-corridor mean FSS",
+      "evidence_role": "external_transfer",
+      "claim_boundary": "External transfer validation only; not Mindoro recalibration.",
+      "repo_paths": [
+        "output/Phase 3C DWH Final Output/summary/comparison/phase3c_main_scorecard.csv",
+        "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/phase3c_fss_by_date_window.csv",
+        "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_ensemble_comparison/phase3c_ensemble_fss_by_date_window.csv",
+        "output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator/phase3c_dwh_pygnome_fss_by_date_window.csv"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/panel_paper_expected_values.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "stored DWH scorecard and FSS tables",
+      "notes": "Trace for deterministic 0.5568, ensemble p50 0.5389, ensemble p90 0.4966, and PyGNOME comparator 0.3612."
+    },
+    {
+      "paper_item_id": "table_4_10",
+      "paper_label": "Table 4.10 - DWH corridor overlap / geometry diagnostics",
+      "evidence_role": "external_transfer",
+      "claim_boundary": "DWH diagnostics are external transfer evidence only.",
+      "repo_paths": [
+        "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/phase3c_eventcorridor_summary.csv",
+        "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_ensemble_comparison/phase3c_ensemble_eventcorridor_summary.csv",
+        "output/CASE_DWH_RETRO_2010_72H/phase3c_dwh_pygnome_comparator/phase3c_dwh_pygnome_eventcorridor_summary.csv",
+        "output/CASE_DWH_RETRO_2010_72H/phase3c_external_case_run/phase3c_diagnostics.csv"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/case_dwh_retro_2010_72h.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "event-corridor summaries and diagnostics",
+      "notes": "Complements the FSS scorecard without changing the claim boundary."
+    },
+    {
+      "paper_item_id": "figure_4_7",
+      "paper_label": "Figure 4.7 - DWH deterministic transfer-validation board",
+      "evidence_role": "external_transfer",
+      "claim_boundary": "DWH deterministic transfer-validation visualization only.",
+      "repo_paths": [
+        "output/Phase 3C DWH Final Output/publication/opendrift_deterministic/dwh_24h_48h_72h_deterministic_footprint_overview_board.png",
+        "output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_run__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__daily_deterministic_footprint_overview_board.png"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/publication_figure_style.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "stored DWH deterministic board",
+      "notes": "Read-only packaging from stored outputs."
+    },
+    {
+      "paper_item_id": "figure_4_8",
+      "paper_label": "Figure 4.8 - DWH deterministic / p50 / p90 comparison board",
+      "evidence_role": "external_transfer",
+      "claim_boundary": "p50 is preferred probabilistic footprint; p90 is conservative support/comparison only.",
+      "repo_paths": [
+        "output/Phase 3C DWH Final Output/publication/opendrift_ensemble/dwh_2010-05-21_to_2010-05-23_eventcorridor_observed_deterministic_mask_p50_mask_p90_board.png",
+        "output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_external_case_ensemble_comparison__opendrift__comparison_board__2010_05_21_to_2010_05_23__board__slide__observed_deterministic_mask_p50_mask_p90_board.png"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/ensemble.yaml",
+        "config/publication_figure_style.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "stored DWH ensemble board",
+      "notes": "Never relabel p90 as a broad envelope."
+    },
+    {
+      "paper_item_id": "figure_4_9",
+      "paper_label": "Figure 4.9 - DWH PyGNOME comparator board",
+      "evidence_role": "external_transfer",
+      "claim_boundary": "PyGNOME is comparator-only and never observation truth.",
+      "repo_paths": [
+        "output/Phase 3C DWH Final Output/publication/comparator_pygnome/dwh_2010-05-21_to_2010-05-23_eventcorridor_observed_deterministic_mask_p50_pygnome_board.png",
+        "output/figure_package_publication/case_dwh_retro_2010_72h__phase3c_dwh_pygnome_comparator__opendrift_vs_pygnome__comparison_board__2010_05_21_to_2010_05_23__board__slide__observed_deterministic_mask_p50_pygnome_board.png"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/publication_figure_style.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "stored DWH comparator board",
+      "notes": "Comparator support only."
+    },
+    {
+      "paper_item_id": "output_dwh_case_root",
+      "paper_label": "Stored output root - CASE_DWH_RETRO_2010_72H",
+      "evidence_role": "external_transfer",
+      "claim_boundary": "DWH is external transfer validation only.",
+      "repo_paths": [
+        "output/CASE_DWH_RETRO_2010_72H"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/case_dwh_retro_2010_72h.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "directory presence",
+      "notes": "Canonical DWH scientific output root."
+    },
+    {
+      "paper_item_id": "output_phase3c_final_export",
+      "paper_label": "Stored output root - Phase 3C DWH Final Output",
+      "evidence_role": "external_transfer",
+      "claim_boundary": "Curated DWH transfer-validation export layer only.",
+      "repo_paths": [
+        "output/Phase 3C DWH Final Output",
+        "output/Phase 3C DWH Final Output/manifests/phase3c_final_output_manifest.json"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/case_dwh_retro_2010_72h.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "curated export manifest",
+      "notes": "Read-only export layer for DWH figures and score summaries."
+    },
+    {
+      "paper_item_id": "table_3_15",
+      "paper_label": "Table 3.15 - Mindoro oil-type and shoreline support setup",
+      "evidence_role": "support_context",
+      "claim_boundary": "Oil-type and shoreline outputs are support/context only, not primary validation.",
+      "repo_paths": [
+        "output/phase4/CASE_MINDORO_RETRO_2023/phase4_oil_budget_summary.csv",
+        "output/phase4/CASE_MINDORO_RETRO_2023/phase4_oiltype_comparison.csv",
+        "output/phase4/CASE_MINDORO_RETRO_2023/phase4_shoreline_arrival.csv",
+        "output/phase4/CASE_MINDORO_RETRO_2023/phase4_run_manifest.json"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/oil.yaml",
+        "config/case_mindoro_retro_2023.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "Phase 4 support manifest and summary tables",
+      "notes": "Trace for light oil, fixed-base medium-heavy proxy, and heavier oil values plus QC note."
+    },
+    {
+      "paper_item_id": "figure_appendix_f_oil_budget",
+      "paper_label": "Appendix F figure - Mindoro oil-budget support",
+      "evidence_role": "support_context",
+      "claim_boundary": "Support/context only; not observational validation.",
+      "repo_paths": [
+        "output/phase4/CASE_MINDORO_RETRO_2023/mass_budget_comparison.png",
+        "output/phase4/CASE_MINDORO_RETRO_2023/qa_phase4_oiltype_comparison.png",
+        "output/figure_package_publication/case_mindoro_retro_2023__phase4__openoil__comparison_board__2023_03_03_to_2023_03_06__all_scenarios__board__slide__oil_budget_board.png"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/oil.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "stored Phase 4 PNGs and summary tables",
+      "notes": "Missing or regenerated paper-layout variants must come from these stored support outputs."
+    },
+    {
+      "paper_item_id": "figure_appendix_f_shoreline",
+      "paper_label": "Appendix F figure - Mindoro shoreline support",
+      "evidence_role": "support_context",
+      "claim_boundary": "Support/context only; not primary validation.",
+      "repo_paths": [
+        "output/phase4/CASE_MINDORO_RETRO_2023/qa_phase4_shoreline_impacts.png",
+        "output/phase4/CASE_MINDORO_RETRO_2023/phase4_shoreline_segments.csv",
+        "output/figure_package_publication/case_mindoro_retro_2023__phase4__openoil__comparison_board__2023_03_03_to_2023_03_06__all_scenarios__board__slide__shoreline_impact_board.png"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/case_mindoro_retro_2023.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "stored Phase 4 shoreline figure and segment table",
+      "notes": "Shoreline support does not change the B1 validation claim."
+    },
+    {
+      "paper_item_id": "appendix_f",
+      "paper_label": "Appendix F - Mindoro oil-type and shoreline support/context package",
+      "evidence_role": "support_context",
+      "claim_boundary": "Appendix/support only; not primary validation.",
+      "repo_paths": [
+        "output/phase4/CASE_MINDORO_RETRO_2023/phase4_final_verdict.md",
+        "output/phase4/CASE_MINDORO_RETRO_2023/phase4_methodology_sync_memo.md",
+        "docs/PHASE4_COMPARATOR_DECISION.md"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/oil.yaml",
+        "config/archive_registry.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "support memo and archive decision note",
+      "notes": "Fixed-base medium-heavy proxy is QC flagged; light and heavier oil support rows pass QC."
+    },
+    {
+      "paper_item_id": "output_phase4_mindoro_root",
+      "paper_label": "Stored output root - Mindoro Phase 4 oil-type/shoreline support",
+      "evidence_role": "support_context",
+      "claim_boundary": "Support/context only.",
+      "repo_paths": [
+        "output/phase4/CASE_MINDORO_RETRO_2023"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/oil.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "directory presence",
+      "notes": "Required root named in the final-paper alignment facts."
+    },
+    {
+      "paper_item_id": "table_4_11",
+      "paper_label": "Table 4.11 - Secondary 2016 drifter-track benchmark",
+      "evidence_role": "secondary_support",
+      "claim_boundary": "Secondary 2016 is drifter-track support only, not public-spill validation.",
+      "repo_paths": [
+        "output/2016_drifter_benchmark/scorecard.csv",
+        "output/2016_drifter_benchmark/scorecard.json",
+        "output/2016_drifter_benchmark/manifest.json"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/archive_registry.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "stored drifter benchmark scorecard and manifest",
+      "notes": "Does not replace Mindoro B1 or DWH."
+    },
+    {
+      "paper_item_id": "table_4_11a",
+      "paper_label": "Table 4.11A - Secondary 2016 legacy FSS by case/window",
+      "evidence_role": "secondary_support",
+      "claim_boundary": "Legacy FSS support only; PyGNOME remains comparator-only.",
+      "repo_paths": [
+        "output/prototype_2016_pygnome_similarity/prototype_pygnome_fss_by_case_window.csv",
+        "output/2016 Legacy Runs FINAL Figures/summary/phase3a/prototype_pygnome_fss_by_case_window.csv",
+        "output/2016 Legacy Runs FINAL Figures/summary/phase3a/CASE_2016-09-*/phase3a_fss_by_time_window.csv"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/archive_registry.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "stored legacy FSS tables",
+      "notes": "Secondary support only."
+    },
+    {
+      "paper_item_id": "table_4_11b",
+      "paper_label": "Table 4.11B - Secondary 2016 OpenDrift/PyGNOME similarity support",
+      "evidence_role": "secondary_support",
+      "claim_boundary": "Comparator support only; not public-spill validation.",
+      "repo_paths": [
+        "output/prototype_2016_pygnome_similarity/prototype_pygnome_similarity_by_case.csv",
+        "output/prototype_2016_pygnome_similarity/prototype_pygnome_case_registry.csv",
+        "output/2016 Legacy Runs FINAL Figures/summary/phase3a/prototype_pygnome_similarity_by_case.csv"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/archive_registry.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "stored legacy similarity tables",
+      "notes": "Secondary support only."
+    },
+    {
+      "paper_item_id": "table_4_12",
+      "paper_label": "Table 4.12 - Secondary 2016 legacy fate/shoreline support",
+      "evidence_role": "secondary_support",
+      "claim_boundary": "Legacy support only; not a final-paper primary validation lane.",
+      "repo_paths": [
+        "output/2016 Legacy Runs FINAL Figures/summary/phase4/prototype_2016_phase4_registry.csv",
+        "output/2016 Legacy Runs FINAL Figures/summary/phase4_comparator/prototype_2016_phase4_pygnome_comparator_registry.csv",
+        "output/2016 Legacy Runs FINAL Figures/summary/phase4_comparator/prototype_2016_phase4_pygnome_decision_note.md"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/archive_registry.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "stored legacy support registries",
+      "notes": "Preserved as repository/archive support without promoting into the main paper claim."
+    },
+    {
+      "paper_item_id": "figure_4_10",
+      "paper_label": "Figure 4.10 - Secondary 2016 drifter-track benchmark boards",
+      "evidence_role": "secondary_support",
+      "claim_boundary": "Secondary drifter-track support only.",
+      "repo_paths": [
+        "output/2016_drifter_benchmark/case_boards/CASE_2016-09-*_drifter_track_benchmark.png",
+        "output/figure_package_publication/case_legacy_2016__prototype_2016_home_overview__observation__comparison_board__2016_09_01_to_2016_09_17__board__slide__legacy_2016_drifter_track_triptych_board.png"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/archive_registry.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "archived board and benchmark figures",
+      "notes": "Not public-spill validation."
+    },
+    {
+      "paper_item_id": "figure_4_11",
+      "paper_label": "Figure 4.11 - Secondary 2016 drifter versus ensemble support",
+      "evidence_role": "secondary_support",
+      "claim_boundary": "Secondary support only.",
+      "repo_paths": [
+        "output/figure_package_publication/case_legacy_2016__prototype_2016_home_overview__observation_vs_opendrift__comparison_board__2016_09_01_to_2016_09_17__board__slide__legacy_2016_drifter_vs_mask_p50_mask_p90_triptych_board.png",
+        "output/2016 Legacy Runs FINAL Figures/CASE_2016-09-*/drifter_vs_ensemble_72h.png"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/archive_registry.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "archived board and legacy figure package",
+      "notes": "Not a replacement for Mindoro B1 or DWH."
+    },
+    {
+      "paper_item_id": "figure_4_12",
+      "paper_label": "Figure 4.12 - Secondary 2016 OpenDrift/PyGNOME FSS support boards",
+      "evidence_role": "secondary_support",
+      "claim_boundary": "PyGNOME comparator support only.",
+      "repo_paths": [
+        "output/figure_package_publication/case_legacy_2016__prototype_2016_home_overview__opendrift_vs_pygnome__comparison_board__2016_09_01_to_2016_09_17__board__slide__legacy_2016_mask_p50_mask_p90_vs_pygnome_triptych_board.png",
+        "output/prototype_2016_pygnome_similarity/figures/case_2016_09_*__prototype_2016__24_48_72h__opendrift_vs_pygnome__board.png"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/archive_registry.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "archived comparator boards",
+      "notes": "Comparator-only support."
+    },
+    {
+      "paper_item_id": "figure_4_13",
+      "paper_label": "Figure 4.13 - Secondary 2016 legacy fate/shoreline support",
+      "evidence_role": "secondary_support",
+      "claim_boundary": "Legacy support only; not a current primary validation or Mindoro recalibration claim.",
+      "repo_paths": [
+        "output/2016 Legacy Runs FINAL Figures/publication/phase4/CASE_2016-09-*/mass_budget_comparison.png",
+        "output/2016 Legacy Runs FINAL Figures/publication/phase4/CASE_2016-09-*/shoreline_summary_*.png",
+        "output/2016 Legacy Runs FINAL Figures/publication/phase4_comparator/CASE_2016-09-*/budget_comparison_board.png"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/archive_registry.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "legacy publication/support figures",
+      "notes": "Repository-only and appendix/support provenance."
+    },
+    {
+      "paper_item_id": "output_2016_drifter_benchmark_root",
+      "paper_label": "Stored output root - 2016 drifter benchmark",
+      "evidence_role": "secondary_support",
+      "claim_boundary": "Secondary support only.",
+      "repo_paths": [
+        "output/2016_drifter_benchmark"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/archive_registry.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "directory presence",
+      "notes": "Open IDE tab manifest belongs to this secondary-support output root."
+    },
+    {
+      "paper_item_id": "output_legacy_fss_roots",
+      "paper_label": "Stored output roots - 2016 legacy FSS and final figures",
+      "evidence_role": "secondary_support",
+      "claim_boundary": "Legacy support only.",
+      "repo_paths": [
+        "output/prototype_2016_pygnome_similarity",
+        "output/2016 Legacy Runs FINAL Figures"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/archive_registry.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "directory presence",
+      "notes": "Authoritative legacy support roots for secondary 2016 material."
+    },
+    {
+      "paper_item_id": "table_3_16",
+      "paper_label": "Table 3.16 - Launcher matrix and reproducibility governance",
+      "evidence_role": "governance",
+      "claim_boundary": "Governance table only; it does not create scientific results.",
+      "repo_paths": [
+        "config/launcher_matrix.json",
+        "docs/COMMAND_MATRIX.md",
+        "docs/LAUNCHER_USER_GUIDE.md"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/launcher_matrix.json"
+      ],
+      "output_exists": true,
+      "validation_method": "launcher matrix and docs",
+      "notes": "Maps launcher entries, role groups, rerun costs, and read-only governance paths."
+    },
+    {
+      "paper_item_id": "table_3_17",
+      "paper_label": "Table 3.17 - Archive governance and non-promoted outputs",
+      "evidence_role": "governance",
+      "claim_boundary": "Archive governance preserves non-promoted rows without promoting them into paper claims.",
+      "repo_paths": [
+        "config/archive_registry.yaml",
+        "docs/ARCHIVE_GOVERNANCE.md",
+        "docs/MINDORO_VALIDATION_ARCHIVE_DECISION.md"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/archive_registry.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "archive registry and archive governance docs",
+      "notes": "Use this before citing archived, experimental, or legacy rows."
+    },
+    {
+      "paper_item_id": "appendix_g",
+      "paper_label": "Appendix G - Reproducibility package and panel review governance",
+      "evidence_role": "governance",
+      "claim_boundary": "Read-only/package governance only; no scientific reruns.",
+      "repo_paths": [
+        "output/final_reproducibility_package/final_reproducibility_manifest.json",
+        "output/final_reproducibility_package/final_output_catalog.csv",
+        "docs/PANEL_REVIEW_GUIDE.md",
+        "docs/FINAL_PAPER_ALIGNMENT.md"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/launcher_matrix.json",
+        "config/paper_to_output_registry.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "reproducibility manifest, output catalog, and review docs",
+      "notes": "Some reproducibility package files may be regenerated from stored outputs by explicit packaging entries only."
+    },
+    {
+      "paper_item_id": "appendix_h",
+      "paper_label": "Appendix H - UI/read-only package layer and paper-to-output traceability",
+      "evidence_role": "governance",
+      "claim_boundary": "Read-only presentation/governance surface only.",
+      "repo_paths": [
+        "ui",
+        "docs/UI_GUIDE.md",
+        "docs/PAPER_TO_REPO_CROSSWALK.md",
+        "config/paper_to_output_registry.yaml"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/paper_to_output_registry.yaml",
+        "config/launcher_matrix.json"
+      ],
+      "output_exists": true,
+      "validation_method": "UI guide, crosswalk doc, and registry",
+      "notes": "The dashboard consumes stored outputs and must not reinterpret stored values."
+    },
+    {
+      "paper_item_id": "data_sources_registry",
+      "paper_label": "Data sources and provenance registry",
+      "evidence_role": "governance",
+      "claim_boundary": "Data-source provenance only; does not promote any new scientific claim.",
+      "repo_paths": [
+        "docs/DATA_SOURCES.md",
+        "config/data_sources.yaml"
+      ],
+      "required_repo_paths": [],
+      "source_config_paths": [
+        "config/data_sources.yaml"
+      ],
+      "output_exists": true,
+      "validation_method": "data-source documentation and machine-readable registry",
+      "notes": "Covers public observations, drifters, forcing, shoreline, oil properties, and model/tool provenance."
+    }
+  ]
+}
