@@ -49,7 +49,11 @@ Use [DATA_SOURCES.md](DATA_SOURCES.md) for data-source provenance and [ARCHIVE_G
 
 ## Primary Mindoro Metrics
 
-The Primary Mindoro March 13–14 validation case is the public-observation validation row. It is interpreted as coastal-neighborhood usefulness, not exact 1 km overlap.
+Fact group: Mindoro B1 primary validation.
+
+Final manuscript-facing label: Primary Mindoro March 13–14 validation case. `B1` is retained as an internal alias for guardrail compatibility.
+
+Mindoro B1 is the March 13-14 primary public-observation validation row. It is interpreted as coastal-neighborhood usefulness, not exact 1 km overlap.
 
 | Metric | Value |
 | --- | ---: |
@@ -110,7 +114,13 @@ These values are support/context only, not primary validation.
 
 ## Secondary 2016 Support Role
 
-The 2016 material provides direct drifter-track and legacy OpenDrift–PyGNOME FSS support only. It is not public-spill validation and is not a replacement for Mindoro or DWH.
+Fact group: secondary 2016 support.
+
+Final manuscript-facing label: Secondary 2016 drifter-track and legacy FSS support.
+
+The 2016 material provides direct drifter-track and legacy OpenDrift-PyGNOME FSS support only. It is not public-spill validation and is not a replacement for Mindoro B1 or DWH.
+
+In reviewer-facing prose, this remains secondary 2016 drifter-track and legacy FSS support only.
 
 ## Launcher Entries By Role
 

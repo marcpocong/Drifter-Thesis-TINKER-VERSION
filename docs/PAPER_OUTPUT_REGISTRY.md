@@ -3,6 +3,7 @@
 This registry is the short reviewer-facing companion to [`config/paper_to_output_registry.yaml`](../config/paper_to_output_registry.yaml). It maps final manuscript labels to stored outputs already present in this repository.
 
 - It is read-only.
+- It is intended for panel review, defense inspection, and audit.
 - It does not promote experimental, archive-only, or sensitivity-only outputs.
 - It does not run scientific workflows or download data.
 - Raw `output/CASE_MINDORO_RETRO_2023` and `output/CASE_DWH_RETRO_2010_72H` paths are provenance/staging context only; curated package paths lead.
