@@ -15,7 +15,7 @@ Do not use the deprecated `powershell@preview` cask. Current Homebrew taps expos
 macOS:
 
 ```bash
-cd ~/Documents/GitHub/Drifter-Thesis-TINKER-VERSION
+cd ~/Documents/GitHub/drifter-validated-oilspill-forecasting
 [ -f .env ] || cp .env.example .env
 open -a Docker
 docker compose up -d --build
@@ -25,7 +25,7 @@ docker compose ps
 Linux:
 
 ```bash
-cd /path/to/Drifter-Thesis-TINKER-VERSION
+cd /path/to/drifter-validated-oilspill-forecasting
 [ -f .env ] || cp .env.example .env
 docker compose up -d --build
 docker compose ps
@@ -34,7 +34,7 @@ docker compose ps
 Windows PowerShell:
 
 ```powershell
-cd C:\path\to\Drifter-Thesis-TINKER-VERSION
+cd C:\path\to\drifter-validated-oilspill-forecasting
 if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 docker compose up -d --build
 docker compose ps

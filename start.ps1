@@ -27,6 +27,7 @@ param(
     [string]$Explain,
     [string]$ListRole,
     [switch]$Panel,
+    [switch]$Dashboard,
     [switch]$DryRun,
     [switch]$ExportPlan,
     [switch]$NoPause
@@ -214,6 +215,100 @@ function Write-ComposeUnavailableMessage {
     Write-Host ""
     Write-Host $message -ForegroundColor Yellow
     return $message
+}
+
+function Test-DockerEngineAvailable {
+    $previousErrorActionPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = "Continue"
+        Invoke-ComposeCommand -ComposeArgs @("ps", "-q") *> $null
+        return ($LASTEXITCODE -eq 0)
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+}
+
+function Get-DockerEngineUnavailableMessage {
+    param([string]$ActionLabel = "This launcher action")
+
+    return ("{0} requires Docker, but Docker does not appear to be running. Start Docker Desktop, then try again." -f $ActionLabel)
+}
+
+function Write-DockerEngineUnavailableMessage {
+    param([string]$ActionLabel = "This launcher action")
+
+    $message = Get-DockerEngineUnavailableMessage -ActionLabel $ActionLabel
+    Write-Host ""
+    Write-Host $message -ForegroundColor Yellow
+    return $message
+}
+
+function Get-DashboardDockerUnavailableMessage {
+    return "Docker is not available. Install/start Docker Desktop, then rerun .\panel.ps1 or run the manual Streamlit command in docs/UI_GUIDE.md."
+}
+
+function Write-DashboardDockerUnavailableMessage {
+    $message = Get-DashboardDockerUnavailableMessage
+    Write-Host ""
+    Write-Host $message -ForegroundColor Yellow
+    return $message
+}
+
+function Get-LauncherEnvRoot {
+    $override = [string](Get-Item -Path "Env:LAUNCHER_ENV_ROOT" -ErrorAction SilentlyContinue).Value
+    if (-not [string]::IsNullOrWhiteSpace($override)) {
+        return $override
+    }
+
+    return $Script:RepoRoot
+}
+
+function Ensure-LauncherEnvFile {
+    $envRoot = Get-LauncherEnvRoot
+    $envPath = Join-Path $envRoot ".env"
+    $examplePath = Join-Path $envRoot ".env.example"
+
+    if (Test-Path -LiteralPath $envPath) {
+        return $true
+    }
+
+    if (-not (Test-Path -LiteralPath $examplePath)) {
+        Write-Host ""
+        Write-Host ".env is missing and .env.example was not found. Continuing with existing shell/default Docker Compose environment." -ForegroundColor DarkYellow
+        return $true
+    }
+
+    if ($NoPause -or -not (Test-ConsolePromptAvailable)) {
+        Copy-Item -LiteralPath $examplePath -Destination $envPath -Force
+        Write-Host ""
+        Write-Host "Created .env from .env.example as the safe non-interactive default before starting Docker." -ForegroundColor Yellow
+        Write-Host "Review .env later if you need custom local paths or credentials." -ForegroundColor DarkGray
+        return $true
+    }
+
+    Write-Host ""
+    Write-Host ".env is missing. Docker Compose startup usually expects this file." -ForegroundColor Yellow
+    Write-Host "Use .env.example as the safe default, or cancel before any Docker action runs." -ForegroundColor DarkGray
+    while ($true) {
+        $choice = Resolve-LauncherChoice `
+            -InputText (Read-Host "Create .env from .env.example? [Y/YES/Enter=create | C=cancel]") `
+            -AllowedActions @("run", "cancel") `
+            -BlankAction "run" `
+            -AllowedOptions @("Y", "YES", "Enter", "C", "CANCEL")
+        switch ($choice.Action) {
+            "run" {
+                Copy-Item -LiteralPath $examplePath -Destination $envPath -Force
+                Write-Host "Created .env from .env.example." -ForegroundColor Green
+                return $true
+            }
+            "cancel" {
+                Write-LauncherCancelledMessage
+                return $false
+            }
+        }
+        Write-Host "Invalid option. Use Y, YES, C, CANCEL, or press Enter." -ForegroundColor DarkYellow
+    }
 }
 
 function Ensure-Directories {
@@ -520,6 +615,11 @@ function Test-LauncherEntryNeedsPreview {
 }
 
 function Test-ConsolePromptAvailable {
+    $scriptedInput = [string](Get-Item -Path "Env:LAUNCHER_SCRIPTED_STDIN" -ErrorAction SilentlyContinue).Value
+    if ($scriptedInput.Trim().ToLowerInvariant() -in @("1", "true", "yes", "y", "on")) {
+        return $true
+    }
+
     try {
         if ([Console]::IsInputRedirected) {
             return (Test-LauncherInputBuffered)
@@ -1079,7 +1179,7 @@ function Write-LauncherEntryPreviewContent {
     $expectedOutputDirs = Get-LauncherEntryExpectedOutputDirs -LauncherEntry $LauncherEntry
     if ($expectedOutputDirs) {
         foreach ($dir in $expectedOutputDirs) {
-            Write-Host ("  {0}" -f $dir) -ForegroundColor DarkGray
+            Write-Host ("  {0}" -f (Format-LauncherDisplayPath -Path $dir)) -ForegroundColor DarkGray
         }
     } else {
         Write-Host "  Entry-specific directories are determined by the phase handlers and manifests under output/." -ForegroundColor DarkGray
@@ -2232,7 +2332,12 @@ function Export-LauncherRunPlan {
         -LauncherEntry $LauncherEntry `
         -RequestedEntryId $RequestedEntryId `
         -StartupEnv $startupEnv
-    $outputDir = Join-Path $Script:RepoRoot "output\launcher_plans"
+    $planRootOverride = [string](Get-Item -Path "Env:LAUNCHER_PLAN_OUTPUT_ROOT" -ErrorAction SilentlyContinue).Value
+    if ([string]::IsNullOrWhiteSpace($planRootOverride)) {
+        $outputDir = Join-Path $Script:RepoRoot "output\launcher_plans"
+    } else {
+        $outputDir = Join-Path $planRootOverride "launcher_plans"
+    }
     if (-not (Test-Path -LiteralPath $outputDir)) {
         New-Item -ItemType Directory -Path $outputDir -Force | Out-Null
     }
@@ -2363,6 +2468,13 @@ function Invoke-LauncherEntry {
         $message = Write-ComposeUnavailableMessage -ActionLabel ("Launcher entry '{0}'" -f [string]$LauncherEntry.entry_id)
         return (New-LauncherResult -Status "docker_unavailable" -Message $message -ExitCode 2 -LauncherEntry $LauncherEntry -RequestedEntryId $RequestedEntryId -NoWorkflowExecuted $true)
     }
+    if (-not (Ensure-LauncherEnvFile)) {
+        return (New-LauncherResult -Status "cancelled" -Message "Cancelled. No workflow was executed." -LauncherEntry $LauncherEntry -RequestedEntryId $RequestedEntryId -NoWorkflowExecuted $true)
+    }
+    if (-not (Test-DockerEngineAvailable)) {
+        $message = Write-DockerEngineUnavailableMessage -ActionLabel ("Launcher entry '{0}'" -f [string]$LauncherEntry.entry_id)
+        return (New-LauncherResult -Status "docker_unavailable" -Message $message -ExitCode 2 -LauncherEntry $LauncherEntry -RequestedEntryId $RequestedEntryId -NoWorkflowExecuted $true)
+    }
 
     Ensure-Directories
     $entryId = [string]$LauncherEntry.entry_id
@@ -2479,6 +2591,33 @@ Start-Process `$targetUrl
     }
 }
 
+function Test-LauncherBrowserOpenEnabled {
+    $disableBrowserOpen = [string](Get-Item -Path "Env:LAUNCHER_DISABLE_BROWSER_OPEN" -ErrorAction SilentlyContinue).Value
+    if ($disableBrowserOpen.Trim().ToLowerInvariant() -in @("1", "true", "yes", "y", "on")) {
+        return $false
+    }
+
+    $ciMode = [string](Get-Item -Path "Env:CI" -ErrorAction SilentlyContinue).Value
+    if ($ciMode.Trim().ToLowerInvariant() -in @("1", "true", "yes", "y", "on")) {
+        return $false
+    }
+
+    if ($NoPause) {
+        return $false
+    }
+
+    try {
+        if ([Console]::IsOutputRedirected) {
+            return $false
+        }
+
+        return [Environment]::UserInteractive
+    }
+    catch {
+        return $false
+    }
+}
+
 function Test-ReadOnlyUiHealth {
     param([int]$Port = 8501)
 
@@ -2496,8 +2635,25 @@ function Test-ReadOnlyUiHealth {
     }
 }
 
+function Test-ReadOnlyUiContainerPortOpen {
+    param([int]$Port = 8501)
+
+    $probeCode = "import socket,sys; s=socket.socket(); s.settimeout(2); sys.exit(0 if s.connect_ex(('127.0.0.1',$Port)) == 0 else 1)"
+    $previousErrorActionPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = "Continue"
+        Invoke-ComposeCommand -ComposeArgs @("exec", "-T", "pipeline", "python", "-c", $probeCode) *> $null
+        $probeExitCode = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+
+    return ($probeExitCode -eq 0)
+}
+
 function Test-ReadOnlyUiProcessRunning {
-    $probeCommand = "(pgrep -f 'streamlit run ui/app.py' >/dev/null 2>&1) || (ps -ef 2>/dev/null | grep -F 'streamlit run ui/app.py' | grep -v grep >/dev/null 2>&1)"
+    $probeCommand = "(pgrep -f '[s]treamlit run ui/app.py' >/dev/null 2>&1) || (ps -ef 2>/dev/null | grep -E '[s]treamlit run ui/app.py' >/dev/null 2>&1)"
     $previousErrorActionPreference = $ErrorActionPreference
     try {
         $ErrorActionPreference = "Continue"
@@ -2514,7 +2670,7 @@ function Test-ReadOnlyUiProcessRunning {
 function Stop-ReadOnlyUiProcess {
     param([switch]$Quiet)
 
-    $stopCommand = "pkill -f 'streamlit run ui/app.py' >/dev/null 2>&1 || true"
+    $stopCommand = 'pids=$(pgrep -f ''[s]treamlit run ui/app.py'' 2>/dev/null || true); if [ -n "$pids" ]; then kill $pids >/dev/null 2>&1 || true; fi'
     $previousErrorActionPreference = $ErrorActionPreference
     try {
         $ErrorActionPreference = "Continue"
@@ -2532,37 +2688,86 @@ function Stop-ReadOnlyUiProcess {
     return ($stopExitCode -eq 0)
 }
 
+function Get-ReadOnlyUiUrl {
+    param([string]$LandingPath = "")
+
+    $landingUrl = "http://localhost:8501"
+    if ($LandingPath) {
+        $landingUrl = "{0}/{1}" -f $landingUrl.TrimEnd("/"), $LandingPath.TrimStart("/")
+    }
+
+    return $landingUrl
+}
+
+function Get-ReadOnlyUiLaunchCommandText {
+    return ("{0} exec -T -d pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501" -f (Get-ComposeCommandText))
+}
+
+function Show-ReadOnlyUiDryRunPlan {
+    param(
+        [switch]$RestartPipeline,
+        [string]$LandingPath = ""
+    )
+
+    $landingUrl = Get-ReadOnlyUiUrl -LandingPath $LandingPath
+    Write-Section "READ-ONLY DASHBOARD DRY RUN"
+    Write-Host ""
+    Write-Host "Dry run only. No Docker commands were executed and no outputs were modified." -ForegroundColor Green
+    Write-Host "No workflow was executed." -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Dashboard shortcut plan:" -ForegroundColor Yellow
+    Write-Host "  1. Ensure .env exists; if it is missing and .env.example exists, copy the example as the safe default." -ForegroundColor DarkGray
+    Write-Host ("  2. {0} up -d pipeline" -f (Get-ComposeCommandText)) -ForegroundColor DarkGray
+    if ($RestartPipeline) {
+        Write-Host ("  3. {0} restart pipeline" -f (Get-ComposeCommandText)) -ForegroundColor DarkGray
+        Write-Host "  4. Reuse Streamlit if port 8501 already responds; otherwise start the read-only UI." -ForegroundColor DarkGray
+    } else {
+        Write-Host "  3. Reuse Streamlit if port 8501 already responds; otherwise start the read-only UI." -ForegroundColor DarkGray
+    }
+    Write-Host ("     {0}" -f (Get-ReadOnlyUiLaunchCommandText)) -ForegroundColor DarkGray
+    Write-Host ("  Open URL: {0}" -f $landingUrl) -ForegroundColor Yellow
+}
+
 function Invoke-ReadOnlyUi {
     param(
         [switch]$RestartPipeline,
         [string]$LandingPath = ""
     )
 
+    if (Test-LauncherDryRunRequested) {
+        Show-ReadOnlyUiDryRunPlan -RestartPipeline:$RestartPipeline -LandingPath $LandingPath
+        return $true
+    }
+
     if (-not (Resolve-ComposeMode)) {
-        Write-ComposeUnavailableMessage -ActionLabel "The read-only dashboard"
+        Write-DashboardDockerUnavailableMessage
+        return $false
+    }
+    if (-not (Ensure-LauncherEnvFile)) {
+        return $false
+    }
+    if (-not (Test-DockerEngineAvailable)) {
+        Write-DashboardDockerUnavailableMessage
         return $false
     }
 
     if ($RestartPipeline) {
-        Write-Host "Restarting compose services for a clean UI refresh..." -ForegroundColor Yellow
+        Write-Host "Restarting the pipeline service for a clean UI refresh..." -ForegroundColor Yellow
     } else {
-        Write-Host "Starting Docker containers..." -ForegroundColor Yellow
+        Write-Host "Starting the pipeline container..." -ForegroundColor Yellow
     }
 
     $previousErrorActionPreference = $ErrorActionPreference
     try {
         # Docker may emit routine status lines to stderr even on success.
         $ErrorActionPreference = "Continue"
+        Invoke-ComposeCommand -ComposeArgs @("up", "-d", "pipeline") 2>&1 | ForEach-Object { Write-ProcessLine $_ }
+        $composeExitCode = $LASTEXITCODE
         if ($RestartPipeline) {
-            Invoke-ComposeCommand -ComposeArgs @("up", "-d") 2>&1 | ForEach-Object { Write-ProcessLine $_ }
-            $composeExitCode = $LASTEXITCODE
             if ($composeExitCode -eq 0) {
-                Invoke-ComposeCommand -ComposeArgs @("restart", "pipeline", "gnome") 2>&1 | ForEach-Object { Write-ProcessLine $_ }
+                Invoke-ComposeCommand -ComposeArgs @("restart", "pipeline") 2>&1 | ForEach-Object { Write-ProcessLine $_ }
                 $composeExitCode = $LASTEXITCODE
             }
-        } else {
-            Invoke-ComposeCommand -ComposeArgs @("up", "-d") 2>&1 | ForEach-Object { Write-ProcessLine $_ }
-            $composeExitCode = $LASTEXITCODE
         }
     }
     finally {
@@ -2570,23 +2775,22 @@ function Invoke-ReadOnlyUi {
     }
     if ($composeExitCode -ne 0) {
         if ($RestartPipeline) {
-            throw ("{0} up/restart for the full compose stack failed with exit code {1}." -f (Get-ComposeCommandText), $composeExitCode)
+            throw ("{0} up/restart for the pipeline service failed with exit code {1}." -f (Get-ComposeCommandText), $composeExitCode)
         }
-        throw ("{0} up -d failed with exit code {1}." -f (Get-ComposeCommandText), $composeExitCode)
+        throw ("{0} up -d pipeline failed with exit code {1}." -f (Get-ComposeCommandText), $composeExitCode)
     }
 
-    $landingUrl = "http://localhost:8501"
-    if ($LandingPath) {
-        $landingUrl = "{0}/{1}" -f $landingUrl.TrimEnd("/"), $LandingPath.TrimStart("/")
-    }
+    $landingUrl = Get-ReadOnlyUiUrl -LandingPath $LandingPath
 
-    if ((-not $RestartPipeline) -and (Test-ReadOnlyUiHealth)) {
+    if ((-not $RestartPipeline) -and ((Test-ReadOnlyUiHealth) -or (Test-ReadOnlyUiContainerPortOpen))) {
         Write-Host ""
         Write-Host "Read-only Streamlit UI is already running." -ForegroundColor Green
         Write-Host ("Open {0}" -f $landingUrl) -ForegroundColor Yellow
         Write-Host "Use R / RESTART from panel mode if you need a clean dashboard process." -ForegroundColor DarkGray
-        if ($LandingPath) {
+        if (Test-LauncherBrowserOpenEnabled) {
             Start-DelayedBrowserLaunch -Url $landingUrl -Label "requested dashboard page"
+        } else {
+            Write-Host "Automatic browser opening skipped in non-interactive mode; use the URL above." -ForegroundColor DarkGray
         }
         return $true
     }
@@ -2600,14 +2804,18 @@ function Invoke-ReadOnlyUi {
 
     Write-Host ""
     Write-Host "Launching read-only Streamlit UI..." -ForegroundColor Yellow
-    Write-Host ("Open {0} while this process is running." -f $landingUrl) -ForegroundColor DarkGray
-    Write-Host "Press Ctrl+C to stop the UI and return to the launcher." -ForegroundColor DarkGray
-    if ($LandingPath) {
+    Write-Host ("Command: {0}" -f (Get-ReadOnlyUiLaunchCommandText)) -ForegroundColor DarkGray
+    Write-Host ("Open {0}" -f $landingUrl) -ForegroundColor Yellow
+    if (Test-LauncherBrowserOpenEnabled) {
         Start-DelayedBrowserLaunch -Url $landingUrl -Label "requested dashboard page"
+    } else {
+        Write-Host "Automatic browser opening skipped in non-interactive mode; use the URL above." -ForegroundColor DarkGray
     }
 
     $uiArgs = @(
         "exec",
+        "-T",
+        "-d",
         "pipeline",
         "python",
         "-m",
@@ -2622,7 +2830,7 @@ function Invoke-ReadOnlyUi {
 
     $previousErrorActionPreference = $ErrorActionPreference
     try {
-        # Keep Streamlit attached to this terminal so Ctrl+C behaves as expected.
+        # Start Streamlit detached inside the pipeline service so the launcher can return.
         $ErrorActionPreference = "Continue"
         Invoke-ComposeCommand -ComposeArgs $uiArgs 2>&1 | ForEach-Object { Write-ProcessLine $_ }
         $uiExitCode = $LASTEXITCODE
@@ -2632,7 +2840,7 @@ function Invoke-ReadOnlyUi {
     }
 
     if ($uiExitCode -ne 0) {
-        if (Test-ReadOnlyUiHealth) {
+        if ((Test-ReadOnlyUiHealth) -or (Test-ReadOnlyUiContainerPortOpen)) {
             Write-Host ""
             Write-Host "Read-only Streamlit UI is already running." -ForegroundColor Green
             Write-Host ("Open {0}" -f $landingUrl) -ForegroundColor Yellow
@@ -2640,6 +2848,31 @@ function Invoke-ReadOnlyUi {
             return $true
         }
         throw "Read-only UI exited with code $uiExitCode."
+    }
+
+    $healthWaitSeconds = 30
+    $healthWaitOverride = [string](Get-Item -Path "Env:LAUNCHER_DASHBOARD_HEALTH_WAIT_SECONDS" -ErrorAction SilentlyContinue).Value
+    if (-not [string]::IsNullOrWhiteSpace($healthWaitOverride)) {
+        $parsedHealthWait = 0
+        if ([int]::TryParse($healthWaitOverride, [ref]$parsedHealthWait)) {
+            $healthWaitSeconds = [Math]::Max(0, $parsedHealthWait)
+        }
+    }
+
+    $deadline = (Get-Date).AddSeconds($healthWaitSeconds)
+    $responded = $false
+    while ($healthWaitSeconds -gt 0 -and (Get-Date) -lt $deadline) {
+        if (Test-ReadOnlyUiHealth) {
+            $responded = $true
+            break
+        }
+        Start-Sleep -Seconds 1
+    }
+
+    if ($responded) {
+        Write-Host "Read-only dashboard is responding on http://localhost:8501." -ForegroundColor Green
+    } else {
+        Write-Host "Streamlit launch command was sent. If the page is still loading, wait a moment and refresh http://localhost:8501." -ForegroundColor Yellow
     }
 
     return $true
@@ -2656,6 +2889,13 @@ function Invoke-ContainerPythonScript {
 
     if (-not (Resolve-ComposeMode)) {
         Write-ComposeUnavailableMessage -ActionLabel $Description
+        return $false
+    }
+    if (-not (Ensure-LauncherEnvFile)) {
+        return $false
+    }
+    if (-not (Test-DockerEngineAvailable)) {
+        Write-DockerEngineUnavailableMessage -ActionLabel $Description
         return $false
     }
 
@@ -2698,6 +2938,17 @@ function Get-DisplayPath {
     }
 
     return (Join-Path $Script:RepoRoot $Path)
+}
+
+function Format-LauncherDisplayPath {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $normalized = ([string]$Path).Replace("\", "/")
+    if ($normalized -match "\s") {
+        return ('"{0}"' -f $normalized)
+    }
+
+    return $normalized
 }
 
 function Open-FileInDefaultApp {
@@ -2846,7 +3097,7 @@ function Invoke-LauncherMatrixValidation {
     $previousErrorActionPreference = $ErrorActionPreference
     try {
         $ErrorActionPreference = "Continue"
-        & python -m src.utils.validate_launcher_matrix 2>&1 | ForEach-Object { Write-ProcessLine $_ }
+        & python -m src.utils.validate_launcher_matrix --no-write 2>&1 | ForEach-Object { Write-ProcessLine $_ }
         $validationExitCode = $LASTEXITCODE
     }
     finally {
@@ -2888,7 +3139,7 @@ function Show-LauncherList {
     Write-Host "Explain one entry: .\start.ps1 -Explain <entry_id> -NoPause" -ForegroundColor Yellow
     Write-Host "Dry-run one entry: .\start.ps1 -Entry <entry_id> -DryRun -NoPause" -ForegroundColor Yellow
     Write-Host ("Prompt-free container run: {0} exec -T -e WORKFLOW_MODE=<workflow_mode> -e PIPELINE_PHASE=<phase> <pipeline|gnome> python -m src" -f $compose) -ForegroundColor Yellow
-    Write-Host ("Read-only UI: {0} exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501" -f $compose) -ForegroundColor Yellow
+    Write-Host "Read-only UI: .\start.ps1 -Dashboard -NoPause" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "Use user-facing entry IDs and thesis-role groupings here. Raw phase names are not the primary startup commands." -ForegroundColor White
     Write-Host "The unfiltered list is grouped by thesis role, so archive, legacy, support, and read-only routes do not flatten into main evidence." -ForegroundColor White
@@ -2971,11 +3222,13 @@ function Show-Help {
     Write-Host "Panel-safe default path:" -ForegroundColor Yellow
     Write-Host "  .\panel.ps1" -ForegroundColor Green
     Write-Host "  .\start.ps1 -Panel -NoPause" -ForegroundColor Green
+    Write-Host "  .\start.ps1 -Dashboard -NoPause" -ForegroundColor Green
     Write-Host ""
     Write-Host "Full launcher / researcher-audit path:" -ForegroundColor Yellow
     Write-Host "  .\start.ps1" -ForegroundColor Green
     Write-Host "  .\start.ps1 -List -NoPause" -ForegroundColor Green
     Write-Host "  .\start.ps1 -ListRole primary_evidence -NoPause" -ForegroundColor Green
+    Write-Host "  .\start.ps1 -ListRole read_only_governance -NoPause" -ForegroundColor Green
     Write-Host "  .\start.ps1 -ListRole archive_provenance -NoPause" -ForegroundColor Green
     Write-Host "  .\start.ps1 -ValidateMatrix -NoPause" -ForegroundColor Green
     Write-Host "  .\start.ps1 -Explain mindoro_phase3b_primary_public_validation -NoPause" -ForegroundColor Green
@@ -3020,6 +3273,7 @@ function Show-Help {
     Write-Host "  .\start.ps1 -Entry final_validation_package" -ForegroundColor Green
     Write-Host "  .\start.ps1 -Entry phase5_sync" -ForegroundColor Green
     Write-Host "  .\start.ps1 -Entry figure_package_publication" -ForegroundColor Green
+    Write-Host "  .\start.ps1 -Dashboard -DryRun -NoPause" -ForegroundColor Green
     Write-Host ""
     Write-Host "Shared controls:" -ForegroundColor Yellow
     Write-Host "  B/BACK/0 = go back when a previous menu exists" -ForegroundColor White
@@ -3040,8 +3294,8 @@ function Show-Help {
     Write-Host "Direct container commands:" -ForegroundColor Yellow
     Write-Host ("  {0} exec -T -e WORKFLOW_MODE=<workflow_mode> -e PIPELINE_PHASE=<phase> <pipeline|gnome> python -m src" -f $compose) -ForegroundColor Green
     Write-Host ("  {0} exec -T pipeline python src/services/panel_review_check.py" -f $compose) -ForegroundColor Green
-    Write-Host ("  {0} exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501" -f $compose) -ForegroundColor Green
-    Write-Host ("  {0} up -d ; {0} restart pipeline gnome ; {0} exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501" -f $compose) -ForegroundColor Green
+    Write-Host "  .\start.ps1 -Dashboard -NoPause" -ForegroundColor Green
+    Write-Host ("  {0} up -d pipeline ; {0} exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501" -f $compose) -ForegroundColor Green
     Write-Host ""
     Write-Host "Guardrails:" -ForegroundColor Yellow
     Write-Host "  - Panel mode is the defense-safe default. The full launcher is for researcher/audit use." -ForegroundColor White
@@ -3659,6 +3913,49 @@ function Show-Menu {
     }
 }
 
+function Test-LauncherNoPauseNeedsSummary {
+    if (-not $NoPause) {
+        return $false
+    }
+
+    $scriptedInput = [string](Get-Item -Path "Env:LAUNCHER_SCRIPTED_STDIN" -ErrorAction SilentlyContinue).Value
+    if ($scriptedInput.Trim().ToLowerInvariant() -in @("1", "true", "yes", "y", "on")) {
+        return $false
+    }
+
+    try {
+        if ([Console]::IsInputRedirected -or [Console]::IsOutputRedirected) {
+            return $true
+        }
+    }
+    catch {
+        return $true
+    }
+
+    return (-not [Environment]::UserInteractive)
+}
+
+function Show-NonInteractiveLauncherSummary {
+    Clear-Host
+    Write-Section "LAUNCHER NON-INTERACTIVE SUMMARY"
+    Write-Host ""
+    Write-Host "No interactive input is available and -NoPause was supplied, so the launcher will not wait for menu input." -ForegroundColor Yellow
+    Write-Host "No workflow was executed." -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Usable non-interactive commands:" -ForegroundColor Yellow
+    Write-Host "  .\start.ps1 -Help -NoPause" -ForegroundColor Green
+    Write-Host "  .\start.ps1 -ValidateMatrix -NoPause" -ForegroundColor Green
+    Write-Host "  .\start.ps1 -List -NoPause" -ForegroundColor Green
+    Write-Host "  .\start.ps1 -ListRole primary_evidence -NoPause" -ForegroundColor Green
+    Write-Host "  .\start.ps1 -ListRole read_only_governance -NoPause" -ForegroundColor Green
+    Write-Host "  .\start.ps1 -Explain mindoro_phase3b_primary_public_validation -NoPause" -ForegroundColor Green
+    Write-Host "  .\start.ps1 -Entry mindoro_phase3b_primary_public_validation -DryRun -NoPause" -ForegroundColor Green
+    Write-Host "  .\start.ps1 -Dashboard -NoPause" -ForegroundColor Green
+    Write-Host "  .\panel.ps1 -NoPause" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Panel mode and read-only/package entries are the defense-safe default. Scientific reruns require an explicit entry and confirmation." -ForegroundColor White
+}
+
 try {
     if ($ValidateMatrix) {
         $validationResult = Invoke-LauncherMatrixValidation
@@ -3715,8 +4012,20 @@ try {
         exit 1
     }
 
+    if ($Dashboard) {
+        Write-Section "READ-ONLY DASHBOARD"
+        [void](Invoke-ReadOnlyUi)
+        Pause-IfNeeded
+        exit 0
+    }
+
     if ($Panel) {
         Show-PanelMenu
+        exit 0
+    }
+
+    if (Test-LauncherNoPauseNeedsSummary) {
+        Show-NonInteractiveLauncherSummary
         exit 0
     }
 

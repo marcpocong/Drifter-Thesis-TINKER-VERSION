@@ -105,7 +105,7 @@ def render(state: dict, ui_state: dict) -> None:
     )
 
     render_modern_hero(
-        "Mindoro Same-Case OpenDrift-PyGNOME Comparator",
+        "Mindoro Same-Case OpenDrift-PyGNOME Comparator (Track A)",
         "The Mindoro same-case OpenDrift-PyGNOME comparator is support for the March 13-14 Mindoro case; Track A is the internal alias and it is not a second validation row.",
         badge=ROLE_COMPARATOR,
         eyebrow="Same-case comparator lane",

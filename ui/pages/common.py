@@ -23,7 +23,25 @@ except ModuleNotFoundError:
 ensure_repo_root_on_path(__file__)
 
 import pandas as pd
-import streamlit as st
+try:
+    import streamlit as st
+except ModuleNotFoundError:
+    class _MissingStreamlit:
+        def cache_data(self, *args, **kwargs):
+            if args and callable(args[0]) and len(args) == 1 and not kwargs:
+                return args[0]
+
+            def _decorator(func):
+                return func
+
+            return _decorator
+
+        def __getattr__(self, name: str):
+            if name == "dialog":
+                return None
+            raise ModuleNotFoundError("streamlit is required to render dashboard pages")
+
+    st = _MissingStreamlit()
 from PIL import Image as PILImage
 
 from ui.data_access import parse_source_paths, read_json, read_text, resolve_repo_path
@@ -33,6 +51,17 @@ from ui.evidence_contract import panel_safe_label, role_badge_for_record
 READ_ONLY_DASHBOARD_NOTICE = "Dashboard pages organize stored outputs only and do not create new scientific results."
 COMPARATOR_ONLY_NOTICE = "Comparator-only; not observation truth."
 ARCHIVE_ONLY_NOTICE = "Archive/provenance only; not a final-paper validation claim."
+
+
+def _streamlit_dialog(title: str):
+    dialog = getattr(st, "dialog", None)
+    if callable(dialog):
+        return dialog(title)
+
+    def _decorator(func):
+        return func
+
+    return _decorator
 
 
 def _clean_text_value(value: Any) -> str:
@@ -970,7 +999,8 @@ def _render_gallery_preview_media(figure_path: Path | None, title_text: str) -> 
     return False
 
 
-@st.dialog("Figure preview")
+# @st.dialog("Figure preview") is used when available; older Streamlit builds fall back to inline rendering.
+@_streamlit_dialog("Figure preview")
 def _render_figure_gallery_dialog(row_payload: dict[str, Any], *, show_download: bool = True) -> None:
     row = pd.Series(row_payload)
     figure_path = resolve_repo_path(row.get("resolved_path") or row.get("file_path") or row.get("relative_path"))
@@ -1212,19 +1242,27 @@ def preview_artifact(path_value: str | Path | None, *, repo_root: str | Path | N
     elif suffix in {".md", ".txt", ".log", ".yaml", ".yml"}:
         st.code(read_text(path, repo_root)[:15000], language="text")
     elif suffix == ".csv":
-        df = pd.read_csv(path)
+        from ui.data_access import read_csv
+
+        df = read_csv(path, repo_root)
         st.dataframe(df.head(200), width="stretch", height=280)
     elif suffix in {".png", ".jpg", ".jpeg"}:
-        st.image(str(path), width="stretch")
+        try:
+            st.image(str(path), width="stretch")
+        except OSError:
+            _render_missing_figure_tile(path.name)
     else:
         st.code(str(path), language="text")
-    st.download_button(
-        "Download selected artifact",
-        path.read_bytes(),
-        file_name=path.name,
-        mime="application/octet-stream",
-        key=f"artifact::{path}",
-    )
+    try:
+        st.download_button(
+            "Download selected artifact",
+            path.read_bytes(),
+            file_name=path.name,
+            mime="application/octet-stream",
+            key=f"artifact::{path}",
+        )
+    except OSError:
+        render_status_callout("Download unavailable", "The selected optional artifact is not readable in this repo state.", "neutral")
 
 
 def json_excerpt(payload: dict[str, Any]) -> str:

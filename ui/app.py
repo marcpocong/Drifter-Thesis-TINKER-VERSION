@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import base64
+import os
 from pathlib import Path
 
 try:
@@ -39,6 +40,10 @@ LAYER_LABELS = {
 }
 
 
+def _strict_errors_enabled() -> bool:
+    return str(os.environ.get("UI_STRICT_ERRORS", "")).strip().lower() in {"1", "true", "yes", "on"}
+
+
 @st.cache_data(show_spinner=False)
 def _load_dashboard_state(_cache_token: str) -> dict:
     return build_dashboard_state()
@@ -65,7 +70,7 @@ def _load_css() -> None:
 
 def _apply_streamlit_branding(branding: dict) -> None:
     logo_path = branding.get("logo_path")
-    if not logo_path:
+    if not logo_path or not hasattr(st, "logo"):
         return
     logo_args = {"link": "/"}
     icon_path = branding.get("icon_path")
@@ -271,8 +276,8 @@ def _render_sidebar_controls(state: dict, branding: dict) -> dict:
             metric_columns = st.columns(1)
             with metric_columns[0]:
                 st.metric("Curated package roots", len(curated_packages))
-                st.metric("Publication figures indexed", len(state["publication_registry"]))
-                st.metric("Focused Phase 1 recipes tested", len(state["phase1_focused_recipe_summary"]))
+                st.metric("Publication figures indexed", len(state.get("publication_registry", [])))
+                st.metric("Focused Phase 1 recipes tested", len(state.get("phase1_focused_recipe_summary", [])))
 
             with st.expander("Advanced stored read paths", expanded=False):
                 read_paths = [
@@ -311,8 +316,29 @@ def _render_sidebar_controls(state: dict, branding: dict) -> dict:
     }
 
 
+def _render_artifact_status_expander(state: dict) -> None:
+    messages = list(state.get("artifact_status_messages") or [])
+    if not messages:
+        return
+    missing = [message for message in messages if str(message.get("level", "")).lower() == "missing"]
+    warnings = [message for message in messages if str(message.get("level", "")).lower() != "missing"]
+    with st.sidebar:
+        with st.expander("Optional package status", expanded=False):
+            st.caption(
+                "The dashboard is read-only. Missing optional artifacts are listed here for transparency; pages stay available."
+            )
+            st.metric("Missing optional artifacts", len(missing))
+            if warnings:
+                st.metric("Read warnings", len(warnings))
+            for message in messages[:10]:
+                label = str(message.get("path") or "optional artifact")
+                st.caption(f"{label}: {message.get('message', 'not packaged in current repo state')}")
+            if len(messages) > 10:
+                st.caption(f"{len(messages) - 10} more optional status note(s) are available in the dashboard state.")
+
+
 def _render_sidebar_navigation(ui_state: dict) -> None:
-    if ui_state["export_mode"]:
+    if ui_state["export_mode"] or not hasattr(st, "page_link"):
         return
     page_sections = st.session_state.get("_ui_nav_pages_by_section", {})
     if not page_sections:
@@ -353,8 +379,8 @@ def _render_page_wrapper(page_definition: PageDefinition, state: dict, ui_state:
         try:
             render_dashboard_read_only_banner()
             page_definition.renderer(state, ui_state)
-        except Exception:
-            if ui_state["advanced"]:
+        except Exception as exc:
+            if _strict_errors_enabled():
                 raise
             render_status_callout(
                 "Optional artifact could not load",
@@ -364,8 +390,13 @@ def _render_page_wrapper(page_definition: PageDefinition, state: dict, ui_state:
             st.caption(
                 "Open the Reproducibility / Governance / Audit page for the synced file indexes, or switch to Advanced mode if you need lower-level inspection."
             )
+            st.caption(f"Status detail: {exc.__class__.__name__}. Set UI_STRICT_ERRORS=1 to re-raise during development.")
 
     return _run
+
+
+def _streamlit_navigation_available() -> bool:
+    return hasattr(st, "Page") and hasattr(st, "navigation")
 
 
 def _build_navigation(state: dict, ui_state: dict):
@@ -373,6 +404,10 @@ def _build_navigation(state: dict, ui_state: dict):
     sections: dict[str, list] = {}
     page_objects_by_label: dict[str, object] = {}
     page_objects_by_section: dict[str, list[dict[str, object]]] = {}
+    if not _streamlit_navigation_available():
+        st.session_state["_ui_nav_pages_by_label"] = {}
+        st.session_state["_ui_nav_pages_by_section"] = {}
+        return None
     for index, definition in enumerate(page_definitions):
         page_object = st.Page(
             _render_page_wrapper(definition, state, ui_state),
@@ -394,9 +429,34 @@ def _build_navigation(state: dict, ui_state: dict):
     return st.navigation(sections, position="hidden", expanded=True)
 
 
+def _run_fallback_navigation(state: dict, ui_state: dict) -> None:
+    page_definitions = visible_page_definitions(state, advanced=ui_state["advanced"])
+    if not page_definitions:
+        render_status_callout("No pages available", "No dashboard pages are available in this mode.", "warning")
+        return
+    if ui_state["export_mode"]:
+        selected_definition = page_definitions[0]
+    else:
+        with st.sidebar:
+            st.markdown("<div class='sidebar-nav-divider'></div>", unsafe_allow_html=True)
+            selected_label = st.selectbox(
+                "Dashboard page",
+                options=[definition.label for definition in page_definitions],
+                index=0,
+                key="fallback_dashboard_page",
+            )
+        selected_definition = next(
+            definition for definition in page_definitions if definition.label == selected_label
+        )
+    _render_page_wrapper(selected_definition, state, ui_state)()
+
+
 def main() -> None:
     Image.MAX_IMAGE_PIXELS = None
-    st_config.set_option("client.showSidebarNavigation", False)
+    try:
+        st_config.set_option("client.showSidebarNavigation", False)
+    except Exception:
+        pass
     branding, page_icon = _branding_payload()
     st.set_page_config(
         page_title=APP_TITLE,
@@ -406,7 +466,13 @@ def main() -> None:
     )
     _load_css()
     _apply_streamlit_branding(branding)
-    export_mode = _export_mode_from_query_params(st.query_params)
+    if hasattr(st, "query_params"):
+        export_mode = _export_mode_from_query_params(st.query_params)
+    else:
+        try:
+            export_mode = _export_mode_from_query_params(st.experimental_get_query_params())
+        except Exception:
+            export_mode = False
     if export_mode:
         _load_export_css()
     state = _load_dashboard_state(dashboard_state_signature())
@@ -416,6 +482,8 @@ def main() -> None:
         "visual_layer": "publication",
         "export_mode": True,
     }
+    if not export_mode:
+        _render_artifact_status_expander(state)
     navigation = _build_navigation(state, ui_state)
     _render_sidebar_navigation(ui_state)
 
@@ -426,7 +494,10 @@ def main() -> None:
             "info",
         )
 
-    navigation.run()
+    if navigation is not None:
+        navigation.run()
+    else:
+        _run_fallback_navigation(state, ui_state)
 
 
 if __name__ == "__main__":

@@ -92,8 +92,8 @@ class UiReadonlySemanticsTests(unittest.TestCase):
                 "Overview / Final Manuscript Alignment",
                 "Data Sources & Provenance",
                 "Focused Mindoro Phase 1 Provenance",
-                "Mindoro B1 Public-Observation Validation",
-                "Mindoro Track A Comparator Support",
+                "Primary Mindoro March 13-14 Validation Case (B1)",
+                "Mindoro Same-Case OpenDrift-PyGNOME Comparator (Track A)",
                 "DWH External Transfer Validation",
                 "Mindoro Oil-Type and Shoreline Support/Context",
                 "Secondary 2016 Support",
@@ -147,8 +147,8 @@ class UiReadonlySemanticsTests(unittest.TestCase):
                 "Overview / Final Manuscript Alignment",
                 "Data Sources & Provenance",
                 "Focused Mindoro Phase 1 Provenance",
-                "Mindoro B1 Public-Observation Validation",
-                "Mindoro Track A Comparator Support",
+                "Primary Mindoro March 13-14 Validation Case (B1)",
+                "Mindoro Same-Case OpenDrift-PyGNOME Comparator (Track A)",
                 "DWH External Transfer Validation",
                 "Mindoro Oil-Type and Shoreline Support/Context",
                 "Secondary 2016 Support",
@@ -314,7 +314,7 @@ class UiReadonlySemanticsTests(unittest.TestCase):
         self.assertNotIn("B2", mindoro_text)
         self.assertNotIn("B3", mindoro_text)
         self.assertNotIn("March 3", mindoro_text)
-        self.assertIn("Mindoro Track A Comparator Support", comparator_text)
+        self.assertIn("Mindoro Same-Case OpenDrift-PyGNOME Comparator (Track A)", comparator_text)
         self.assertIn("PyGNOME is comparator-only and is not observational truth.", comparator_text)
         self.assertIn("0.0061", comparator_text)
         self.assertIn("DWH External Transfer Validation", dwh_text)

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+import contextvars
 import json
 import hashlib
 from functools import lru_cache
@@ -58,6 +59,137 @@ MINDORO_CASE_CONFIG_PATH = Path("config") / "case_mindoro_retro_2023.yaml"
 SETTINGS_PATH = Path("config") / "settings.yaml"
 
 MINDORO_ARCHIVE_SURFACE_KEYS: tuple[str, ...] = ("archive_only",)
+
+_ARTIFACT_READ_STATUS: contextvars.ContextVar[list[dict[str, Any]] | None] = contextvars.ContextVar(
+    "ui_artifact_read_status",
+    default=None,
+)
+
+_SURFACE_FALLBACKS: dict[str, dict[str, Any]] = {
+    "thesis_main": {
+        "surface_key": "thesis_main",
+        "surface_label": "Thesis-facing main surface",
+        "surface_description": "Eligible for thesis-facing home and main presentation surfaces.",
+        "surface_home_visible": True,
+        "surface_panel_visible": True,
+        "surface_archive_visible": False,
+        "surface_advanced_visible": True,
+        "surface_recommended_visible": True,
+    },
+    "comparator_support": {
+        "surface_key": "comparator_support",
+        "surface_label": "Support / comparator surface",
+        "surface_description": "Support, comparator, or context material kept separate from the primary thesis claim.",
+        "surface_home_visible": True,
+        "surface_panel_visible": True,
+        "surface_archive_visible": False,
+        "surface_advanced_visible": True,
+        "surface_recommended_visible": True,
+    },
+    "archive_only": {
+        "surface_key": "archive_only",
+        "surface_label": "Archive-only surface",
+        "surface_description": "Preserved for archive, provenance, reproducibility, or audit only.",
+        "surface_home_visible": False,
+        "surface_panel_visible": False,
+        "surface_archive_visible": True,
+        "surface_advanced_visible": True,
+        "surface_recommended_visible": False,
+    },
+    "legacy_support": {
+        "surface_key": "legacy_support",
+        "surface_label": "Legacy / prototype support surface",
+        "surface_description": "Legacy or prototype support material kept visible as support only.",
+        "surface_home_visible": True,
+        "surface_panel_visible": True,
+        "surface_archive_visible": False,
+        "surface_advanced_visible": True,
+        "surface_recommended_visible": True,
+    },
+    "advanced_only": {
+        "surface_key": "advanced_only",
+        "surface_label": "Advanced-only surface",
+        "surface_description": "Visible only through advanced or lower-level inspection surfaces.",
+        "surface_home_visible": False,
+        "surface_panel_visible": False,
+        "surface_archive_visible": False,
+        "surface_advanced_visible": True,
+        "surface_recommended_visible": False,
+    },
+}
+
+_UI_STATUS_FALLBACKS: dict[str, dict[str, Any]] = {
+    "focused_phase1_transport_provenance": {
+        "status_label": "Focused Mindoro Phase 1 transport provenance",
+        "status_role": "transport_provenance",
+        "status_reportability": "stored_support",
+        "status_official_status": "stored_final_paper_support",
+        "status_frozen_status": "stored",
+        "status_provenance": "Stored publication Figure 4 transport-provenance support.",
+        "status_panel_text": "Focused Phase 1 transport provenance; drifter segments are not oil-footprint truth.",
+        "status_dashboard_summary": "Transport-provenance support for the Primary Mindoro March 13-14 recipe choice.",
+        "surface_key": "thesis_main",
+        "page_target": "phase1_recipe_selection",
+        "recommended_scope": "main_text",
+        "display_order": 80,
+    },
+    "focused_phase1_recipe_provenance": {
+        "status_label": "Focused Mindoro Phase 1 recipe provenance",
+        "status_role": "transport_provenance",
+        "status_reportability": "stored_support",
+        "status_official_status": "stored_final_paper_support",
+        "status_frozen_status": "stored",
+        "status_provenance": "Stored publication Figure 4 recipe-ranking support.",
+        "status_panel_text": "Focused Phase 1 recipe provenance; the stored ranking supports recipe selection only.",
+        "status_dashboard_summary": "Recipe-selection support for the Primary Mindoro March 13-14 setup.",
+        "surface_key": "thesis_main",
+        "page_target": "phase1_recipe_selection",
+        "recommended_scope": "main_text",
+        "display_order": 90,
+    },
+    "mindoro_product_family_support": {
+        "status_label": "Mindoro product-family support",
+        "status_role": "support_context",
+        "status_reportability": "stored_support",
+        "status_official_status": "stored_final_paper_support",
+        "status_frozen_status": "stored",
+        "status_provenance": "Stored publication Figure 4 product-family support.",
+        "status_panel_text": "Product-family support for deterministic, prob_presence, mask_p50, and mask_p90 surfaces.",
+        "status_dashboard_summary": "Stored product-family support; not a new validation claim.",
+        "surface_key": "thesis_main",
+        "page_target": "mindoro_validation",
+        "recommended_scope": "page_support",
+        "display_order": 150,
+    },
+    "secondary_2016_drifter_track_support": {
+        "status_label": "Secondary 2016 drifter-track support",
+        "status_role": "secondary_support",
+        "status_reportability": "support_only",
+        "status_official_status": "stored_secondary_support",
+        "status_frozen_status": "stored",
+        "status_provenance": "Stored secondary 2016 drifter-track support figure.",
+        "status_panel_text": "Secondary 2016 support only; not public-spill validation.",
+        "status_dashboard_summary": "Secondary drifter-track support only.",
+        "surface_key": "legacy_support",
+        "page_target": "legacy_2016_support",
+        "recommended_scope": "legacy_support",
+        "display_order": 600,
+    },
+    "legacy_2016_fss_support": {
+        "status_label": "Legacy 2016 OpenDrift-PyGNOME FSS support",
+        "status_role": "secondary_support",
+        "status_reportability": "support_only",
+        "status_official_status": "stored_secondary_support",
+        "status_frozen_status": "stored",
+        "status_provenance": "Stored legacy 2016 OpenDrift-versus-PyGNOME FSS support figure.",
+        "status_panel_text": "Legacy 2016 FSS support only; PyGNOME remains comparator-only.",
+        "status_dashboard_summary": "Legacy FSS support only; not public-spill validation.",
+        "surface_key": "legacy_support",
+        "page_target": "legacy_2016_support",
+        "recommended_scope": "legacy_support",
+        "display_order": 690,
+    },
+}
 
 DASHBOARD_STATE_PATHS: tuple[Path, ...] = (
     FINAL_REPRO_DIR / "final_phase_status_registry.csv",
@@ -166,6 +298,50 @@ def _path_cache_signature(path: str | Path, repo_root: str | Path | None = None)
     return str(resolved), root_text, int(stat.st_mtime_ns), int(stat.st_size)
 
 
+def _display_path(path_text: str | Path, repo_root_text: str) -> str:
+    path = Path(str(path_text))
+    root = Path(str(repo_root_text))
+    try:
+        return path.resolve().relative_to(root.resolve()).as_posix()
+    except (OSError, ValueError):
+        return str(path_text).replace("\\", "/")
+
+
+def _record_artifact_status(
+    *,
+    artifact_type: str,
+    path_text: str | Path,
+    repo_root_text: str | Path,
+    level: str,
+    message: str,
+) -> None:
+    status = {
+        "artifact_type": artifact_type,
+        "path": _display_path(path_text, str(repo_root_text)),
+        "level": level,
+        "message": message,
+    }
+    collector = _ARTIFACT_READ_STATUS.get()
+    if collector is not None:
+        collector.append(status)
+
+
+def _missing_message(artifact_type: str, path_text: str | Path, repo_root_text: str | Path) -> str:
+    return f"Optional {artifact_type} is not packaged in this repo state: {_display_path(path_text, str(repo_root_text))}"
+
+
+def _read_error_message(
+    artifact_type: str,
+    path_text: str | Path,
+    repo_root_text: str | Path,
+    exc: BaseException,
+) -> str:
+    return (
+        f"Optional {artifact_type} could not be read and was left empty: "
+        f"{_display_path(path_text, str(repo_root_text))} ({exc.__class__.__name__})"
+    )
+
+
 def resolve_repo_path(value: str | Path | None, repo_root: str | Path | None = None) -> Path | None:
     if value is None:
         return None
@@ -235,7 +411,27 @@ def _cached_csv(path_text: str, repo_root_text: str, _mtime_ns: int, _size: int)
 
 
 def read_csv(path: str | Path, repo_root: str | Path | None = None) -> pd.DataFrame:
-    return _cached_csv(*_path_cache_signature(path, repo_root)).copy()
+    path_text, repo_root_text, mtime_ns, size = _path_cache_signature(path, repo_root)
+    if mtime_ns < 0 or size < 0:
+        _record_artifact_status(
+            artifact_type="CSV",
+            path_text=path_text,
+            repo_root_text=repo_root_text,
+            level="missing",
+            message=_missing_message("CSV", path_text, repo_root_text),
+        )
+        return pd.DataFrame()
+    try:
+        return _cached_csv(path_text, repo_root_text, mtime_ns, size).copy()
+    except Exception as exc:
+        _record_artifact_status(
+            artifact_type="CSV",
+            path_text=path_text,
+            repo_root_text=repo_root_text,
+            level="warning",
+            message=_read_error_message("CSV", path_text, repo_root_text, exc),
+        )
+        return pd.DataFrame()
 
 
 @lru_cache(maxsize=128)
@@ -250,7 +446,28 @@ def _cached_json(path_text: str, repo_root_text: str, _mtime_ns: int, _size: int
 
 
 def read_json(path: str | Path, repo_root: str | Path | None = None) -> dict[str, Any]:
-    return copy.deepcopy(_cached_json(*_path_cache_signature(path, repo_root)))
+    path_text, repo_root_text, mtime_ns, size = _path_cache_signature(path, repo_root)
+    if mtime_ns < 0 or size < 0:
+        _record_artifact_status(
+            artifact_type="JSON",
+            path_text=path_text,
+            repo_root_text=repo_root_text,
+            level="missing",
+            message=_missing_message("JSON", path_text, repo_root_text),
+        )
+        return {}
+    try:
+        payload = _cached_json(path_text, repo_root_text, mtime_ns, size)
+    except Exception as exc:
+        _record_artifact_status(
+            artifact_type="JSON",
+            path_text=path_text,
+            repo_root_text=repo_root_text,
+            level="warning",
+            message=_read_error_message("JSON", path_text, repo_root_text, exc),
+        )
+        return {}
+    return copy.deepcopy(payload)
 
 
 @lru_cache(maxsize=128)
@@ -264,7 +481,27 @@ def _cached_text(path_text: str, repo_root_text: str, _mtime_ns: int, _size: int
 
 
 def read_text(path: str | Path, repo_root: str | Path | None = None) -> str:
-    return _cached_text(*_path_cache_signature(path, repo_root))
+    path_text, repo_root_text, mtime_ns, size = _path_cache_signature(path, repo_root)
+    if mtime_ns < 0 or size < 0:
+        _record_artifact_status(
+            artifact_type="text",
+            path_text=path_text,
+            repo_root_text=repo_root_text,
+            level="missing",
+            message=_missing_message("text", path_text, repo_root_text),
+        )
+        return ""
+    try:
+        return _cached_text(path_text, repo_root_text, mtime_ns, size)
+    except Exception as exc:
+        _record_artifact_status(
+            artifact_type="text",
+            path_text=path_text,
+            repo_root_text=repo_root_text,
+            level="warning",
+            message=_read_error_message("text", path_text, repo_root_text, exc),
+        )
+        return ""
 
 
 def _parse_simple_yaml_scalar(raw_value: str) -> Any:
@@ -328,7 +565,28 @@ def _cached_yaml(path_text: str, repo_root_text: str, _mtime_ns: int, _size: int
 
 
 def read_yaml(path: str | Path, repo_root: str | Path | None = None) -> dict[str, Any]:
-    return copy.deepcopy(_cached_yaml(*_path_cache_signature(path, repo_root)))
+    path_text, repo_root_text, mtime_ns, size = _path_cache_signature(path, repo_root)
+    if mtime_ns < 0 or size < 0:
+        _record_artifact_status(
+            artifact_type="YAML",
+            path_text=path_text,
+            repo_root_text=repo_root_text,
+            level="missing",
+            message=_missing_message("YAML", path_text, repo_root_text),
+        )
+        return {}
+    try:
+        payload = _cached_yaml(path_text, repo_root_text, mtime_ns, size)
+    except Exception as exc:
+        _record_artifact_status(
+            artifact_type="YAML",
+            path_text=path_text,
+            repo_root_text=repo_root_text,
+            level="warning",
+            message=_read_error_message("YAML", path_text, repo_root_text, exc),
+        )
+        return {}
+    return copy.deepcopy(payload)
 
 
 def _discover_first_matching_path(
@@ -390,6 +648,46 @@ def _attach_resolved_paths(df: pd.DataFrame, repo_root: str | Path | None = None
     return payload
 
 
+def _surface_columns_for_key(surface_key: str) -> dict[str, Any]:
+    return dict(_SURFACE_FALLBACKS.get(surface_key, _SURFACE_FALLBACKS["advanced_only"]))
+
+
+def _ui_status_fallback_columns(status_key: str, record: dict[str, Any] | None = None) -> dict[str, Any]:
+    fallback = _UI_STATUS_FALLBACKS.get(status_key)
+    if fallback is None:
+        record = record or {}
+        surface_key = str(record.get("surface_key") or "").strip()
+        if surface_key == "support":
+            surface_key = "legacy_support"
+        if surface_key not in _SURFACE_FALLBACKS:
+            surface_key = "advanced_only"
+        label = str(record.get("status_label") or status_key.replace("_", " ").title()).strip()
+        fallback = {
+            "status_label": label,
+            "status_role": "stored_optional_artifact",
+            "status_reportability": "stored_support",
+            "status_official_status": "stored",
+            "status_frozen_status": "stored",
+            "status_provenance": "Stored registry status is not in the core status registry; displayed as read-only support.",
+            "status_panel_text": "Stored optional artifact; displayed without changing scientific outputs.",
+            "status_dashboard_summary": "Stored optional artifact; read-only display.",
+            "surface_key": surface_key,
+        }
+    payload = {
+        "status_key": status_key,
+        "status_label": fallback["status_label"],
+        "status_role": fallback["status_role"],
+        "status_reportability": fallback["status_reportability"],
+        "status_official_status": fallback["status_official_status"],
+        "status_frozen_status": fallback["status_frozen_status"],
+        "status_provenance": fallback["status_provenance"],
+        "status_panel_text": fallback["status_panel_text"],
+        "status_dashboard_summary": fallback["status_dashboard_summary"],
+    }
+    payload.update(_surface_columns_for_key(str(fallback["surface_key"])))
+    return payload
+
+
 def _attach_status_fields(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
         return df.copy()
@@ -399,12 +697,42 @@ def _attach_status_fields(df: pd.DataFrame) -> pd.DataFrame:
         raw_status_key = row.get("status_key")
         status_key = "" if pd.isna(raw_status_key) else str(raw_status_key or "").strip()
         if status_key:
-            status_rows.append(artifact_status_columns_for_key(status_key, row))
+            try:
+                status_rows.append(artifact_status_columns_for_key(status_key, row))
+            except KeyError:
+                status_rows.append(_ui_status_fallback_columns(status_key, row))
         else:
             status_rows.append(artifact_status_columns(row))
     status_df = pd.DataFrame(status_rows, index=payload.index)
     for column in status_df.columns:
         payload[column] = status_df[column]
+    return payload
+
+
+def _apply_ui_publication_governance_overrides(df: pd.DataFrame) -> pd.DataFrame:
+    if df.empty or "status_key" not in df.columns:
+        return df.copy()
+    payload = df.copy()
+    for status_key, fallback in _UI_STATUS_FALLBACKS.items():
+        mask = payload["status_key"].fillna("").astype(str).eq(status_key)
+        if not mask.any():
+            continue
+        for column in ("page_target", "recommended_scope", "display_order"):
+            if column in fallback:
+                payload.loc[mask, column] = fallback[column]
+        surface_columns = _surface_columns_for_key(str(fallback["surface_key"]))
+        for column, value in surface_columns.items():
+            payload.loc[mask, column] = value
+        if str(fallback["surface_key"]) == "legacy_support":
+            payload.loc[mask, "legacy_support"] = True
+            payload.loc[mask, "thesis_surface"] = True
+            payload.loc[mask, "archive_only"] = False
+            payload.loc[mask, "comparator_support"] = False
+        elif str(fallback["surface_key"]) == "thesis_main":
+            payload.loc[mask, "legacy_support"] = False
+            payload.loc[mask, "thesis_surface"] = True
+            payload.loc[mask, "archive_only"] = False
+            payload.loc[mask, "comparator_support"] = False
     return payload
 
 
@@ -416,7 +744,7 @@ def _attach_publication_governance_fields(df: pd.DataFrame) -> pd.DataFrame:
     governance_df = pd.DataFrame(governance_rows, index=payload.index)
     for column in governance_df.columns:
         payload[column] = governance_df[column]
-    return payload
+    return _apply_ui_publication_governance_overrides(payload)
 
 
 def _apply_status_key(df: pd.DataFrame, status_key: str) -> pd.DataFrame:
@@ -854,7 +1182,7 @@ def curated_package_roots(repo_root: str | Path | None = None) -> list[dict[str,
     return [
         {
             "package_id": "mindoro_b1_final",
-            "label": "Primary Mindoro March 13-14 validation case package (B1)",
+            "label": "Mindoro B1 primary validation package",
             "page_label": "Primary Mindoro March 13-14 Validation Case (B1)",
             "relative_path": str(MINDORO_FINAL_DIR),
             "description": "Curated thesis-facing package for the Primary Mindoro March 13-14 validation case built from stored outputs only.",
@@ -863,7 +1191,7 @@ def curated_package_roots(repo_root: str | Path | None = None) -> list[dict[str,
         },
         {
             "package_id": "mindoro_comparator",
-            "label": "Mindoro same-case OpenDrift-PyGNOME comparator package (Track A)",
+            "label": "Mindoro Track A comparator support package",
             "page_label": "Mindoro Same-Case OpenDrift-PyGNOME Comparator (Track A)",
             "relative_path": str(MINDORO_FINAL_DIR / "publication" / "comparator_pygnome"),
             "description": "Curated comparator-only subgroup for the thesis-facing March 14 same-case OpenDrift-PyGNOME comparator after archived R0-only materials were moved out of the main story.",
@@ -890,8 +1218,8 @@ def curated_package_roots(repo_root: str | Path | None = None) -> list[dict[str,
         },
         {
             "package_id": "legacy_2016_final",
-            "label": "Secondary 2016 drifter-track and legacy FSS support package",
-            "page_label": "Secondary 2016 Drifter-Track And Legacy FSS Support",
+            "label": "Secondary 2016 support package",
+            "page_label": "Secondary 2016 Support",
             "relative_path": str(LEGACY_2016_FINAL_DIR),
             "description": "Authoritative curated support-only package for direct 2016 drifter-track benchmarks and legacy OpenDrift-PyGNOME FSS context.",
             "secondary_note": "Secondary support only; not public-spill validation.",
@@ -1467,6 +1795,13 @@ HOME_FEATURED_EXCLUDED_MINDORO_PHASES: frozenset[str] = frozenset(
     }
 )
 
+HOME_FEATURED_EXCLUDED_STATUS_KEYS: frozenset[str] = frozenset(
+    {
+        "focused_phase1_transport_provenance",
+        "focused_phase1_recipe_provenance",
+    }
+)
+
 
 def _sort_home_story_rows(df: pd.DataFrame) -> pd.DataFrame:
     if df.empty:
@@ -1476,9 +1811,11 @@ def _sort_home_story_rows(df: pd.DataFrame) -> pd.DataFrame:
     payload["_story_page_order"] = page_targets.map(HOME_STORY_PAGE_ORDER).fillna(999).astype(int)
     if "display_order" in payload.columns:
         payload["_display_order"] = pd.to_numeric(payload["display_order"], errors="coerce").fillna(9999).astype(int)
-        sort_columns = ["_story_page_order", "_display_order", "figure_id"]
+        sort_columns = ["_story_page_order", "_display_order"]
     else:
-        sort_columns = ["_story_page_order", "figure_id"]
+        sort_columns = ["_story_page_order"]
+    if "figure_id" in payload.columns:
+        sort_columns.append("figure_id")
     payload = payload.sort_values(sort_columns, na_position="last").drop(
         columns=[column for column in ("_story_page_order", "_display_order") if column in payload.columns]
     )
@@ -1532,6 +1869,7 @@ def _filter_home_featured_candidates(df: pd.DataFrame) -> pd.DataFrame:
     phases = payload.get("phase_or_track", pd.Series("", index=payload.index)).fillna("").astype(str)
     mindoro_mask = case_ids.eq(MINDORO_CASE_ID)
 
+    blocked_mask |= status_keys.isin(HOME_FEATURED_EXCLUDED_STATUS_KEYS)
     blocked_mask |= mindoro_mask & status_keys.isin(HOME_FEATURED_EXCLUDED_MINDORO_STATUS_KEYS)
     blocked_mask |= mindoro_mask & page_targets.isin(HOME_FEATURED_EXCLUDED_MINDORO_PAGE_TARGETS)
     blocked_mask |= mindoro_mask & phases.isin(HOME_FEATURED_EXCLUDED_MINDORO_PHASES)
@@ -1566,7 +1904,10 @@ def curated_recommended_figures(repo_root: str | Path | None = None) -> pd.DataF
     if "thesis_surface" in recommended.columns:
         recommended = recommended.loc[recommended["thesis_surface"].fillna(False).astype(bool)].copy()
     if "display_order" in recommended.columns:
-        recommended = recommended.sort_values(["display_order", "figure_id"], na_position="last").reset_index(drop=True)
+        sort_columns = ["display_order"]
+        if "figure_id" in recommended.columns:
+            sort_columns.append("figure_id")
+        recommended = recommended.sort_values(sort_columns, na_position="last").reset_index(drop=True)
     return recommended.reset_index(drop=True)
 
 
@@ -1619,7 +1960,10 @@ def figure_subset(
         if recommended_only:
             manifest = publication_manifest(repo_root)
             recommended_ids = manifest.get("recommended_main_defense_figures") or []
-            df = df.loc[df["figure_id"].isin(recommended_ids)].copy()
+            if "figure_id" in df.columns:
+                df = df.loc[df["figure_id"].isin(recommended_ids)].copy()
+            else:
+                df = df.iloc[0:0].copy()
     elif layer == "panel":
         df = panel_registry(repo_root)
         if recommended_only and "recommended_for_main_defense" in df.columns:
@@ -1631,8 +1975,19 @@ def figure_subset(
     if case_id:
         df = df.loc[df.get("case_id", pd.Series(dtype=str)).astype(str).eq(case_id)].copy()
     if family_codes:
-        code_column = "figure_family_code" if "figure_family_code" in df.columns else "board_family_code" if "board_family_code" in df.columns else "figure_group_code"
-        df = df.loc[df[code_column].astype(str).isin(family_codes)].copy()
+        code_column = (
+            "figure_family_code"
+            if "figure_family_code" in df.columns
+            else "board_family_code"
+            if "board_family_code" in df.columns
+            else "figure_group_code"
+            if "figure_group_code" in df.columns
+            else ""
+        )
+        if code_column:
+            df = df.loc[df[code_column].astype(str).isin(family_codes)].copy()
+        else:
+            df = df.iloc[0:0].copy()
     if status_keys:
         if "status_key" in df.columns:
             df = df.loc[df["status_key"].astype(str).isin(status_keys)].copy()
@@ -1651,7 +2006,10 @@ def figure_subset(
                 mask |= df[column].astype(str).str.lower().str.contains(lowered, na=False)
             df = df.loc[mask].copy()
     if "display_order" in df.columns:
-        df = df.sort_values(["display_order", "figure_id"], na_position="last").copy()
+        sort_columns = ["display_order"]
+        if "figure_id" in df.columns:
+            sort_columns.append("figure_id")
+        df = df.sort_values(sort_columns, na_position="last").copy()
     return df.reset_index(drop=True)
 
 
@@ -1677,16 +2035,19 @@ def raster_summary(path_value: str, repo_root_text: str) -> dict[str, Any]:
     path = resolve_repo_path(path_value, repo_root_text)
     if path is None or not path.exists():
         return {}
-    with rasterio.open(path) as dataset:
-        return {
-            "path": str(path),
-            "crs": str(dataset.crs),
-            "width": int(dataset.width),
-            "height": int(dataset.height),
-            "bounds": tuple(float(value) for value in dataset.bounds),
-            "count": int(dataset.count),
-            "dtype": str(dataset.dtypes[0]),
-        }
+    try:
+        with rasterio.open(path) as dataset:
+            return {
+                "path": str(path),
+                "crs": str(dataset.crs),
+                "width": int(dataset.width),
+                "height": int(dataset.height),
+                "bounds": tuple(float(value) for value in dataset.bounds),
+                "count": int(dataset.count),
+                "dtype": str(dataset.dtypes[0]),
+            }
+    except Exception:
+        return {}
 
 
 @lru_cache(maxsize=32)
@@ -1694,14 +2055,17 @@ def vector_summary(path_value: str, repo_root_text: str) -> dict[str, Any]:
     path = resolve_repo_path(path_value, repo_root_text)
     if path is None or not path.exists():
         return {}
-    gdf = gpd.read_file(path)
-    return {
-        "path": str(path),
-        "feature_count": int(len(gdf)),
-        "crs": str(gdf.crs) if gdf.crs else "",
-        "bounds": tuple(float(value) for value in gdf.total_bounds) if not gdf.empty else (),
-        "columns": list(gdf.columns),
-    }
+    try:
+        gdf = gpd.read_file(path)
+        return {
+            "path": str(path),
+            "feature_count": int(len(gdf)),
+            "crs": str(gdf.crs) if gdf.crs else "",
+            "bounds": tuple(float(value) for value in gdf.total_bounds) if not gdf.empty else (),
+            "columns": list(gdf.columns),
+        }
+    except Exception:
+        return {}
 
 
 @lru_cache(maxsize=32)
@@ -1709,31 +2073,53 @@ def track_summary(path_value: str, repo_root_text: str) -> dict[str, Any]:
     path = resolve_repo_path(path_value, repo_root_text)
     if path is None or not path.exists():
         return {}
-    with xr.open_dataset(path) as ds:
-        variables = list(ds.variables.keys())
-        dims = {name: int(size) for name, size in ds.sizes.items()}
-        lon_name = "lon" if "lon" in ds.variables else "longitude" if "longitude" in ds.variables else ""
-        lat_name = "lat" if "lat" in ds.variables else "latitude" if "latitude" in ds.variables else ""
-        lon_span = ()
-        lat_span = ()
-        if lon_name:
-            lon_values = np.asarray(ds[lon_name].values, dtype=float)
-            lon_span = (float(np.nanmin(lon_values)), float(np.nanmax(lon_values)))
-        if lat_name:
-            lat_values = np.asarray(ds[lat_name].values, dtype=float)
-            lat_span = (float(np.nanmin(lat_values)), float(np.nanmax(lat_values)))
-    return {
-        "path": str(path),
-        "variables": variables,
-        "dims": dims,
-        "lon_span": lon_span,
-        "lat_span": lat_span,
-    }
+    try:
+        with xr.open_dataset(path) as ds:
+            variables = list(ds.variables.keys())
+            dims = {name: int(size) for name, size in ds.sizes.items()}
+            lon_name = "lon" if "lon" in ds.variables else "longitude" if "longitude" in ds.variables else ""
+            lat_name = "lat" if "lat" in ds.variables else "latitude" if "latitude" in ds.variables else ""
+            lon_span = ()
+            lat_span = ()
+            if lon_name:
+                lon_values = np.asarray(ds[lon_name].values, dtype=float)
+                lon_span = (float(np.nanmin(lon_values)), float(np.nanmax(lon_values)))
+            if lat_name:
+                lat_values = np.asarray(ds[lat_name].values, dtype=float)
+                lat_span = (float(np.nanmin(lat_values)), float(np.nanmax(lat_values)))
+        return {
+            "path": str(path),
+            "variables": variables,
+            "dims": dims,
+            "lon_span": lon_span,
+            "lat_span": lat_span,
+        }
+    except Exception:
+        return {}
+
+
+def _dedupe_artifact_statuses(statuses: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    seen: set[tuple[str, str, str]] = set()
+    deduped: list[dict[str, Any]] = []
+    for status in statuses:
+        key = (
+            str(status.get("artifact_type", "")),
+            str(status.get("path", "")),
+            str(status.get("message", "")),
+        )
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(status)
+    return deduped
 
 
 def build_dashboard_state(repo_root: str | Path | None = None) -> dict[str, Any]:
     root = _root(repo_root)
-    return {
+    artifact_statuses: list[dict[str, Any]] = []
+    status_token = _ARTIFACT_READ_STATUS.set(artifact_statuses)
+    try:
+        state = {
         "repo_root": str(root),
         "phase_status": final_phase_status(root),
         "final_case_registry": final_case_registry(root),
@@ -1816,3 +2202,7 @@ def build_dashboard_state(repo_root: str | Path | None = None) -> dict[str, Any]
         "home_featured_publication_figures": home_featured_publication_figures(root),
         "curated_package_roots": curated_package_roots(root),
     }
+    finally:
+        _ARTIFACT_READ_STATUS.reset(status_token)
+    state["artifact_status_messages"] = _dedupe_artifact_statuses(artifact_statuses)
+    return state

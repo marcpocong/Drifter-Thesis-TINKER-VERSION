@@ -14,11 +14,25 @@ or:
 .\start.ps1 -Panel
 ```
 
+To open the dashboard directly without walking the menu:
+
+```powershell
+.\start.ps1 -Dashboard -NoPause
+.\start.ps1 -Panel -Dashboard -NoPause
+```
+
 On macOS or Linux with PowerShell 7:
 
 ```bash
 pwsh ./panel.ps1
 pwsh ./start.ps1 -Panel
+pwsh ./start.ps1 -Dashboard -NoPause
+```
+
+On Windows PowerShell 5.1, use:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\panel.ps1 -NoPause
 ```
 
 ## 2. Use The Panel Menu
@@ -66,3 +80,7 @@ Expensive science does not run from the default panel path. Choose the full laun
 ```
 
 Use dry runs and exported plans before running any full scientific entry. Explain and dry-run previews show the requested ID, canonical ID, claim boundary, run kind, rerun cost, `safe_default`, and role flags before any run confirmation.
+
+In `-NoPause` mode, panel startup does not wait for input. If Docker startup is selected and `.env` is missing, the safe default is to copy `.env.example` to `.env` before Docker starts.
+
+If Docker is unavailable, the dashboard shortcut prints: `Docker is not available. Install/start Docker Desktop, then rerun .\panel.ps1 or run the manual Streamlit command in docs/UI_GUIDE.md.`

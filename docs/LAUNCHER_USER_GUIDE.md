@@ -14,6 +14,7 @@
 ```powershell
 .\panel.ps1
 .\start.ps1 -Panel
+.\start.ps1 -Dashboard -NoPause
 .\start.ps1
 .\start.ps1 -List -NoPause
 .\start.ps1 -ListRole primary_evidence -NoPause
@@ -25,12 +26,20 @@
 .\start.ps1 -Entry <entry_id> -DryRun -NoPause
 ```
 
+Windows PowerShell 5.1 fallback:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\panel.ps1 -NoPause
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\start.ps1 -Help -NoPause
+```
+
 macOS with Homebrew:
 
 ```bash
 brew install powershell
 pwsh ./panel.ps1
 pwsh ./start.ps1 -Panel
+pwsh ./start.ps1 -Dashboard -NoPause
 pwsh ./start.ps1
 pwsh ./start.ps1 -List -NoPause
 pwsh ./start.ps1 -Entry <entry_id>
@@ -112,9 +121,14 @@ Use `.\start.ps1 -Explain <entry_id> -NoPause` before running any hidden ID. The
 - `FORCING_SOURCE_BUDGET_SECONDS=<seconds>` with default `300`
 - `INPUT_CACHE_POLICY=default|reuse_if_valid|force_refresh`
 - `LAUNCHER_DRY_RUN=1` or `-DryRun` for a no-Docker, no-output-modification command preview
+- `-Dashboard` opens the read-only dashboard shortcut; combine with `-DryRun -NoPause` to preview the Docker commands without running them.
 - `-Explain <entry_id> -ExportPlan` for a no-Docker run-plan export under `output/launcher_plans/`
+- `-ValidateMatrix -NoPause` runs the matrix validator with `--no-write`; it prints the audit result without creating launcher audit files.
 
 Interactive launcher runs ask once per entry for forcing wait budget and eligible input-cache reuse choices. Prompt-free container runs with `-T` do not ask those questions.
+If `.\start.ps1 -NoPause` is launched in a non-interactive shell with no buffered input, it prints a command summary and exits instead of waiting for menu input.
+
+If a Docker-backed dashboard or launcher entry is selected and `.env` is missing while `.env.example` exists, the launcher prompts before copying it. In `-NoPause` or other non-interactive shells, it copies `.env.example` to `.env` as the safe default before starting Docker.
 
 ## Launcher Regression Tests
 
@@ -130,7 +144,17 @@ The PowerShell subprocess tests skip clearly when `pwsh` is unavailable. They us
 
 The read-only dashboard is a launcher shortcut rather than a catalog entry ID. Open it from panel option `1`, `U` / `UI`, or launch it directly:
 
+```powershell
+.\start.ps1 -Dashboard -NoPause
+.\start.ps1 -Dashboard -DryRun -NoPause
+```
+
+The shortcut runs `docker compose up -d pipeline`, avoids starting a duplicate Streamlit process when port `8501` is already serving, and prints `http://localhost:8501`. If Docker is unavailable, it prints: `Docker is not available. Install/start Docker Desktop, then rerun .\panel.ps1 or run the manual Streamlit command in docs/UI_GUIDE.md.`
+
+Manual container form:
+
 ```bash
+docker compose up -d pipeline
 docker compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501
 ```
 

@@ -115,7 +115,7 @@ def render(state: dict, ui_state: dict) -> None:
     recipe_scope = f"{len(recipe_family)}-recipe" if recipe_family else "focused"
 
     render_modern_hero(
-        "Primary Mindoro March 13-14 Validation Case",
+        "Primary Mindoro March 13-14 Validation Case (B1)",
         "The Primary Mindoro March 13-14 validation case is the only main Philippine public-observation validation claim; B1 is the internal alias for the stored March 13-14 row.",
         badge=ROLE_THESIS,
         eyebrow="Primary thesis-facing Mindoro validation",

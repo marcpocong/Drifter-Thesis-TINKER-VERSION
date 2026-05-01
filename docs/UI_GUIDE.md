@@ -41,6 +41,22 @@ These helpers use escaped HTML where appropriate and should remain dependency-fr
 
 ## Running The Dashboard
 
+Preferred launcher shortcut:
+
+```powershell
+.\panel.ps1
+.\start.ps1 -Panel
+.\start.ps1 -Dashboard -NoPause
+```
+
+The dashboard shortcut creates `.env` from `.env.example` when `.env` is missing, starts only the `pipeline` compose service, reuses an existing Streamlit process on port `8501` when one is already serving, and prints `http://localhost:8501`.
+
+Dry-run the dashboard shortcut without Docker:
+
+```powershell
+.\start.ps1 -Dashboard -DryRun -NoPause
+```
+
 Start the pipeline container if needed:
 
 ```powershell
@@ -59,6 +75,8 @@ Open:
 ```text
 http://localhost:8501
 ```
+
+If Docker is unavailable, the launcher prints: `Docker is not available. Install/start Docker Desktop, then rerun .\panel.ps1 or run the manual Streamlit command in docs/UI_GUIDE.md.`
 
 For print/export review, append `?export=1` to a page URL. Export mode hides sidebar/navigation chrome and keeps cards/figures print-friendly.
 

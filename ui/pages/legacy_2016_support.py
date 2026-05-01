@@ -93,7 +93,7 @@ def render(state: dict, ui_state: dict) -> None:
         )
 
     render_modern_hero(
-        "Secondary 2016 Drifter-Track And Legacy FSS Support",
+        "Secondary 2016 Support",
         "This page surfaces the authoritative curated prototype_2016 package as secondary drifter-track and legacy FSS support. It is not public-spill validation and does not replace the Primary Mindoro March 13-14 validation case or DWH.",
         badge=ROLE_SECONDARY,
         eyebrow="Secondary support lane",

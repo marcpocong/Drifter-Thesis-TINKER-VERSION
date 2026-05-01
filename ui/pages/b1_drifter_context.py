@@ -20,7 +20,6 @@ ensure_repo_root_on_path(__file__)
 import pandas as pd
 import streamlit as st
 
-from ui import plots as dashboard_plots
 from ui.data_access import resolve_repo_path
 from ui.evidence_contract import ROLE_ADVANCED
 from ui.pages.common import (
@@ -110,20 +109,22 @@ def _render_map_section(context: dict, *, export_mode: bool) -> None:
 
     figure_path = resolve_repo_path(context.get("panel_context_map_figure_path"))
     if figure_path and figure_path.exists():
-        st.image(str(figure_path), width="stretch")
-        st.caption("Stored-output-only figure loaded from the local repo.")
+        try:
+            st.image(str(figure_path), width="stretch")
+            st.caption("Stored-output-only figure loaded from the local repo.")
+        except OSError:
+            render_status_callout(
+                "Stored map unavailable",
+                "The packaged B1 drifter-context map could not be opened. No replacement science is generated in the UI.",
+                "warning",
+            )
         return
 
-    figure = dashboard_plots.b1_drifter_context_map_figure(
-        context.get("accepted_segments"),
-        context.get("ranking_subset"),
-        phase1_validation_box=context.get("phase1_validation_box"),
-        mindoro_case_domain=context.get("mindoro_case_domain"),
-        source_point=context.get("source_point"),
+    render_status_callout(
+        "Stored map unavailable",
+        "No packaged B1 drifter-context map is available in this repo state. The dashboard does not generate a replacement map.",
+        "warning",
     )
-    st.pyplot(figure, width="stretch")
-    if not export_mode:
-        st.caption("Live read-only preview rendered from local accepted-segment registries because no packaged B1 drifter-context figure was found.")
 
 
 def render(state: dict, ui_state: dict) -> None:

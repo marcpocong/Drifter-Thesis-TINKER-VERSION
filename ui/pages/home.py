@@ -422,6 +422,12 @@ def render(state: dict, ui_state: dict) -> None:
                 "page_label": "Archive/Provenance and Legacy Support",
             },
     ]
+    if not ui_state["advanced"] and not export_mode:
+        render_caveat_ribbon(
+            "Archive / legacy boundary",
+            "Legacy and debug routes remain inspectable on their own archive/support pages without replacing the Primary Mindoro March 13-14 or DWH evidence.",
+            tone="archive",
+        )
     if ui_state["advanced"] and not export_mode and secondary_quick_links:
         render_section_header(
             "Archive And Legacy Support",

@@ -40,7 +40,21 @@ ARCHIVE_STATUS_KEYS = frozenset(
         "mindoro_legacy_support",
     }
 )
-LEGACY_STATUS_KEYS = frozenset({"prototype_2016_support", "prototype_2021_support"})
+PHASE1_PROVENANCE_STATUS_KEYS = frozenset(
+    {
+        "focused_phase1_transport_provenance",
+        "focused_phase1_recipe_provenance",
+    }
+)
+PRODUCT_FAMILY_STATUS_KEYS = frozenset({"mindoro_product_family_support"})
+LEGACY_STATUS_KEYS = frozenset(
+    {
+        "prototype_2016_support",
+        "prototype_2021_support",
+        "secondary_2016_drifter_track_support",
+        "legacy_2016_fss_support",
+    }
+)
 ADVANCED_STATUS_KEYS = frozenset({"mindoro_trajectory_context", "dwh_trajectory_context"})
 CONTEXT_STATUS_KEYS = frozenset(
     {
@@ -59,7 +73,7 @@ THESIS_STATUS_KEYS = frozenset(
         "dwh_cross_track_summary",
         "thesis_study_box_reference",
     }
-)
+) | PHASE1_PROVENANCE_STATUS_KEYS | PRODUCT_FAMILY_STATUS_KEYS
 
 
 PAGE_POLICIES: dict[str, PageEvidencePolicy] = {
@@ -80,7 +94,7 @@ PAGE_POLICIES: dict[str, PageEvidencePolicy] = {
     "phase1_recipe_selection": PageEvidencePolicy(
         page_id="phase1_recipe_selection",
         allowed_surface_keys=frozenset({"thesis_main", "advanced_only"}),
-        allowed_status_keys=frozenset({"thesis_study_box_reference"}),
+        allowed_status_keys=frozenset({"thesis_study_box_reference"}) | PHASE1_PROVENANCE_STATUS_KEYS,
         allowed_page_targets=frozenset({"phase1_recipe_selection"}),
         allow_archive=True,
         allow_advanced=True,
@@ -88,7 +102,7 @@ PAGE_POLICIES: dict[str, PageEvidencePolicy] = {
     "mindoro_validation": PageEvidencePolicy(
         page_id="mindoro_validation",
         allowed_surface_keys=frozenset({"thesis_main"}),
-        allowed_status_keys=frozenset({"mindoro_primary_validation"}),
+        allowed_status_keys=frozenset({"mindoro_primary_validation"}) | PRODUCT_FAMILY_STATUS_KEYS,
         allowed_page_targets=frozenset({"mindoro_validation"}),
         allowed_artifact_groups=frozenset({"publication/observations", "publication/opendrift_primary"}),
     ),

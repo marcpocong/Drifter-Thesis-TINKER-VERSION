@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from launcher_ps_helpers import REPO_ROOT, assert_clean_launcher_exit, assert_no_docker_execution, run_launcher, run_panel
+from launcher_ps_helpers import assert_clean_launcher_exit, assert_no_docker_execution, run_launcher, run_panel
 
 
 B1_ENTRY_ID = "mindoro_phase3b_primary_public_validation"
@@ -39,6 +39,14 @@ B1_BOUNDARY = "Only main Philippine public-observation validation claim"
                 "Mindoro B1 primary public-validation rerun",
                 B1_BOUNDARY,
                 "independent NOAA-published day-specific observation products",
+            ],
+        ),
+        (
+            ["-ListRole", "read_only_governance", "-NoPause"],
+            [
+                "Filtered thesis role: Read-only governance",
+                "Publication-grade figure package",
+                "No scientific rerun should occur",
             ],
         ),
         (
@@ -99,10 +107,7 @@ def test_required_entries_dry_run_without_docker(tmp_path, entry_id):
 
 
 def test_hidden_alias_dry_run_resolves_to_canonical_entry(tmp_path):
-    result = run_launcher(
-        ["-Entry", "mindoro_march13_14_noaa_reinit_stress_test", "-DryRun", "-NoPause"],
-        tmp_path=tmp_path,
-    )
+    result = run_launcher(["-Entry", "mindoro_march13_14_noaa_reinit_stress_test", "-DryRun", "-NoPause"], tmp_path=tmp_path)
 
     assert_clean_launcher_exit(result)
     assert_no_docker_execution(result)
@@ -111,15 +116,40 @@ def test_hidden_alias_dry_run_resolves_to_canonical_entry(tmp_path):
     assert "phase3b_extended_public_scored_march13_14_reinit_pygnome_comparison" not in result.output
 
 
+def test_phase1_hidden_alias_dry_run_resolves_to_canonical_entry(tmp_path):
+    result = run_launcher(["-Entry", "phase1_mindoro_focus_pre_spill_experiment", "-DryRun", "-NoPause"], tmp_path=tmp_path)
+
+    assert_clean_launcher_exit(result)
+    assert_no_docker_execution(result)
+    assert "Requested alias: phase1_mindoro_focus_pre_spill_experiment" in result.output
+    assert "Alias resolution: requested ID resolves to the canonical entry metadata shown below." in result.output
+    assert "Canonical entry ID: phase1_mindoro_focus_provenance" in result.output
+
+
+def test_noninteractive_no_pause_without_input_prints_summary_and_exits(tmp_path):
+    result = run_launcher(["-NoPause"], tmp_path=tmp_path, stdin="", timeout=10)
+
+    assert_clean_launcher_exit(result)
+    assert_no_docker_execution(result)
+    assert "LAUNCHER NON-INTERACTIVE SUMMARY" in result.output
+    assert "will not wait for menu input" in result.output
+    assert "No workflow was executed." in result.output
+
+
 def test_explain_export_plan_writes_plan_without_docker(tmp_path):
-    result = run_launcher(["-Explain", B1_ENTRY_ID, "-ExportPlan", "-NoPause"], tmp_path=tmp_path)
+    plan_root = tmp_path / "plans"
+    result = run_launcher(
+        ["-Explain", B1_ENTRY_ID, "-ExportPlan", "-NoPause"],
+        tmp_path=tmp_path,
+        extra_env={"LAUNCHER_PLAN_OUTPUT_ROOT": str(plan_root)},
+    )
 
     assert_clean_launcher_exit(result)
     assert_no_docker_execution(result)
     assert "Run plan exported without executing science:" in result.output
 
-    json_path = REPO_ROOT / "output" / "launcher_plans" / f"{B1_ENTRY_ID}.json"
-    markdown_path = REPO_ROOT / "output" / "launcher_plans" / f"{B1_ENTRY_ID}.md"
+    json_path = plan_root / "launcher_plans" / f"{B1_ENTRY_ID}.json"
+    markdown_path = plan_root / "launcher_plans" / f"{B1_ENTRY_ID}.md"
     assert json_path.exists()
     assert markdown_path.exists()
     plan = json.loads(json_path.read_text(encoding="utf-8-sig"))
@@ -152,6 +182,87 @@ def test_panel_wrapper_forwards_arguments_from_any_cwd(tmp_path):
     assert_no_docker_execution(result)
     assert "PANEL REVIEW MODE" in result.output
     assert "View data sources and provenance registry" in result.output
+
+
+def test_dashboard_dry_run_prints_plan_without_docker(tmp_path):
+    result = run_launcher(["-Dashboard", "-DryRun", "-NoPause"], tmp_path=tmp_path)
+
+    assert_clean_launcher_exit(result)
+    assert_no_docker_execution(result)
+    assert "READ-ONLY DASHBOARD DRY RUN" in result.output
+    assert "docker compose up -d pipeline" in result.output
+    assert "python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501" in result.output
+    assert "http://localhost:8501" in result.output
+    assert "No Docker commands were executed" in result.output
+
+
+def test_panel_dashboard_flag_routes_to_dashboard_without_docker_in_dry_run(tmp_path):
+    result = run_launcher(["-Panel", "-Dashboard", "-DryRun", "-NoPause"], tmp_path=tmp_path)
+
+    assert_clean_launcher_exit(result)
+    assert_no_docker_execution(result)
+    assert "READ-ONLY DASHBOARD DRY RUN" in result.output
+    assert "docker compose up -d pipeline" in result.output
+
+
+def test_dashboard_docker_unavailable_message_is_actionable(tmp_path):
+    result = run_launcher(["-Dashboard", "-NoPause"], tmp_path=tmp_path)
+
+    assert_clean_launcher_exit(result)
+    assert "[ERROR]" not in result.output
+    assert (
+        "Docker is not available. Install/start Docker Desktop, then rerun .\\panel.ps1 "
+        "or run the manual Streamlit command in docs/UI_GUIDE.md."
+    ) in result.output
+
+
+def test_dashboard_copies_env_example_before_fake_docker_launch(tmp_path):
+    env_root = tmp_path / "env-root"
+    env_root.mkdir()
+    (env_root / ".env.example").write_text("LOCAL_REVIEW=1\n", encoding="utf-8")
+
+    result = run_launcher(
+        ["-Dashboard", "-NoPause"],
+        tmp_path=tmp_path,
+        timeout=20,
+        extra_env={
+            "FAKE_DOCKER_MODE": "launch",
+            "LAUNCHER_ENV_ROOT": str(env_root),
+            "LAUNCHER_DISABLE_BROWSER_OPEN": "1",
+            "LAUNCHER_DASHBOARD_HEALTH_WAIT_SECONDS": "0",
+        },
+    )
+
+    assert_clean_launcher_exit(result)
+    assert (env_root / ".env").read_text(encoding="utf-8") == "LOCAL_REVIEW=1\n"
+    docker_output = result.docker_log.read_text(encoding="utf-8")
+    assert "compose up -d pipeline" in docker_output
+    assert "compose exec -T -d pipeline python -m streamlit run ui/app.py" in docker_output
+    assert "Created .env from .env.example as the safe non-interactive default" in result.output
+
+
+def test_dashboard_reuses_existing_port_without_duplicate_streamlit_launch(tmp_path):
+    env_root = tmp_path / "env-root"
+    env_root.mkdir()
+    (env_root / ".env").write_text("LOCAL_REVIEW=1\n", encoding="utf-8")
+
+    result = run_launcher(
+        ["-Dashboard", "-NoPause"],
+        tmp_path=tmp_path,
+        timeout=20,
+        extra_env={
+            "FAKE_DOCKER_MODE": "duplicate",
+            "LAUNCHER_ENV_ROOT": str(env_root),
+            "LAUNCHER_DISABLE_BROWSER_OPEN": "1",
+            "LAUNCHER_DASHBOARD_HEALTH_WAIT_SECONDS": "0",
+        },
+    )
+
+    assert_clean_launcher_exit(result)
+    docker_output = result.docker_log.read_text(encoding="utf-8")
+    assert "compose up -d pipeline" in docker_output
+    assert "streamlit run ui/app.py" not in docker_output
+    assert "Read-only Streamlit UI is already running." in result.output
 
 
 def test_interactive_role_group_back_returns_to_launcher_home_then_quits(tmp_path):

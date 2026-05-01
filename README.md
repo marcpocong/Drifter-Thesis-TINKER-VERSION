@@ -9,10 +9,11 @@ Panel reviewers should start with either:
 ```powershell
 .\panel.ps1
 .\start.ps1 -Panel
+.\start.ps1 -Dashboard -NoPause
 ```
 
 Panel mode opens the defense-safe launcher path. It reads stored outputs, opens review surfaces, checks package consistency, and rebuilds presentation packages from existing artifacts only.
-The Streamlit dashboard is also read-only by default: its pages organize stored outputs only and do not create new scientific results.
+The Streamlit dashboard is also read-only by default: its pages organize stored outputs only and do not create new scientific results. The dashboard shortcut prints `http://localhost:8501` after starting or reusing the local Streamlit process.
 
 The full launcher stays available for intentional researcher or audit work, but it is grouped by role instead of presenting archive, support, legacy, and main evidence as one flat list:
 

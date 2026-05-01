@@ -33,15 +33,27 @@ Safe inspection helpers:
 ```powershell
 .\start.ps1 -List -NoPause
 .\start.ps1 -ListRole primary_evidence -NoPause
+.\start.ps1 -ListRole read_only_governance -NoPause
 .\start.ps1 -ListRole archive_provenance -NoPause
 .\start.ps1 -ValidateMatrix -NoPause
 .\start.ps1 -Help -NoPause
 .\start.ps1 -Explain mindoro_phase3b_primary_public_validation -NoPause
 .\start.ps1 -Explain mindoro_phase3b_primary_public_validation -ExportPlan -NoPause
 .\start.ps1 -Entry mindoro_phase3b_primary_public_validation -DryRun -NoPause
+.\start.ps1 -Dashboard -DryRun -NoPause
 ```
 
 `-List` is grouped by thesis role so archive, legacy, support, and read-only entries do not flatten into main evidence. `-Explain` prints label, manuscript section, thesis role, claim boundary, run kind, rerun cost, `safe_default`, role flags, expected outputs, and alias requested/canonical IDs before any execution path.
+`-ValidateMatrix -NoPause` runs the validator in `--no-write` mode, so it reports matrix status without creating audit files. If `-NoPause` is launched with no interactive input and no action, the launcher prints a non-interactive command summary and exits.
+
+Windows PowerShell 5.1 fallback:
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\start.ps1 -Help -NoPause
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\panel.ps1 -NoPause
+```
+
+If a Docker-backed action is selected and `.env` is missing while `.env.example` exists, interactive shells prompt before copying it. In `-NoPause` or CI/non-interactive shells, the safe default is to copy `.env.example` to `.env` before Docker starts.
 
 Shared menu controls:
 
@@ -65,7 +77,7 @@ Shared menu controls:
 | Audit launcher entries without Docker or science | `.\start.ps1 -ValidateMatrix -NoPause` or `python -m src.utils.validate_launcher_matrix` |
 | List only main thesis/reportable entries | `.\start.ps1 -ListRole primary_evidence -NoPause` |
 | List archive/provenance entries | `.\start.ps1 -ListRole archive_provenance -NoPause` |
-| Open dashboard only | panel option `1` or `U` / `UI`; the dashboard launch is a shortcut, not a separate launcher entry ID. Direct container form: `docker compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501` |
+| Open dashboard only | panel option `1` or `U` / `UI`, or `.\start.ps1 -Dashboard -NoPause`; the dashboard launch is a shortcut, not a separate launcher entry ID. Direct container form: `docker compose up -d pipeline` then `docker compose exec pipeline python -m streamlit run ui/app.py --server.address 0.0.0.0 --server.port 8501` |
 | Inspect drifter provenance behind `B1` for the Primary Mindoro March 13-14 case | panel option `7`, or `.\start.ps1 -Entry b1_drifter_context_panel` |
 | Inspect data sources and provenance | panel option `8`, open [DATA_SOURCES.md](DATA_SOURCES.md), inspect [config/data_sources.yaml](../config/data_sources.yaml), or use the dashboard `Data Sources & Provenance` reference page |
 | Verify manuscript numbers | panel option `2` |
