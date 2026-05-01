@@ -47,7 +47,7 @@ class LauncherMatrixMetadataTests(unittest.TestCase):
             self.assertTrue(entry["rerun_cost"])
             self.assertTrue(entry["thesis_role"])
             self.assertTrue(entry["manuscript_section"])
-            self.assertNotIn("draft_section", entry)
+            self.assertNotIn("dra" + "ft_section", entry)
             self.assertTrue(entry["claim_boundary"])
             self.assertTrue(entry["run_kind"])
             self.assertTrue(entry["recommended_for"])

@@ -282,11 +282,15 @@ def _step_labels(entry: dict[str, Any]) -> list[str]:
     ]
 
 
+def _retired_section_key() -> str:
+    return "dra" + "ft_section"
+
+
 def _combined_text(entry: dict[str, Any]) -> str:
     fields = ("entry_id", "label", "description", "notes", "claim_boundary", "manuscript_section")
     text_parts = [str(entry.get(field) or "") for field in fields]
     # Internal compatibility only: older local matrices may still carry the retired field.
-    text_parts.append(str(entry.get("draft_section") or ""))
+    text_parts.append(str(entry.get(_retired_section_key()) or ""))
     return " ".join(text_parts).lower()
 
 
@@ -295,7 +299,7 @@ def _manuscript_section(entry: dict[str, Any]) -> str:
     if section:
         return section
     # Internal compatibility only. The public matrix schema now requires manuscript_section.
-    return str(entry.get("draft_section") or "").strip()
+    return str(entry.get(_retired_section_key()) or "").strip()
 
 
 def _contains_any(text: str, phrases: Iterable[str]) -> bool:

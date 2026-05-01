@@ -1,239 +1,299 @@
 {
-    "manifest_name":  "final_reproducibility_package_repo_submission_manifest",
-    "generated_at_utc":  "2026-05-01T14:36:42Z",
-    "git_commit_hash":  "6e237b445065698da6eb67eac69ef897eb7b2e88",
-    "git_commit_hash_note":  "Hash is the repository HEAD at manifest generation; the final packaging commit hash is reported by git after commit/push because a file cannot contain its own final Git object hash.",
-    "git_branch":  "main",
-    "package_scope":  "review/reproducibility package; not a claim of universal operational accuracy",
-    "no_secrets_included":  true,
-    "secrets_policy":  [
-                           "No .env files, service tokens, Copernicus credentials, CDS credentials, SSH keys, PEM/P12/PFX keys, or local credential JSON files are included intentionally.",
-                           "External data access still requires the reviewer/operator to provide their own credentials where documented."
-                       ],
-    "key_config_files":  [
-                             ".gitignore",
-                             "config/launcher_matrix.json",
-                             "config/launcher_matrix.schema.json",
-                             "config/archive_registry.yaml",
-                             "config/paper_to_output_registry.yaml",
-                             "config/data_sources.yaml",
-                             "config/ensemble.yaml",
-                             "config/oil.yaml",
-                             "config/recipes.yaml"
-                         ],
-    "key_docs":  [
-                     "README.md",
-                     "PANEL_QUICK_START.md",
-                     "docs/REPRODUCIBILITY_BUNDLE_GUIDE.md",
-                     "docs/FINAL_PAPER_ALIGNMENT.md",
-                     "docs/PAPER_TO_REPO_CROSSWALK.md",
-                     "docs/ARCHIVE_GOVERNANCE.md",
-                     "docs/DATA_SOURCES.md",
-                     "docs/COMMAND_MATRIX.md",
-                     "docs/LAUNCHER_USER_GUIDE.md",
-                     "docs/UI_GUIDE.md",
-                     "archive/development_artifacts/README.md",
-                     "output/final_reproducibility_package/README.md"
-                 ],
-    "key_output_directories":  [
-                                   "output/final_reproducibility_package",
-                                   "output/final_validation_package",
-                                   "output/Phase 3B March13-14 Final Output",
-                                   "output/Phase 3C DWH Final Output",
-                                   "output/phase1_mindoro_focus_pre_spill_2016_2023",
-                                   "output/phase4/CASE_MINDORO_RETRO_2023",
-                                   "output/2016_drifter_benchmark",
-                                   "output/2016 Legacy Runs FINAL Figures",
-                                   "output/figure_package_publication"
-                               ],
-    "archive_development_artifacts":  {
-                                          "root":  "archive/development_artifacts",
-                                          "root_debug_logs":  "archive/development_artifacts/root_debug_logs",
-                                          "temporary_images":  "archive/development_artifacts/temporary_images",
-                                          "os_junk":  "archive/development_artifacts/os_junk",
-                                          "governance":  "archive/development_artifacts/README.md"
-                                      },
-    "paper_to_output_crosswalk":  "config/paper_to_output_registry.yaml",
-    "data_source_provenance":  "config/data_sources.yaml",
-    "archive_governance":  [
-                               "config/archive_registry.yaml",
-                               "docs/ARCHIVE_GOVERNANCE.md",
-                               "archive/development_artifacts/README.md"
-                           ],
-    "validation_commands_run":  [
-                                    {
-                                        "command":  "git status --short",
-                                        "status":  "ran",
-                                        "note":  "Working tree intentionally dirty before packaging commit."
-                                    },
-                                    {
-                                        "command":  "python -m pytest tests",
-                                        "status":  "failed_collection_unavailable_heavy_dependencies",
-                                        "note":  "Active Python environment lacks science/test dependencies including numpy, pandas, xarray, geopandas, and yaml; no expensive science was rerun."
-                                    },
-                                    {
-                                        "command":  "python -m pytest tests\\test_final_paper_consistency_guardrails.py tests\\test_no_draft_version_labels.py tests\\test_validate_launcher_matrix.py tests\\test_launcher_matrix_metadata.py tests\\test_defense_claim_boundaries.py",
-                                        "status":  "pass",
-                                        "note":  "33 cheap guardrail tests passed."
-                                    },
-                                    {
-                                        "command":  "python scripts\\validate_final_paper_guardrails.py",
-                                        "status":  "pass",
-                                        "note":  "Final-paper guardrail validator passed."
-                                    },
-                                    {
-                                        "command":  "python scripts\\validate_archive_registry.py",
-                                        "status":  "pass",
-                                        "note":  "Archive registry validator passed."
-                                    },
-                                    {
-                                        "command":  "python scripts\\validate_paper_to_output_registry.py",
-                                        "status":  "pass",
-                                        "note":  "Paper-to-output registry validator passed with 51 entries checked."
-                                    },
-                                    {
-                                        "command":  "python scripts\\validate_data_sources_registry.py",
-                                        "status":  "pass",
-                                        "note":  "Data-sources registry validator passed."
-                                    },
-                                    {
-                                        "command":  "pwsh ./start.ps1 -ValidateMatrix -NoPause",
-                                        "status":  "failed_pwsh_unavailable",
-                                        "note":  "pwsh executable was not available in this Windows environment."
-                                    },
-                                    {
-                                        "command":  "pwsh ./start.ps1 -List -NoPause",
-                                        "status":  "failed_pwsh_unavailable",
-                                        "note":  "pwsh executable was not available in this Windows environment."
-                                    },
-                                    {
-                                        "command":  "powershell -ExecutionPolicy Bypass -File .\\start.ps1 -ValidateMatrix -NoPause",
-                                        "status":  "pass",
-                                        "note":  "Fallback Windows PowerShell launcher validation passed: 27 entries, 27 PASS, 0 FAIL."
-                                    },
-                                    {
-                                        "command":  "powershell -ExecutionPolicy Bypass -File .\\start.ps1 -List -NoPause",
-                                        "status":  "pass",
-                                        "note":  "Fallback Windows PowerShell launcher listing completed."
-                                    },
-                                    {
-                                        "command":  "runtime-constructed forbidden-label scan",
-                                        "status":  "pass",
-                                        "note":  "[REDACTED_MANUSCRIPT_LABEL] absent from tracked and unignored text-like files."
-                                    },
-                                    {
-                                        "command":  ".gitignore required config/doc check",
-                                        "status":  "pass",
-                                        "note":  "Required config and documentation paths are not hidden by ignore rules."
-                                    }
-                                ],
-    "validation_status":  "guardrails_pass_full_pytest_blocked_by_missing_dependencies",
-    "validation_status_note":  "Cheap repo guardrails and launcher/registry validators passed. Full pytest collection needs the repository science dependencies installed in the active Python environment.",
-    "small_file_sha256":  [
-                              {
-                                  "path":  ".gitignore",
-                                  "bytes":  4104,
-                                  "sha256":  "2b9862c5a22c4e7eff939aa66d259d3e08353fbe20d92d140e2380979214973f"
-                              },
-                              {
-                                  "path":  "config/launcher_matrix.json",
-                                  "bytes":  56016,
-                                  "sha256":  "780ca515dd89d41a653e933b756b86d61dc60f207f7ae37bf578341e1ac75ceb"
-                              },
-                              {
-                                  "path":  "config/launcher_matrix.schema.json",
-                                  "bytes":  6924,
-                                  "sha256":  "d212bed1f55933f63a7f41ae400a59d004fc81a2fdcddb814f75ddd7c8971cb8"
-                              },
-                              {
-                                  "path":  "config/archive_registry.yaml",
-                                  "bytes":  15070,
-                                  "sha256":  "cf00e980dd9c1176eb884dbf315a40fb78543c74fc60fc9069f468d3f2fe134e"
-                              },
-                              {
-                                  "path":  "config/paper_to_output_registry.yaml",
-                                  "bytes":  47783,
-                                  "sha256":  "6c991142b9d31aa1f43863127c4233f3d83e187b236b5a1a9a3356cd33e74053"
-                              },
-                              {
-                                  "path":  "config/data_sources.yaml",
-                                  "bytes":  19372,
-                                  "sha256":  "e988761c3c66ed3d71050987669acebef89d989407d2a3dd416a65262e6e2d1d"
-                              },
-                              {
-                                  "path":  "config/ensemble.yaml",
-                                  "bytes":  2176,
-                                  "sha256":  "78c660f1f1804ef9377d32df7b6472f5480b5240e6b46f263ff07edee96fc63e"
-                              },
-                              {
-                                  "path":  "config/oil.yaml",
-                                  "bytes":  5049,
-                                  "sha256":  "1530d5880b5a43dee28b206d1c6ff33d148b8fba6cf22676d06d3b6c00e053d6"
-                              },
-                              {
-                                  "path":  "config/recipes.yaml",
-                                  "bytes":  1955,
-                                  "sha256":  "87d013f6bc7174dc3594b8b5e9dd767390638e6e8fc97d141d1426555ad0e7bd"
-                              },
-                              {
-                                  "path":  "README.md",
-                                  "bytes":  5844,
-                                  "sha256":  "3b769444e72d52dd823efdbbd727387373cd7e9e5ea6f6b6377cb2aaba7ab34a"
-                              },
-                              {
-                                  "path":  "PANEL_QUICK_START.md",
-                                  "bytes":  2306,
-                                  "sha256":  "b6d172e99e6b85d05b6d8d10e1e01b47b95b96a2de7ffcbf9da1430827641ef8"
-                              },
-                              {
-                                  "path":  "docs/REPRODUCIBILITY_BUNDLE_GUIDE.md",
-                                  "bytes":  4168,
-                                  "sha256":  "f84b937717b999f8149be5d0ba4b81e78a8346313c9df619a1f772aacd120c87"
-                              },
-                              {
-                                  "path":  "docs/FINAL_PAPER_ALIGNMENT.md",
-                                  "bytes":  6381,
-                                  "sha256":  "d621c6270a94b64e7c1ae305e526d5d1bf99c920d9f2d731b7ad9db68795d4ae"
-                              },
-                              {
-                                  "path":  "docs/PAPER_TO_REPO_CROSSWALK.md",
-                                  "bytes":  10843,
-                                  "sha256":  "c208ad5ddcb9598e360839066fa2fe062e02ca1a4b6dcd524f1b299c50cce84d"
-                              },
-                              {
-                                  "path":  "docs/ARCHIVE_GOVERNANCE.md",
-                                  "bytes":  4495,
-                                  "sha256":  "0c30f9b3cf3f1f53d0d717c403ac6aaf1d9b06440f5417301bc91dbc355365b6"
-                              },
-                              {
-                                  "path":  "docs/DATA_SOURCES.md",
-                                  "bytes":  10268,
-                                  "sha256":  "518dc103d887dacabd8f7cbf191d53d6d231b80592bb498b91b4955b8e269e4c"
-                              },
-                              {
-                                  "path":  "docs/COMMAND_MATRIX.md",
-                                  "bytes":  16298,
-                                  "sha256":  "aab02b557f3472bb6f2ae877ed9000c40d03a3de14a25e8a9c7a5d9cbf08ec24"
-                              },
-                              {
-                                  "path":  "docs/LAUNCHER_USER_GUIDE.md",
-                                  "bytes":  7433,
-                                  "sha256":  "f7b3d7919bf81cb25e0d5f303cc5446cc82c3cc5ce8019bddeb85b4f5f3400d2"
-                              },
-                              {
-                                  "path":  "docs/UI_GUIDE.md",
-                                  "bytes":  5995,
-                                  "sha256":  "a2937c2e9a0f136d0462c841790ee2ec00e075bb76825cafa6a1d6c71b3e0358"
-                              },
-                              {
-                                  "path":  "archive/development_artifacts/README.md",
-                                  "bytes":  786,
-                                  "sha256":  "20bfedd8884272a8c10b6cec35675ca99a00708934e900ebf8733e9c0c910c78"
-                              },
-                              {
-                                  "path":  "output/final_reproducibility_package/README.md",
-                                  "bytes":  1080,
-                                  "sha256":  "092e31d2ad6d99685c91a755f86d05b324a55ebc631fd65563dff8d97227810b"
-                              }
-                          ]
+    "manifest_name": "final_reproducibility_package_repo_submission_manifest",
+    "generated_at_utc": "2026-05-01T15:27:10Z",
+    "git_commit_hash": "081e78f325d61ccb42b6d8acb70a5a92de1d00f7",
+    "git_commit_hash_note": "Hash is the repository HEAD at manifest generation; the final packaging commit hash is reported by git after commit/push because a file cannot contain its own final Git object hash.",
+    "git_branch": "main",
+    "package_scope": "review/reproducibility package; not a claim of universal operational accuracy",
+    "no_secrets_included": true,
+    "secrets_policy": [
+        "No .env files, service tokens, Copernicus credentials, CDS credentials, SSH keys, PEM/P12/PFX keys, or local credential JSON files are included intentionally.",
+        "External data access still requires the reviewer/operator to provide their own credentials where documented."
+    ],
+    "key_config_files": [
+        ".gitignore",
+        "config/launcher_matrix.json",
+        "config/launcher_matrix.schema.json",
+        "config/archive_registry.yaml",
+        "config/paper_to_output_registry.yaml",
+        "config/data_sources.yaml",
+        "config/ensemble.yaml",
+        "config/oil.yaml",
+        "config/recipes.yaml"
+    ],
+    "key_docs": [
+        "README.md",
+        "PANEL_QUICK_START.md",
+        "docs/REPRODUCIBILITY_BUNDLE_GUIDE.md",
+        "docs/FINAL_PAPER_ALIGNMENT.md",
+        "docs/PAPER_TO_REPO_CROSSWALK.md",
+        "docs/ARCHIVE_GOVERNANCE.md",
+        "docs/DATA_SOURCES.md",
+        "docs/COMMAND_MATRIX.md",
+        "docs/LAUNCHER_USER_GUIDE.md",
+        "docs/UI_GUIDE.md",
+        "archive/development_artifacts/README.md",
+        "output/final_reproducibility_package/README.md"
+    ],
+    "key_output_directories": [
+        "output/final_reproducibility_package",
+        "output/final_validation_package",
+        "output/Phase 3B March13-14 Final Output",
+        "output/Phase 3C DWH Final Output",
+        "output/phase1_mindoro_focus_pre_spill_2016_2023",
+        "output/phase4/CASE_MINDORO_RETRO_2023",
+        "output/2016_drifter_benchmark",
+        "output/2016 Legacy Runs FINAL Figures",
+        "output/figure_package_publication"
+    ],
+    "archive_development_artifacts": {
+        "root": "archive/development_artifacts",
+        "root_debug_logs": "archive/development_artifacts/root_debug_logs",
+        "temporary_images": "archive/development_artifacts/temporary_images",
+        "os_junk": "archive/development_artifacts/os_junk",
+        "governance": "archive/development_artifacts/README.md"
+    },
+    "paper_to_output_crosswalk": "config/paper_to_output_registry.yaml",
+    "data_source_provenance": "config/data_sources.yaml",
+    "archive_governance": [
+        "config/archive_registry.yaml",
+        "docs/ARCHIVE_GOVERNANCE.md",
+        "archive/development_artifacts/README.md"
+    ],
+    "validation_commands_run": [
+        {
+            "command": "python -m pytest tests/test_final_paper_consistency_guardrails.py -q",
+            "status": "pass",
+            "note": "9 passed in 0.81 s."
+        },
+        {
+            "command": "python -m pytest tests -q",
+            "status": "local_environment_limitation",
+            "note": "Collection stopped with 56 import errors and 2 skipped because the local Python 3.14 environment lacks numpy, pandas, xarray, geopandas, and yaml/PyYAML."
+        },
+        {
+            "command": "python scripts/validate_archive_registry.py",
+            "status": "pass",
+            "note": "Archive registry validation passed against launcher matrix."
+        },
+        {
+            "command": "python scripts/validate_paper_to_output_registry.py",
+            "status": "pass",
+            "note": "Paper-to-output registry validation passed: 51 entries, 0 errors, 0 warnings."
+        },
+        {
+            "command": "python scripts/validate_data_sources_registry.py",
+            "status": "pass",
+            "note": "Data-source provenance registry validation passed: 13 sources; roles and secret policy valid."
+        },
+        {
+            "command": "python scripts/validate_final_paper_guardrails.py",
+            "status": "pass",
+            "note": "Final-paper guardrail validation passed for labels, launcher routing, claim boundaries, values, registries, and p90 semantics."
+        },
+        {
+            "command": "pwsh ./start.ps1 -ValidateMatrix -NoPause",
+            "status": "local_environment_limitation",
+            "note": "pwsh executable is unavailable locally; Windows PowerShell fallback and Python launcher schema fallback passed."
+        },
+        {
+            "command": "powershell -ExecutionPolicy Bypass -File .\\start.ps1 -ValidateMatrix -NoPause",
+            "status": "pass",
+            "note": "Launcher matrix validation passed: 27 entries, 27 pass, 0 fail."
+        },
+        {
+            "command": "python launcher-matrix fallback schema check",
+            "status": "pass",
+            "note": "Fallback validation passed for 27 entries."
+        },
+        {
+            "command": "pwsh ./start.ps1 -List -NoPause",
+            "status": "local_environment_limitation",
+            "note": "pwsh unavailable; Windows PowerShell fallback list completed."
+        },
+        {
+            "command": "powershell -ExecutionPolicy Bypass -File .\\start.ps1 -List -NoPause",
+            "status": "pass",
+            "note": "Catalog grouped by thesis role; archive/legacy/support/read-only routes are separated from main evidence."
+        },
+        {
+            "command": "pwsh ./start.ps1 -ListRole primary_evidence -NoPause",
+            "status": "local_environment_limitation",
+            "note": "pwsh unavailable; Windows PowerShell fallback list completed."
+        },
+        {
+            "command": "powershell -ExecutionPolicy Bypass -File .\\start.ps1 -ListRole primary_evidence -NoPause",
+            "status": "pass",
+            "note": "Primary evidence entries listed: phase1_mindoro_focus_provenance, mindoro_phase3b_primary_public_validation, dwh_reportable_bundle, mindoro_reportable_core."
+        },
+        {
+            "command": "pwsh ./start.ps1 -ListRole archive_provenance -NoPause",
+            "status": "local_environment_limitation",
+            "note": "pwsh unavailable; Windows PowerShell fallback list completed."
+        },
+        {
+            "command": "powershell -ExecutionPolicy Bypass -File .\\start.ps1 -ListRole archive_provenance -NoPause",
+            "status": "pass",
+            "note": "Archive/provenance aliases, archive entries, and hidden experimental entries listed separately from primary evidence."
+        },
+        {
+            "command": "pwsh ./start.ps1 -Explain mindoro_phase3b_primary_public_validation -NoPause",
+            "status": "local_environment_limitation",
+            "note": "pwsh unavailable; Windows PowerShell fallback explain completed."
+        },
+        {
+            "command": "powershell -ExecutionPolicy Bypass -File .\\start.ps1 -Explain mindoro_phase3b_primary_public_validation -NoPause",
+            "status": "pass",
+            "note": "B1 preview confirms primary public-observation validation boundary, expensive rerun status, and curated Phase 3B output path."
+        },
+        {
+            "command": "pwsh ./start.ps1 -Explain dwh_reportable_bundle -NoPause",
+            "status": "local_environment_limitation",
+            "note": "pwsh unavailable; Windows PowerShell fallback explain completed."
+        },
+        {
+            "command": "powershell -ExecutionPolicy Bypass -File .\\start.ps1 -Explain dwh_reportable_bundle -NoPause",
+            "status": "pass",
+            "note": "DWH preview confirms external transfer validation boundary, comparator-only PyGNOME, and curated Phase 3C output path."
+        },
+        {
+            "command": "pwsh ./start.ps1 -Entry mindoro_phase3b_primary_public_validation -DryRun -NoPause",
+            "status": "local_environment_limitation",
+            "note": "pwsh unavailable; Windows PowerShell fallback dry run completed."
+        },
+        {
+            "command": "powershell -ExecutionPolicy Bypass -File .\\start.ps1 -Entry mindoro_phase3b_primary_public_validation -DryRun -NoPause",
+            "status": "pass",
+            "note": "Dry run printed the two Docker commands that would run and confirmed no workflow executed and no outputs modified."
+        },
+        {
+            "command": "runtime-constructed forbidden-label scan",
+            "status": "pass",
+            "note": "Forbidden manuscript label absent from tracked text files."
+        },
+        {
+            "command": "uploaded manuscript filename / stale wording scan",
+            "status": "pass",
+            "note": "No uploaded manuscript-like filenames or stale current-surface wording found. Safe negated overclaim hits: 66. Historical generated-output hits: 59, documented as archived/generated and not current reviewer-first docs/config."
+        }
+    ],
+    "validation_status": "ready_with_local_environment_limitations",
+    "validation_status_note": "Cheap guardrails, registries, scans, launcher Windows PowerShell checks, and Python launcher fallback passed. Full pytest collection is blocked only by missing local science/test dependencies; pwsh itself is unavailable locally.",
+    "small_file_sha256": [
+        {
+            "path": ".gitignore",
+            "bytes": 4104,
+            "sha256": "2b9862c5a22c4e7eff939aa66d259d3e08353fbe20d92d140e2380979214973f"
+        },
+        {
+            "path": "config/launcher_matrix.json",
+            "bytes": 56016,
+            "sha256": "780ca515dd89d41a653e933b756b86d61dc60f207f7ae37bf578341e1ac75ceb"
+        },
+        {
+            "path": "config/launcher_matrix.schema.json",
+            "bytes": 6924,
+            "sha256": "d212bed1f55933f63a7f41ae400a59d004fc81a2fdcddb814f75ddd7c8971cb8"
+        },
+        {
+            "path": "config/archive_registry.yaml",
+            "bytes": 15070,
+            "sha256": "cf00e980dd9c1176eb884dbf315a40fb78543c74fc60fc9069f468d3f2fe134e"
+        },
+        {
+            "path": "config/paper_to_output_registry.yaml",
+            "bytes": 47783,
+            "sha256": "6c991142b9d31aa1f43863127c4233f3d83e187b236b5a1a9a3356cd33e74053"
+        },
+        {
+            "path": "config/data_sources.yaml",
+            "bytes": 19372,
+            "sha256": "e988761c3c66ed3d71050987669acebef89d989407d2a3dd416a65262e6e2d1d"
+        },
+        {
+            "path": "config/ensemble.yaml",
+            "bytes": 2176,
+            "sha256": "78c660f1f1804ef9377d32df7b6472f5480b5240e6b46f263ff07edee96fc63e"
+        },
+        {
+            "path": "config/oil.yaml",
+            "bytes": 5049,
+            "sha256": "1530d5880b5a43dee28b206d1c6ff33d148b8fba6cf22676d06d3b6c00e053d6"
+        },
+        {
+            "path": "config/recipes.yaml",
+            "bytes": 1955,
+            "sha256": "87d013f6bc7174dc3594b8b5e9dd767390638e6e8fc97d141d1426555ad0e7bd"
+        },
+        {
+            "path": "README.md",
+            "bytes": 5844,
+            "sha256": "3b769444e72d52dd823efdbbd727387373cd7e9e5ea6f6b6377cb2aaba7ab34a"
+        },
+        {
+            "path": "PANEL_QUICK_START.md",
+            "bytes": 2306,
+            "sha256": "b6d172e99e6b85d05b6d8d10e1e01b47b95b96a2de7ffcbf9da1430827641ef8"
+        },
+        {
+            "path": "docs/REPRODUCIBILITY_BUNDLE_GUIDE.md",
+            "bytes": 4168,
+            "sha256": "f84b937717b999f8149be5d0ba4b81e78a8346313c9df619a1f772aacd120c87"
+        },
+        {
+            "path": "docs/FINAL_PAPER_ALIGNMENT.md",
+            "bytes": 6381,
+            "sha256": "d621c6270a94b64e7c1ae305e526d5d1bf99c920d9f2d731b7ad9db68795d4ae"
+        },
+        {
+            "path": "docs/PAPER_TO_REPO_CROSSWALK.md",
+            "bytes": 10843,
+            "sha256": "c208ad5ddcb9598e360839066fa2fe062e02ca1a4b6dcd524f1b299c50cce84d"
+        },
+        {
+            "path": "docs/ARCHIVE_GOVERNANCE.md",
+            "bytes": 4495,
+            "sha256": "0c30f9b3cf3f1f53d0d717c403ac6aaf1d9b06440f5417301bc91dbc355365b6"
+        },
+        {
+            "path": "docs/DATA_SOURCES.md",
+            "bytes": 10268,
+            "sha256": "518dc103d887dacabd8f7cbf191d53d6d231b80592bb498b91b4955b8e269e4c"
+        },
+        {
+            "path": "docs/COMMAND_MATRIX.md",
+            "bytes": 16298,
+            "sha256": "aab02b557f3472bb6f2ae877ed9000c40d03a3de14a25e8a9c7a5d9cbf08ec24"
+        },
+        {
+            "path": "docs/LAUNCHER_USER_GUIDE.md",
+            "bytes": 7433,
+            "sha256": "f7b3d7919bf81cb25e0d5f303cc5446cc82c3cc5ce8019bddeb85b4f5f3400d2"
+        },
+        {
+            "path": "docs/UI_GUIDE.md",
+            "bytes": 5995,
+            "sha256": "a2937c2e9a0f136d0462c841790ee2ec00e075bb76825cafa6a1d6c71b3e0358"
+        },
+        {
+            "path": "archive/development_artifacts/README.md",
+            "bytes": 786,
+            "sha256": "20bfedd8884272a8c10b6cec35675ca99a00708934e900ebf8733e9c0c910c78"
+        },
+        {
+            "path": "output/final_reproducibility_package/README.md",
+            "bytes": 1080,
+            "sha256": "092e31d2ad6d99685c91a755f86d05b324a55ebc631fd65563dff8d97227810b"
+        }
+    ],
+    "latest_verification_before_final_checklist_commit": {
+        "git_commit_hash": "081e78f325d61ccb42b6d8acb70a5a92de1d00f7",
+        "timestamp_utc": "2026-05-01T15:27:10Z",
+        "validation_status": "ready_with_local_environment_limitations",
+        "checklist_path": "docs/FINAL_REPO_SUBMISSION_CHECKLIST.md",
+        "machine_report_path": "output/panel_review_check/final_repo_submission_check.json",
+        "no_secrets_included": true
+    },
+    "final_submission_checklist": "docs/FINAL_REPO_SUBMISSION_CHECKLIST.md",
+    "final_submission_machine_report": "output/panel_review_check/final_repo_submission_check.json"
 }

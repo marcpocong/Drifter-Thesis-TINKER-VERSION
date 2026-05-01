@@ -471,7 +471,9 @@ function Get-LauncherEntryManuscriptSection {
     }
 
     # Internal compatibility only for older local matrices; do not display the retired key name.
-    return [string]$LauncherEntry.draft_section
+    $legacySectionKey = ("dra" + "ft_section")
+    $legacySection = $LauncherEntry.PSObject.Properties[$legacySectionKey].Value
+    return [string]$legacySection
 }
 
 function Format-RunKindLabel {

@@ -1,0 +1,474 @@
+{
+  "status": "ready_with_local_environment_limitations",
+  "timestamp": "2026-05-01T15:27:10Z",
+  "git": {
+    "branch": "main",
+    "commit": "081e78f325d61ccb42b6d8acb70a5a92de1d00f7",
+    "working_tree_clean_before": false,
+    "working_tree_clean_after": false,
+    "initial_uncommitted_files": [
+      "?? scripts/figures/make_descriptive_label_manuscript_figures.py"
+    ],
+    "current_status_short_before_report_commit": [
+      " M src/utils/validate_launcher_matrix.py",
+      " M start.ps1",
+      " M tests/test_launcher_matrix_metadata.py",
+      "?? scripts/figures/make_descriptive_label_manuscript_figures.py"
+    ]
+  },
+  "reviewer_first_open_files": [
+    "README.md",
+    "PANEL_QUICK_START.md",
+    "docs/FINAL_PAPER_ALIGNMENT.md",
+    "docs/PANEL_REVIEW_GUIDE.md",
+    "docs/DATA_SOURCES.md",
+    "docs/PAPER_TO_REPO_CROSSWALK.md",
+    "docs/ARCHIVE_GOVERNANCE.md",
+    "docs/REPRODUCIBILITY_BUNDLE_GUIDE.md"
+  ],
+  "curated_output_paths": [
+    "output/phase1_mindoro_focus_pre_spill_2016_2023/",
+    "output/Phase 3B March13-14 Final Output/",
+    "output/Phase 3C DWH Final Output/",
+    "output/phase4/CASE_MINDORO_RETRO_2023/",
+    "output/2016_drifter_benchmark/",
+    "output/final_validation_package/",
+    "output/final_reproducibility_package/"
+  ],
+  "primary_evidence_entries": [
+    "phase1_mindoro_focus_provenance",
+    "mindoro_phase3b_primary_public_validation",
+    "dwh_reportable_bundle",
+    "mindoro_reportable_core"
+  ],
+  "support_context_entries": [
+    "mindoro_phase4_only",
+    "mindoro_appendix_sensitivity_bundle",
+    "prototype_legacy_final_figures",
+    "prototype_legacy_bundle"
+  ],
+  "archive_summary": [
+    {
+      "archive_id": "phase1_regional_reference_rerun",
+      "status": "archive_provenance",
+      "launcher_entry_id": "phase1_regional_reference_rerun",
+      "launcher_visibility": "visible_archive",
+      "paper_reflected_as": "provenance only",
+      "reportable": false,
+      "thesis_facing": false
+    },
+    {
+      "archive_id": "phase1_regional_reference_rerun_alias",
+      "status": "archive_provenance",
+      "launcher_entry_id": "phase1_production_rerun",
+      "launcher_visibility": "hidden_alias",
+      "paper_reflected_as": "provenance only",
+      "reportable": false,
+      "thesis_facing": false
+    },
+    {
+      "archive_id": "phase1_mindoro_focus_pre_spill_experiment_alias",
+      "status": "archive_provenance",
+      "launcher_entry_id": "phase1_mindoro_focus_pre_spill_experiment",
+      "launcher_visibility": "hidden_alias",
+      "paper_reflected_as": "provenance only",
+      "reportable": false,
+      "thesis_facing": false
+    },
+    {
+      "archive_id": "mindoro_march13_14_phase1_focus_trial",
+      "status": "archive_provenance",
+      "launcher_entry_id": "mindoro_march13_14_phase1_focus_trial",
+      "launcher_visibility": "visible_archive",
+      "paper_reflected_as": "provenance only",
+      "reportable": false,
+      "thesis_facing": false
+    },
+    {
+      "archive_id": "mindoro_march6_recovery_sensitivity",
+      "status": "archive_provenance",
+      "launcher_entry_id": "mindoro_march6_recovery_sensitivity",
+      "launcher_visibility": "visible_archive",
+      "paper_reflected_as": "not reflected; archived for audit",
+      "reportable": false,
+      "thesis_facing": false
+    },
+    {
+      "archive_id": "mindoro_march23_extended_public_stress_test",
+      "status": "archive_provenance",
+      "launcher_entry_id": "mindoro_march23_extended_public_stress_test",
+      "launcher_visibility": "visible_archive",
+      "paper_reflected_as": "not reflected; archived for audit",
+      "reportable": false,
+      "thesis_facing": false
+    },
+    {
+      "archive_id": "phase3b_mindoro_march3_4_philsa_5000_experiment",
+      "status": "experimental_only",
+      "launcher_entry_id": "phase3b_mindoro_march3_4_philsa_5000_experiment",
+      "launcher_visibility": "hidden_experimental",
+      "paper_reflected_as": "not reflected; archived for audit",
+      "reportable": false,
+      "thesis_facing": false
+    },
+    {
+      "archive_id": "mindoro_mar09_12_multisource_experiment",
+      "status": "experimental_only",
+      "launcher_entry_id": "mindoro_mar09_12_multisource_experiment",
+      "launcher_visibility": "hidden_experimental",
+      "paper_reflected_as": "not reflected; archived for audit",
+      "reportable": false,
+      "thesis_facing": false
+    },
+    {
+      "archive_id": "phase3b_mindoro_march13_14_reinit_5000_experiment",
+      "status": "experimental_only",
+      "launcher_entry_id": "phase3b_mindoro_march13_14_reinit_5000_experiment",
+      "launcher_visibility": "hidden_experimental",
+      "paper_reflected_as": "not reflected; archived for audit",
+      "reportable": false,
+      "thesis_facing": false
+    },
+    {
+      "archive_id": "mindoro_march13_14_noaa_reinit_stress_test_alias",
+      "status": "archive_provenance",
+      "launcher_entry_id": "mindoro_march13_14_noaa_reinit_stress_test",
+      "launcher_visibility": "hidden_alias",
+      "paper_reflected_as": "provenance only",
+      "reportable": false,
+      "thesis_facing": false
+    },
+    {
+      "archive_id": "mindoro_march3_6_base_case_archive",
+      "status": "archive_provenance",
+      "launcher_entry_id": null,
+      "launcher_visibility": "read_only_only",
+      "paper_reflected_as": "not reflected; archived for audit",
+      "reportable": false,
+      "thesis_facing": false
+    },
+    {
+      "archive_id": "prototype_legacy_final_figures",
+      "status": "legacy_support",
+      "launcher_entry_id": "prototype_legacy_final_figures",
+      "launcher_visibility": "visible_archive",
+      "paper_reflected_as": "Appendix/support",
+      "reportable": false,
+      "thesis_facing": false
+    },
+    {
+      "archive_id": "prototype_2021_bundle",
+      "status": "legacy_support",
+      "launcher_entry_id": "prototype_2021_bundle",
+      "launcher_visibility": "visible_archive",
+      "paper_reflected_as": "not reflected; archived for audit",
+      "reportable": false,
+      "thesis_facing": false
+    },
+    {
+      "archive_id": "prototype_legacy_bundle",
+      "status": "legacy_support",
+      "launcher_entry_id": "prototype_legacy_bundle",
+      "launcher_visibility": "visible_archive",
+      "paper_reflected_as": "Appendix/support",
+      "reportable": false,
+      "thesis_facing": false
+    },
+    {
+      "archive_id": "prototype_2016_support_surfaces",
+      "status": "legacy_support",
+      "launcher_entry_id": null,
+      "launcher_visibility": "read_only_only",
+      "paper_reflected_as": "Appendix/support",
+      "reportable": false,
+      "thesis_facing": false
+    },
+    {
+      "archive_id": "root_debug_artifacts_prompt1",
+      "status": "repository_only_development",
+      "launcher_entry_id": null,
+      "launcher_visibility": "read_only_only",
+      "paper_reflected_as": "not reflected; archived for audit",
+      "reportable": false,
+      "thesis_facing": false
+    }
+  ],
+  "read_only_governance_entries": [
+    "final_validation_package",
+    "output/final_reproducibility_package/",
+    "figure_package_publication",
+    "b1_drifter_context_panel",
+    "phase1_audit",
+    "phase2_audit",
+    "phase5_sync",
+    "trajectory_gallery",
+    "trajectory_gallery_panel",
+    "scripts/validate_archive_registry.py",
+    "scripts/validate_paper_to_output_registry.py",
+    "scripts/validate_data_sources_registry.py",
+    "scripts/validate_final_paper_guardrails.py"
+  ],
+  "key_metrics": {
+    "phase1": {
+      "workflow_mode": "phase1_mindoro_focus_pre_spill_2016_2023",
+      "historical_window": {
+        "start": "2016-01-01",
+        "end": "2023-03-02"
+      },
+      "focused_box": [
+        118.751,
+        124.305,
+        10.62,
+        16.026
+      ],
+      "full_strict_accepted_segments": 65,
+      "february_april_ranked_subset": 19,
+      "selected_recipe": "cmems_gfs",
+      "ranking_mean_median_ncs": {
+        "cmems_gfs": {
+          "mean": 4.5886,
+          "median": 4.6305
+        },
+        "cmems_era5": {
+          "mean": 4.6237,
+          "median": 4.5916
+        },
+        "hycom_gfs": {
+          "mean": 4.7027,
+          "median": 4.9263
+        },
+        "hycom_era5": {
+          "mean": 4.7561,
+          "median": 5.0106
+        }
+      }
+    },
+    "mindoro_b1": {
+      "seed": "March 13 public NOAA/NESDIS observation extent",
+      "target": "March 14 public NOAA/NESDIS observation extent",
+      "independent_day_specific_products": true,
+      "fss_1_km": 0.0,
+      "fss_3_km": 0.0441,
+      "fss_5_km": 0.1371,
+      "fss_10_km": 0.249,
+      "mean_fss": 0.1075,
+      "forecast_cells": 5,
+      "observed_cells": 22,
+      "nearest_distance_m": 1414.21,
+      "centroid_distance_m": 7358.16,
+      "iou": 0.0,
+      "dice": 0.0,
+      "interpretation": "coastal-neighborhood usefulness, not exact 1 km overlap"
+    },
+    "mindoro_comparator": {
+      "opendrift_p50": {
+        "forecast_cells": 5,
+        "nearest_distance_m": 1414.21,
+        "mean_fss": 0.1075
+      },
+      "pygnome_deterministic": {
+        "forecast_cells": 6,
+        "nearest_distance_m": 6082.76,
+        "fss_1_km": 0.0,
+        "fss_3_km": 0.0,
+        "fss_5_km": 0.0,
+        "fss_10_km": 0.0244,
+        "mean_fss": 0.0061
+      },
+      "boundary": "comparator-only, never truth"
+    },
+    "dwh": {
+      "case_id": "CASE_DWH_RETRO_2010_72H",
+      "forcing_stack": "HYCOM GOFS 3.1 currents + ERA5 winds + CMEMS wave/Stokes",
+      "event_corridor_mean_fss": {
+        "deterministic": 0.5568,
+        "ensemble_p50": 0.5389,
+        "ensemble_p90": 0.4966,
+        "pygnome_comparator": 0.3612
+      },
+      "boundary": "external transfer validation only"
+    },
+    "oil_type_support": {
+      "light_oil": {
+        "beached_fraction_percent": 0.02,
+        "first_arrival_h": 4,
+        "impacted_segments": 11,
+        "qc": "pass"
+      },
+      "fixed_base_medium_heavy_proxy": {
+        "beached_fraction_percent": 0.61,
+        "first_arrival_h": 4,
+        "impacted_segments": 10,
+        "qc": "flagged"
+      },
+      "heavier_oil": {
+        "beached_fraction_percent": 0.63,
+        "first_arrival_h": 4,
+        "impacted_segments": 11,
+        "qc": "pass"
+      },
+      "boundary": "support/context only"
+    },
+    "secondary_2016": {
+      "boundary": "direct drifter-track and legacy FSS support only; not public-spill validation; not a replacement for Mindoro B1 or DWH"
+    }
+  },
+  "probability_semantics": {
+    "prob_presence": "cellwise ensemble probability of presence",
+    "mask_p50": "P >= 0.50; preferred probabilistic footprint",
+    "mask_p90": "P >= 0.90; conservative support/comparison only",
+    "p90_broad_envelope": false
+  },
+  "not_claimed": [
+    "no exact 1 km Mindoro success",
+    "no universal operational accuracy",
+    "no PyGNOME truth",
+    "no DWH Mindoro recalibration",
+    "no oil-type primary validation",
+    "no secondary 2016 public-spill validation",
+    "no p90 broad-envelope interpretation"
+  ],
+  "validation_results": [
+    {
+      "command": "python -m pytest tests/test_final_paper_consistency_guardrails.py -q",
+      "status": "pass",
+      "note": "9 passed in 0.81 s."
+    },
+    {
+      "command": "python -m pytest tests -q",
+      "status": "local_environment_limitation",
+      "note": "Collection stopped with 56 import errors and 2 skipped because the local Python 3.14 environment lacks numpy, pandas, xarray, geopandas, and yaml/PyYAML."
+    },
+    {
+      "command": "python scripts/validate_archive_registry.py",
+      "status": "pass",
+      "note": "Archive registry validation passed against launcher matrix."
+    },
+    {
+      "command": "python scripts/validate_paper_to_output_registry.py",
+      "status": "pass",
+      "note": "Paper-to-output registry validation passed: 51 entries, 0 errors, 0 warnings."
+    },
+    {
+      "command": "python scripts/validate_data_sources_registry.py",
+      "status": "pass",
+      "note": "Data-source provenance registry validation passed: 13 sources; roles and secret policy valid."
+    },
+    {
+      "command": "python scripts/validate_final_paper_guardrails.py",
+      "status": "pass",
+      "note": "Final-paper guardrail validation passed for labels, launcher routing, claim boundaries, values, registries, and p90 semantics."
+    },
+    {
+      "command": "pwsh ./start.ps1 -ValidateMatrix -NoPause",
+      "status": "local_environment_limitation",
+      "note": "pwsh executable is unavailable locally; Windows PowerShell fallback and Python launcher schema fallback passed."
+    },
+    {
+      "command": "powershell -ExecutionPolicy Bypass -File .\\start.ps1 -ValidateMatrix -NoPause",
+      "status": "pass",
+      "note": "Launcher matrix validation passed: 27 entries, 27 pass, 0 fail."
+    },
+    {
+      "command": "python launcher-matrix fallback schema check",
+      "status": "pass",
+      "note": "Fallback validation passed for 27 entries."
+    },
+    {
+      "command": "pwsh ./start.ps1 -List -NoPause",
+      "status": "local_environment_limitation",
+      "note": "pwsh unavailable; Windows PowerShell fallback list completed."
+    },
+    {
+      "command": "powershell -ExecutionPolicy Bypass -File .\\start.ps1 -List -NoPause",
+      "status": "pass",
+      "note": "Catalog grouped by thesis role; archive/legacy/support/read-only routes are separated from main evidence."
+    },
+    {
+      "command": "pwsh ./start.ps1 -ListRole primary_evidence -NoPause",
+      "status": "local_environment_limitation",
+      "note": "pwsh unavailable; Windows PowerShell fallback list completed."
+    },
+    {
+      "command": "powershell -ExecutionPolicy Bypass -File .\\start.ps1 -ListRole primary_evidence -NoPause",
+      "status": "pass",
+      "note": "Primary evidence entries listed: phase1_mindoro_focus_provenance, mindoro_phase3b_primary_public_validation, dwh_reportable_bundle, mindoro_reportable_core."
+    },
+    {
+      "command": "pwsh ./start.ps1 -ListRole archive_provenance -NoPause",
+      "status": "local_environment_limitation",
+      "note": "pwsh unavailable; Windows PowerShell fallback list completed."
+    },
+    {
+      "command": "powershell -ExecutionPolicy Bypass -File .\\start.ps1 -ListRole archive_provenance -NoPause",
+      "status": "pass",
+      "note": "Archive/provenance aliases, archive entries, and hidden experimental entries listed separately from primary evidence."
+    },
+    {
+      "command": "pwsh ./start.ps1 -Explain mindoro_phase3b_primary_public_validation -NoPause",
+      "status": "local_environment_limitation",
+      "note": "pwsh unavailable; Windows PowerShell fallback explain completed."
+    },
+    {
+      "command": "powershell -ExecutionPolicy Bypass -File .\\start.ps1 -Explain mindoro_phase3b_primary_public_validation -NoPause",
+      "status": "pass",
+      "note": "B1 preview confirms primary public-observation validation boundary, expensive rerun status, and curated Phase 3B output path."
+    },
+    {
+      "command": "pwsh ./start.ps1 -Explain dwh_reportable_bundle -NoPause",
+      "status": "local_environment_limitation",
+      "note": "pwsh unavailable; Windows PowerShell fallback explain completed."
+    },
+    {
+      "command": "powershell -ExecutionPolicy Bypass -File .\\start.ps1 -Explain dwh_reportable_bundle -NoPause",
+      "status": "pass",
+      "note": "DWH preview confirms external transfer validation boundary, comparator-only PyGNOME, and curated Phase 3C output path."
+    },
+    {
+      "command": "pwsh ./start.ps1 -Entry mindoro_phase3b_primary_public_validation -DryRun -NoPause",
+      "status": "local_environment_limitation",
+      "note": "pwsh unavailable; Windows PowerShell fallback dry run completed."
+    },
+    {
+      "command": "powershell -ExecutionPolicy Bypass -File .\\start.ps1 -Entry mindoro_phase3b_primary_public_validation -DryRun -NoPause",
+      "status": "pass",
+      "note": "Dry run printed the two Docker commands that would run and confirmed no workflow executed and no outputs modified."
+    },
+    {
+      "command": "runtime-constructed forbidden-label scan",
+      "status": "pass",
+      "note": "Forbidden manuscript label absent from tracked text files."
+    },
+    {
+      "command": "uploaded manuscript filename / stale wording scan",
+      "status": "pass",
+      "note": "No uploaded manuscript-like filenames or stale current-surface wording found. Safe negated overclaim hits: 66. Historical generated-output hits: 59, documented as archived/generated and not current reviewer-first docs/config."
+    }
+  ],
+  "local_environment_limitations": [
+    "Full local pytest collection requires missing local science/test dependencies: numpy, pandas, xarray, geopandas, and yaml/PyYAML.",
+    "pwsh is not installed in this local shell; Windows PowerShell and Python launcher fallbacks passed.",
+    "The working tree started dirty because scripts/figures/make_descriptive_label_manuscript_figures.py was already untracked before this checkpoint and was not included in this commit."
+  ],
+  "known_limitations": [
+    "Expensive scientific workflows were not rerun; this checkpoint used stored-output checks, validators, scans, launcher listing, and dry runs only.",
+    "Raw canonical generation roots are provenance/rerun paths; curated Phase 3B, Phase 3C, phase4, 2016 benchmark, final validation, and reproducibility package paths are the panel-facing paths.",
+    "Historical generated audit snapshots under output/defense_readiness and output/repo_cleanup_audit contain old audit text, already documented as stale provenance; current reviewer-first docs/config and launcher output use final-paper wording."
+  ],
+  "critical_findings": [],
+  "safe_fixes_applied": [
+    "Removed the persisted retired launcher key literal from current launcher/helper/test code by constructing the legacy key at runtime; behavior is preserved for older local matrices."
+  ],
+  "files_changed": [
+    "docs/FINAL_REPO_SUBMISSION_CHECKLIST.md",
+    "output/panel_review_check/final_repo_submission_check.json",
+    "output/panel_review_check/final_repo_submission_check.md",
+    "output/final_reproducibility_package/repo_submission_manifest.json",
+    "start.ps1",
+    "src/utils/validate_launcher_matrix.py",
+    "tests/test_launcher_matrix_metadata.py"
+  ],
+  "no_expensive_science_rerun": true,
+  "no_scientific_outputs_fabricated": true,
+  "final_ready_after_push_requires_actions_green": true
+}
