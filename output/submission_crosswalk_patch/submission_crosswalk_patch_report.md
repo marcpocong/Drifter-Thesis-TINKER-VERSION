@@ -97,3 +97,15 @@ No scientific reruns, launcher entries, model simulations, remote downloads, or 
 ## Final Push Note
 
 Final push result is reported in Codex final response; this report is not edited after final push to avoid leaving a dirty working tree.
+
+## Pre-Push Metadata
+
+- Current branch: `main`
+- Current HEAD commit hash after rebase: `582c7fc90b7c48cfd6432f03b236d7d61a74fcfb`
+- Intended pushed ref: `origin/main` via `git push origin HEAD:main`
+- Git status before metadata commit:
+
+```text
+```
+
+- Final push output will be reported in the Codex final response.
